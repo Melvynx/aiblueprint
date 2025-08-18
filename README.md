@@ -70,11 +70,11 @@ npm publish
 
 ```bash
 # Install globally
-npm install -g @aiblueprint/cli
+npm install -g aiblueprint-cli
 
 # Or use with npx/pnpm dlx
-npx @aiblueprint/cli claude-code setup
-pnpm dlx @aiblueprint/cli claude-code setup
+npx aiblueprint-cli claude-code setup
+pnpm dlx aiblueprint-cli claude-code setup
 ```
 
 ### Setup Claude Code Configuration

@@ -1,5 +1,5 @@
 {
-  "name": "aiblueprint",
+  "name": "aiblueprint-cli",
   "version": "1.0.0",
   "description": "AIBlueprint CLI for setting up Claude Code configurations",
   "author": "AIBlueprint",
