@@ -1,0 +1,319 @@
+import * as clack from '@clack/prompts';
+import fs from 'fs-extra';
+import path from 'path';
+import os from 'os';
+import { execSync } from 'child_process';
+import chalk from 'chalk';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+interface SetupOptions {
+  shellShortcuts: boolean;
+  commandValidation: boolean;
+  customStatusline: boolean;
+  aiblueprintCommands: boolean;
+  aiblueprintAgents: boolean;
+  outputStyles: boolean;
+  notificationSounds: boolean;
+}
+
+export async function setupCommand(customFolder?: string, skipInteractive?: boolean) {
+  try {
+    console.log(chalk.blue.bold('\n🚀 AIBlueprint Claude Code Setup\n'));
+
+    clack.intro(chalk.bgBlue(' Setting up your Claude Code environment '));
+
+  let features: string[];
+
+  if (skipInteractive) {
+    features = ['shellShortcuts', 'commandValidation', 'customStatusline', 'aiblueprintCommands', 'aiblueprintAgents', 'outputStyles', 'notificationSounds'];
+    console.log(chalk.green('✓ Installing all features (--skip mode)'));
+  } else {
+    features = await clack.multiselect({
+      message: 'Which features would you like to install?',
+      options: [
+        { value: 'shellShortcuts', label: 'Shell shortcuts (cc, ccc aliases)', hint: 'Quick access to Claude Code' },
+        { value: 'commandValidation', label: 'Command validation', hint: 'Security hook for bash commands' },
+        { value: 'customStatusline', label: 'Custom statusline', hint: 'Shows git, costs, tokens info' },
+        { value: 'aiblueprintCommands', label: 'AIBlueprint commands', hint: 'Pre-configured command templates' },
+        { value: 'aiblueprintAgents', label: 'AIBlueprint agents', hint: 'Specialized AI agents' },
+        { value: 'outputStyles', label: 'Output styles', hint: 'Custom output formatting' },
+        { value: 'notificationSounds', label: 'Notification sounds', hint: 'Audio alerts for events' },
+      ],
+      initialValues: ['shellShortcuts', 'commandValidation', 'customStatusline', 'aiblueprintCommands', 'aiblueprintAgents', 'outputStyles', 'notificationSounds'],
+    }) as string[];
+
+    if (clack.isCancel(features)) {
+      clack.cancel('Setup cancelled');
+      process.exit(0);
+    }
+  }
+
+  const options: SetupOptions = {
+    shellShortcuts: features.includes('shellShortcuts'),
+    commandValidation: features.includes('commandValidation'),
+    customStatusline: features.includes('customStatusline'),
+    aiblueprintCommands: features.includes('aiblueprintCommands'),
+    aiblueprintAgents: features.includes('aiblueprintAgents'),
+    outputStyles: features.includes('outputStyles'),
+    notificationSounds: features.includes('notificationSounds'),
+  };
+
+  const s = clack.spinner();
+  
+  const claudeDir = customFolder ? path.resolve(customFolder) : path.join(os.homedir(), '.claude');
+  
+  // Find the source directory - it should be relative to the project root
+  let sourceDir: string;
+  const currentDir = process.cwd();
+  const possiblePaths = [
+    path.join(currentDir, 'claude-code-config'),
+    path.join(__dirname, '../../claude-code-config'),
+    path.join(path.dirname(process.argv[1]), '../claude-code-config')
+  ];
+  
+  sourceDir = possiblePaths.find(p => {
+    try {
+      return fs.existsSync(p);
+    } catch {
+      return false;
+    }
+  }) || possiblePaths[0];
+  
+  console.log(chalk.gray(`Installing to: ${claudeDir}`));
+  
+  await fs.ensureDir(claudeDir);
+
+  if (options.shellShortcuts) {
+    s.start('Setting up shell shortcuts');
+    await setupShellShortcuts();
+    s.stop('Shell shortcuts configured');
+  }
+
+  if (options.commandValidation || options.customStatusline || options.notificationSounds) {
+    s.start('Copying scripts');
+    await fs.copy(path.join(sourceDir, 'scripts'), path.join(claudeDir, 'scripts'), { overwrite: true });
+    s.stop('Scripts copied');
+  }
+
+  if (options.aiblueprintCommands) {
+    s.start('Copying AIBlueprint commands');
+    await fs.copy(path.join(sourceDir, 'commands'), path.join(claudeDir, 'commands'), { overwrite: true });
+    s.stop('Commands copied');
+  }
+
+  if (options.aiblueprintAgents) {
+    s.start('Copying AIBlueprint agents');
+    await fs.copy(path.join(sourceDir, 'agents'), path.join(claudeDir, 'agents'), { overwrite: true });
+    s.stop('Agents copied');
+  }
+
+  if (options.outputStyles) {
+    s.start('Copying output styles');
+    await fs.copy(path.join(sourceDir, 'output-styles'), path.join(claudeDir, 'output-styles'), { overwrite: true });
+    s.stop('Output styles copied');
+  }
+
+  if (options.notificationSounds) {
+    s.start('Copying notification sounds');
+    await fs.copy(path.join(sourceDir, 'song'), path.join(claudeDir, 'song'), { overwrite: true });
+    s.stop('Notification sounds copied');
+  }
+
+  if (options.customStatusline) {
+    s.start('Checking dependencies');
+    await checkAndInstallDependencies();
+    s.stop('Dependencies checked');
+  }
+
+  s.start('Updating settings.json');
+  await updateSettings(options, claudeDir);
+  s.stop('Settings updated');
+
+  clack.outro(chalk.green('✨ Setup complete!'));
+  
+    console.log(chalk.gray('\nNext steps:'));
+    if (options.shellShortcuts) {
+      console.log(chalk.gray('  • Restart your terminal or run: source ~/.zshenv (macOS) or source ~/.bashrc (Linux)'));
+      console.log(chalk.gray('  • Use "cc" for Claude Code with permissions skipped'));
+      console.log(chalk.gray('  • Use "ccc" for Claude Code with permissions skipped and continue mode'));
+    }
+    console.log(chalk.gray('  • Run "claude" to start using Claude Code with your new configuration'));
+  
+  } catch (error) {
+    console.error(chalk.red('\n❌ Setup failed:'), error);
+    clack.outro(chalk.red('Setup failed!'));
+    process.exit(1);
+  }
+}
+
+async function setupShellShortcuts() {
+  try {
+    const platform = os.platform();
+    let shellConfigFile: string;
+    
+    if (platform === 'darwin') {
+      shellConfigFile = path.join(os.homedir(), '.zshenv');
+    } else if (platform === 'linux') {
+      const shell = process.env.SHELL || '';
+      if (shell.includes('zsh')) {
+        shellConfigFile = path.join(os.homedir(), '.zshrc');
+      } else {
+        shellConfigFile = path.join(os.homedir(), '.bashrc');
+      }
+    } else {
+      console.log(chalk.yellow('Shell shortcuts are only supported on macOS and Linux'));
+      return;
+    }
+
+    const aliases = `
+# AIBlueprint Claude Code aliases
+alias cc="claude --dangerously-skip-permissions"
+alias ccc="claude --dangerously-skip-permissions -c"
+`;
+
+    const existingContent = await fs.readFile(shellConfigFile, 'utf-8').catch(() => '');
+    
+    if (!existingContent.includes('AIBlueprint Claude Code aliases')) {
+      await fs.appendFile(shellConfigFile, aliases);
+    }
+  } catch (error) {
+    console.error(chalk.red('Error setting up shell shortcuts:'), error);
+    throw error;
+  }
+}
+
+async function checkAndInstallDependencies() {
+  const checkCommand = (cmd: string): boolean => {
+    try {
+      execSync(`which ${cmd}`, { stdio: 'ignore' });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  if (!checkCommand('bun')) {
+    console.log(chalk.yellow('\n  Installing bun...'));
+    try {
+      execSync('npm install -g bun', { stdio: 'inherit' });
+    } catch (error) {
+      console.log(chalk.red('  Failed to install bun. Please install it manually: npm install -g bun'));
+    }
+  }
+
+  if (!checkCommand('ccusage')) {
+    console.log(chalk.yellow('\n  Installing ccusage...'));
+    try {
+      execSync('npm install -g ccusage', { stdio: 'inherit' });
+    } catch (error) {
+      console.log(chalk.red('  Failed to install ccusage. Please install it manually: npm install -g ccusage'));
+    }
+  }
+}
+
+async function updateSettings(options: SetupOptions, claudeDir: string) {
+  const settingsPath = path.join(claudeDir, 'settings.json');
+  let settings: any = {};
+
+  try {
+    const existingSettings = await fs.readFile(settingsPath, 'utf-8');
+    settings = JSON.parse(existingSettings);
+  } catch {
+    // Settings file doesn't exist or is invalid
+  }
+
+  if (options.customStatusline) {
+    if (settings.statusLine) {
+      const confirm = await clack.confirm({
+        message: 'You already have a statusLine configuration. Replace it?',
+      });
+      
+      if (clack.isCancel(confirm) || !confirm) {
+        console.log(chalk.yellow('  Keeping existing statusLine configuration'));
+      } else {
+        settings.statusLine = {
+          type: 'command',
+          command: `bash ${path.join(claudeDir, 'scripts/statusline-ccusage.sh')}`,
+          padding: 0
+        };
+      }
+    } else {
+      settings.statusLine = {
+        type: 'command',
+        command: `bash ${path.join(claudeDir, 'scripts/statusline-ccusage.sh')}`,
+        padding: 0
+      };
+    }
+  }
+
+  if (!settings.hooks) {
+    settings.hooks = {};
+  }
+
+  if (options.commandValidation) {
+    if (!settings.hooks.PreToolUse) {
+      settings.hooks.PreToolUse = [];
+    }
+
+    const bashHook = {
+      matcher: 'Bash',
+      hooks: [
+        {
+          type: 'command',
+          command: `bun ${path.join(claudeDir, 'scripts/validate-command.js')}`
+        }
+      ]
+    };
+
+    const existingBashHook = settings.hooks.PreToolUse.find((h: any) => h.matcher === 'Bash');
+    if (!existingBashHook) {
+      settings.hooks.PreToolUse.push(bashHook);
+    }
+  }
+
+  if (options.notificationSounds) {
+    if (!settings.hooks.Stop) {
+      settings.hooks.Stop = [];
+    }
+    
+    const stopHook = {
+      matcher: '',
+      hooks: [
+        {
+          type: 'command',
+          command: `afplay -v 0.1 ${path.join(claudeDir, 'song/finish.mp3')}`
+        }
+      ]
+    };
+
+    const existingStopHook = settings.hooks.Stop.find((h: any) => h.hooks?.some((hook: any) => hook.command?.includes('finish.mp3')));
+    if (!existingStopHook) {
+      settings.hooks.Stop.push(stopHook);
+    }
+
+    if (!settings.hooks.Notification) {
+      settings.hooks.Notification = [];
+    }
+    
+    const notificationHook = {
+      matcher: '',
+      hooks: [
+        {
+          type: 'command',
+          command: `afplay -v 0.1 ${path.join(claudeDir, 'song/need-human.mp3')}`
+        }
+      ]
+    };
+
+    const existingNotificationHook = settings.hooks.Notification.find((h: any) => h.hooks?.some((hook: any) => hook.command?.includes('need-human.mp3')));
+    if (!existingNotificationHook) {
+      settings.hooks.Notification.push(notificationHook);
+    }
+  }
+
+  await fs.writeJson(settingsPath, settings, { spaces: 2 });
+}
