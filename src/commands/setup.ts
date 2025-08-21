@@ -20,6 +20,57 @@ interface SetupOptions {
   notificationSounds: boolean;
 }
 
+const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/Melvynx/aiblueprint-cli/main/claude-code-config';
+
+async function downloadFromGitHub(relativePath: string, targetPath: string): Promise<boolean> {
+  try {
+    const url = `${GITHUB_RAW_BASE}/${relativePath}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      return false;
+    }
+    const content = await response.arrayBuffer();
+    await fs.ensureDir(path.dirname(targetPath));
+    await fs.writeFile(targetPath, Buffer.from(content));
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function downloadDirectoryFromGitHub(dirPath: string, targetDir: string): Promise<boolean> {
+  try {
+    // Use GitHub API to list directory contents
+    const apiUrl = `https://api.github.com/repos/Melvynx/aiblueprint-cli/contents/claude-code-config/${dirPath}`;
+    const response = await fetch(apiUrl);
+    if (!response.ok) {
+      return false;
+    }
+    
+    const files = await response.json();
+    if (!Array.isArray(files)) {
+      return false;
+    }
+    
+    await fs.ensureDir(targetDir);
+    
+    for (const file of files) {
+      const relativePath = `${dirPath}/${file.name}`;
+      const targetPath = path.join(targetDir, file.name);
+      
+      if (file.type === 'file') {
+        await downloadFromGitHub(relativePath, targetPath);
+      } else if (file.type === 'dir') {
+        await downloadDirectoryFromGitHub(relativePath, targetPath);
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 export async function setupCommand(customFolder?: string, skipInteractive?: boolean) {
   try {
     console.log(chalk.blue.bold('\n🚀 AIBlueprint Claude Code Setup\n'));
@@ -66,26 +117,47 @@ export async function setupCommand(customFolder?: string, skipInteractive?: bool
   
   const claudeDir = customFolder ? path.resolve(customFolder) : path.join(os.homedir(), '.claude');
   
-  // Find the source directory - it should be relative to the project root
-  let sourceDir: string;
-  const currentDir = process.cwd();
-  const possiblePaths = [
-    path.join(currentDir, 'claude-code-config'),
-    path.join(__dirname, '../../claude-code-config'),
-    path.join(path.dirname(process.argv[1]), '../claude-code-config')
-  ];
-  
-  sourceDir = possiblePaths.find(p => {
-    try {
-      return fs.existsSync(p);
-    } catch {
-      return false;
-    }
-  }) || possiblePaths[0];
-  
   console.log(chalk.gray(`Installing to: ${claudeDir}`));
   
   await fs.ensureDir(claudeDir);
+  
+  // Try to download from GitHub first, fallback to local files
+  let useGitHub = true;
+  let sourceDir: string | undefined;
+  const testUrl = `${GITHUB_RAW_BASE}/scripts/validate-command.js`;
+  try {
+    const testResponse = await fetch(testUrl);
+    useGitHub = testResponse.ok;
+  } catch {
+    useGitHub = false;
+  }
+  
+  if (!useGitHub) {
+    // Fallback to local source directory
+    const currentDir = process.cwd();
+    const possiblePaths = [
+      path.join(currentDir, 'claude-code-config'),
+      path.join(__dirname, '../../claude-code-config'),
+      path.join(__dirname, '../claude-code-config'),
+      path.join(path.dirname(process.argv[1]), '../claude-code-config')
+    ];
+    
+    sourceDir = possiblePaths.find(p => {
+      try {
+        return fs.existsSync(p);
+      } catch {
+        return false;
+      }
+    });
+    
+    if (!sourceDir) {
+      throw new Error('Could not find claude-code-config directory locally and GitHub is not accessible');
+    }
+    
+    console.log(chalk.yellow('  Using local configuration files (GitHub not accessible)'));
+  } else {
+    console.log(chalk.green('  Downloading latest configuration from GitHub'));
+  }
 
   if (options.shellShortcuts) {
     s.start('Setting up shell shortcuts');
@@ -94,33 +166,61 @@ export async function setupCommand(customFolder?: string, skipInteractive?: bool
   }
 
   if (options.commandValidation || options.customStatusline || options.notificationSounds) {
-    s.start('Copying scripts');
-    await fs.copy(path.join(sourceDir, 'scripts'), path.join(claudeDir, 'scripts'), { overwrite: true });
-    s.stop('Scripts copied');
+    s.start('Setting up scripts');
+    if (useGitHub) {
+      const scriptsDir = path.join(claudeDir, 'scripts');
+      await fs.ensureDir(scriptsDir);
+      const scriptFiles = ['validate-command.js', 'statusline-ccusage.sh', 'validate-command.readme.md', 'statusline.readme.md'];
+      for (const file of scriptFiles) {
+        await downloadFromGitHub(`scripts/${file}`, path.join(scriptsDir, file));
+      }
+    } else {
+      await fs.copy(path.join(sourceDir!, 'scripts'), path.join(claudeDir, 'scripts'), { overwrite: true });
+    }
+    s.stop('Scripts installed');
   }
 
   if (options.aiblueprintCommands) {
-    s.start('Copying AIBlueprint commands');
-    await fs.copy(path.join(sourceDir, 'commands'), path.join(claudeDir, 'commands'), { overwrite: true });
-    s.stop('Commands copied');
+    s.start('Setting up AIBlueprint commands');
+    if (useGitHub) {
+      await downloadDirectoryFromGitHub('commands', path.join(claudeDir, 'commands'));
+    } else {
+      await fs.copy(path.join(sourceDir!, 'commands'), path.join(claudeDir, 'commands'), { overwrite: true });
+    }
+    s.stop('Commands installed');
   }
 
   if (options.aiblueprintAgents) {
-    s.start('Copying AIBlueprint agents');
-    await fs.copy(path.join(sourceDir, 'agents'), path.join(claudeDir, 'agents'), { overwrite: true });
-    s.stop('Agents copied');
+    s.start('Setting up AIBlueprint agents');
+    if (useGitHub) {
+      await downloadDirectoryFromGitHub('agents', path.join(claudeDir, 'agents'));
+    } else {
+      await fs.copy(path.join(sourceDir!, 'agents'), path.join(claudeDir, 'agents'), { overwrite: true });
+    }
+    s.stop('Agents installed');
   }
 
   if (options.outputStyles) {
-    s.start('Copying output styles');
-    await fs.copy(path.join(sourceDir, 'output-styles'), path.join(claudeDir, 'output-styles'), { overwrite: true });
-    s.stop('Output styles copied');
+    s.start('Setting up output styles');
+    if (useGitHub) {
+      await downloadDirectoryFromGitHub('output-styles', path.join(claudeDir, 'output-styles'));
+    } else {
+      await fs.copy(path.join(sourceDir!, 'output-styles'), path.join(claudeDir, 'output-styles'), { overwrite: true });
+    }
+    s.stop('Output styles installed');
   }
 
   if (options.notificationSounds) {
-    s.start('Copying notification sounds');
-    await fs.copy(path.join(sourceDir, 'song'), path.join(claudeDir, 'song'), { overwrite: true });
-    s.stop('Notification sounds copied');
+    s.start('Setting up notification sounds');
+    if (useGitHub) {
+      const songDir = path.join(claudeDir, 'song');
+      await fs.ensureDir(songDir);
+      await downloadFromGitHub('song/finish.mp3', path.join(songDir, 'finish.mp3'));
+      await downloadFromGitHub('song/need-human.mp3', path.join(songDir, 'need-human.mp3'));
+    } else {
+      await fs.copy(path.join(sourceDir!, 'song'), path.join(claudeDir, 'song'), { overwrite: true });
+    }
+    s.stop('Notification sounds installed');
   }
 
   if (options.customStatusline) {
