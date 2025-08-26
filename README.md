@@ -2,6 +2,9 @@
 
 A CLI tool for setting up Claude Code configurations with AIBlueprint defaults.
 
+> [!NOTE]
+> If you encounter permission errors when running the commands below, add `sudo` before the command.
+
 ## Quick Start
 
 ```bash
@@ -11,11 +14,18 @@ bunx aiblueprint-cli claude-code setup
 
 ## Installation & Usage
 
+### Option 1: Install globally via npm
 ```bash
 # Install globally
 npm install -g aiblueprint-cli
 
-# Or use with npx/pnpm dlx/bunx
+# Then run the setup command
+aiblueprint claude-code setup
+```
+
+### Option 2: Run directly without installation
+```bash
+# Use with npx/pnpm dlx/bunx (no installation needed)
 npx aiblueprint-cli claude-code setup
 pnpm dlx aiblueprint-cli claude-code setup
 bunx aiblueprint-cli claude-code setup
