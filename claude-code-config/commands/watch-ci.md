@@ -1,22 +1,29 @@
 ---
-allowed-tools: mcp__wait-timer__wait, Bash(gh :*), Bash(git :*), Read, LS, Grep, Task
-description: Watch CI pipeline after commit and auto-fix errors intelligently.
+description: Watch CI pipeline after a commit and auto-fix errors
 ---
 
-After a commit is pushed:
+When this command runs, follow the workflow below:
 
 1. Wait 30 seconds for GitHub Actions to start
-2. Find the latest GitHub Actions run for current branch
+2. Find the latest GitHub Actions run for the current branch
 3. Watch the run until completion
 4. If the run fails:
-   - Download and analyze log artifacts
-   - Identify common CI errors (vector dimensions, Inngest auth, database issues, TypeScript errors)
-   - Auto-correct the errors found
-   - Commit the fixes and push
-   - Recursively restart this process until CI passes
-5. Clean up downloaded artifacts
-6. Report final CI status
+
+- Inspect the run logs
+- Identify CI errors
+- Download any artifact files
+- Think carefully and plan an update
+- Update the code
+- Commit the fixes and push them
+- Return to step `1` to verify that CI is now passing
+
+5. If the run succeeds:
+
+- Clean up downloaded artifacts
+- Report the final CI results
+- Report all modifications you made to achieve this success
 
 ## Commands
 
-- `gh run watch <run-id>` : to watch the run
+- Wait: `wait 30`
+- Watch GitHub Actions run: `gh run watch <run-id>`

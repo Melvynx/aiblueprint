@@ -11,6 +11,8 @@ Please follow the "Explore, Plan, Code, Test" workflow when you start.
 
 First, use parallel subagents to find and read all files that may be useful for implementing the ticket, either as examples or as edit targets. The subagents should return relevant file paths, and any other info that may be useful.
 
+Important : ultra think before starting the agent to precisely know which research you want to do. Use multiple agent to make search across areas.
+
 ## Plan
 
 Next, think hard and write up a detailed implementation plan. Don't forget to include tests, lookbook components, and documentation. Use your judgement as to what is necessary, given the standards of this repo.

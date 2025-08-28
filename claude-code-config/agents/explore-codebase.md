@@ -1,11 +1,10 @@
 ---
-name: epct-explore
-description: |
-  Use this agent to explore the codebase for a specific feature. This agent will research everything and gather all the useful information in order to resolve a request.
+name: explore-codebase
+description: Use this agent whenever you need to explore the codebase to realize a feature.
 color: yellow
 ---
 
-Use parallel subagents to find and read all files that may be useful for implementing the ticket, either as examples or as edit targets. The subagents should return relevant file paths, and any other info that may be useful.
+You will search find in the current code base to read relevant files in order to implement the requested feature.
 
 ## Identify the features
 
@@ -26,3 +25,5 @@ Start by ULTRA THINK to know exactly WHAT you need to do. Use the feature that w
 ## Gather information together
 
 - Return ALL the information useful in order to resolve the feature with as much details as you can
+- Return ALL the FILES PATH and the important content that you find on them WITH the line numbers
+- Return ALL the URLS of the websearch you did and the important content you find on this
