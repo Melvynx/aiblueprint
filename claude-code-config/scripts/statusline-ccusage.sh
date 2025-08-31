@@ -18,6 +18,10 @@ current_dir=$(echo "$input" | jq -r '.workspace.current_dir // empty')
 cwd=$(echo "$input" | jq -r '.cwd // empty')
 output_style=$(echo "$input" | jq -r '.output_style.name // empty')
 
+# Extract cost data from Claude Code Status hook
+session_cost_usd=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+session_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+
 # Get current git branch with error handling
 if git rev-parse --git-dir >/dev/null 2>&1; then
     branch=$(git branch --show-current 2>/dev/null || echo "detached")
@@ -64,8 +68,11 @@ else
     branch="no-git"
 fi
 
-# Get basename of current directory
-dir_name=$(basename "$current_dir")
+# Use full path but replace home directory with ~
+dir_path="$current_dir"
+if [[ "$dir_path" == "$HOME"* ]]; then
+    dir_path="~${dir_path#$HOME}"
+fi
 
 # Get today's date in YYYYMMDD format
 today=$(date +%Y%m%d)
@@ -97,21 +104,38 @@ format_time() {
     fi
 }
 
+format_duration_ms() {
+    local ms=$1
+    local minutes=$((ms / 60000))
+    format_time "$minutes"
+}
+
 # Initialize variables with defaults
 session_cost="0.00"
 session_tokens=0
 daily_cost="0.00"
 block_cost="0.00"
 remaining_time="N/A"
+session_duration=""
 
-# Get current session data using ccusage session --id
+# Use Claude Code cost data if available, otherwise fallback to ccusage
+if [ "$session_cost_usd" != "0" ] && [ "$session_cost_usd" != "null" ]; then
+    session_cost="$session_cost_usd"
+    if [ "$session_duration_ms" != "0" ] && [ "$session_duration_ms" != "null" ]; then
+        session_duration=$(format_duration_ms "$session_duration_ms")
+    fi
+fi
+
+# Always get session tokens from ccusage when session_id is available
 if command -v ccusage >/dev/null 2>&1 && [ -n "$session_id" ] && [ "$session_id" != "empty" ]; then
     # Use the new ccusage session --id functionality to get session data
     session_data=$(ccusage session --id "$session_id" --json 2>/dev/null)
     
     if [ $? -eq 0 ] && [ -n "$session_data" ] && [ "$session_data" != "null" ]; then
-        # Extract cost and tokens from the JSON response
-        session_cost=$(echo "$session_data" | jq -r '.totalCost // 0')
+        # If we don't have cost from Claude Code, get it from ccusage
+        if [ "$session_cost" = "0.00" ] || [ "$session_cost" = "0" ]; then
+            session_cost=$(echo "$session_data" | jq -r '.totalCost // 0')
+        fi
         # Calculate only input + output tokens (exclude cache tokens for meaningful display)
         session_tokens=$(echo "$session_data" | jq -r '.entries | map(.inputTokens + .outputTokens) | add // 0')
     fi
@@ -144,13 +168,21 @@ formatted_daily_cost=$(format_cost "$daily_cost")
 formatted_block_cost=$(format_cost "$block_cost")
 formatted_tokens=$(format_tokens "$session_tokens")
 
-# Build the status line with colors (light gray as default)
-status_line="${LIGHT_GRAY}🌿 $branch ${GRAY}|${LIGHT_GRAY} 💄 $output_style ${GRAY}|${LIGHT_GRAY} 📁 $dir_name ${GRAY}|${LIGHT_GRAY} 🤖 $model_name ${GRAY}|${LIGHT_GRAY} 💰 \$$formatted_session_cost ${GRAY}/${LIGHT_GRAY} 📅 \$$formatted_daily_cost ${GRAY}/${LIGHT_GRAY} 🧊 \$$formatted_block_cost"
+# Build the first line: branch / style / folder / model
+first_line="${LIGHT_GRAY}🌿 $branch ${GRAY}|${LIGHT_GRAY} 💄 $output_style ${GRAY}|${LIGHT_GRAY} 📁 $dir_path ${GRAY}|${LIGHT_GRAY} 🤖 $model_name${RESET}"
 
-if [ "$remaining_time" != "N/A" ]; then
-    status_line="$status_line ($remaining_time left)"
+# Build the second line: pricing and tokens
+session_cost_display="\$$formatted_session_cost"
+if [ -n "$session_duration" ]; then
+    session_cost_display="$session_cost_display ${GRAY}($session_duration)${LIGHT_GRAY}"
 fi
 
-status_line="$status_line ${GRAY}|${LIGHT_GRAY} 🧩 ${formatted_tokens} ${GRAY}tokens${RESET}"
+second_line="${LIGHT_GRAY}💰 $session_cost_display ${GRAY}|${LIGHT_GRAY} 📅 \$$formatted_daily_cost ${GRAY}|${LIGHT_GRAY} 🧊 \$$formatted_block_cost"
 
-printf "%b\n" "$status_line"
+if [ "$remaining_time" != "N/A" ]; then
+    second_line="$second_line ($remaining_time left)"
+fi
+
+second_line="$second_line ${GRAY}|${LIGHT_GRAY} 🧩 ${formatted_tokens} ${GRAY}tokens${RESET}"
+
+printf "%b\n%b\n" "$first_line" "$second_line"

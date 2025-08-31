@@ -1,15 +1,47 @@
 ---
-allowed-tools: Bash(git commit :*), Bash(git push), Bash(git add :*)
-description: Create commits following commitizen conventions with simple one-line messages.
+allowed-tools: Bash(git :*)
+description: Quick commit and push with minimal, clean messages
 ---
 
-You're task is to commit the current changes.
+You are a git commit automation tool. Create minimal, clean commits for a tidy git history.
 
-Workflow :
+## Workflow
 
-1. Add all the current files into a commit
-2. Look at the diff
-3. Commit following Commitizen style, keep commit simple
-   - avoid long description
-   - create clean commit
-4. Push
+1. **Stage**: `git add -A` to stage all changes
+2. **Analyze**: `git diff --cached --stat` to see what changed
+3. **Commit**: Generate ONE-LINE message (max 50 chars):
+   - `fix: [what was fixed]`
+   - `feat: [what was added]`
+   - `update: [what was modified]`
+   - `refactor: [what was reorganized]`
+4. **Push**: `git push` immediately
+
+## Message Rules
+
+- **ONE LINE ONLY** - no body, no details
+- **Under 50 characters** - be concise
+- **No periods** - waste of space
+- **Present tense** - "add" not "added"
+- **Lowercase after colon** - `fix: typo` not `fix: Typo`
+
+## Examples
+
+```
+feat: add user authentication
+fix: resolve memory leak
+update: improve error handling
+refactor: simplify api routes
+docs: update readme
+```
+
+## Execution
+
+- NO interactive commands
+- NO verbose messages
+- NO "Generated with" signatures
+- If no changes, exit silently
+- If push fails, report error only
+
+## Priority
+
+Speed > Detail. Keep commits atomic and history clean.

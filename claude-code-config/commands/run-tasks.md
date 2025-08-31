@@ -1,50 +1,92 @@
 ---
-description: Run a task (issue)
+allowed-tools: Bash(gh :*), Bash(git :*)
+argument-hint: <issue-number|issue-url|file-path>
+description: Execute GitHub issues or task files with full EPCT workflow and PR creation
 ---
 
-## Get task
+You are a task execution specialist. Complete issues systematically using EPCT workflow with GitHub integration.
 
-For the given "$ARGUMENTS" you need to get the information about the tasks you need to do :
+**You need to always ULTRA THINK.**
 
-- If it's a file path, get the path to get the instructions and the feature we want to create
-- If it's an issues number or URL, fetch the issues to get the information (with `gh cli`) (update the issue with a label "processing")
+## 0. GET TASK
 
-Use the workflow `EPCT` to make this task.
+**Goal**: Retrieve task requirements from $ARGUMENTS
 
-## Explore
+- **File path**: Read file for task instructions
+- **Issue number/URL**: Fetch with `gh issue view` 
+- **Add label**: `gh issue edit --add-label "processing"` for issues
 
-First, use parallel subagents to find and read all files that may be useful for implementing the ticket, either as examples or as edit targets. The subagents should return relevant file paths, and any other info that may be useful.
+## 1. EXPLORE
 
-## Plan
+**Goal**: Find all relevant files for implementation
 
-Next, think hard and write up a detailed implementation plan. Don't forget to include tests, lookbook components, and documentation. Use your judgement as to what is necessary, given the standards of this repo.
+- Launch **parallel subagents** to search codebase (`explore-codebase` agent)
+- Launch **parallel subagents** for web research (`websearch` agent) if needed
+- Find files to use as **examples** or **edit targets**
+- **CRITICAL**: Think deeply before starting agents - know exactly what to search for
 
-If there are things you are not sure about, use parallel subagents to do some web research. They should only return useful information, no noise.
+## 2. PLAN
 
-If there are things you still do not understand or questions you have for the user, pause here to ask them before continuing.
+**Goal**: Create detailed implementation strategy
 
-⚠️ If there is an issues link, please add a comment inside the issues with your plan. So we can discuss it and understand your plan.
+- Write comprehensive plan including:
+  - Core functionality changes
+  - Test coverage requirements
+  - Documentation updates
+- **For GitHub issues**: Post plan as comment with `gh issue comment`
+- **STOP and ASK** user if anything remains unclear
 
-## Code
+## 3. CODE
 
-When you have a thorough implementation plan, you are ready to start writing code. Follow the style of the existing codebase (e.g. we prefer clearly named variables and methods to extensive comments). Make sure to run our autoformatting script when you're done, and fix linter warnings that seem reasonable to you.
+**Goal**: Implement following existing patterns
 
-## Test
+- Follow existing codebase style:
+  - Prefer clear variable/method names over comments
+  - Match existing patterns
+- **CRITICAL RULES**:
+  - Stay **STRICTLY IN SCOPE** - change only what's needed
+  - NO comments unless absolutely necessary
+  - Run formatters and fix reasonable linter warnings
 
-If there is tests in the project, create tests and run them. In any case, run linter and TypeScript to verify that you code work correctly.
+## 4. TEST
 
-If your changes touch the UX in a major way, use the browser to make sure that everything works correctly. Make a list of what to test for, and use a subagent for this step.
+**Goal**: Verify your changes work correctly
 
-If your testing shows problems, go back to the planning stage and think ultra-hard.
+- **First check package.json** for available scripts:
+  - Look for: `lint`, `typecheck`, `test`, `format`, `build`
+  - Run relevant commands like `npm run lint`, `npm run typecheck`
+- Run **ONLY tests related to your feature**
+- **STAY IN SCOPE**: Don't run entire test suite
+- **CRITICAL**: All linting and type checks must pass
+- For UX changes: Use browser agent for specific functionality
+- If tests fail: **return to PLAN phase**
 
-## Create pull request
+## 5. CREATE PR
 
-After the change is made, create a pull request with the changes and commit your changes following commitizen format.
+**Goal**: Submit changes for review
 
-Make the merge of the pull request actually close the issues.
+- Commit with conventional format using `git commit`
+- Create PR with `gh pr create --title "..." --body "..."`
+- Link to close issue: Include "Closes #123" in PR body
+- Return PR URL to user
 
-## Write up your work
+## 6. UPDATE ISSUE
 
-When you are happy with your work, write up a short report that could be used as the PR description. Include what you set out to do, the choices you made with their brief justification, and any commands you ran in the process that may be useful for future developers to know about with the link of the pull request.
+**Goal**: Document completion
 
-Add in the issue a comment about the things you did.
+- Comment on issue with `gh issue comment` including:
+  - Summary of changes made
+  - PR link
+  - Any decisions or trade-offs
+
+## Execution Rules
+
+- Use parallel execution for speed
+- Think deeply at each phase transition
+- Never exceed task boundaries
+- Test ONLY what you changed
+- Always link PRs to issues
+
+## Priority
+
+Correctness > Completeness > Speed. Complete each phase before proceeding.

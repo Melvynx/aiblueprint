@@ -67,9 +67,8 @@ const SECURITY_RULES = {
 
   // Dangerous regex patterns
   DANGEROUS_PATTERNS: [
-    // File system destruction - block rm -rf with absolute paths
+    // File system destruction - block rm -rf with absolute paths (checked separately)
     /rm\s+.*-rf\s*\/\s*$/i, // rm -rf ending at root directory
-    /rm\s+.*-rf\s*\/\w+/i, // rm -rf with any absolute path
     /rm\s+.*-rf\s*\/etc/i, // rm -rf in /etc
     /rm\s+.*-rf\s*\/usr/i, // rm -rf in /usr
     /rm\s+.*-rf\s*\/bin/i, // rm -rf in /bin
@@ -92,7 +91,7 @@ const SECURITY_RULES = {
 
     // Command injection (but allow general chaining - we'll validate each command separately)
     // /;\s*(rm|dd|mkfs|format)/i,  // Commented out - handled by individual command validation
-    // /&&\s*(rm|dd|mkfs|format)/i, // Commented out - handled by individual command validation  
+    // /&&\s*(rm|dd|mkfs|format)/i, // Commented out - handled by individual command validation
     // /\|\|\s*(rm|dd|mkfs|format)/i, // Commented out - handled by individual command validation
 
     // Remote code execution
@@ -147,7 +146,6 @@ const SECURITY_RULES = {
     /printenv.*PASSWORD/i,
   ],
 
-
   // Paths that should never be written to
   PROTECTED_PATHS: [
     "/etc/",
@@ -159,6 +157,14 @@ const SECURITY_RULES = {
     "/proc/",
     "/dev/",
     "/root/",
+  ],
+
+  // Safe paths where rm -rf is allowed
+  SAFE_RM_PATHS: [
+    "/Users/melvynx/Developer/",
+    "/tmp/",
+    "/var/tmp/",
+    process.cwd() + "/", // Current working directory
   ],
 };
 
@@ -225,7 +231,7 @@ class CommandValidator {
     const mainCommand = cmdParts[0];
 
     // Allow source and python commands unconditionally
-    if (mainCommand === 'source' || mainCommand === 'python') {
+    if (mainCommand === "source" || mainCommand === "python") {
       return result; // Always allow
     }
 
@@ -257,9 +263,19 @@ class CommandValidator {
       result.violations.push(`System manipulation command: ${mainCommand}`);
     }
 
-    // Check dangerous patterns
+    // Check for rm -rf commands first (special handling)
+    if (/rm\s+.*-rf\s/.test(command)) {
+      const isRmRfSafe = this.isRmRfCommandSafe(command);
+      if (!isRmRfSafe) {
+        result.isValid = false;
+        result.severity = "CRITICAL";
+        result.violations.push("rm -rf command targeting unsafe path");
+      }
+    }
+
+    // Check dangerous patterns (skip rm -rf patterns as they're handled above)
     for (const pattern of SECURITY_RULES.DANGEROUS_PATTERNS) {
-      if (pattern.test(command)) {
+      if (pattern.test(command) && !/rm\s+.*-rf/.test(pattern.source)) {
         result.isValid = false;
         result.severity = "CRITICAL";
         result.violations.push(`Dangerous pattern detected: ${pattern.source}`);
@@ -267,24 +283,32 @@ class CommandValidator {
     }
 
     // Allow && chaining for safe commands like source and python
-    if (command.includes('&&')) {
+    if (command.includes("&&")) {
       const chainedCommands = this.splitCommandChain(command);
       let allSafe = true;
       for (const chainedCmd of chainedCommands) {
         const trimmedCmd = chainedCmd.trim();
         const cmdParts = trimmedCmd.split(/\s+/);
         const mainCommand = cmdParts[0];
-        
+
         // Allow source and python commands in && chains
-        if (mainCommand === 'source' || mainCommand === 'python' || SAFE_COMMANDS.includes(mainCommand)) {
+        if (
+          mainCommand === "source" ||
+          mainCommand === "python" ||
+          SAFE_COMMANDS.includes(mainCommand)
+        ) {
           continue;
         }
-        
+
         const chainResult = this.validateSingleCommand(trimmedCmd, toolName);
         if (!chainResult.isValid) {
           result.isValid = false;
           result.severity = chainResult.severity;
-          result.violations.push(`Chained command violation: ${trimmedCmd} - ${chainResult.violations.join(', ')}`);
+          result.violations.push(
+            `Chained command violation: ${trimmedCmd} - ${chainResult.violations.join(
+              ", "
+            )}`
+          );
           allSafe = false;
         }
       }
@@ -292,27 +316,38 @@ class CommandValidator {
         return result; // Allow safe && chains
       }
     }
-    
+
     // Check other command chaining (; and ||)
-    if (command.includes(';') || command.includes('||')) {
+    if (command.includes(";") || command.includes("||")) {
       const chainedCommands = this.splitCommandChain(command);
       for (const chainedCmd of chainedCommands) {
-        const chainResult = this.validateSingleCommand(chainedCmd.trim(), toolName);
+        const chainResult = this.validateSingleCommand(
+          chainedCmd.trim(),
+          toolName
+        );
         if (!chainResult.isValid) {
           result.isValid = false;
           result.severity = chainResult.severity;
-          result.violations.push(`Chained command violation: ${chainedCmd.trim()} - ${chainResult.violations.join(', ')}`);
+          result.violations.push(
+            `Chained command violation: ${chainedCmd.trim()} - ${chainResult.violations.join(
+              ", "
+            )}`
+          );
         }
       }
       return result;
     }
 
-
     // Check for protected path access (but allow common redirections like /dev/null)
     for (const path of SECURITY_RULES.PROTECTED_PATHS) {
       if (command.includes(path)) {
         // Allow common safe redirections
-        if (path === "/dev/" && (command.includes("/dev/null") || command.includes("/dev/stderr") || command.includes("/dev/stdout"))) {
+        if (
+          path === "/dev/" &&
+          (command.includes("/dev/null") ||
+            command.includes("/dev/stderr") ||
+            command.includes("/dev/stdout"))
+        ) {
           continue;
         }
         result.isValid = false;
@@ -338,7 +373,6 @@ class CommandValidator {
     return result;
   }
 
-
   /**
    * Validate a single command (without chaining logic to avoid recursion)
    */
@@ -362,7 +396,7 @@ class CommandValidator {
     const mainCommand = cmdParts[0];
 
     // Allow source and python commands unconditionally in single command validation too
-    if (mainCommand === 'source' || mainCommand === 'python') {
+    if (mainCommand === "source" || mainCommand === "python") {
       return result; // Always allow
     }
 
@@ -394,9 +428,19 @@ class CommandValidator {
       result.violations.push(`System manipulation command: ${mainCommand}`);
     }
 
-    // Check dangerous patterns (but skip chaining patterns since we're validating individual commands)
+    // Check for rm -rf commands first (special handling)
+    if (/rm\s+.*-rf\s/.test(command)) {
+      const isRmRfSafe = this.isRmRfCommandSafe(command);
+      if (!isRmRfSafe) {
+        result.isValid = false;
+        result.severity = "CRITICAL";
+        result.violations.push("rm -rf command targeting unsafe path");
+      }
+    }
+
+    // Check dangerous patterns (skip rm -rf patterns as they're handled above)
     for (const pattern of SECURITY_RULES.DANGEROUS_PATTERNS) {
-      if (pattern.test(command)) {
+      if (pattern.test(command) && !/rm\s+.*-rf/.test(pattern.source)) {
         result.isValid = false;
         result.severity = "CRITICAL";
         result.violations.push(`Dangerous pattern detected: ${pattern.source}`);
@@ -406,7 +450,12 @@ class CommandValidator {
     // Check for protected path access
     for (const path of SECURITY_RULES.PROTECTED_PATHS) {
       if (command.includes(path)) {
-        if (path === "/dev/" && (command.includes("/dev/null") || command.includes("/dev/stderr") || command.includes("/dev/stdout"))) {
+        if (
+          path === "/dev/" &&
+          (command.includes("/dev/null") ||
+            command.includes("/dev/stderr") ||
+            command.includes("/dev/stdout"))
+        ) {
           continue;
         }
         result.isValid = false;
@@ -439,14 +488,14 @@ class CommandValidator {
     // Simple splitting on && ; ||
     // This is basic - doesn't handle complex quoting, but good enough for basic validation
     const commands = [];
-    let current = '';
+    let current = "";
     let inQuotes = false;
-    let quoteChar = '';
-    
+    let quoteChar = "";
+
     for (let i = 0; i < command.length; i++) {
       const char = command[i];
       const nextChar = command[i + 1];
-      
+
       // Handle quotes
       if ((char === '"' || char === "'") && !inQuotes) {
         inQuotes = true;
@@ -454,31 +503,31 @@ class CommandValidator {
         current += char;
       } else if (char === quoteChar && inQuotes) {
         inQuotes = false;
-        quoteChar = '';
+        quoteChar = "";
         current += char;
       } else if (inQuotes) {
         current += char;
-      } else if (char === '&' && nextChar === '&') {
+      } else if (char === "&" && nextChar === "&") {
         commands.push(current.trim());
-        current = '';
+        current = "";
         i++; // skip next &
-      } else if (char === '|' && nextChar === '|') {
+      } else if (char === "|" && nextChar === "|") {
         commands.push(current.trim());
-        current = '';
+        current = "";
         i++; // skip next |
-      } else if (char === ';') {
+      } else if (char === ";") {
         commands.push(current.trim());
-        current = '';
+        current = "";
       } else {
         current += char;
       }
     }
-    
+
     if (current.trim()) {
       commands.push(current.trim());
     }
-    
-    return commands.filter(cmd => cmd.length > 0);
+
+    return commands.filter((cmd) => cmd.length > 0);
   }
 
   /**
@@ -511,6 +560,39 @@ class CommandValidator {
     } catch (error) {
       console.error("Failed to write security log:", error);
     }
+  }
+
+  /**
+   * Check if rm -rf command targets a safe path
+   */
+  isRmRfCommandSafe(command) {
+    // Extract the path from rm -rf command
+    const rmRfMatch = command.match(/rm\s+.*-rf\s+([^\s;&|]+)/);
+    if (!rmRfMatch) {
+      return false; // Couldn't parse path, block for safety
+    }
+
+    const targetPath = rmRfMatch[1];
+
+    // Block if targeting root or ending at root
+    if (targetPath === "/" || targetPath.endsWith("/")) {
+      return false;
+    }
+
+    // Check if path starts with any safe prefix
+    for (const safePath of SECURITY_RULES.SAFE_RM_PATHS) {
+      if (targetPath.startsWith(safePath)) {
+        return true;
+      }
+    }
+
+    // Check if it's a relative path (safer)
+    if (!targetPath.startsWith("/")) {
+      return true;
+    }
+
+    // Block all other absolute paths
+    return false;
   }
 
   /**
@@ -594,16 +676,20 @@ async function main() {
       process.exit(0); // Allow execution
     } else {
       // Instead of blocking, ask user for confirmation
-      const confirmationMessage = `⚠️  Potentially dangerous command detected!\n\nCommand: ${command}\nViolations: ${result.violations.join(", ")}\nSeverity: ${result.severity}\n\nDo you want to proceed with this command?`;
-      
+      const confirmationMessage = `⚠️  Potentially dangerous command detected!\n\nCommand: ${command}\nViolations: ${result.violations.join(
+        ", "
+      )}\nSeverity: ${
+        result.severity
+      }\n\nDo you want to proceed with this command?`;
+
       const hookOutput = {
         hookSpecificOutput: {
           hookEventName: "PreToolUse",
           permissionDecision: "ask",
-          permissionDecisionReason: confirmationMessage
-        }
+          permissionDecisionReason: confirmationMessage,
+        },
       };
-      
+
       console.log(JSON.stringify(hookOutput));
       process.exit(0); // Exit with 0 to trigger user prompt
     }
