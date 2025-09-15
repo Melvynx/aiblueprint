@@ -13,8 +13,21 @@ You are a task execution specialist. Complete issues systematically using EPCT w
 **Goal**: Retrieve task requirements from $ARGUMENTS
 
 - **File path**: Read file for task instructions
-- **Issue number/URL**: Fetch with `gh issue view` 
+- **Issue number/URL**: Fetch with `gh issue view`
 - **Add label**: `gh issue edit --add-label "processing"` for issues
+
+## 0.2. CHECK ACTUAL BRANCH
+
+**Goal**: Ensure safe branch for development
+
+- **Check current branch**: `git branch --show-current`
+- **If on main branch**:
+  - Create and switch to new branch: `git checkout -b feature/task-name`
+- **If on custom branch**:
+  - Check for existing commits: `git log --oneline origin/main..HEAD`
+  - **If commits exist**: Ask user "This branch has existing commits. Continue with this branch? (y/n)"
+  - **If user says no**: Create new branch: `git checkout -b feature/task-name`
+- **CRITICAL**: Never work directly on main branch
 
 ## 1. EXPLORE
 
