@@ -5,6 +5,7 @@ import chalk from 'chalk';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { getTargetDirectory } from '../utils/claude-config.js';
+import { installFileWithGitHubFallback } from '../utils/file-installer.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -79,9 +80,12 @@ export async function addHookCommand(hookType: string, options: AddHookOptions) 
     // Ensure directories exist
     await fs.ensureDir(hooksDir);
 
-    // Copy hook file from template
-    const templatePath = path.join(__dirname, '../../claude-code-config/hooks', hook.hookFile);
-    await fs.copy(templatePath, hookFilePath);
+    // Install hook file using GitHub fallback
+    await installFileWithGitHubFallback({
+      sourceDir: 'hooks',
+      targetPath: hookFilePath,
+      fileName: hook.hookFile
+    });
 
     // Make hook executable
     await fs.chmod(hookFilePath, 0o755);
