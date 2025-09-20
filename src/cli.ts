@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { setupCommand } from './commands/setup.js';
+import { addHookCommand } from './commands/addHook.js';
 import chalk from 'chalk';
 
 const program = new Command();
@@ -22,6 +23,18 @@ claudeCodeCmd
   .action((options, command) => {
     const parentOptions = command.parent.opts();
     setupCommand(parentOptions.folder, parentOptions.skip);
+  });
+
+const addCmd = claudeCodeCmd
+  .command('add')
+  .description('Add components to your Claude Code configuration');
+
+addCmd
+  .command('hook <type>')
+  .description('Add a hook to your Claude Code configuration')
+  .action((type, options, command) => {
+    const parentOptions = command.parent.parent.opts();
+    addHookCommand(type, { folder: parentOptions.folder });
   });
 
 program.parse(process.argv);
