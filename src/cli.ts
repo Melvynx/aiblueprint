@@ -4,13 +4,19 @@ import { setupCommand } from './commands/setup.js';
 import { addHookCommand } from './commands/addHook.js';
 import { addCommandCommand } from './commands/addCommand.js';
 import chalk from 'chalk';
+import { readFileSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8'));
 
 const program = new Command();
 
 program
   .name('aiblueprint')
   .description('AIBlueprint CLI for setting up Claude Code configurations')
-  .version('1.0.0');
+  .version(packageJson.version);
 
 const claudeCodeCmd = program
   .command('claude-code')
