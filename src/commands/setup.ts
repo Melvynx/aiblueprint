@@ -1,4 +1,4 @@
-import * as clack from '@clack/prompts';
+import inquirer from 'inquirer';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
@@ -9,6 +9,20 @@ import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// Simple spinner replacement for clack.spinner()
+class SimpleSpinner {
+  private message: string = '';
+
+  start(message: string) {
+    this.message = message;
+    console.log(chalk.gray(`⏳ ${message}...`));
+  }
+
+  stop(message: string) {
+    console.log(chalk.green(`✓ ${message}`));
+  }
+}
 
 interface SetupOptions {
   shellShortcuts: boolean;
@@ -74,8 +88,7 @@ async function downloadDirectoryFromGitHub(dirPath: string, targetDir: string): 
 export async function setupCommand(customFolder?: string, skipInteractive?: boolean) {
   try {
     console.log(chalk.blue.bold('\n🚀 AIBlueprint Claude Code Setup\n'));
-
-    clack.intro(chalk.bgBlue(' Setting up your Claude Code environment '));
+    console.log(chalk.bgBlue(' Setting up your Claude Code environment '));
 
   let features: string[];
 
@@ -83,22 +96,25 @@ export async function setupCommand(customFolder?: string, skipInteractive?: bool
     features = ['shellShortcuts', 'commandValidation', 'customStatusline', 'aiblueprintCommands', 'aiblueprintAgents', 'outputStyles', 'notificationSounds'];
     console.log(chalk.green('✓ Installing all features (--skip mode)'));
   } else {
-    features = await clack.multiselect({
+    const answers = await inquirer.prompt([{
+      type: 'checkbox',
+      name: 'features',
       message: 'Which features would you like to install?',
-      options: [
-        { value: 'shellShortcuts', label: 'Shell shortcuts (cc, ccc aliases)', hint: 'Quick access to Claude Code' },
-        { value: 'commandValidation', label: 'Command validation', hint: 'Security hook for bash commands' },
-        { value: 'customStatusline', label: 'Custom statusline', hint: 'Shows git, costs, tokens info' },
-        { value: 'aiblueprintCommands', label: 'AIBlueprint commands', hint: 'Pre-configured command templates' },
-        { value: 'aiblueprintAgents', label: 'AIBlueprint agents', hint: 'Specialized AI agents' },
-        { value: 'outputStyles', label: 'Output styles', hint: 'Custom output formatting' },
-        { value: 'notificationSounds', label: 'Notification sounds', hint: 'Audio alerts for events' },
-      ],
-      initialValues: ['shellShortcuts', 'commandValidation', 'customStatusline', 'aiblueprintCommands', 'aiblueprintAgents', 'outputStyles', 'notificationSounds'],
-    }) as string[];
+      choices: [
+        { value: 'shellShortcuts', name: 'Shell shortcuts (cc, ccc aliases) - Quick access to Claude Code', checked: true },
+        { value: 'commandValidation', name: 'Command validation - Security hook for bash commands', checked: true },
+        { value: 'customStatusline', name: 'Custom statusline - Shows git, costs, tokens info', checked: true },
+        { value: 'aiblueprintCommands', name: 'AIBlueprint commands - Pre-configured command templates', checked: true },
+        { value: 'aiblueprintAgents', name: 'AIBlueprint agents - Specialized AI agents', checked: true },
+        { value: 'outputStyles', name: 'Output styles - Custom output formatting', checked: true },
+        { value: 'notificationSounds', name: 'Notification sounds - Audio alerts for events', checked: true },
+      ]
+    }]);
 
-    if (clack.isCancel(features)) {
-      clack.cancel('Setup cancelled');
+    features = answers.features;
+
+    if (!features || features.length === 0) {
+      console.log(chalk.yellow('Setup cancelled - no features selected'));
       process.exit(0);
     }
   }
@@ -113,7 +129,7 @@ export async function setupCommand(customFolder?: string, skipInteractive?: bool
     notificationSounds: features.includes('notificationSounds'),
   };
 
-  const s = clack.spinner();
+  const s = new SimpleSpinner();
   
   const claudeDir = customFolder ? path.resolve(customFolder) : path.join(os.homedir(), '.claude');
   
@@ -233,7 +249,7 @@ export async function setupCommand(customFolder?: string, skipInteractive?: bool
   await updateSettings(options, claudeDir);
   s.stop('Settings updated');
 
-  clack.outro(chalk.green('✨ Setup complete!'));
+  console.log(chalk.green('✨ Setup complete!'));
   
     console.log(chalk.gray('\nNext steps:'));
     if (options.shellShortcuts) {
@@ -245,7 +261,7 @@ export async function setupCommand(customFolder?: string, skipInteractive?: bool
   
   } catch (error) {
     console.error(chalk.red('\n❌ Setup failed:'), error);
-    clack.outro(chalk.red('Setup failed!'));
+    console.log(chalk.red('Setup failed!'));
     process.exit(1);
   }
 }
@@ -328,11 +344,13 @@ async function updateSettings(options: SetupOptions, claudeDir: string) {
 
   if (options.customStatusline) {
     if (settings.statusLine) {
-      const confirm = await clack.confirm({
+      const confirmAnswer = await inquirer.prompt([{
+        type: 'confirm',
+        name: 'replace',
         message: 'You already have a statusLine configuration. Replace it?',
-      });
-      
-      if (clack.isCancel(confirm) || !confirm) {
+      }]);
+
+      if (!confirmAnswer.replace) {
         console.log(chalk.yellow('  Keeping existing statusLine configuration'));
       } else {
         settings.statusLine = {

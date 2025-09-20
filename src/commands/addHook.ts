@@ -1,4 +1,4 @@
-import * as clack from '@clack/prompts';
+import inquirer from 'inquirer';
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
@@ -7,6 +7,20 @@ import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// Simple spinner replacement for clack.spinner()
+class SimpleSpinner {
+  private message: string = '';
+
+  start(message: string) {
+    this.message = message;
+    console.log(chalk.gray(`⏳ ${message}...`));
+  }
+
+  stop(message: string) {
+    console.log(chalk.green(`✓ ${message}`));
+  }
+}
 
 interface AddHookOptions {
   folder?: string;
@@ -23,10 +37,10 @@ const supportedHooks = {
 };
 
 export async function addHookCommand(hookType: string, options: AddHookOptions) {
-  clack.intro(chalk.bgBlue(' aiblueprint-cli '));
+  console.log(chalk.bgBlue(' aiblueprint-cli '));
 
   if (!supportedHooks[hookType as keyof typeof supportedHooks]) {
-    clack.outro(chalk.red(`❌ Unsupported hook type: ${hookType}`));
+    console.log(chalk.red(`❌ Unsupported hook type: ${hookType}`));
     console.log(chalk.gray('Available hooks:'));
     Object.entries(supportedHooks).forEach(([key, hook]) => {
       console.log(chalk.gray(`  • ${key}: ${hook.description}`));
@@ -35,31 +49,43 @@ export async function addHookCommand(hookType: string, options: AddHookOptions) 
   }
 
   const hook = supportedHooks[hookType as keyof typeof supportedHooks];
-  const s = clack.spinner();
+  const s = new SimpleSpinner();
 
-  // Detect project directory
-  const cwd = process.cwd();
-  const isGitRepo = await fs.pathExists(path.join(cwd, '.git'));
-  const hasClaudeConfig = await fs.pathExists(path.join(cwd, '.claude'));
+  // Determine target directory for Claude configuration
+  const targetDir = options.folder || path.join(process.env.HOME || process.env.USERPROFILE || '~', '.claude');
 
-  if (!isGitRepo && !hasClaudeConfig) {
-    clack.outro(chalk.red('❌ Not in a project directory. Please run this command in a Git repository or a directory with .claude/ configuration.'));
-    process.exit(1);
+  // If no custom folder specified, detect project directory
+  if (!options.folder) {
+    const cwd = process.cwd();
+    const isGitRepo = await fs.pathExists(path.join(cwd, '.git'));
+    const hasClaudeConfig = await fs.pathExists(path.join(cwd, '.claude'));
+
+    if (!isGitRepo && !hasClaudeConfig) {
+      console.log(chalk.red('❌ Not in a project directory. Please run this command in a Git repository or a directory with .claude/ configuration.'));
+      process.exit(1);
+    }
+
+    const claudeDir = path.join(cwd, '.claude');
+  } else {
+    // Use custom folder
+    console.log(chalk.gray(`Using custom folder: ${targetDir}`));
   }
 
-  const claudeDir = path.join(cwd, '.claude');
+  const claudeDir = targetDir;
   const hooksDir = path.join(claudeDir, 'hooks');
   const hookFilePath = path.join(hooksDir, hook.hookFile);
   const settingsPath = path.join(claudeDir, 'settings.json');
 
   // Check if hook already exists
   if (await fs.pathExists(hookFilePath)) {
-    const overwrite = await clack.confirm({
+    const overwriteAnswer = await inquirer.prompt([{
+      type: 'confirm',
+      name: 'overwrite',
       message: `Hook file already exists at ${hookFilePath}. Overwrite?`,
-    });
+    }]);
 
-    if (clack.isCancel(overwrite) || !overwrite) {
-      clack.outro(chalk.yellow('Hook installation cancelled.'));
+    if (!overwriteAnswer.overwrite) {
+      console.log(chalk.yellow('Hook installation cancelled.'));
       process.exit(0);
     }
   }
@@ -116,16 +142,16 @@ export async function addHookCommand(hookType: string, options: AddHookOptions) 
     );
 
     if (existingHook) {
-      const replace = await clack.confirm({
+      const replaceAnswer = await inquirer.prompt([{
+        type: 'confirm',
+        name: 'replace',
         message: `A similar ${hook.event} hook already exists in settings.json. Replace it?`,
-      });
+      }]);
 
-      if (clack.isCancel(replace)) {
-        clack.outro(chalk.yellow('Hook installation cancelled.'));
+      if (!replaceAnswer.replace) {
+        console.log(chalk.yellow('Hook installation cancelled.'));
         process.exit(0);
-      }
-
-      if (replace) {
+      } else {
         // Remove existing hook and add new one
         settings.hooks[hook.event] = settings.hooks[hook.event].filter((h: any) => h !== existingHook);
         settings.hooks[hook.event].push(newHook);
@@ -138,7 +164,7 @@ export async function addHookCommand(hookType: string, options: AddHookOptions) 
 
     s.stop('Settings updated');
 
-    clack.outro(chalk.green('✨ Hook installed successfully!'));
+    console.log(chalk.green('✨ Hook installed successfully!'));
 
     console.log(chalk.gray('\nHook details:'));
     console.log(chalk.gray(`  • Name: ${hook.name}`));
@@ -149,7 +175,7 @@ export async function addHookCommand(hookType: string, options: AddHookOptions) 
 
   } catch (error) {
     s.stop('Installation failed');
-    clack.outro(chalk.red(`❌ Failed to install hook: ${error}`));
+    console.log(chalk.red(`❌ Failed to install hook: ${error}`));
     process.exit(1);
   }
 }

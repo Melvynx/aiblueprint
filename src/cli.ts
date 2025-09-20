@@ -2,6 +2,7 @@
 import { Command } from 'commander';
 import { setupCommand } from './commands/setup.js';
 import { addHookCommand } from './commands/addHook.js';
+import { addCommandCommand } from './commands/addCommand.js';
 import chalk from 'chalk';
 
 const program = new Command();
@@ -35,6 +36,14 @@ addCmd
   .action((type, options, command) => {
     const parentOptions = command.parent.parent.opts();
     addHookCommand(type, { folder: parentOptions.folder });
+  });
+
+addCmd
+  .command('commands [command-name]')
+  .description('Add or list available Claude Code commands')
+  .action((commandName, options, command) => {
+    const parentOptions = command.parent.parent.opts();
+    addCommandCommand(commandName, { folder: parentOptions.folder });
   });
 
 program.parse(process.argv);

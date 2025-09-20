@@ -10,6 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `bun run dev` - Run CLI directly in development mode without building
 - `bun run dev-test` - Test setup command with temporary folder (removes test-claude-config first)
 - `bun run test-local` - Creates npm link for local testing of the CLI
+- **`bun test:run`** - Run tests in non-interactive mode (CRITICAL: use test:run to avoid interactive mode)
 
 ### Release
 
@@ -68,6 +69,14 @@ This is a CLI tool built with TypeScript and Bun that sets up Claude Code config
 - macOS (primary) - Uses `.zshenv` for shell shortcuts
 - Linux - Supports bash/zsh via `.bashrc`/`.zshrc`
 - Windows - Limited support (shell shortcuts not available)
+
+## Critical Workflow
+
+- **AFTER EVERY MODIFICATION**: Always run `bun test:run` to verify changes
+- **CRITICAL**: Use `test:run` specifically to avoid interactive mode
+- **NEVER** skip tests after code changes
+- **NEVER** manually test CLI commands - ALWAYS use the test workflow to verify functionality
+- **REQUIRED**: Use tests to validate behavior instead of manual command execution
 
 ## Important : BEFORE EDITING
 
