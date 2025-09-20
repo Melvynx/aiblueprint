@@ -28,11 +28,15 @@ claudeCodeCmd
 
 const addCmd = claudeCodeCmd
   .command('add')
-  .description('Add components to your Claude Code configuration');
+  .description('Add components to your Claude Code configuration\n' +
+    'Examples:\n' +
+    '  aiblueprint claude-code add hook post-edit-typescript\n' +
+    '  aiblueprint claude-code add commands\n' +
+    '  aiblueprint claude-code add commands commit');
 
 addCmd
   .command('hook <type>')
-  .description('Add a hook to your Claude Code configuration')
+  .description('Add a hook to your Claude Code configuration. Available types: post-edit-typescript')
   .action((type, options, command) => {
     const parentOptions = command.parent.parent.opts();
     addHookCommand(type, { folder: parentOptions.folder });
@@ -40,7 +44,7 @@ addCmd
 
 addCmd
   .command('commands [command-name]')
-  .description('Add or list available Claude Code commands')
+  .description('Install a Claude Code command or list all available commands (use without argument to list)')
   .action((commandName, options, command) => {
     const parentOptions = command.parent.parent.opts();
     addCommandCommand(commandName, { folder: parentOptions.folder });
