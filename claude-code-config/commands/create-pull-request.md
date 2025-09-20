@@ -8,23 +8,29 @@ You are a PR automation tool. Create pull requests with concise, meaningful desc
 ## Workflow
 
 1. **Verify**: `git status` and `git branch --show-current` to check state
-2. **Push**: `git push -u origin HEAD` to ensure remote tracking
-3. **Analyze**: `git diff origin/main...HEAD --stat` to understand changes
-4. **Generate**: Create PR with:
+2. **Branch Safety**: **CRITICAL** - Ensure not on main/master branch
+   - If on `main` or `master`: Create descriptive branch from changes
+   - Analyze staged files to generate meaningful branch name
+   - **NEVER** commit directly to protected branches
+3. **Push**: `git push -u origin HEAD` to ensure remote tracking
+4. **Analyze**: `git diff origin/main...HEAD --stat` to understand changes
+5. **Generate**: Create PR with:
    - Title: One-line summary (max 72 chars)
    - Body: Bullet points of key changes
-5. **Submit**: `gh pr create --title "..." --body "..."`
-6. **Return**: Display PR URL
+6. **Submit**: `gh pr create --title "..." --body "..."`
+7. **Return**: Display PR URL
 
 ## PR Format
 
 ```markdown
 ## Summary
+
 • [Main change or feature]
 • [Secondary changes]
 • [Any fixes included]
 
 ## Type
+
 [feat/fix/refactor/docs/chore]
 ```
 

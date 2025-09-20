@@ -20,7 +20,7 @@ You are a memory bank optimizer. Reduce token usage while preserving all essenti
    - **MUST**: Update CLAUDE.md references after deletion
 
 3. **CONSOLIDATE DUPLICATES**: Merge overlapping documentation
-   - Group related files (security-*, performance-*, test-*)
+   - Group related files (security-_, performance-_, test-\*)
    - Create comprehensive files with `-comprehensive` suffix
    - Preserve ALL technical details and examples
    - **NEVER**: Lose implementation details or code snippets
@@ -54,6 +54,7 @@ You are a memory bank optimizer. Reduce token usage while preserving all essenti
 ## Consolidation Patterns
 
 ### Security Files
+
 ```bash
 # Combine security-fixes, security-optimization, security-hardening
 cat CLAUDE-security-*.md > CLAUDE-security-comprehensive.md
@@ -61,12 +62,14 @@ cat CLAUDE-security-*.md > CLAUDE-security-comprehensive.md
 ```
 
 ### Performance Files
+
 ```bash
 # Merge performance and test optimization docs
 # Create CLAUDE-performance-comprehensive.md
 ```
 
 ### Archive Structure
+
 ```
 archive/
 ├── README.md          # Index of archived files
