@@ -54,18 +54,24 @@ export async function findLocalConfigDir(subDir: string): Promise<string | null>
 }
 
 export async function getTargetDirectory(options: { folder?: string }): Promise<string> {
-  let targetDir = options.folder || path.join(process.env.HOME || process.env.USERPROFILE || '~', '.claude');
-
-  // If no custom folder specified, detect project directory
-  if (!options.folder) {
-    const cwd = process.cwd();
-    const isGitRepo = await fs.pathExists(path.join(cwd, '.git'));
-    const hasClaudeConfig = await fs.pathExists(path.join(cwd, '.claude'));
-
-    if (isGitRepo || hasClaudeConfig) {
-      targetDir = path.join(cwd, '.claude');
-    }
+  // If custom folder specified, use it
+  if (options.folder) {
+    return options.folder;
   }
 
-  return targetDir;
+  // Always try to use local .claude directory first
+  const cwd = process.cwd();
+  const localClaudeDir = path.join(cwd, '.claude');
+
+  // Check if we're in a project directory (git repo or existing .claude config)
+  const isGitRepo = await fs.pathExists(path.join(cwd, '.git'));
+  const hasClaudeConfig = await fs.pathExists(localClaudeDir);
+
+  // If we're in a project or already have .claude config, use local directory
+  if (isGitRepo || hasClaudeConfig) {
+    return localClaudeDir;
+  }
+
+  // Fallback to global directory
+  return path.join(process.env.HOME || process.env.USERPROFILE || '~', '.claude');
 }

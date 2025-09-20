@@ -4,6 +4,7 @@ import path from 'path';
 import chalk from 'chalk';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { getTargetDirectory } from '../utils/claude-config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -52,25 +53,7 @@ export async function addHookCommand(hookType: string, options: AddHookOptions) 
   const s = new SimpleSpinner();
 
   // Determine target directory for Claude configuration
-  const targetDir = options.folder || path.join(process.env.HOME || process.env.USERPROFILE || '~', '.claude');
-
-  // If no custom folder specified, detect project directory
-  if (!options.folder) {
-    const cwd = process.cwd();
-    const isGitRepo = await fs.pathExists(path.join(cwd, '.git'));
-    const hasClaudeConfig = await fs.pathExists(path.join(cwd, '.claude'));
-
-    if (!isGitRepo && !hasClaudeConfig) {
-      console.log(chalk.red('❌ Not in a project directory. Please run this command in a Git repository or a directory with .claude/ configuration.'));
-      process.exit(1);
-    }
-
-    const claudeDir = path.join(cwd, '.claude');
-  } else {
-    // Use custom folder
-    console.log(chalk.gray(`Using custom folder: ${targetDir}`));
-  }
-
+  const targetDir = await getTargetDirectory(options);
   const claudeDir = targetDir;
   const hooksDir = path.join(claudeDir, 'hooks');
   const hookFilePath = path.join(hooksDir, hook.hookFile);
