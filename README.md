@@ -62,7 +62,8 @@ bunx aiblueprint-cli claude-code setup  # Creates .claude/ in project root
 
 | Command | Description | Options |
 |---------|-------------|---------|
-| `bunx aiblueprint-cli claude-code setup` | Interactive setup with feature selection | `-f, --folder <path>` (alias for --claudeCodeFolder), `--claudeCodeFolder <path>`, `--codexFolder <path>`, `-s, --skip` |
+| `bunx aiblueprint-cli claude-code setup` | Interactive setup with feature selection | `-f, --folder <path>` (alias for --claudeCodeFolder), `--claudeCodeFolder <path>`, `--codexFolder <path>`, `--openCodeFolder <path>`, `--factoryAiFolder <path>`, `-s, --skip` |
+| `bunx aiblueprint-cli claude-code symlink` | Create symlinks between CLI tools (Codex, OpenCode, FactoryAI) | `--claudeCodeFolder <path>`, `--codexFolder <path>`, `--openCodeFolder <path>`, `--factoryAiFolder <path>` |
 | `bunx aiblueprint-cli claude-code add hook <type>` | Install specific hook | `-f, --folder <path>` |
 | `bunx aiblueprint-cli claude-code add commands [name]` | List or install commands | `-f, --folder <path>` |
 
@@ -81,6 +82,10 @@ bunx aiblueprint-cli claude-code add hook post-edit-typescript   # TypeScript pr
 bunx aiblueprint-cli claude-code add commands                    # List all available commands
 bunx aiblueprint-cli claude-code add commands commit             # Install commit command
 bunx aiblueprint-cli claude-code add commands deep-code-analysis # Install analysis command
+
+# Create symlinks between CLI tools
+bunx aiblueprint-cli claude-code symlink                         # Interactive symlink manager
+bunx aiblueprint-cli claude-code symlink --factoryAiFolder ~/.factory  # With custom paths
 ```
 
 ### Hook Types Available
@@ -149,6 +154,17 @@ The CLI intelligently determines where to install configurations:
 - **Finish sound** - Audio alert for completed operations (macOS afplay)
 - **Need-human sound** - Audio alert for attention requests
 - **Volume control** - Configurable audio levels
+
+### 🔗 Symlink Management
+- **Multi-tool integration** - Create symlinks between Claude Code, Codex, OpenCode, and FactoryAI
+- **Interactive selection** - Choose source, content type (commands/agents), and destinations
+- **Smart validation** - Prevents overwriting non-symlink directories and validates paths
+- **Bidirectional sync** - Sync commands and agents in any direction
+- **Supported tools:**
+  - **Claude Code** - Commands + Agents (`~/.claude/`)
+  - **Codex** - Commands only (`~/.codex/prompts`)
+  - **OpenCode** - Commands only (`~/.config/opencode/command`)
+  - **FactoryAI** - Commands + Droids/Agents (`~/.factory/`)
 
 ## ⚙️ Configuration System
 
