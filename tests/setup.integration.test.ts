@@ -9,8 +9,9 @@ describe("CLI Integration Tests", () => {
       const { execSync } = await import("child_process");
 
       const codexDir = `${tempDir}-codex`;
+      const openCodeDir = `${tempDir}-opencode`;
       const output = execSync(
-        `bun src/cli.ts claude-code --claudeCodeFolder "${tempDir}" --codexFolder "${codexDir}" --skip setup`,
+        `bun src/cli.ts claude-code --claudeCodeFolder "${tempDir}" --codexFolder "${codexDir}" --openCodeFolder "${openCodeDir}" --skip setup`,
         {
           cwd: process.cwd(),
           timeout: 15000,
@@ -62,11 +63,15 @@ describe("CLI Integration Tests", () => {
       try {
         const realFs = await import("fs-extra");
         const codexDir = `${tempDir}-codex`;
+        const openCodeDir = `${tempDir}-opencode`;
         if (await realFs.pathExists(tempDir)) {
           await realFs.remove(tempDir);
         }
         if (await realFs.pathExists(codexDir)) {
           await realFs.remove(codexDir);
+        }
+        if (await realFs.pathExists(openCodeDir)) {
+          await realFs.remove(openCodeDir);
         }
       } catch (error) {
         console.warn(`Cleanup failed for ${tempDir}:`, error);

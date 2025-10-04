@@ -35,6 +35,10 @@ const claudeCodeCmd = program
     "--codexFolder <path>",
     "Specify custom Codex folder path (default: ~/.codex)",
   )
+  .option(
+    "--openCodeFolder <path>",
+    "Specify custom OpenCode folder path (default: ~/.config/opencode)",
+  )
   .option("-s, --skip", "Skip interactive prompts and install all features");
 
 claudeCodeCmd
@@ -42,13 +46,12 @@ claudeCodeCmd
   .description("Setup Claude Code configuration with AIBlueprint defaults")
   .action((options, command) => {
     const parentOptions = command.parent.opts();
-    const claudeCodeFolder =
-      parentOptions.claudeCodeFolder || parentOptions.folder;
-    setupCommand(
-      claudeCodeFolder,
-      parentOptions.codexFolder,
-      parentOptions.skip,
-    );
+    setupCommand({
+      claudeCodeFolder: parentOptions.claudeCodeFolder || parentOptions.folder,
+      codexFolder: parentOptions.codexFolder,
+      openCodeFolder: parentOptions.openCodeFolder,
+      skipInteractive: parentOptions.skip,
+    });
   });
 
 const addCmd = claudeCodeCmd
