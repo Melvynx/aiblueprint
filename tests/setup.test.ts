@@ -50,7 +50,7 @@ describe("Setup Command with Inquirer.js", () => {
     const tempDir = "/tmp/test-claude";
 
     // Should not throw any errors
-    await expect(setupCommand(tempDir, true)).resolves.not.toThrow();
+    await expect(setupCommand(tempDir, undefined, true)).resolves.not.toThrow();
 
     // Should not call inquirer.prompt when skipping
     expect(inquirer.prompt).not.toHaveBeenCalled();
@@ -79,7 +79,7 @@ describe("Setup Command with Inquirer.js", () => {
     });
 
     // Should not throw any errors
-    await expect(setupCommand(tempDir, false)).resolves.not.toThrow();
+    await expect(setupCommand(tempDir, undefined, false)).resolves.not.toThrow();
 
     // Should call inquirer.prompt for feature selection
     expect(inquirer.prompt).toHaveBeenCalledWith([

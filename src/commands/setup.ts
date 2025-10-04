@@ -94,7 +94,8 @@ async function downloadDirectoryFromGitHub(
 }
 
 export async function setupCommand(
-  customFolder?: string,
+  customClaudeCodeFolder?: string,
+  customCodexFolder?: string,
   skipInteractive?: boolean,
 ) {
   try {
@@ -187,8 +188,8 @@ export async function setupCommand(
 
     const s = new SimpleSpinner();
 
-    const claudeDir = customFolder
-      ? path.resolve(customFolder)
+    const claudeDir = customClaudeCodeFolder
+      ? path.resolve(customClaudeCodeFolder)
       : path.join(os.homedir(), ".claude");
 
     console.log(chalk.gray(`Installing to: ${claudeDir}`));
@@ -297,7 +298,7 @@ export async function setupCommand(
 
     if (options.codexSymlink && options.aiblueprintCommands) {
       s.start("Setting up Codex symlink");
-      await setupCodexSymlink(claudeDir, customFolder);
+      await setupCodexSymlink(claudeDir, customCodexFolder, customClaudeCodeFolder);
       s.stop("Codex symlink configured");
     }
 
@@ -438,11 +439,21 @@ alias ccc="claude --dangerously-skip-permissions -c"
   }
 }
 
-async function setupCodexSymlink(claudeDir: string, customFolder?: string) {
+async function setupCodexSymlink(
+  claudeDir: string,
+  customCodexFolder?: string,
+  customClaudeCodeFolder?: string,
+) {
   try {
-    const codexDir = customFolder
-      ? path.join(path.dirname(claudeDir), "codex")
-      : path.join(os.homedir(), ".codex");
+    let codexDir: string;
+    if (customCodexFolder) {
+      codexDir = path.resolve(customCodexFolder);
+    } else if (customClaudeCodeFolder) {
+      const parentDir = path.dirname(claudeDir);
+      codexDir = path.join(parentDir, "codex");
+    } else {
+      codexDir = path.join(os.homedir(), ".codex");
+    }
     const promptsPath = path.join(codexDir, "prompts");
     const commandsPath = path.join(claudeDir, "commands");
 
