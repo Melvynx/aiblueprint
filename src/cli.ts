@@ -3,6 +3,7 @@ import { Command } from "commander";
 import { setupCommand } from "./commands/setup.js";
 import { addHookCommand } from "./commands/addHook.js";
 import { addCommandCommand } from "./commands/addCommand.js";
+import { symlinkCommand } from "./commands/symlink.js";
 import chalk from "chalk";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
@@ -38,6 +39,10 @@ const claudeCodeCmd = program
   .option(
     "--openCodeFolder <path>",
     "Specify custom OpenCode folder path (default: ~/.config/opencode)",
+  )
+  .option(
+    "--factoryAiFolder <path>",
+    "Specify custom FactoryAI folder path (default: ~/.factory)",
   )
   .option("-s, --skip", "Skip interactive prompts and install all features");
 
@@ -85,6 +90,21 @@ addCmd
     const parentOptions = command.parent.parent.opts();
     const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
     addCommandCommand(commandName, { folder: claudeCodeFolder });
+  });
+
+claudeCodeCmd
+  .command("symlink")
+  .description(
+    "Create symlinks between different CLI tools (Claude Code, Codex, OpenCode, FactoryAI)",
+  )
+  .action((options, command) => {
+    const parentOptions = command.parent.opts();
+    symlinkCommand({
+      claudeCodeFolder: parentOptions.claudeCodeFolder || parentOptions.folder,
+      codexFolder: parentOptions.codexFolder,
+      openCodeFolder: parentOptions.openCodeFolder,
+      factoryAiFolder: parentOptions.factoryAiFolder,
+    });
   });
 
 program.parse(process.argv);
