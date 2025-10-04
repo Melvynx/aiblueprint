@@ -43,17 +43,17 @@ bunx aiblueprint-cli@latest claude-code setup
 
 ```bash
 # Interactive setup with feature selection
-aiblueprint claude-code setup
+bunx aiblueprint-cli claude-code setup
 
 # Non-interactive setup (install all features)
-aiblueprint claude-code setup --skip
+bunx aiblueprint-cli claude-code setup --skip
 
 # Install to custom directory
-aiblueprint claude-code setup --folder ./custom-claude-config
+bunx aiblueprint-cli claude-code setup --folder ./custom-claude-config
 
 # Install to project directory
 cd your-project
-aiblueprint claude-code setup  # Creates .claude/ in project root
+bunx aiblueprint-cli claude-code setup  # Creates .claude/ in project root
 ```
 
 ## 🎯 Command Reference
@@ -62,24 +62,25 @@ aiblueprint claude-code setup  # Creates .claude/ in project root
 
 | Command | Description | Options |
 |---------|-------------|---------|
-| `aiblueprint claude-code setup` | Interactive setup with feature selection | `-f, --folder <path>`, `-s, --skip` |
-| `aiblueprint claude-code add hook <type>` | Install specific hook | `-f, --folder <path>` |
-| `aiblueprint claude-code add commands [name]` | List or install commands | `-f, --folder <path>` |
+| `bunx aiblueprint-cli claude-code setup` | Interactive setup with feature selection | `-f, --folder <path>` (alias for --claudeCodeFolder), `--claudeCodeFolder <path>`, `--codexFolder <path>`, `-s, --skip` |
+| `bunx aiblueprint-cli claude-code add hook <type>` | Install specific hook | `-f, --folder <path>` |
+| `bunx aiblueprint-cli claude-code add commands [name]` | List or install commands | `-f, --folder <path>` |
 
 ### Command Examples
 
 ```bash
 # Setup with options
-aiblueprint claude-code setup --skip                    # Install all features
-aiblueprint claude-code setup --folder ~/.my-claude     # Custom location
+bunx aiblueprint-cli claude-code setup --skip                    # Install all features
+bunx aiblueprint-cli claude-code setup --folder ~/.my-claude     # Custom location
+bunx aiblueprint-cli claude-code setup --claudeCodeFolder ~/.claude --codexFolder ~/.codex  # Separate folders
 
 # Add specific hooks
-aiblueprint claude-code add hook post-edit-typescript   # TypeScript processing hook
+bunx aiblueprint-cli claude-code add hook post-edit-typescript   # TypeScript processing hook
 
 # Manage commands
-aiblueprint claude-code add commands                    # List all available commands
-aiblueprint claude-code add commands commit             # Install commit command
-aiblueprint claude-code add commands deep-code-analysis # Install analysis command
+bunx aiblueprint-cli claude-code add commands                    # List all available commands
+bunx aiblueprint-cli claude-code add commands commit             # Install commit command
+bunx aiblueprint-cli claude-code add commands deep-code-analysis # Install analysis command
 ```
 
 ### Hook Types Available
@@ -255,7 +256,7 @@ When run in a Git repository, creates `.claude/` in your project root:
 
 ```bash
 cd your-project/
-aiblueprint claude-code setup
+bunx aiblueprint-cli claude-code setup
 # Creates: your-project/.claude/
 ```
 
@@ -271,7 +272,7 @@ When not in a Git repository, uses global directory:
 
 ```bash
 cd ~/
-aiblueprint claude-code setup
+bunx aiblueprint-cli claude-code setup
 # Creates: ~/.claude/
 ```
 
@@ -285,8 +286,8 @@ aiblueprint claude-code setup
 Use `--folder` for specific locations:
 
 ```bash
-aiblueprint claude-code setup --folder ./custom-config
-aiblueprint claude-code setup --folder /opt/claude-config
+bunx aiblueprint-cli claude-code setup --folder ./custom-config
+bunx aiblueprint-cli claude-code setup --folder /opt/claude-config
 ```
 
 ## 🔐 Security Features

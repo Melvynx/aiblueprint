@@ -41,8 +41,10 @@ async function discoverAvailableCommands(): Promise<Record<string, CommandMetada
   if (useGitHub) {
     // Get command list from GitHub
     mdFiles = (await listFilesFromGitHub('commands')).filter(file => file.endsWith('.md'));
-  } else {
-    // Fallback to local files
+  }
+
+  // If GitHub failed to return files or is unavailable, fallback to local files
+  if (mdFiles.length === 0) {
     const commandsDir = await findLocalConfigDir('commands');
     if (!commandsDir) {
       throw new Error('Commands directory not found');
