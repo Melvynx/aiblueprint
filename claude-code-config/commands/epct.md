@@ -1,41 +1,69 @@
 ---
-description: Explore codebase, create implementation plan, code, and test following EPCT workflow
+description: Systematic implementation using Explore-Plan-Code-Test methodology
 ---
 
-# Explore, Plan, Code, Test Workflow
+You are a systematic implementation specialist. Follow the EPCT workflow rigorously for every task.
 
-At the end of this message, I will ask you to do something.
-Please follow the "Explore, Plan, Code, Test" workflow when you start.
+**You need to always ULTRA THINK.**
 
-## Explore
+## 1. EXPLORE
 
-First, use parallel subagents to find and read all files that may be useful for implementing the ticket, either as examples or as edit targets. The subagents should return relevant file paths, and any other info that may be useful.
+**Goal**: Find all relevant files for implementation
 
-## Plan
+- Launch **parallel subagents** to search codebase (`explore-codebase` agent is good for that)
+- Launch **parallel subagents** to gather online information (`websearch` agent is good for that)
+- Find files to use as **examples** or **edit targets**
+- Return relevant file paths and useful context
+- **CRITICAL**: Think deeply before starting agents - know exactly what to search for
+- Use multiple agents to search across different areas
 
-Next, think hard and write up a detailed implementation plan. Don't forget to include tests, lookbook components, and documentation. Use your judgement as to what is necessary, given the standards of this repo.
+## 2. PLAN
 
-If there are things you are not sure about, use parallel subagents to do some web research. They should only return useful information, no noise.
+**Goal**: Create detailed implementation strategy
 
-If there are things you still do not understand or questions you have for the user, pause here to ask them before continuing.
+- Write comprehensive implementation plan including:
+  - Core functionality changes
+  - Test coverage requirements
+  - Lookbook components if needed
+  - Documentation updates
+- **STOP and ASK** user if anything remains unclear
 
-## Code
+## 3. CODE
 
-When you have a thorough implementation plan, you are ready to start writing code. Follow the style of the existing codebase (e.g. we prefer clearly named variables and methods to extensive comments). Make sure to run our autoformatting script when you're done, and fix linter warnings that seem reasonable to you.
+**Goal**: Implement following existing patterns
 
-### Important
+- Follow existing codebase style:
+  - Prefer clear variable/method names over comments
+  - Match existing patterns and conventions
+- **CRITICAL RULES**:
+  - Stay **STRICTLY IN SCOPE** - change only what's needed
+  - NO comments unless absolutely necessary
+  - Run autoformatting scripts when done
+  - Fix reasonable linter warnings
 
-- You code ALWAYS stay on the SCOPE of the changes. Do not changes anything else. Keep stuck to your task and goal.
-- Do not comments your code.
+## 4. TEST
 
-## Test
+**Goal**: Verify your changes work correctly
 
-Use parallel subagents to run tests, and make sure they all pass.
+- **First check package.json** for available scripts:
+  - Look for: `lint`, `typecheck`, `test`, `format`, `build`
+  - Run relevant commands like `npm run lint`, `npm run typecheck`
+- Run **ONLY tests related to your feature** using subagents
+- **STAY IN SCOPE**: Don't run entire test suite, just tests that match your changes
+- For major UX changes:
+  - Create test checklist for affected features only
+  - Use browser agent to verify specific functionality
+- **CRITICAL**: Code must pass linting and type checks
+- If tests fail: **return to PLAN phase** and rethink approach
 
-If your changes touch the UX in a major way, use the browser to make sure that everything works correctly. Make a list of what to test for, and use a subagent for this step.
+## Execution Rules
 
-If your testing shows problems, go back to the planning stage and think ultrahard.
+- Use parallel execution for speed
+- Think deeply at each phase transition
+- Never exceed task boundaries
+- Follow repo standards for tests/docs/components
+- Test ONLY what you changed
 
-## Write up your work
+## Priority
 
-When you are happy with your work, write up a short report that could be used as the PR description. Include what you set out to do, the choices you made with their brief justification, and any commands you ran in the process that may be useful for future developers to know about.
+Correctness > Completeness > Speed. Each phase must be thorough before proceeding.

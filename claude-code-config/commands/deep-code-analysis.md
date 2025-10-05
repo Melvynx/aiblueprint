@@ -1,37 +1,87 @@
 ---
-description: Analyze the code to answer a DEEP question.
+description: Analyze code thoroughly to answer complex questions with detailed exploration and research
+allowed-tools: Task, Read, Glob, Grep, WebSearch, mcp__context7__resolve-library-id, mcp__context7__get-library-docs, Write
+argument-hint: <question> <target-area>
 ---
 
-Your job is to perform a DEEP analysis by thinking thoroughly to answer a question, following this workflow:
+You are a senior code analyst. Perform comprehensive analysis by exploring code deeply, researching context, and delivering structured findings.
 
-## Explore
+## Workflow
 
-Explore the code as deeply as possible, searching for everything related to fully understand the structure of the actual implementation and to better judge the result.
+1. **EXPLORE**: Deep codebase investigation
 
-## Search
+   - Use `Task` with explore-codebase agent for parallel search
+   - `Grep` and `Glob` to find all related implementations
+   - `Read` key files to understand architecture patterns
+   - **CRITICAL**: Map entire flow, not just surface-level code
 
-If you are missing information, use Context7 or WebSearch to fetch information about a given subject. Read as many sources as needed to have the right context for the task.
+2. **RESEARCH**: Fill knowledge gaps
 
-## Reply
+   - Use `mcp__context7__resolve-library-id` for framework docs
+   - `mcp__context7__get-library-docs` for specific APIs
+   - `WebSearch` for latest patterns and best practices
+   - **MUST**: Verify assumptions with authoritative sources
 
-Write a deep analysis result in `.claude/analysis` INSIDE the current projects !
+3. **ANALYZE**: Synthesize findings
 
-use the following format :
+   - Cross-reference patterns across codebase
+   - Identify trade-offs and design decisions
+   - Evaluate multiple solution approaches
+   - **STAY FOCUSED**: Answer the specific question asked
 
-<format-of-document>
-Subject: *quick description of the subject and problems*
+4. **DOCUMENT**: Create structured analysis
+   - `Write` report to `.claude/analysis/{topic}-analysis.md`
+   - Include concrete code examples and file references
+   - Present multiple options with trade-offs
+   - **NON-NEGOTIABLE**: Use exact format below INSIDE THE CURRENT FOLDER.
 
-Solution: Final response
+## Analysis Report Format
 
-## Options
+```markdown
+# {Question/Topic} Analysis
 
-### Option 1 title
+**Subject**: One-line problem statement
 
-_Description of the first option_
+**Solution**: Recommended approach with rationale
 
-(etc. for each option)
+## Options Evaluated
 
-## Analysis
+### Option 1: {Approach Name}
 
-_Why did you choose the solution?_
-</format-of-document>
+- **Implementation**: How it works
+- **Pros**: Benefits and advantages
+- **Cons**: Limitations and trade-offs
+- **Code Impact**: Files/areas affected
+
+### Option 2: {Alternative Approach}
+
+[Same structure]
+
+## Technical Analysis
+
+**Current Implementation**: What exists now
+**Dependencies**: Libraries/frameworks involved
+**Performance Impact**: Resource considerations
+**Maintainability**: Long-term implications
+
+## Code References
+
+- `file.ts:123` - Relevant implementation
+- `other.js:456` - Related pattern
+
+## Recommendation Rationale
+
+Why the chosen solution fits best given constraints and requirements.
+```
+
+## Execution Rules
+
+- **DEEP OVER BROAD**: Thoroughly analyze relevant code vs superficial survey
+- **EVIDENCE-BASED**: Every claim backed by code references or docs
+- **MULTI-PERSPECTIVE**: Consider performance, maintainability, and complexity
+- **CONCRETE EXAMPLES**: Include actual code snippets and file paths
+- **NEVER**: Make recommendations without exploring existing patterns
+
+## Priority
+
+Thoroughness > Speed. Deliver comprehensive analysis that guides decision-making.

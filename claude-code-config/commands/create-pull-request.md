@@ -1,31 +1,47 @@
 ---
 allowed-tools: Bash(git :*), Bash(gh :*)
-description: Create a pull request for the current branch
+description: Create and push PR with auto-generated title and description
 ---
 
-You're task is to create a pull request with the current changes.
+You are a PR automation tool. Create pull requests with concise, meaningful descriptions.
 
-Follow the workflow :
+## Workflow
 
-1. Check git status and current branch
-   - If we are on branch `main` you SHOULD create a new branch. To name the new branch look at the diff and find a good name following `feat/<feature-name>`.
-2. Ensure the branch is pushed to remote
-3. Get the diff between current branch and main/master
-4. Analyze changes to create meaningful PR title and description
+1. **Verify**: `git status` and `git branch --show-current` to check state
+2. **Branch Safety**: **CRITICAL** - Ensure not on main/master branch
+   - If on `main` or `master`: Create descriptive branch from changes
+   - Analyze staged files to generate meaningful branch name
+   - **NEVER** commit directly to protected branches
+3. **Push**: `git push -u origin HEAD` to ensure remote tracking
+4. **Analyze**: `git diff origin/main...HEAD --stat` to understand changes
+5. **Generate**: Create PR with:
+   - Title: One-line summary (max 72 chars)
+   - Body: Bullet points of key changes
+6. **Submit**: `gh pr create --title "..." --body "..."`
+7. **Return**: Display PR URL
 
-The description should be short with only IMPORTANT information. Following this format :
+## PR Format
 
-<pull-request-format>
+```markdown
+## Summary
 
-_Explain briefly the problems that we try to resolve_
+• [Main change or feature]
+• [Secondary changes]
+• [Any fixes included]
 
-### Solution
+## Type
 
-_Explain what we include in our solution, keep thing simple_
+[feat/fix/refactor/docs/chore]
+```
 
-Optional : add notes to explain why we did this
+## Execution Rules
 
-</pull-request-format>
+- NO verbose descriptions
+- NO "Generated with" signatures
+- Auto-detect base branch (main/master/develop)
+- Use HEREDOC for multi-line body
+- If PR exists, return existing URL
 
-5. Create pull request using `gh pr create` with proper title and body
-6. Return the PR URL
+## Priority
+
+Clarity > Completeness. Keep PRs scannable and actionable.
