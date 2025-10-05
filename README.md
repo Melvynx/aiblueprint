@@ -5,7 +5,6 @@ A comprehensive CLI tool for supercharging Claude Code with security, productivi
 > [!NOTE]
 > If you encounter permission errors when running the commands below, add `sudo` before the command.
 
-## Quick Start
 ## 🚀 Quick Start
 
 ```bash
@@ -32,7 +31,6 @@ aiblueprint claude-code setup
 
 ### Installation Methods
 
-### Option 1: Install globally via npm
 ```bash
 # Global installation
 npm install -g aiblueprint-cli
