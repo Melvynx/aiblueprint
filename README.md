@@ -2,6 +2,10 @@
 
 A comprehensive CLI tool for supercharging Claude Code with security, productivity, and workflow automation features. Transform your Claude Code experience with pre-configured commands, security hooks, intelligent status displays, and specialized AI agents.
 
+> [!NOTE]
+> If you encounter permission errors when running the commands below, add `sudo` before the command.
+
+## Quick Start
 ## 🚀 Quick Start
 
 ```bash
@@ -28,6 +32,7 @@ aiblueprint claude-code setup
 
 ### Installation Methods
 
+### Option 1: Install globally via npm
 ```bash
 # Global installation
 npm install -g aiblueprint-cli
