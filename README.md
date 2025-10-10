@@ -11,13 +11,13 @@ A comprehensive CLI tool for supercharging Claude Code with security, productivi
 
 ```bash
 # Add the AIBlueprint marketplace
-/plugin marketplace add melvynx/aiblueprint-cli
+/plugin marketplace add melvynx/aiblueprint
 
 # Install the base plugin
 /plugin install aibp-base@AIBlueprint
 
 # Or install directly from GitHub
-/plugin install github:melvynx/aiblueprint-cli
+/plugin install github:melvynx/aiblueprint
 ```
 
 ### Option 2: Use the CLI Tool
@@ -51,13 +51,13 @@ The easiest way to get started is by installing AIBlueprint as a Claude Code plu
 
 ```bash
 # Step 1: Add the AIBlueprint marketplace
-/plugin marketplace add melvynx/aiblueprint-cli
+/plugin marketplace add melvynx/aiblueprint
 
 # Step 2: Install the aibp-base plugin
 /plugin install aibp-base@AIBlueprint
 
 # Alternative: Install directly from GitHub
-/plugin install github:melvynx/aiblueprint-cli
+/plugin install github:melvynx/aiblueprint
 ```
 
 ### What Gets Installed
@@ -527,4 +527,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 **Created by AIBlueprint** - Enhancing Claude Code for modern development workflows.
 
-Need help? [Open an issue](https://github.com/aiblueprint/aiblueprint-cli/issues) or check our [documentation](https://docs.aiblueprint.dev).
+Need help? [Open an issue](https://github.com/melvynx/aiblueprint/issues) or check our [documentation](https://docs.aiblueprint.dev).
