@@ -7,6 +7,21 @@ A comprehensive CLI tool for supercharging Claude Code with security, productivi
 
 ## 🚀 Quick Start
 
+### Option 1: Install as Claude Code Plugin (Recommended)
+
+```bash
+# Add the AIBlueprint marketplace
+/plugin marketplace add melvynx/aiblueprint-cli
+
+# Install the base plugin
+/plugin install aibp-base@AIBlueprint
+
+# Or install directly from GitHub
+/plugin install github:melvynx/aiblueprint-cli
+```
+
+### Option 2: Use the CLI Tool
+
 ```bash
 # Run immediately without installation
 bunx aiblueprint-cli@latest claude-code setup
@@ -18,7 +33,8 @@ aiblueprint claude-code setup
 
 ## 📋 Table of Contents
 
-- [Installation & Usage](#installation--usage)
+- [Plugin Installation](#-plugin-installation)
+- [CLI Installation & Usage](#-cli-installation--usage)
 - [Command Reference](#command-reference)
 - [Available Features](#available-features)
 - [Configuration System](#configuration-system)
@@ -27,7 +43,64 @@ aiblueprint claude-code setup
 - [Security Features](#security-features)
 - [Development](#development)
 
-## 💾 Installation & Usage
+## 🔌 Plugin Installation
+
+### Install from Claude Code Plugin Marketplace
+
+The easiest way to get started is by installing AIBlueprint as a Claude Code plugin:
+
+```bash
+# Step 1: Add the AIBlueprint marketplace
+/plugin marketplace add melvynx/aiblueprint-cli
+
+# Step 2: Install the aibp-base plugin
+/plugin install aibp-base@AIBlueprint
+
+# Alternative: Install directly from GitHub
+/plugin install github:melvynx/aiblueprint-cli
+```
+
+### What Gets Installed
+
+The `aibp-base` plugin includes:
+- ✅ **16 Custom Commands** - `/commit`, `/create-pull-request`, `/deep-code-analysis`, etc.
+- ✅ **3 Specialized Agents** - explore-codebase, Snipper, websearch
+- ✅ **Security Hooks** - Command validation and TypeScript processing
+- ✅ **Custom Statusline** - Git status, cost tracking, and token usage
+- ✅ **Output Styles** - Professional, senior-dev, and honest-friend personas
+- ✅ **Notification Sounds** - Audio alerts for task completion
+
+### Plugin Management
+
+```bash
+# List installed plugins
+/plugin list
+
+# Update plugin to latest version
+/plugin update aibp-base
+
+# Remove plugin
+/plugin uninstall aibp-base
+
+# View marketplace plugins
+/plugin marketplace list
+```
+
+### Plugin vs CLI Tool
+
+**Plugin Installation (Recommended)**:
+- ✅ Automatic updates via marketplace
+- ✅ No CLI tool installation needed
+- ✅ Direct integration with Claude Code
+- ✅ Easy to manage and update
+
+**CLI Tool Installation**:
+- ✅ More control over installation
+- ✅ Custom folder locations
+- ✅ Interactive feature selection
+- ✅ Symlink management for other tools
+
+## 💾 CLI Installation & Usage
 
 ### Installation Methods
 

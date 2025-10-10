@@ -97,6 +97,11 @@ export async function setupCommand(params: SetupCommandParams = {}) {
               checked: true,
             },
             {
+              value: "postEditTypeScript",
+              name: "Post-edit TypeScript hook - Auto-format and lint TypeScript files",
+              checked: false,
+            },
+            {
               value: "codexSymlink",
               name: "Codex symlink - Link commands to ~/.codex/prompts",
               checked: false,
@@ -126,6 +131,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       aiblueprintAgents: features.includes("aiblueprintAgents"),
       outputStyles: features.includes("outputStyles"),
       notificationSounds: features.includes("notificationSounds"),
+      postEditTypeScript: features.includes("postEditTypeScript"),
       codexSymlink: features.includes("codexSymlink"),
       openCodeSymlink: features.includes("openCodeSymlink"),
     };
@@ -195,7 +201,8 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     if (
       options.commandValidation ||
       options.customStatusline ||
-      options.notificationSounds
+      options.notificationSounds ||
+      options.postEditTypeScript
     ) {
       s.start("Setting up scripts");
       if (useGitHub) {
@@ -207,6 +214,9 @@ export async function setupCommand(params: SetupCommandParams = {}) {
           "validate-command.readme.md",
           "statusline.readme.md",
         ];
+        if (options.postEditTypeScript) {
+          scriptFiles.push("hook-post-file.ts");
+        }
         for (const file of scriptFiles) {
           await downloadFromGitHub(
             `scripts/${file}`,

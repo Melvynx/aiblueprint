@@ -54,8 +54,8 @@ describe("CLI Integration Tests - Add Hook Command", () => {
       const realFs = await import("fs-extra");
 
 
-      // Check if hook file was copied
-      const hookFileExists = await realFs.pathExists(`${tempDir}/hooks/hook-post-file.ts`);
+      // Check if hook file was copied to scripts directory
+      const hookFileExists = await realFs.pathExists(`${tempDir}/scripts/hook-post-file.ts`);
       expect(hookFileExists).toBe(true);
 
       // Check if settings.json was updated with the hook

@@ -33,6 +33,8 @@ const supportedHooks = {
     name: 'Post Edit TypeScript Hook',
     description: 'Runs Prettier, ESLint, and TypeScript checks after editing TypeScript files',
     hookFile: 'hook-post-file.ts',
+    sourceDir: 'scripts',
+    targetDir: 'scripts',
     event: 'PostToolUse',
     matcher: 'Edit|Write|MultiEdit'
   }
@@ -56,8 +58,8 @@ export async function addHookCommand(hookType: string, options: AddHookOptions) 
   // Determine target directory for Claude configuration
   const targetDir = await getTargetDirectory(options);
   const claudeDir = targetDir;
-  const hooksDir = path.join(claudeDir, 'hooks');
-  const hookFilePath = path.join(hooksDir, hook.hookFile);
+  const targetHookDir = path.join(claudeDir, hook.targetDir || 'hooks');
+  const hookFilePath = path.join(targetHookDir, hook.hookFile);
   const settingsPath = path.join(claudeDir, 'settings.json');
 
   // Check if hook already exists
@@ -78,11 +80,11 @@ export async function addHookCommand(hookType: string, options: AddHookOptions) 
     s.start('Installing hook...');
 
     // Ensure directories exist
-    await fs.ensureDir(hooksDir);
+    await fs.ensureDir(targetHookDir);
 
     // Install hook file using GitHub fallback
     await installFileWithGitHubFallback({
-      sourceDir: 'hooks',
+      sourceDir: hook.sourceDir || 'hooks',
       targetPath: hookFilePath,
       fileName: hook.hookFile
     });
@@ -117,7 +119,7 @@ export async function addHookCommand(hookType: string, options: AddHookOptions) 
       hooks: [
         {
           type: 'command',
-          command: `bun $CLAUDE_PROJECT_DIR/.claude/hooks/${hook.hookFile}`
+          command: `bun $CLAUDE_PROJECT_DIR/.claude/${hook.targetDir || 'hooks'}/${hook.hookFile}`
         }
       ]
     };
