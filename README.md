@@ -139,6 +139,7 @@ bunx aiblueprint-cli@latest claude-code setup  # Creates .claude/ in project roo
 |---------|-------------|---------|
 | `bunx aiblueprint-cli@latest claude-code setup` | Interactive setup with feature selection | `-f, --folder <path>` (alias for --claudeCodeFolder), `--claudeCodeFolder <path>`, `--codexFolder <path>`, `--openCodeFolder <path>`, `--factoryAiFolder <path>`, `-s, --skip` |
 | `bunx aiblueprint-cli@latest claude-code symlink` | Create symlinks between CLI tools (Codex, OpenCode, FactoryAI) | `--claudeCodeFolder <path>`, `--codexFolder <path>`, `--openCodeFolder <path>`, `--factoryAiFolder <path>` |
+| `bunx aiblueprint-cli@latest claude-code statusline` | Setup custom statusline with git status, costs, and token usage | `-f, --folder <path>` |
 | `bunx aiblueprint-cli@latest claude-code add hook <type>` | Install specific hook | `-f, --folder <path>` |
 | `bunx aiblueprint-cli@latest claude-code add commands [name]` | List or install commands | `-f, --folder <path>` |
 
@@ -161,6 +162,10 @@ bunx aiblueprint-cli@latest claude-code add commands deep-code-analysis # Instal
 # Create symlinks between CLI tools
 bunx aiblueprint-cli@latest claude-code symlink                         # Interactive symlink manager
 bunx aiblueprint-cli@latest claude-code symlink --factoryAiFolder ~/.factory  # With custom paths
+
+# Setup statusline
+bunx aiblueprint-cli@latest claude-code statusline                      # Quick statusline setup
+bunx aiblueprint-cli@latest claude-code statusline --folder ~/.my-claude # Custom location
 ```
 
 ### Hook Types Available
@@ -193,6 +198,7 @@ The CLI intelligently determines where to install configurations:
 - **Cost tracking** - Session costs, daily limits, and token usage via ccusage
 - **Real-time updates** - Command-triggered statusline refresh
 - **Colored output** - Visual indicators for different status types
+- **Quick setup** - Install with one command: `pnpm dlx aiblueprint-cli claude-code statusline`
 
 ### 🤖 AIBlueprint Commands (16 Available)
 

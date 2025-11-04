@@ -4,6 +4,7 @@ import { setupCommand } from "./commands/setup.js";
 import { addHookCommand } from "./commands/addHook.js";
 import { addCommandCommand } from "./commands/addCommand.js";
 import { symlinkCommand } from "./commands/symlink.js";
+import { statuslineCommand } from "./commands/statusline.js";
 import chalk from "chalk";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
@@ -105,6 +106,15 @@ claudeCodeCmd
       openCodeFolder: parentOptions.openCodeFolder,
       factoryAiFolder: parentOptions.factoryAiFolder,
     });
+  });
+
+claudeCodeCmd
+  .command("statusline")
+  .description("Setup custom statusline with git status, costs, and token usage")
+  .action((options, command) => {
+    const parentOptions = command.parent.opts();
+    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
+    statuslineCommand({ folder: claudeCodeFolder });
   });
 
 program.parse(process.argv);
