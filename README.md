@@ -67,7 +67,6 @@ The `aibp-base` plugin includes:
 - ✅ **3 Specialized Agents** - explore-codebase, Snipper, websearch
 - ✅ **Security Hooks** - Command validation and TypeScript processing
 - ✅ **Custom Statusline** - Git status, cost tracking, and token usage
-- ✅ **Output Styles** - Professional, senior-dev, and honest-friend personas
 - ✅ **Notification Sounds** - Audio alerts for task completion
 
 ### Plugin Management
@@ -220,12 +219,6 @@ The CLI intelligently determines where to install configurations:
 - **Snipper** (blue) - Rapid code modification specialist with minimal output
 - **websearch** (yellow) - Quick web research with authoritative sources
 
-### 🎨 Output Styles (3 Personalities)
-
-- **Assistant** - Professional "Bob" persona with honest, task-focused communication
-- **senior-dev** - Casual engineering teammate style, direct and conversational
-- **Honest Friend** - WhatsApp-style brutally honest feedback from a successful friend
-
 ### 🔊 Notification Sounds
 - **Finish sound** - Audio alert for completed operations (macOS afplay)
 - **Need-human sound** - Audio alert for attention requests
@@ -252,7 +245,7 @@ The CLI automatically manages your `~/.claude/settings.json` with:
 {
   "statusLine": {
     "type": "command",
-    "command": "bash ~/.claude/scripts/statusline-ccusage.sh",
+    "command": "bun ~/.claude/scripts/statusline/src/index.ts",
     "padding": 0
   },
   "hooks": {
@@ -470,7 +463,6 @@ claude-code-config/                 # Template repository
 ├── hooks/                          # Hook scripts
 ├── agents/                         # Agent configurations
 ├── scripts/                        # Utility scripts
-├── output-styles/                  # Style templates
 └── song/                           # Notification sounds
 ```
 

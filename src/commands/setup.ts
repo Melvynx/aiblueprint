@@ -7,7 +7,7 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { setupShellShortcuts } from "./setup/shell-shortcuts.js";
 import { setupCodexSymlink, setupOpenCodeSymlink } from "./setup/symlinks.js";
-import { checkAndInstallDependencies } from "./setup/dependencies.js";
+import { checkAndInstallDependencies, installStatuslineDependencies } from "./setup/dependencies.js";
 import { updateSettings, type SetupOptions } from "./setup/settings.js";
 import {
   SimpleSpinner,
@@ -48,7 +48,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
         "customStatusline",
         "aiblueprintCommands",
         "aiblueprintAgents",
-        "outputStyles",
         "notificationSounds",
         "codexSymlink",
         "openCodeSymlink",
@@ -84,11 +83,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
             {
               value: "aiblueprintAgents",
               name: "AIBlueprint agents - Specialized AI agents",
-              checked: true,
-            },
-            {
-              value: "outputStyles",
-              name: "Output styles - Custom output formatting",
               checked: true,
             },
             {
@@ -129,7 +123,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       customStatusline: features.includes("customStatusline"),
       aiblueprintCommands: features.includes("aiblueprintCommands"),
       aiblueprintAgents: features.includes("aiblueprintAgents"),
-      outputStyles: features.includes("outputStyles"),
       notificationSounds: features.includes("notificationSounds"),
       postEditTypeScript: features.includes("postEditTypeScript"),
       codexSymlink: features.includes("codexSymlink"),
@@ -210,9 +203,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
         await fs.ensureDir(scriptsDir);
         const scriptFiles = [
           "validate-command.js",
-          "statusline-ccusage.sh",
           "validate-command.readme.md",
-          "statusline.readme.md",
         ];
         if (options.postEditTypeScript) {
           scriptFiles.push("hook-post-file.ts");
@@ -221,6 +212,13 @@ export async function setupCommand(params: SetupCommandParams = {}) {
           await downloadFromGitHub(
             `scripts/${file}`,
             path.join(scriptsDir, file),
+          );
+        }
+
+        if (options.customStatusline) {
+          await downloadDirectoryFromGitHub(
+            "scripts/statusline",
+            path.join(scriptsDir, "statusline"),
           );
         }
       } else {
@@ -287,23 +285,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       s.stop("Agents installed");
     }
 
-    if (options.outputStyles) {
-      s.start("Setting up output styles");
-      if (useGitHub) {
-        await downloadDirectoryFromGitHub(
-          "output-styles",
-          path.join(claudeDir, "output-styles"),
-        );
-      } else {
-        await fs.copy(
-          path.join(sourceDir!, "output-styles"),
-          path.join(claudeDir, "output-styles"),
-          { overwrite: true },
-        );
-      }
-      s.stop("Output styles installed");
-    }
-
     if (options.notificationSounds) {
       s.start("Setting up notification sounds");
       if (useGitHub) {
@@ -331,6 +312,10 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       s.start("Checking dependencies");
       await checkAndInstallDependencies();
       s.stop("Dependencies checked");
+
+      s.start("Installing statusline dependencies");
+      await installStatuslineDependencies(claudeDir);
+      s.stop("Statusline dependencies installed");
     }
 
     s.start("Updating settings.json");

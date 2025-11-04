@@ -1,0 +1,21 @@
+{
+	"name": "statusline",
+	"version": "1.0.0",
+	"module": "src/index.ts",
+	"type": "module",
+	"scripts": {
+		"start": "bun run src/index.ts",
+		"test": "bun run test.ts",
+		"spend:today": "bun run src/commands/spend-today.ts",
+		"spend:month": "bun run src/commands/spend-month.ts",
+		"lint": "biome check --write .",
+		"format": "biome format --write ."
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.2",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	}
+}

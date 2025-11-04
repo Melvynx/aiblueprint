@@ -9,7 +9,6 @@ export interface SetupOptions {
   customStatusline: boolean;
   aiblueprintCommands: boolean;
   aiblueprintAgents: boolean;
-  outputStyles: boolean;
   notificationSounds: boolean;
   postEditTypeScript: boolean;
   codexSymlink: boolean;
@@ -44,14 +43,14 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
       } else {
         settings.statusLine = {
           type: "command",
-          command: `bash ${path.join(claudeDir, "scripts/statusline-ccusage.sh")}`,
+          command: `bun ${path.join(claudeDir, "scripts/statusline/src/index.ts")}`,
           padding: 0,
         };
       }
     } else {
       settings.statusLine = {
         type: "command",
-        command: `bash ${path.join(claudeDir, "scripts/statusline-ccusage.sh")}`,
+        command: `bun ${path.join(claudeDir, "scripts/statusline/src/index.ts")}`,
         padding: 0,
       };
     }

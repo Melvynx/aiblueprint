@@ -1,5 +1,6 @@
 import { execSync } from "child_process";
 import chalk from "chalk";
+import path from "path";
 
 export async function checkAndInstallDependencies() {
   const checkCommand = (cmd: string): boolean => {
@@ -35,5 +36,24 @@ export async function checkAndInstallDependencies() {
         ),
       );
     }
+  }
+}
+
+export async function installStatuslineDependencies(claudeDir: string) {
+  const statuslineDir = path.join(claudeDir, "scripts/statusline");
+
+  console.log(chalk.yellow("\n  Installing statusline dependencies..."));
+  try {
+    execSync("bun install", {
+      cwd: statuslineDir,
+      stdio: "inherit"
+    });
+    console.log(chalk.green("  ✓ Statusline dependencies installed"));
+  } catch (error) {
+    console.log(
+      chalk.red(
+        "  Failed to install statusline dependencies. Please run 'bun install' manually in ~/.claude/scripts/statusline",
+      ),
+    );
   }
 }
