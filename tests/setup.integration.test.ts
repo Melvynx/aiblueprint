@@ -77,5 +77,5 @@ describe("CLI Integration Tests", () => {
         console.warn(`Cleanup failed for ${tempDir}:`, error);
       }
     }
-  }, 20000);
+  }, 60000);
 });

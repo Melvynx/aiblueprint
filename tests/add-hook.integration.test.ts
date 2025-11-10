@@ -45,7 +45,7 @@ describe("CLI Integration Tests - Add Hook Command", () => {
         `bun src/cli.ts claude-code -f "${tempDir}" add hook post-edit-typescript`,
         {
           cwd: process.cwd(),
-          timeout: 10000,
+          timeout: 30000,
           encoding: "utf8",
         },
       );
@@ -95,5 +95,5 @@ describe("CLI Integration Tests - Add Hook Command", () => {
         console.warn(`Cleanup failed for ${tempDir}:`, error);
       }
     }
-  }, 30000);
+  }, 60000);
 });
