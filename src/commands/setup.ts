@@ -346,6 +346,12 @@ export async function setupCommand(params: SetupCommandParams = {}) {
         '  • Run "claude" to start using Claude Code with your new configuration',
       ),
     );
+
+    console.log(
+      chalk.blue(
+        "\n💎 Want premium features? Get AIBlueprint CLI Pro at https://mlv.sh/claude-cli",
+      ),
+    );
   } catch (error) {
     console.error(chalk.red("\n❌ Setup failed:"), error);
     console.log(chalk.red("Setup failed!"));

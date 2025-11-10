@@ -8,6 +8,7 @@ import { statuslineCommand } from "./commands/statusline.js";
 import {
   proActivateCommand,
   proStatusCommand,
+  proSetupCommand,
   proUpdateCommand,
 } from "./commands/pro.js";
 import chalk from "chalk";
@@ -124,22 +125,29 @@ claudeCodeCmd
 
 const proCmd = claudeCodeCmd
   .command("pro")
-  .description("Manage AIBlueprint Pro features");
+  .description("Manage AIBlueprint CLI Premium features");
 
 proCmd
   .command("activate [token]")
-  .description("Activate AIBlueprint Pro with your access token")
-  .action((token, options, command) => {
-    const parentOptions = command.parent.parent.opts();
-    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-    proActivateCommand(token, { folder: claudeCodeFolder });
+  .description("Activate AIBlueprint CLI Premium with your access token")
+  .action((token) => {
+    proActivateCommand(token);
   });
 
 proCmd
   .command("status")
-  .description("Check your Pro license status")
+  .description("Check your Premium token status")
   .action(() => {
     proStatusCommand();
+  });
+
+proCmd
+  .command("setup")
+  .description("Install premium configurations (requires activation)")
+  .action((options, command) => {
+    const parentOptions = command.parent.parent.opts();
+    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
+    proSetupCommand({ folder: claudeCodeFolder });
   });
 
 proCmd

@@ -1,42 +1,25 @@
 import * as p from "@clack/prompts";
 import chalk from "chalk";
-import fs from "fs-extra";
-import os from "os";
-import path from "path";
 import { installProConfigs } from "../lib/pro-installer.js";
+import { installBasicConfigs } from "../lib/setup-helper.js";
+import {
+  saveToken,
+  getToken,
+  hasToken,
+  getTokenInfo,
+} from "../lib/token-storage.js";
 
-const LICENSE_FILE = path.join(os.homedir(), ".aiblueprint", "license.json");
 const API_URL = "https://codeline.app/api/products";
-const PRODUCT_ID = "cli-pro"; // You can make this configurable
+const PRODUCT_ID = "prd_XJVgxVPbGG";
 
-interface LicenseData {
-  token: string;
-  productId: string;
-  user: {
-    name: string;
-    email: string;
-  };
-  product: {
-    id: string;
-    title: string;
-    metadata: {
-      "cli-github-token"?: string;
-    };
-  };
-  activatedAt: string;
-}
-
-export async function proActivateCommand(
-  token?: string,
-  options: { folder?: string } = {},
-) {
-  p.intro(chalk.blue("🔑 Activate AIBlueprint Pro"));
+export async function proActivateCommand(userToken?: string) {
+  p.intro(chalk.blue("🔑 Activate AIBlueprint CLI Premium"));
 
   try {
     // If token not provided as argument, ask for it
-    if (!token) {
+    if (!userToken) {
       const result = await p.text({
-        message: "Enter your Pro access token:",
+        message: "Enter your Premium access token:",
         placeholder: "Your ProductsOnUsers ID from codeline.app",
         validate: (value) => {
           if (!value) return "Token is required";
@@ -50,7 +33,7 @@ export async function proActivateCommand(
         process.exit(0);
       }
 
-      token = result as string;
+      userToken = result as string;
     }
 
     const spinner = p.spinner();
@@ -58,14 +41,12 @@ export async function proActivateCommand(
 
     // Call API to validate token
     const response = await fetch(
-      `${API_URL}/${PRODUCT_ID}/have-access?token=${token}`,
+      `${API_URL}/${PRODUCT_ID}/have-access?token=${userToken}`,
     );
 
     if (!response.ok) {
       spinner.stop("Failed to validate token");
-      p.log.error(
-        `API error: ${response.status} ${response.statusText}`,
-      );
+      p.log.error(`API error: ${response.status} ${response.statusText}`);
       p.outro(
         chalk.red("❌ Failed to activate. Please check your token and try again."),
       );
@@ -77,7 +58,7 @@ export async function proActivateCommand(
     if (!data.hasAccess) {
       spinner.stop("Token validation failed");
       p.log.error(data.error || "Invalid token");
-      p.log.info("💎 Get AIBlueprint Pro at: https://codeline.app/pro");
+      p.log.info("💎 Get AIBlueprint CLI Premium at: https://mlv.sh/claude-cli");
       p.outro(chalk.red("❌ Activation failed"));
       process.exit(1);
     }
@@ -94,44 +75,24 @@ export async function proActivateCommand(
       process.exit(1);
     }
 
-    // Save license locally
-    await fs.ensureDir(path.dirname(LICENSE_FILE));
-    const licenseData: LicenseData = {
-      token,
-      productId: data.product.id,
-      user: data.user,
-      product: data.product,
-      activatedAt: new Date().toISOString(),
-    };
-    await fs.writeJSON(LICENSE_FILE, licenseData, { spaces: 2 });
+    // Save GitHub token to config file
+    spinner.start("Saving token...");
+    await saveToken(githubToken);
+    spinner.stop("Token saved");
 
-    p.log.success("License activated!");
+    const tokenInfo = getTokenInfo();
+    p.log.success("✅ Token activated!");
     p.log.info(`User: ${data.user.name} (${data.user.email})`);
     p.log.info(`Product: ${data.product.title}`);
+    p.log.info(`Token saved to: ${tokenInfo.path}`);
 
-    // Install premium configs
-    spinner.start("Installing premium configurations...");
+    p.log.info(
+      chalk.cyan(
+        "\n💡 Next step: Run 'aiblueprint claude-code pro setup' to install premium configs",
+      ),
+    );
 
-    try {
-      await installProConfigs({
-        githubToken,
-        claudeCodeFolder: options.folder,
-      });
-      spinner.stop("Premium configurations installed");
-    } catch (error) {
-      spinner.stop("Failed to install premium configs");
-      if (error instanceof Error) {
-        p.log.error(error.message);
-      }
-      p.outro(
-        chalk.yellow(
-          "⚠️  License activated but premium installation failed. Try running: aiblueprint claude-code pro update",
-        ),
-      );
-      process.exit(1);
-    }
-
-    p.outro(chalk.green("✅ AIBlueprint Pro activated successfully!"));
+    p.outro(chalk.green("✅ Activation complete!"));
   } catch (error) {
     if (error instanceof Error) {
       p.log.error(error.message);
@@ -142,45 +103,25 @@ export async function proActivateCommand(
 }
 
 export async function proStatusCommand() {
-  p.intro(chalk.blue("📊 Pro License Status"));
+  p.intro(chalk.blue("📊 Premium Token Status"));
 
   try {
-    if (!(await fs.pathExists(LICENSE_FILE))) {
-      p.log.warn("No active license found");
+    const token = await getToken();
+
+    if (!token) {
+      p.log.warn("No token found");
       p.log.info("Run: aiblueprint claude-code pro activate <token>");
-      p.log.info("Get your token at: https://codeline.app/pro");
-      p.outro(chalk.yellow("⚠️  No license"));
+      p.log.info("Get your token at: https://mlv.sh/claude-cli");
+      p.outro(chalk.yellow("⚠️  Not activated"));
       process.exit(0);
     }
 
-    const license: LicenseData = await fs.readJSON(LICENSE_FILE);
+    const tokenInfo = getTokenInfo();
+    p.log.success("✅ Token active");
+    p.log.info(`Token file: ${tokenInfo.path}`);
+    p.log.info(`Platform: ${tokenInfo.platform}`);
 
-    // Validate license online
-    const spinner = p.spinner();
-    spinner.start("Validating license...");
-
-    const response = await fetch(
-      `${API_URL}/${license.productId}/have-access?token=${license.token}`,
-    );
-
-    if (!response.ok || !(await response.json()).hasAccess) {
-      spinner.stop("License validation failed");
-      p.log.error("Your license is no longer valid");
-      p.log.info("Please reactivate: aiblueprint claude-code pro activate");
-      p.outro(chalk.red("❌ Invalid license"));
-      process.exit(1);
-    }
-
-    spinner.stop("License validated");
-
-    p.log.success("✅ Pro license active");
-    p.log.info(`User: ${license.user.name} (${license.user.email})`);
-    p.log.info(`Product: ${license.product.title}`);
-    p.log.info(
-      `Activated: ${new Date(license.activatedAt).toLocaleDateString()}`,
-    );
-
-    p.outro(chalk.green("License is valid"));
+    p.outro(chalk.green("Token is saved"));
   } catch (error) {
     if (error instanceof Error) {
       p.log.error(error.message);
@@ -190,23 +131,63 @@ export async function proStatusCommand() {
   }
 }
 
+export async function proSetupCommand(options: { folder?: string } = {}) {
+  p.intro(chalk.blue("⚙️  Setup AIBlueprint CLI Premium"));
+
+  try {
+    const githubToken = await getToken();
+
+    if (!githubToken) {
+      p.log.error("No token found");
+      p.log.info("Run: aiblueprint claude-code pro activate <token>");
+      p.outro(chalk.red("❌ Not activated"));
+      process.exit(1);
+    }
+
+    const spinner = p.spinner();
+
+    // Step 1: Install free configs (commands, agents ONLY - skip free statusline)
+    spinner.start("Installing free configurations...");
+    const claudeDir = await installBasicConfigs(
+      { claudeCodeFolder: options.folder },
+      true, // Skip free statusline
+    );
+    spinner.stop("Free configurations installed");
+
+    // Step 2: Install premium configs (commands, agents, statusline PREMIUM)
+    spinner.start("Installing premium configurations...");
+    await installProConfigs({
+      githubToken,
+      claudeCodeFolder: claudeDir,
+    });
+    spinner.stop("Premium configurations installed");
+
+    p.log.success("✅ Setup complete!");
+    p.log.info("Installed:");
+    p.log.info("  • Free commands + Premium commands");
+    p.log.info("  • Free agents + Premium agents");
+    p.log.info("  • Premium statusline ONLY (advanced)");
+
+    p.outro(chalk.green("🚀 Ready to use!"));
+  } catch (error) {
+    if (error instanceof Error) {
+      p.log.error(error.message);
+    }
+    p.outro(chalk.red("❌ Setup failed"));
+    process.exit(1);
+  }
+}
+
 export async function proUpdateCommand(options: { folder?: string } = {}) {
   p.intro(chalk.blue("🔄 Update Premium Configs"));
 
   try {
-    if (!(await fs.pathExists(LICENSE_FILE))) {
-      p.log.error("No active license found");
-      p.log.info("Run: aiblueprint claude-code pro activate <token>");
-      p.outro(chalk.red("❌ No license"));
-      process.exit(1);
-    }
+    const githubToken = await getToken();
 
-    const license: LicenseData = await fs.readJSON(LICENSE_FILE);
-
-    const githubToken = license.product.metadata?.["cli-github-token"];
     if (!githubToken) {
-      p.log.error("No GitHub token found in license");
-      p.outro(chalk.red("❌ Invalid license data"));
+      p.log.error("No token found");
+      p.log.info("Run: aiblueprint claude-code pro activate <token>");
+      p.outro(chalk.red("❌ Not activated"));
       process.exit(1);
     }
 
