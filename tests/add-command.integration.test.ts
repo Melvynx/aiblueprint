@@ -186,7 +186,7 @@ describe("CLI Integration Tests - Add Command", () => {
             timeout: 10000,
             encoding: "utf8",
             shell: true,
-          }
+          } as any
         );
         // If it succeeds without error, it should at least show the overwrite prompt
         expect(conflictOutput).toContain("Command file already exists");

@@ -5,6 +5,11 @@ import { addHookCommand } from "./commands/addHook.js";
 import { addCommandCommand } from "./commands/addCommand.js";
 import { symlinkCommand } from "./commands/symlink.js";
 import { statuslineCommand } from "./commands/statusline.js";
+import {
+  proActivateCommand,
+  proStatusCommand,
+  proUpdateCommand,
+} from "./commands/pro.js";
 import chalk from "chalk";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
@@ -115,6 +120,35 @@ claudeCodeCmd
     const parentOptions = command.parent.opts();
     const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
     statuslineCommand({ folder: claudeCodeFolder });
+  });
+
+const proCmd = claudeCodeCmd
+  .command("pro")
+  .description("Manage AIBlueprint Pro features");
+
+proCmd
+  .command("activate [token]")
+  .description("Activate AIBlueprint Pro with your access token")
+  .action((token, options, command) => {
+    const parentOptions = command.parent.parent.opts();
+    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
+    proActivateCommand(token, { folder: claudeCodeFolder });
+  });
+
+proCmd
+  .command("status")
+  .description("Check your Pro license status")
+  .action(() => {
+    proStatusCommand();
+  });
+
+proCmd
+  .command("update")
+  .description("Update premium configurations")
+  .action((options, command) => {
+    const parentOptions = command.parent.parent.opts();
+    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
+    proUpdateCommand({ folder: claudeCodeFolder });
   });
 
 program.parse(process.argv);

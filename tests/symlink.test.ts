@@ -94,8 +94,8 @@ describe("createSymlink", () => {
     const targetPath = "/target/path";
 
     vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(false);
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(false as any);
 
     const result = await createSymlink(sourcePath, targetPath);
 
@@ -109,8 +109,8 @@ describe("createSymlink", () => {
     const targetPath = "/target/path";
 
     vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(true);
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(true as any);
     vi.mocked(fs.lstat).mockResolvedValue({
       isSymbolicLink: () => true,
     } as any);
@@ -127,8 +127,8 @@ describe("createSymlink", () => {
     const targetPath = "/target/path";
 
     vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(true);
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(true as any);
     vi.mocked(fs.lstat).mockResolvedValue({
       isSymbolicLink: () => false,
     } as any);
@@ -147,8 +147,8 @@ describe("createSymlink", () => {
     const targetPath = "/target/path";
 
     vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(true);
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(true as any);
     vi.mocked(fs.lstat).mockResolvedValue({
       isSymbolicLink: () => false,
     } as any);
@@ -166,7 +166,7 @@ describe("createSymlink", () => {
     const sourcePath = "/source/path";
     const targetPath = "/target/path";
 
-    vi.mocked(fs.pathExists).mockResolvedValueOnce(false);
+    vi.mocked(fs.pathExists).mockResolvedValueOnce(false as any);
 
     const result = await createSymlink(sourcePath, targetPath);
 
@@ -183,8 +183,8 @@ describe("createSymlink", () => {
     const error = new Error("Symlink creation failed");
 
     vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(false);
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(false as any);
     vi.mocked(fs.symlink).mockRejectedValue(error);
 
     await expect(
@@ -215,8 +215,8 @@ describe("symlinkCommand", () => {
       .mockResolvedValueOnce({ destinations: ["codex-commands"] });
 
     vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(false);
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(false as any);
 
     await symlinkCommand();
 
@@ -236,10 +236,10 @@ describe("symlinkCommand", () => {
       });
 
     vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(false)
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(false);
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(false as any)
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(false as any);
 
     await symlinkCommand();
 
@@ -255,10 +255,10 @@ describe("symlinkCommand", () => {
       });
 
     vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(false)
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(false);
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(false as any)
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(false as any);
 
     await symlinkCommand();
 
@@ -275,8 +275,8 @@ describe("symlinkCommand", () => {
       .mockResolvedValueOnce({ destinations: ["codex-commands"] });
 
     vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(false);
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(false as any);
 
     await symlinkCommand({
       claudeCodeFolder: customClaudeFolder,
@@ -362,10 +362,10 @@ describe("symlinkCommand", () => {
       });
 
     vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(false)
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(true);
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(false as any)
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(true as any);
 
     vi.mocked(fs.lstat).mockResolvedValueOnce({
       isSymbolicLink: () => false,
@@ -395,8 +395,8 @@ describe("symlinkCommand", () => {
       .mockResolvedValueOnce({ destinations: ["claude-code-commands"] });
 
     vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true)
-      .mockResolvedValueOnce(false);
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(false as any);
 
     await symlinkCommand();
 

@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 
 // Mock fetch globally
 const mockFetch = vi.fn();
-global.fetch = mockFetch;
+global.fetch = mockFetch as any;
 
 // Mock fs-extra
 vi.mock('fs-extra', () => ({

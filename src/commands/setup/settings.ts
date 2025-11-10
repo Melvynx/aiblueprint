@@ -70,7 +70,7 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
       hooks: [
         {
           type: "command",
-          command: `bun ${path.join(claudeDir, "scripts/validate-command.js")}`,
+          command: `bun ${path.join(claudeDir, "scripts/command-validator/src/cli.ts")}`,
         },
       ],
     };

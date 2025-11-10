@@ -201,17 +201,18 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       if (useGitHub) {
         const scriptsDir = path.join(claudeDir, "scripts");
         await fs.ensureDir(scriptsDir);
-        const scriptFiles = [
-          "validate-command.js",
-          "validate-command.readme.md",
-        ];
-        if (options.postEditTypeScript) {
-          scriptFiles.push("hook-post-file.ts");
+
+        if (options.commandValidation) {
+          await downloadDirectoryFromGitHub(
+            "scripts/command-validator",
+            path.join(scriptsDir, "command-validator"),
+          );
         }
-        for (const file of scriptFiles) {
+
+        if (options.postEditTypeScript) {
           await downloadFromGitHub(
-            `scripts/${file}`,
-            path.join(scriptsDir, file),
+            "scripts/hook-post-file.ts",
+            path.join(scriptsDir, "hook-post-file.ts"),
           );
         }
 

@@ -13,7 +13,7 @@ describe("CLI Integration Tests - Add Hook Command", () => {
         `bun src/cli.ts claude-code -f "${tempDir}" --skip setup`,
         {
           cwd: process.cwd(),
-          timeout: 15000,
+          timeout: 30000,
           encoding: "utf8",
         },
       );

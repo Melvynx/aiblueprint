@@ -47,7 +47,7 @@ describe("File Installer Utils", () => {
       vi.mocked(github.isGitHubAvailable).mockResolvedValue(true);
       vi.mocked(github.downloadAndWriteFile).mockResolvedValue(false);
       vi.mocked(claudeConfig.findLocalConfigDir).mockResolvedValue("/local/commands");
-      vi.mocked(fs.pathExists).mockResolvedValue(true);
+      vi.mocked(fs.pathExists).mockResolvedValue(true as any);
 
       await installFileWithGitHubFallback(options);
 
@@ -59,7 +59,7 @@ describe("File Installer Utils", () => {
     it("should use local when GitHub is not available", async () => {
       vi.mocked(github.isGitHubAvailable).mockResolvedValue(false);
       vi.mocked(claudeConfig.findLocalConfigDir).mockResolvedValue("/local/commands");
-      vi.mocked(fs.pathExists).mockResolvedValue(true);
+      vi.mocked(fs.pathExists).mockResolvedValue(true as any);
 
       await installFileWithGitHubFallback({ ...options, useGitHub: false });
 
@@ -80,7 +80,7 @@ describe("File Installer Utils", () => {
     it("should throw error when local file does not exist", async () => {
       vi.mocked(github.isGitHubAvailable).mockResolvedValue(false);
       vi.mocked(claudeConfig.findLocalConfigDir).mockResolvedValue("/local/commands");
-      vi.mocked(fs.pathExists).mockResolvedValue(false);
+      vi.mocked(fs.pathExists).mockResolvedValue(false as any);
 
       await expect(installFileWithGitHubFallback(options)).rejects.toThrow(
         "File not found: test.md"
@@ -106,8 +106,8 @@ describe("File Installer Utils", () => {
       vi.mocked(github.isGitHubAvailable).mockResolvedValue(true);
       vi.mocked(github.downloadFromGitHub).mockResolvedValue(null);
       vi.mocked(claudeConfig.findLocalConfigDir).mockResolvedValue("/local/commands");
-      vi.mocked(fs.pathExists).mockResolvedValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(mockContent);
+      vi.mocked(fs.pathExists).mockResolvedValue(true as any);
+      vi.mocked(fs.readFile).mockResolvedValue(mockContent as any);
 
       const result = await getFileContentWithGitHubFallback("commands", "test.md");
 
@@ -121,8 +121,8 @@ describe("File Installer Utils", () => {
       const mockContent = "local content";
       vi.mocked(github.isGitHubAvailable).mockResolvedValue(false);
       vi.mocked(claudeConfig.findLocalConfigDir).mockResolvedValue("/local/commands");
-      vi.mocked(fs.pathExists).mockResolvedValue(true);
-      vi.mocked(fs.readFile).mockResolvedValue(mockContent);
+      vi.mocked(fs.pathExists).mockResolvedValue(true as any);
+      vi.mocked(fs.readFile).mockResolvedValue(mockContent as any);
 
       const result = await getFileContentWithGitHubFallback("commands", "test.md");
 
@@ -144,7 +144,7 @@ describe("File Installer Utils", () => {
     it("should throw error when local file does not exist", async () => {
       vi.mocked(github.isGitHubAvailable).mockResolvedValue(false);
       vi.mocked(claudeConfig.findLocalConfigDir).mockResolvedValue("/local/commands");
-      vi.mocked(fs.pathExists).mockResolvedValue(false);
+      vi.mocked(fs.pathExists).mockResolvedValue(false as any);
 
       await expect(getFileContentWithGitHubFallback("commands", "test.md")).rejects.toThrow(
         "File not found: test.md"

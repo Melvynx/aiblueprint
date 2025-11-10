@@ -36,6 +36,7 @@ describe("Setup Command with Inquirer.js", () => {
     // Mock fs-extra methods
     vi.mocked(fs.ensureDir).mockResolvedValue();
     vi.mocked(fs.writeFile).mockResolvedValue();
+    vi.mocked(fs.writeJson).mockResolvedValue();
     // @ts-expect-error Not important
     vi.mocked(fs.readFile).mockResolvedValue("{}");
     // @ts-expect-error Not important
@@ -72,7 +73,7 @@ describe("Setup Command with Inquirer.js", () => {
 
     // Should create directories and files
     expect(fs.ensureDir).toHaveBeenCalled();
-    expect(fs.writeFile).toHaveBeenCalled();
+    expect(fs.writeJson).toHaveBeenCalled();
   });
 
   it("should run interactive setup with inquirer prompts", async () => {
@@ -107,6 +108,6 @@ describe("Setup Command with Inquirer.js", () => {
     ]);
 
     // Should create files
-    expect(fs.writeFile).toHaveBeenCalled();
+    expect(fs.writeJson).toHaveBeenCalled();
   });
 });
