@@ -83,16 +83,18 @@ Body content`;
       const paths = getLocalConfigPaths("commands");
 
       expect(paths).toHaveLength(2);
-      expect(paths[0]).toMatch(/claude-code-config\/commands$/);
-      expect(paths[1]).toMatch(/claude-code-config\/commands$/);
+      // Use path.normalize for cross-platform regex matching
+      expect(path.normalize(paths[0])).toMatch(/claude-code-config[\/\\]commands$/);
+      expect(path.normalize(paths[1])).toMatch(/claude-code-config[\/\\]commands$/);
     });
 
     it("should return correct paths for different subdirs", () => {
       const paths = getLocalConfigPaths("agents");
 
       expect(paths).toHaveLength(2);
-      expect(paths[0]).toMatch(/claude-code-config\/agents$/);
-      expect(paths[1]).toMatch(/claude-code-config\/agents$/);
+      // Use path.normalize for cross-platform regex matching
+      expect(path.normalize(paths[0])).toMatch(/claude-code-config[\/\\]agents$/);
+      expect(path.normalize(paths[1])).toMatch(/claude-code-config[\/\\]agents$/);
     });
   });
 
@@ -109,7 +111,8 @@ Body content`;
       const result = await findLocalConfigDir("commands");
 
       expect(result).toBeTruthy();
-      expect(result).toContain('claude-code-config/commands');
+      // Normalize the path for cross-platform matching
+      expect(path.normalize(result!)).toContain(path.normalize('claude-code-config/commands'));
     });
 
     it("should return null when no paths exist", async () => {
@@ -133,28 +136,34 @@ Body content`;
 
     it("should use project directory when in git repo", async () => {
       const mockPathExists = fs.pathExists as any;
-      process.cwd = vi.fn().mockReturnValue("/project/dir");
+      const mockCwd = "/project/dir";
+      const originalCwd = process.cwd;
+      process.cwd = vi.fn().mockReturnValue(mockCwd);
 
-      mockPathExists.mockImplementation((path: string) => {
-        return path === "/project/dir/.git";
+      mockPathExists.mockImplementation((checkPath: string) => {
+        return Promise.resolve(path.normalize(checkPath) === path.normalize(path.join(mockCwd, ".git")));
       });
 
       const result = await getTargetDirectory({});
+      process.cwd = originalCwd;
 
-      expect(result).toBe("/project/dir/.claude");
+      expect(path.normalize(result)).toBe(path.normalize("/project/dir/.claude"));
     });
 
     it("should use project directory when .claude config exists", async () => {
       const mockPathExists = fs.pathExists as any;
-      process.cwd = vi.fn().mockReturnValue("/project/dir");
+      const mockCwd = "/project/dir";
+      const originalCwd = process.cwd;
+      process.cwd = vi.fn().mockReturnValue(mockCwd);
 
-      mockPathExists.mockImplementation((path: string) => {
-        return path === "/project/dir/.claude";
+      mockPathExists.mockImplementation((checkPath: string) => {
+        return Promise.resolve(path.normalize(checkPath) === path.normalize(path.join(mockCwd, ".claude")));
       });
 
       const result = await getTargetDirectory({});
+      process.cwd = originalCwd;
 
-      expect(result).toBe("/project/dir/.claude");
+      expect(path.normalize(result)).toBe(path.normalize("/project/dir/.claude"));
     });
 
     it("should use home directory as fallback", async () => {
@@ -166,7 +175,8 @@ Body content`;
 
       const result = await getTargetDirectory({});
 
-      expect(result).toBe("/home/user/.claude");
+      // Normalize paths for cross-platform compatibility
+      expect(path.normalize(result)).toBe(path.normalize("/home/user/.claude"));
     });
 
     it("should use USERPROFILE on Windows", async () => {
@@ -179,7 +189,8 @@ Body content`;
 
       const result = await getTargetDirectory({});
 
-      expect(result).toBe("C:/Users/user/.claude");
+      // Normalize paths for cross-platform compatibility
+      expect(path.normalize(result)).toBe(path.normalize("C:/Users/user/.claude"));
     });
   });
 });

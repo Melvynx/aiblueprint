@@ -35,11 +35,17 @@ describe("File Installer Utils", () => {
 
       await installFileWithGitHubFallback(options);
 
-      expect(fs.ensureDir).toHaveBeenCalledWith("/target");
-      expect(github.downloadAndWriteFile).toHaveBeenCalledWith(
-        "commands/test.md",
-        "/target/test.md"
-      );
+      // Check that the function was called with the dirname of the target path
+      const calls = vi.mocked(fs.ensureDir).mock.calls;
+      expect(calls.length).toBeGreaterThan(0);
+      expect(path.normalize(calls[0][0] as string)).toBe(path.normalize("/target"));
+
+      // Check that downloadAndWriteFile was called with correct parameters
+      const downloadCalls = vi.mocked(github.downloadAndWriteFile).mock.calls;
+      expect(downloadCalls.length).toBeGreaterThan(0);
+      expect(downloadCalls[0][0]).toBe("commands/test.md");
+      expect(downloadCalls[0][1]).toBe("/target/test.md");
+
       expect(claudeConfig.findLocalConfigDir).not.toHaveBeenCalled();
     });
 
@@ -53,7 +59,12 @@ describe("File Installer Utils", () => {
 
       expect(github.downloadAndWriteFile).toHaveBeenCalled();
       expect(claudeConfig.findLocalConfigDir).toHaveBeenCalledWith("commands");
-      expect(fs.copy).toHaveBeenCalledWith("/local/commands/test.md", "/target/test.md");
+
+      // Check copy was called with correct normalized paths
+      const copyCalls = vi.mocked(fs.copy).mock.calls;
+      expect(copyCalls.length).toBeGreaterThan(0);
+      expect(path.normalize(copyCalls[0][0] as string)).toBe(path.normalize("/local/commands/test.md"));
+      expect(copyCalls[0][1]).toBe("/target/test.md");
     });
 
     it("should use local when GitHub is not available", async () => {
@@ -65,7 +76,12 @@ describe("File Installer Utils", () => {
 
       expect(github.downloadAndWriteFile).not.toHaveBeenCalled();
       expect(claudeConfig.findLocalConfigDir).toHaveBeenCalledWith("commands");
-      expect(fs.copy).toHaveBeenCalledWith("/local/commands/test.md", "/target/test.md");
+
+      // Check copy was called with correct normalized paths
+      const copyCalls = vi.mocked(fs.copy).mock.calls;
+      expect(copyCalls.length).toBeGreaterThan(0);
+      expect(path.normalize(copyCalls[0][0] as string)).toBe(path.normalize("/local/commands/test.md"));
+      expect(copyCalls[0][1]).toBe("/target/test.md");
     });
 
     it("should throw error when neither GitHub nor local directory found", async () => {
@@ -114,7 +130,12 @@ describe("File Installer Utils", () => {
       expect(result).toBe(mockContent);
       expect(github.downloadFromGitHub).toHaveBeenCalled();
       expect(claudeConfig.findLocalConfigDir).toHaveBeenCalledWith("commands");
-      expect(fs.readFile).toHaveBeenCalledWith("/local/commands/test.md", "utf-8");
+
+      // Check readFile was called with correct normalized path
+      const readCalls = vi.mocked(fs.readFile).mock.calls;
+      expect(readCalls.length).toBeGreaterThan(0);
+      expect(path.normalize(readCalls[0][0] as string)).toBe(path.normalize("/local/commands/test.md"));
+      expect(readCalls[0][1]).toBe("utf-8");
     });
 
     it("should use local when GitHub is not available", async () => {
@@ -129,7 +150,12 @@ describe("File Installer Utils", () => {
       expect(result).toBe(mockContent);
       expect(github.downloadFromGitHub).not.toHaveBeenCalled();
       expect(claudeConfig.findLocalConfigDir).toHaveBeenCalledWith("commands");
-      expect(fs.readFile).toHaveBeenCalledWith("/local/commands/test.md", "utf-8");
+
+      // Check readFile was called with correct normalized path
+      const readCalls = vi.mocked(fs.readFile).mock.calls;
+      expect(readCalls.length).toBeGreaterThan(0);
+      expect(path.normalize(readCalls[0][0] as string)).toBe(path.normalize("/local/commands/test.md"));
+      expect(readCalls[0][1]).toBe("utf-8");
     });
 
     it("should throw error when neither GitHub nor local directory found", async () => {

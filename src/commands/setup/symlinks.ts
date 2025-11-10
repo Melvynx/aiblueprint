@@ -97,7 +97,15 @@ export async function createSymlink(
       }
     }
 
-    await fs.symlink(sourcePath, targetPath);
+    // On Windows, use junction for directories to avoid EPERM errors
+    // Junctions don't require administrator privileges like symlinks do
+    const isWindows = os.platform() === "win32";
+    if (isWindows) {
+      // Use junction type for directories on Windows
+      await fs.symlink(sourcePath, targetPath, "junction");
+    } else {
+      await fs.symlink(sourcePath, targetPath);
+    }
     return true;
   } catch (error) {
     console.error(

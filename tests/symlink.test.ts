@@ -70,8 +70,12 @@ describe("getToolPaths", () => {
     const customPath = "/custom/path";
     const paths = await getToolPaths("claude-code", customPath);
 
-    expect(paths.baseDir).toBe(customPath);
-    expect(paths.commandsPath).toBe(path.join(customPath, "commands"));
+    // Normalize and resolve paths for cross-platform compatibility
+    const expectedBase = path.resolve(customPath);
+    const expectedCommands = path.resolve(path.join(customPath, "commands"));
+
+    expect(path.resolve(paths.baseDir)).toBe(expectedBase);
+    expect(path.resolve(paths.commandsPath!)).toBe(expectedCommands);
   });
 
   it("should throw error for unknown tool type", async () => {
@@ -101,7 +105,14 @@ describe("createSymlink", () => {
 
     expect(result).toBe(true);
     expect(fs.ensureDir).toHaveBeenCalledWith(path.dirname(targetPath));
-    expect(fs.symlink).toHaveBeenCalledWith(sourcePath, targetPath);
+
+    // On Windows, expect junction as third argument
+    const isWindows = os.platform() === "win32";
+    if (isWindows) {
+      expect(fs.symlink).toHaveBeenCalledWith(sourcePath, targetPath, "junction");
+    } else {
+      expect(fs.symlink).toHaveBeenCalledWith(sourcePath, targetPath);
+    }
   });
 
   it("should replace existing symlink", async () => {
@@ -119,7 +130,14 @@ describe("createSymlink", () => {
 
     expect(result).toBe(true);
     expect(fs.remove).toHaveBeenCalledWith(targetPath);
-    expect(fs.symlink).toHaveBeenCalledWith(sourcePath, targetPath);
+
+    // On Windows, expect junction as third argument
+    const isWindows = os.platform() === "win32";
+    if (isWindows) {
+      expect(fs.symlink).toHaveBeenCalledWith(sourcePath, targetPath, "junction");
+    } else {
+      expect(fs.symlink).toHaveBeenCalledWith(sourcePath, targetPath);
+    }
   });
 
   it("should skip when target exists and is not a symlink", async () => {
@@ -283,10 +301,16 @@ describe("symlinkCommand", () => {
       codexFolder: customCodexFolder,
     });
 
-    expect(fs.symlink).toHaveBeenCalledWith(
-      path.join(customClaudeFolder, "commands"),
-      path.join(customCodexFolder, "prompts"),
-    );
+    // Get the actual call arguments and normalize them for cross-platform testing
+    const symlinkCalls = vi.mocked(fs.symlink).mock.calls;
+    expect(symlinkCalls.length).toBeGreaterThan(0);
+
+    const [actualSource, actualTarget] = symlinkCalls[0];
+    const expectedSource = path.resolve(path.join(customClaudeFolder, "commands"));
+    const expectedTarget = path.resolve(path.join(customCodexFolder, "prompts"));
+
+    expect(path.resolve(actualSource as string)).toBe(expectedSource);
+    expect(path.resolve(actualTarget as string)).toBe(expectedTarget);
   });
 
   it("should show only agents option when source supports agents only", async () => {

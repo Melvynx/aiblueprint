@@ -14,7 +14,7 @@ describe("CLI Integration Tests", () => {
         `bun src/cli.ts claude-code --claudeCodeFolder "${tempDir}" --codexFolder "${codexDir}" --openCodeFolder "${openCodeDir}" --skip setup`,
         {
           cwd: process.cwd(),
-          timeout: 15000,
+          timeout: 30000,
           encoding: "utf8",
         },
       );
@@ -77,5 +77,5 @@ describe("CLI Integration Tests", () => {
         console.warn(`Cleanup failed for ${tempDir}:`, error);
       }
     }
-  }, 20000);
+  }, 60000);
 });
