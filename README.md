@@ -517,6 +517,44 @@ bun run dev claude-code setup --folder ./test-config
 3. Test installation: `bun run dev claude-code add commands <name>`
 4. Document in README
 
+## 💎 AIBlueprint CLI Premium
+
+Unlock advanced features with **AIBlueprint CLI Premium**:
+
+### Premium Features
+
+- ✨ **Advanced Statusline** - Enhanced git info, real-time costs, and token usage tracking
+- 🚀 **Premium Commands** - Exclusive workflow automation templates
+- 🤖 **Premium Agents** - Specialized AI agents for complex tasks
+- 📦 **Priority Updates** - Get new features first
+- 💬 **Priority Support** - Direct help when you need it
+
+### How to Upgrade
+
+```bash
+# 1. Get your premium token at https://mlv.sh/claude-cli
+
+# 2. Activate premium
+aiblueprint claude-code pro activate YOUR_TOKEN
+
+# 3. Setup premium configs
+aiblueprint claude-code pro setup
+```
+
+### Premium Commands
+
+```bash
+# Check premium status
+aiblueprint claude-code pro status
+
+# Update premium configs
+aiblueprint claude-code pro update
+```
+
+**Learn more:** https://mlv.sh/claude-cli
+
+---
+
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.

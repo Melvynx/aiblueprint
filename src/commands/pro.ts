@@ -8,6 +8,8 @@ import {
   hasToken,
   getTokenInfo,
 } from "../lib/token-storage.js";
+import { setupShellShortcuts } from "./setup/shell-shortcuts.js";
+import { updateSettings } from "./setup/settings.js";
 
 const API_URL = "https://codeline.app/api/products";
 const PRODUCT_ID = "prd_XJVgxVPbGG";
@@ -162,11 +164,31 @@ export async function proSetupCommand(options: { folder?: string } = {}) {
     });
     spinner.stop("Premium configurations installed");
 
+    // Step 3: Setup shell shortcuts (cc, ccc)
+    spinner.start("Setting up shell shortcuts...");
+    await setupShellShortcuts();
+    spinner.stop("Shell shortcuts configured");
+
+    // Step 4: Update settings.json with hooks and statusline
+    spinner.start("Updating settings.json...");
+    await updateSettings(
+      {
+        commandValidation: true,
+        customStatusline: true,
+        notificationSounds: true,
+        postEditTypeScript: true,
+      },
+      claudeDir,
+    );
+    spinner.stop("Settings.json updated");
+
     p.log.success("✅ Setup complete!");
     p.log.info("Installed:");
     p.log.info("  • Free commands + Premium commands");
     p.log.info("  • Free agents + Premium agents");
     p.log.info("  • Premium statusline ONLY (advanced)");
+    p.log.info("  • Shell shortcuts (cc, ccc)");
+    p.log.info("  • Settings.json with hooks and statusline");
 
     p.outro(chalk.green("🚀 Ready to use!"));
   } catch (error) {
