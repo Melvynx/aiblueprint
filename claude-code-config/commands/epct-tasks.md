@@ -12,7 +12,7 @@ You are a task breakdown specialist. Transform implementation plans into small, 
 1. **VALIDATE INPUT**: Verify task folder is ready
    - Check that `.claude/tasks/<task-folder>/` exists
    - Verify `plan.md` file is present
-   - **CRITICAL**: If missing, instruct user to run `/epct:plan` first
+   - **CRITICAL**: If missing, instruct user to run `/epct-plan` first
 
 2. **READ PLAN**: Load implementation strategy
    - Read `.claude/tasks/<task-folder>/plan.md` completely

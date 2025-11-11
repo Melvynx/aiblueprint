@@ -66,7 +66,7 @@ The easiest way to get started is by installing AIBlueprint as a Claude Code plu
 ### What Gets Installed
 
 The `aibp-base` plugin includes:
-- ✅ **16 Custom Commands** - `/commit`, `/create-pull-request`, `/deep-code-analysis`, etc.
+- ✅ **21 Custom Commands** - `/commit`, `/create-pull-request`, `/deep-code-analysis`, etc.
 - ✅ **3 Specialized Agents** - explore-codebase, Snipper, websearch
 - ✅ **Security Hooks** - Command validation and TypeScript processing
 - ✅ **Custom Statusline** - Git status, cost tracking, and token usage
@@ -188,7 +188,7 @@ The CLI intelligently determines where to install configurations:
 ### 🛡️ Shell Shortcuts
 - **`cc`** - Claude Code with permissions skipped (`claude --dangerously-skip-permissions`)
 - **`ccc`** - Claude Code with continue mode (`claude --dangerously-skip-permissions -c`)
-- Platform support: macOS (`.zshenv`), Linux (`.bashrc`/`.zshrc`)
+- Platform support: macOS (`.zshenv`), Linux (`.bashrc`/`.zshrc`), Windows (PowerShell `Profile.ps1`)
 
 ### 🔒 Command Validation
 - **700+ line security system** protecting against dangerous bash commands
@@ -203,7 +203,7 @@ The CLI intelligently determines where to install configurations:
 - **Colored output** - Visual indicators for different status types
 - **Quick setup** - Install with one command: `pnpm dlx aiblueprint-cli claude-code statusline`
 
-### 🤖 AIBlueprint Commands (16 Available)
+### 🤖 AIBlueprint Commands (21 Available)
 
 **Development Workflow**
 - `commit` - Fast conventional commits with immediate push
@@ -221,6 +221,11 @@ The CLI intelligently determines where to install configurations:
 - `watch-ci` - Automated CI/CD monitoring and failure fixing
 - `prompt-command` / `prompt-agent` - Template creation utilities
 - `epct` - Systematic Explore-Plan-Code-Test methodology
+- `epct-explore` - Gather all context and create exploration report
+- `epct-plan` - Create detailed implementation strategy
+- `epct-code` - Implement the plan step by step
+- `epct-tasks` - Divide plan into small, actionable tasks
+- `epct-deploy` - Build and validate with automated error fixing
 
 ### 🎭 AIBlueprint Agents (3 Specialized)
 
@@ -318,12 +323,17 @@ The CLI automatically manages your `~/.claude/settings.json` with:
 </details>
 
 <details>
-<summary><strong>Utilities (8 commands)</strong></summary>
+<summary><strong>Utilities (13 commands)</strong></summary>
 
 | Command | Tools | Purpose |
 |---------|-------|---------|
 | `claude-memory` | `Read`, `Write`, `Edit`, `Glob` | CLAUDE.md file management |
 | `epct` | `Task` | Explore-Plan-Code-Test methodology |
+| `epct-explore` | `Task`, `WebSearch`, `Read` | Gather all context and create exploration report |
+| `epct-plan` | `Read`, `Write`, `AskUserQuestion` | Create detailed implementation strategy |
+| `epct-code` | `TodoWrite`, `Read`, `Edit`, `Write` | Implement the plan step by step |
+| `epct-tasks` | `Read`, `Write` | Divide plan into small, actionable tasks |
+| `epct-deploy` | `Bash`, `Task` | Build and validate with automated error fixing |
 | `prompt-command` | `Read`, `Write`, `Edit` | Command template creation |
 | `prompt-agent` | `Read`, `Write`, `Edit` | Agent template creation |
 
@@ -521,12 +531,15 @@ bun run dev claude-code setup --folder ./test-config
 - Optimized test timeouts for Windows file system operations
 - Full backward compatibility with macOS and Linux
 
-**Shell Shortcuts Note:**
-- Shell shortcuts (`cc`, `ccc`) are currently available on macOS and Linux only
-- All other features work identically on Windows, including:
+**Shell Shortcuts:**
+- Shell shortcuts (`cc`, `ccc`) now work on all platforms:
+  - **macOS**: Added to `.zshenv`
+  - **Linux**: Added to `.bashrc` or `.zshrc`
+  - **Windows**: Added to PowerShell `Profile.ps1` (PowerShell Core or Windows PowerShell)
+- All other features work identically across platforms:
   - Command validation hooks
-  - Custom statusline
-  - All 16 AIBlueprint commands
+  - Custom statusline with cross-platform credential support
+  - All 21 AIBlueprint commands
   - All 3 specialized agents
   - Symlink management with Codex, OpenCode, and FactoryAI
 

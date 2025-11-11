@@ -78,7 +78,7 @@ You are an exploration specialist. Your mission is to gather ALL relevant contex
    - Confirm task folder created
    - Highlight key findings
    - Note any concerns or blockers discovered
-   - Suggest next step: Run `/epct:plan <task-folder>` to create implementation plan
+   - Suggest next step: Run `/epct-plan <task-folder>` to create implementation plan
 
 ## Execution Rules
 

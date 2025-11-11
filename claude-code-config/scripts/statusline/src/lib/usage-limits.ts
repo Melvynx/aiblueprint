@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { homedir, platform } from "node:os";
 import { $ } from "bun";
 
 export interface UsageLimits {
@@ -38,12 +39,28 @@ interface Credentials {
 
 export async function getCredentials(): Promise<string | null> {
 	try {
-		const result =
-			await $`security find-generic-password -s "Claude Code-credentials" -w`
-				.quiet()
-				.text();
-		const creds: Credentials = JSON.parse(result.trim());
-		return creds.claudeAiOauth.accessToken;
+		const currentPlatform = platform();
+
+		if (currentPlatform === "darwin") {
+			// macOS: Use Keychain
+			const result =
+				await $`security find-generic-password -s "Claude Code-credentials" -w`
+					.quiet()
+					.text();
+			const creds: Credentials = JSON.parse(result.trim());
+			return creds.claudeAiOauth.accessToken;
+		} else {
+			// Windows and Linux: Read from .credentials.json file
+			const credentialsPath = join(homedir(), ".claude", ".credentials.json");
+
+			if (!existsSync(credentialsPath)) {
+				return null;
+			}
+
+			const credentialsContent = await readFile(credentialsPath, "utf-8");
+			const creds: Credentials = JSON.parse(credentialsContent);
+			return creds.claudeAiOauth.accessToken;
+		}
 	} catch {
 		return null;
 	}

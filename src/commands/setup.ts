@@ -127,6 +127,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       postEditTypeScript: features.includes("postEditTypeScript"),
       codexSymlink: features.includes("codexSymlink"),
       openCodeSymlink: features.includes("openCodeSymlink"),
+      skipInteractive,
     };
 
     const s = new SimpleSpinner();
@@ -216,10 +217,51 @@ export async function setupCommand(params: SetupCommandParams = {}) {
         }
 
         if (options.customStatusline) {
-          await downloadDirectoryFromGitHub(
+          const statuslineSuccess = await downloadDirectoryFromGitHub(
             "scripts/statusline",
             path.join(scriptsDir, "statusline"),
           );
+          if (!statuslineSuccess) {
+            console.log(
+              chalk.yellow(
+                "  Statusline download incomplete, falling back to local files",
+              ),
+            );
+            if (!sourceDir) {
+              const currentDir = process.cwd();
+              const possiblePaths = [
+                path.join(currentDir, "claude-code-config"),
+                path.join(__dirname, "../../claude-code-config"),
+                path.join(__dirname, "../claude-code-config"),
+                path.join(
+                  path.dirname(process.argv[1]),
+                  "../claude-code-config",
+                ),
+              ];
+
+              sourceDir = possiblePaths.find((p) => {
+                try {
+                  return fs.existsSync(p);
+                } catch {
+                  return false;
+                }
+              });
+            }
+
+            if (sourceDir) {
+              await fs.copy(
+                path.join(sourceDir, "scripts/statusline"),
+                path.join(scriptsDir, "statusline"),
+                { overwrite: true },
+              );
+            } else {
+              console.error(
+                chalk.red(
+                  "  Error: Could not find local statusline files to copy",
+                ),
+              );
+            }
+          }
         }
       } else {
         await fs.copy(
@@ -234,10 +276,51 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     if (options.aiblueprintCommands) {
       s.start("Setting up AIBlueprint commands");
       if (useGitHub) {
-        await downloadDirectoryFromGitHub(
+        const commandsSuccess = await downloadDirectoryFromGitHub(
           "commands",
           path.join(claudeDir, "commands"),
         );
+        if (!commandsSuccess) {
+          console.log(
+            chalk.yellow(
+              "  Commands download incomplete, falling back to local files",
+            ),
+          );
+          if (!sourceDir) {
+            const currentDir = process.cwd();
+            const possiblePaths = [
+              path.join(currentDir, "claude-code-config"),
+              path.join(__dirname, "../../claude-code-config"),
+              path.join(__dirname, "../claude-code-config"),
+              path.join(
+                path.dirname(process.argv[1]),
+                "../claude-code-config",
+              ),
+            ];
+
+            sourceDir = possiblePaths.find((p) => {
+              try {
+                return fs.existsSync(p);
+              } catch {
+                return false;
+              }
+            });
+          }
+
+          if (sourceDir) {
+            await fs.copy(
+              path.join(sourceDir, "commands"),
+              path.join(claudeDir, "commands"),
+              { overwrite: true },
+            );
+          } else {
+            console.error(
+              chalk.red(
+                "  Error: Could not find local commands files to copy",
+              ),
+            );
+          }
+        }
       } else {
         await fs.copy(
           path.join(sourceDir!, "commands"),
@@ -271,10 +354,49 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     if (options.aiblueprintAgents) {
       s.start("Setting up AIBlueprint agents");
       if (useGitHub) {
-        await downloadDirectoryFromGitHub(
+        const agentsSuccess = await downloadDirectoryFromGitHub(
           "agents",
           path.join(claudeDir, "agents"),
         );
+        if (!agentsSuccess) {
+          console.log(
+            chalk.yellow(
+              "  Agents download incomplete, falling back to local files",
+            ),
+          );
+          if (!sourceDir) {
+            const currentDir = process.cwd();
+            const possiblePaths = [
+              path.join(currentDir, "claude-code-config"),
+              path.join(__dirname, "../../claude-code-config"),
+              path.join(__dirname, "../claude-code-config"),
+              path.join(
+                path.dirname(process.argv[1]),
+                "../claude-code-config",
+              ),
+            ];
+
+            sourceDir = possiblePaths.find((p) => {
+              try {
+                return fs.existsSync(p);
+              } catch {
+                return false;
+              }
+            });
+          }
+
+          if (sourceDir) {
+            await fs.copy(
+              path.join(sourceDir, "agents"),
+              path.join(claudeDir, "agents"),
+              { overwrite: true },
+            );
+          } else {
+            console.error(
+              chalk.red("  Error: Could not find local agents files to copy"),
+            );
+          }
+        }
       } else {
         await fs.copy(
           path.join(sourceDir!, "agents"),

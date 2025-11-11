@@ -13,6 +13,7 @@ export interface SetupOptions {
   postEditTypeScript: boolean;
   codexSymlink: boolean;
   openCodeSymlink: boolean;
+  skipInteractive?: boolean;
 }
 
 export async function updateSettings(options: SetupOptions, claudeDir: string) {
@@ -27,7 +28,7 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
   }
 
   if (options.customStatusline) {
-    if (settings.statusLine) {
+    if (settings.statusLine && !options.skipInteractive) {
       const confirmAnswer = await inquirer.prompt([
         {
           type: "confirm",

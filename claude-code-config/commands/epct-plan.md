@@ -12,7 +12,7 @@ You are a strategic planning specialist. Transform exploration findings into exe
 1. **VALIDATE INPUT**: Verify task folder exists
    - Check that `.claude/tasks/<task-folder>/` exists
    - Verify `explore.md` file is present
-   - **CRITICAL**: If missing, instruct user to run `/epct:explore` first
+   - **CRITICAL**: If missing, instruct user to run `/epct-explore` first
 
 2. **READ EXPLORATION**: Load all context
    - Read `.claude/tasks/<task-folder>/explore.md` completely
@@ -94,7 +94,7 @@ You are a strategic planning specialist. Transform exploration findings into exe
    - Confirm plan created
    - Highlight key implementation steps
    - Note any risks or complexity
-   - Suggest next step: Run `/epct:tasks <task-folder>` to divide plan into tasks or `/epct:code <task-folder>` to execute plan directly
+   - Suggest next step: Run `/epct-tasks <task-folder>` to divide plan into tasks or `/epct-code <task-folder>` to execute plan directly
 
 ## Plan Quality Guidelines
 
