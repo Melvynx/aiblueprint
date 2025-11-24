@@ -48,6 +48,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
         "customStatusline",
         "aiblueprintCommands",
         "aiblueprintAgents",
+        "aiblueprintSkills",
         "notificationSounds",
         "codexSymlink",
         "openCodeSymlink",
@@ -84,6 +85,11 @@ export async function setupCommand(params: SetupCommandParams = {}) {
               value: "aiblueprintAgents",
               name: "AIBlueprint agents - Specialized AI agents",
               checked: true,
+            },
+            {
+              value: "aiblueprintSkills",
+              name: "AIBlueprint Skills - Reusable skill modules for specialized tasks",
+              checked: false,
             },
             {
               value: "notificationSounds",
@@ -123,6 +129,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       customStatusline: features.includes("customStatusline"),
       aiblueprintCommands: features.includes("aiblueprintCommands"),
       aiblueprintAgents: features.includes("aiblueprintAgents"),
+      aiblueprintSkills: features.includes("aiblueprintSkills"),
       notificationSounds: features.includes("notificationSounds"),
       postEditTypeScript: features.includes("postEditTypeScript"),
       codexSymlink: features.includes("codexSymlink"),
@@ -284,6 +291,39 @@ export async function setupCommand(params: SetupCommandParams = {}) {
         );
       }
       s.stop("Agents installed");
+    }
+
+    if (options.aiblueprintSkills) {
+      s.start("Setting up AIBlueprint Skills");
+      if (useGitHub) {
+        const testSkillsUrl = `${GITHUB_RAW_BASE}/skills/create-prompt/SKILL.md`;
+        try {
+          const testResponse = await fetch(testSkillsUrl);
+          if (testResponse.ok) {
+            await downloadDirectoryFromGitHub(
+              "skills",
+              path.join(claudeDir, "skills"),
+            );
+            s.stop("Skills installed");
+          } else {
+            s.stop("Skills not available in repository");
+          }
+        } catch {
+          s.stop("Skills not available in repository");
+        }
+      } else {
+        const skillsSourcePath = path.join(sourceDir!, "skills");
+        if (await fs.pathExists(skillsSourcePath)) {
+          await fs.copy(
+            skillsSourcePath,
+            path.join(claudeDir, "skills"),
+            { overwrite: true },
+          );
+          s.stop("Skills installed");
+        } else {
+          s.stop("Skills not available in local repository");
+        }
+      }
     }
 
     if (options.notificationSounds) {

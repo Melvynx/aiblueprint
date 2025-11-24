@@ -9,6 +9,7 @@ export interface SetupOptions {
   customStatusline: boolean;
   aiblueprintCommands: boolean;
   aiblueprintAgents: boolean;
+  aiblueprintSkills: boolean;
   notificationSounds: boolean;
   postEditTypeScript: boolean;
   codexSymlink: boolean;
