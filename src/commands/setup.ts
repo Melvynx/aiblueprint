@@ -48,7 +48,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
         "customStatusline",
         "aiblueprintCommands",
         "aiblueprintAgents",
-        "aiblueprintSkills",
         "notificationSounds",
         "codexSymlink",
         "openCodeSymlink",
@@ -85,11 +84,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
               value: "aiblueprintAgents",
               name: "AIBlueprint agents - Specialized AI agents",
               checked: true,
-            },
-            {
-              value: "aiblueprintSkills",
-              name: "AIBlueprint Skills - Reusable skill modules for specialized tasks",
-              checked: false,
             },
             {
               value: "notificationSounds",
@@ -129,7 +123,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       customStatusline: features.includes("customStatusline"),
       aiblueprintCommands: features.includes("aiblueprintCommands"),
       aiblueprintAgents: features.includes("aiblueprintAgents"),
-      aiblueprintSkills: features.includes("aiblueprintSkills"),
       notificationSounds: features.includes("notificationSounds"),
       postEditTypeScript: features.includes("postEditTypeScript"),
       codexSymlink: features.includes("codexSymlink"),

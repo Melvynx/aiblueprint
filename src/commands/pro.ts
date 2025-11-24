@@ -10,9 +10,51 @@ import {
 } from "../lib/token-storage.js";
 import { setupShellShortcuts } from "./setup/shell-shortcuts.js";
 import { updateSettings } from "./setup/settings.js";
+import fs from "fs-extra";
+import path from "path";
 
 const API_URL = "https://codeline.app/api/products";
 const PRODUCT_ID = "prd_XJVgxVPbGG";
+
+async function countInstalledItems(claudeDir: string) {
+  const counts = {
+    commands: 0,
+    agents: 0,
+    skills: 0,
+  };
+
+  try {
+    const commandsDir = path.join(claudeDir, "commands");
+    if (await fs.pathExists(commandsDir)) {
+      const files = await fs.readdir(commandsDir);
+      counts.commands = files.filter(f => f.endsWith(".md")).length;
+    }
+  } catch {}
+
+  try {
+    const agentsDir = path.join(claudeDir, "agents");
+    if (await fs.pathExists(agentsDir)) {
+      const files = await fs.readdir(agentsDir);
+      counts.agents = files.filter(f => f.endsWith(".md")).length;
+    }
+  } catch {}
+
+  try {
+    const skillsDir = path.join(claudeDir, "skills");
+    if (await fs.pathExists(skillsDir)) {
+      const items = await fs.readdir(skillsDir);
+      const dirs = await Promise.all(
+        items.map(async (item) => {
+          const stat = await fs.stat(path.join(skillsDir, item));
+          return stat.isDirectory();
+        })
+      );
+      counts.skills = dirs.filter(Boolean).length;
+    }
+  } catch {}
+
+  return counts;
+}
 
 export async function proActivateCommand(userToken?: string) {
   p.intro(chalk.blue("🔑 Activate AIBlueprint CLI Premium"));
@@ -182,11 +224,16 @@ export async function proSetupCommand(options: { folder?: string } = {}) {
     );
     spinner.stop("Settings.json updated");
 
+    spinner.start("Counting installed items...");
+    const counts = await countInstalledItems(claudeDir);
+    spinner.stop("Installation summary ready");
+
     p.log.success("✅ Setup complete!");
     p.log.info("Installed:");
-    p.log.info("  • Free commands + Premium commands");
-    p.log.info("  • Free agents + Premium agents");
-    p.log.info("  • Premium statusline ONLY (advanced)");
+    p.log.info(`  • Commands (${counts.commands})`);
+    p.log.info(`  • Agents (${counts.agents})`);
+    p.log.info(`  • Premium Skills (${counts.skills})`);
+    p.log.info("  • Premium statusline (advanced)");
     p.log.info("  • Shell shortcuts (cc, ccc)");
     p.log.info("  • Settings.json with hooks and statusline");
 
