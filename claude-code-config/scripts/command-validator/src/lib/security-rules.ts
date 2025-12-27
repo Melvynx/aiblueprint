@@ -1,3 +1,4 @@
+import os from "os";
 import type { SecurityRules } from "./types";
 
 export const SECURITY_RULES: SecurityRules = {
@@ -126,7 +127,7 @@ export const SECURITY_RULES: SecurityRules = {
 	],
 
 	SAFE_RM_PATHS: [
-		"/Users/melvynx/Developer/",
+		`${os.homedir()}/Developer/`,
 		"/tmp/",
 		"/var/tmp/",
 		`${process.cwd()}/`,

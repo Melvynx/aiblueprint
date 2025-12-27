@@ -59,8 +59,8 @@ The system is already installed and active in your Claude Code configuration:
         "matcher": "Bash",
         "hooks": [
           {
-            "type": "command", 
-            "command": "bun /Users/melvynx/.claude/validate-command.js"
+            "type": "command",
+            "command": "bun ~/.claude/validate-command.js"
           }
         ]
       }

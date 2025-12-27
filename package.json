@@ -21,9 +21,10 @@
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
+    "@clack/prompts": "^0.11.0",
+    "chalk": "^5.3.0",
     "commander": "^12.0.0",
     "fs-extra": "^11.2.0",
-    "chalk": "^5.3.0",
     "inquirer": "^9.0.0"
   },
   "devDependencies": {
