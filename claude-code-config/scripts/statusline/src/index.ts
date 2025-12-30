@@ -2,8 +2,9 @@
 
 import { defaultConfig } from "../statusline.config";
 import { getContextData } from "./lib/context";
-import { colors, formatPath, formatSession, formatGit, formatCost } from "./lib/formatters";
+import { colors, formatPath, formatSession, formatGit, formatCost, formatUsageLimits } from "./lib/formatters";
 import { getGitInfo } from "./lib/git";
+import { getUsageLimits } from "./lib/usage-limits";
 import type { HookInput } from "./lib/types";
 
 async function main() {
@@ -20,14 +21,19 @@ async function main() {
 			maxContextTokens: defaultConfig.context.maxContextTokens,
 		});
 
-		const gitInfo = defaultConfig.git.show 
-			? getGitInfo(input.workspace.current_dir) 
+		const gitInfo = defaultConfig.git.show
+			? getGitInfo(input.workspace.current_dir)
 			: null;
-		
+
+		const usageLimits = defaultConfig.usage.show
+			? await getUsageLimits()
+			: null;
+
 		const gitDisplay = formatGit(gitInfo);
-		const costDisplay = defaultConfig.cost.show 
-			? formatCost(input.cost.total_cost_usd) 
+		const costDisplay = defaultConfig.cost.show
+			? formatCost(input.cost.total_cost_usd)
 			: "";
+		const usageDisplay = formatUsageLimits(usageLimits);
 
 		const sessionInfo = formatSession(
 			contextData.tokens,
@@ -37,7 +43,7 @@ async function main() {
 
 		const sep = ` ${colors.GRAY}${defaultConfig.separator}${colors.LIGHT_GRAY} `;
 		
-		const modelDisplay = `${colors.GRAY}${input.model.display_name}${colors.RESET}`;
+		const modelDisplay = `󰚩 ${colors.LAVENDER}${input.model.display_name}${colors.RESET}`;
 		
 		const parts = [
 			`${colors.LIGHT_GRAY}${dirPath}${colors.RESET}`,
@@ -46,6 +52,7 @@ async function main() {
 		if (gitDisplay) parts.push(gitDisplay);
 		if (modelDisplay) parts.push(modelDisplay);
 		if (sessionInfo) parts.push(sessionInfo);
+		if (usageDisplay) parts.push(usageDisplay);
 		if (costDisplay) parts.push(costDisplay);
 
 		console.log(parts.join(sep));

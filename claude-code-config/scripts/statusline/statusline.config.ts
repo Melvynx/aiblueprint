@@ -15,6 +15,9 @@ export interface StatuslineConfig {
 	context: {
 		maxContextTokens: number;
 	};
+	usage: {
+		show: boolean;
+	};
 }
 
 export const defaultConfig: StatuslineConfig = {
@@ -25,7 +28,7 @@ export const defaultConfig: StatuslineConfig = {
 		show: true,
 	},
 	cost: {
-		show: true,
+		show: false,
 	},
 	session: {
 		showTokens: true,
@@ -33,5 +36,8 @@ export const defaultConfig: StatuslineConfig = {
 	},
 	context: {
 		maxContextTokens: 200000,
+	},
+	usage: {
+		show: true,
 	},
 };

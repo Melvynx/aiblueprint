@@ -178,3 +178,6 @@ dist
 test-claude-config/
 
 tmp
+
+.gemini/
+gha-creds-*.json
