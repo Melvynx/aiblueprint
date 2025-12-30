@@ -76,7 +76,10 @@ export async function getContextData({
 	}
 
 	const tokens = await getContextLength(transcriptPath);
-	const percentage = Math.min(100, Math.round((tokens / maxContextTokens) * 100));
+	const percentage = Math.min(
+		100,
+		Math.round((tokens / maxContextTokens) * 100),
+	);
 
 	return { tokens, percentage };
 }

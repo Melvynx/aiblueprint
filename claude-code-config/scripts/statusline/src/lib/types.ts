@@ -1,3 +1,9 @@
+// Re-export all types from lib modules for easier imports
+
+export type { ContextResult } from "./context";
+export type { GitInfo } from "./git";
+export type { UsageLimits } from "./usage-limits";
+
 export interface HookInput {
 	session_id: string;
 	transcript_path: string;

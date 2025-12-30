@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execSync } from "node:child_process";
 
 export interface GitInfo {
 	branch: string;
@@ -26,8 +26,13 @@ export function getGitInfo(cwd: string): GitInfo | null {
 		if (status) {
 			for (const line of status.split("\n")) {
 				const [a, d] = line.split("\t");
-				if (!isNaN(Number(a))) added += Number(a);
-				if (!isNaN(Number(d))) deleted += Number(d);
+				// Skip binary files (marked with '-' in numstat)
+				if (a === "-" || d === "-") continue;
+				// Only add numeric values
+				const addedNum = Number(a);
+				const deletedNum = Number(d);
+				if (!Number.isNaN(addedNum)) added += addedNum;
+				if (!Number.isNaN(deletedNum)) deleted += deletedNum;
 			}
 		}
 

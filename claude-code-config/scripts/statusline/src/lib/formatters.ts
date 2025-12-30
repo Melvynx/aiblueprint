@@ -47,7 +47,9 @@ export function formatGit(git: GitInfo | null): string {
 		const stats: string[] = [];
 		if (git.added > 0) stats.push(`${colors.GREEN}+${git.added}`);
 		if (git.deleted > 0) stats.push(`${colors.RED}-${git.deleted}`);
-		parts.push(`${colors.GRAY}(${stats.join(" ")}${colors.GRAY})${colors.RESET}`);
+		parts.push(
+			`${colors.GRAY}(${stats.join(" ")}${colors.GRAY})${colors.RESET}`,
+		);
 	}
 
 	return parts.join(" ");
@@ -62,18 +64,24 @@ export function formatSession(
 	tokens: number,
 	percentage: number,
 	config: StatuslineConfig["session"],
+	thresholds: StatuslineConfig["thresholds"],
 ): string {
 	const items: string[] = [];
 
-	const contextColor = percentage > 80 ? colors.RED :
-	                     percentage > 60 ? colors.YELLOW :
-	                     colors.GREEN;
+	const contextColor =
+		percentage > thresholds.critical
+			? colors.RED
+			: percentage > thresholds.warning
+				? colors.YELLOW
+				: colors.GREEN;
 
 	if (config.showTokens) {
 		items.push(formatTokens(tokens, contextColor));
 	}
 	if (config.showPercentage) {
-		items.push(`${contextColor}${percentage}${colors.RESET}${colors.GRAY}%${colors.LIGHT_GRAY} ctx`);
+		items.push(
+			`${contextColor}${percentage}${colors.RESET}${colors.GRAY}%${colors.LIGHT_GRAY} ctx`,
+		);
 	}
 
 	if (items.length === 0) {
@@ -86,6 +94,12 @@ export function formatSession(
 function formatTimeUntil(resetTime: Date): string {
 	const now = new Date();
 	const diffMs = resetTime.getTime() - now.getTime();
+
+	// Handle negative time (reset time in the past)
+	if (diffMs <= 0) {
+		return "now";
+	}
+
 	const diffMinutes = Math.floor(diffMs / 1000 / 60);
 
 	if (diffMinutes < 60) {
@@ -104,16 +118,25 @@ function formatTimeUntil(resetTime: Date): string {
 	return `${days}d${hours}h`;
 }
 
-export function formatUsageLimits(usage: UsageLimits | null): string {
+export function formatUsageLimits(
+	usage: UsageLimits | null,
+	thresholds: StatuslineConfig["thresholds"],
+): string {
 	if (!usage) return "";
 
-	const fiveHourColor = usage.fiveHourUtilization > 80 ? colors.RED :
-	                      usage.fiveHourUtilization > 60 ? colors.YELLOW :
-	                      colors.GREEN;
+	const fiveHourColor =
+		usage.fiveHourUtilization > thresholds.critical
+			? colors.RED
+			: usage.fiveHourUtilization > thresholds.warning
+				? colors.YELLOW
+				: colors.GREEN;
 
-	const sevenDayColor = usage.sevenDayUtilization > 80 ? colors.RED :
-	                      usage.sevenDayUtilization > 60 ? colors.YELLOW :
-	                      colors.GREEN;
+	const sevenDayColor =
+		usage.sevenDayUtilization > thresholds.critical
+			? colors.RED
+			: usage.sevenDayUtilization > thresholds.warning
+				? colors.YELLOW
+				: colors.GREEN;
 
 	const fiveHourTime = formatTimeUntil(usage.fiveHourResetsAt);
 	const sevenDayTime = formatTimeUntil(usage.sevenDayResetsAt);

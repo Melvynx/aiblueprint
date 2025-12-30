@@ -18,6 +18,10 @@ export interface StatuslineConfig {
 	usage: {
 		show: boolean;
 	};
+	thresholds: {
+		warning: number;
+		critical: number;
+	};
 }
 
 export const defaultConfig: StatuslineConfig = {
@@ -39,5 +43,9 @@ export const defaultConfig: StatuslineConfig = {
 	},
 	usage: {
 		show: true,
+	},
+	thresholds: {
+		warning: 60, // Yellow warning at 60%
+		critical: 80, // Red critical at 80%
 	},
 };

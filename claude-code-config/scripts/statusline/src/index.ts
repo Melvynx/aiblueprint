@@ -2,10 +2,17 @@
 
 import { defaultConfig } from "../statusline.config";
 import { getContextData } from "./lib/context";
-import { colors, formatPath, formatSession, formatGit, formatCost, formatUsageLimits } from "./lib/formatters";
+import {
+	colors,
+	formatCost,
+	formatGit,
+	formatPath,
+	formatSession,
+	formatUsageLimits,
+} from "./lib/formatters";
 import { getGitInfo } from "./lib/git";
-import { getUsageLimits } from "./lib/usage-limits";
 import type { HookInput } from "./lib/types";
+import { getUsageLimits } from "./lib/usage-limits";
 
 async function main() {
 	try {
@@ -33,21 +40,23 @@ async function main() {
 		const costDisplay = defaultConfig.cost.show
 			? formatCost(input.cost.total_cost_usd)
 			: "";
-		const usageDisplay = formatUsageLimits(usageLimits);
+		const usageDisplay = formatUsageLimits(
+			usageLimits,
+			defaultConfig.thresholds,
+		);
 
 		const sessionInfo = formatSession(
 			contextData.tokens,
 			contextData.percentage,
 			defaultConfig.session,
+			defaultConfig.thresholds,
 		);
 
 		const sep = ` ${colors.GRAY}${defaultConfig.separator}${colors.LIGHT_GRAY} `;
-		
+
 		const modelDisplay = `󰚩 ${colors.LAVENDER}${input.model.display_name}${colors.RESET}`;
-		
-		const parts = [
-			`${colors.LIGHT_GRAY}${dirPath}${colors.RESET}`,
-		];
+
+		const parts = [`${colors.LIGHT_GRAY}${dirPath}${colors.RESET}`];
 
 		if (gitDisplay) parts.push(gitDisplay);
 		if (modelDisplay) parts.push(modelDisplay);
