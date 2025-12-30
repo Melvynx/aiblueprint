@@ -10,6 +10,8 @@
  * Manual test: echo '{"tool_name":"Bash","tool_input":{"command":"rm -rf /"}}' | bun validate-command.js
  */
 
+import os from "os";
+
 // Comprehensive dangerous command patterns database
 const SECURITY_RULES = {
   // Critical system destruction commands
@@ -161,7 +163,7 @@ const SECURITY_RULES = {
 
   // Safe paths where rm -rf is allowed
   SAFE_RM_PATHS: [
-    "/Users/melvynx/Developer/",
+    os.homedir() + "/Developer/",
     "/tmp/",
     "/var/tmp/",
     process.cwd() + "/", // Current working directory
@@ -205,7 +207,7 @@ const SAFE_COMMANDS = [
 
 class CommandValidator {
   constructor() {
-    this.logFile = "/Users/melvynx/.claude/security.log";
+    this.logFile = os.homedir() + "/.claude/security.log";
   }
 
   /**

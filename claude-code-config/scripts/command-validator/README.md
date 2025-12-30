@@ -31,7 +31,7 @@ The validator is configured as a PreToolUse hook in Claude Code settings:
         "hooks": [
           {
             "type": "command",
-            "command": "bun /Users/melvynx/.claude/scripts/command-validator/src/cli.ts"
+            "command": "bun ~/.claude/scripts/command-validator/src/cli.ts"
           }
         ]
       }
@@ -81,7 +81,7 @@ The test suite includes:
 - Sensitive file access: /etc/passwd, /etc/shadow, /etc/sudoers
 
 ### Special Cases
-- rm -rf safety: Allows deletions in safe paths (/Users/melvynx/Developer/, /tmp/)
+- rm -rf safety: Allows deletions in safe paths (~/Developer/, /tmp/, /var/tmp/, current directory)
 - Protected paths: Blocks dangerous operations on /etc, /usr, /bin, etc.
 - Binary content detection
 - Command length limits
