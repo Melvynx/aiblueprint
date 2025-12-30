@@ -2,7 +2,8 @@
 
 import { defaultConfig } from "../statusline.config";
 import { getContextData } from "./lib/context";
-import { colors, formatPath, formatSession } from "./lib/formatters";
+import { colors, formatPath, formatSession, formatGit, formatCost } from "./lib/formatters";
+import { getGitInfo } from "./lib/git";
 import type { HookInput } from "./lib/types";
 
 async function main() {
@@ -19,6 +20,15 @@ async function main() {
 			maxContextTokens: defaultConfig.context.maxContextTokens,
 		});
 
+		const gitInfo = defaultConfig.git.show 
+			? getGitInfo(input.workspace.current_dir) 
+			: null;
+		
+		const gitDisplay = formatGit(gitInfo);
+		const costDisplay = defaultConfig.cost.show 
+			? formatCost(input.cost.total_cost_usd) 
+			: "";
+
 		const sessionInfo = formatSession(
 			contextData.tokens,
 			contextData.percentage,
@@ -26,7 +36,19 @@ async function main() {
 		);
 
 		const sep = ` ${colors.GRAY}${defaultConfig.separator}${colors.LIGHT_GRAY} `;
-		console.log(`${colors.LIGHT_GRAY}${dirPath}${sep}${sessionInfo}${colors.RESET}`);
+		
+		const modelDisplay = `${colors.GRAY}${input.model.display_name}${colors.RESET}`;
+		
+		const parts = [
+			`${colors.LIGHT_GRAY}${dirPath}${colors.RESET}`,
+		];
+
+		if (gitDisplay) parts.push(gitDisplay);
+		if (modelDisplay) parts.push(modelDisplay);
+		if (sessionInfo) parts.push(sessionInfo);
+		if (costDisplay) parts.push(costDisplay);
+
+		console.log(parts.join(sep));
 		console.log("");
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
