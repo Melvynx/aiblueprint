@@ -181,3 +181,5 @@ tmp
 
 .gemini/
 gha-creds-*.json
+
+.claude/

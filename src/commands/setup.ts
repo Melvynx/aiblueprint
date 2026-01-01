@@ -139,50 +139,52 @@ export async function setupCommand(params: SetupCommandParams = {}) {
 
     await fs.ensureDir(claudeDir);
 
-    // Try to download from GitHub first, fallback to local files
+    // Check for local development files first
     let useGitHub = true;
     let sourceDir: string | undefined;
-    const testUrl = `${GITHUB_RAW_BASE}/scripts/validate-command.js`;
-    try {
-      const testResponse = await fetch(testUrl);
-      useGitHub = testResponse.ok;
-    } catch {
-      useGitHub = false;
-    }
 
-    if (!useGitHub) {
-      // Fallback to local source directory
-      const currentDir = process.cwd();
-      const possiblePaths = [
-        path.join(currentDir, "claude-code-config"),
-        path.join(__dirname, "../../claude-code-config"),
-        path.join(__dirname, "../claude-code-config"),
-        path.join(path.dirname(process.argv[1]), "../claude-code-config"),
-      ];
+    const currentDir = process.cwd();
+    const possiblePaths = [
+      path.join(currentDir, "claude-code-config"),
+      path.join(__dirname, "../../claude-code-config"),
+      path.join(__dirname, "../claude-code-config"),
+      path.join(path.dirname(process.argv[1]), "../claude-code-config"),
+    ];
 
-      sourceDir = possiblePaths.find((p) => {
-        try {
-          return fs.existsSync(p);
-        } catch {
-          return false;
-        }
-      });
-
-      if (!sourceDir) {
-        throw new Error(
-          "Could not find claude-code-config directory locally and GitHub is not accessible",
-        );
+    sourceDir = possiblePaths.find((p) => {
+      try {
+        return fs.existsSync(p);
+      } catch {
+        return false;
       }
+    });
 
+    // If local files exist, prefer them (development mode)
+    if (sourceDir) {
+      useGitHub = false;
       console.log(
-        chalk.yellow(
-          "  Using local configuration files (GitHub not accessible)",
-        ),
+        chalk.yellow("  Using local configuration files (development mode)"),
       );
     } else {
-      console.log(
-        chalk.green("  Downloading latest configuration from GitHub"),
-      );
+      // Try to download from GitHub
+      const testUrl = `${GITHUB_RAW_BASE}/scripts/validate-command.js`;
+      try {
+        const testResponse = await fetch(testUrl);
+        useGitHub = testResponse.ok;
+        if (useGitHub) {
+          console.log(
+            chalk.green("  Downloading latest configuration from GitHub"),
+          );
+        }
+      } catch {
+        useGitHub = false;
+      }
+
+      if (!useGitHub) {
+        throw new Error(
+          "Could not find local configuration files and GitHub is not accessible",
+        );
+      }
     }
 
     if (options.shellShortcuts) {
@@ -223,11 +225,32 @@ export async function setupCommand(params: SetupCommandParams = {}) {
           );
         }
       } else {
-        await fs.copy(
-          path.join(sourceDir!, "scripts"),
-          path.join(claudeDir, "scripts"),
-          { overwrite: true },
-        );
+        const scriptsDir = path.join(claudeDir, "scripts");
+        await fs.ensureDir(scriptsDir);
+
+        if (options.commandValidation) {
+          await fs.copy(
+            path.join(sourceDir!, "scripts/command-validator"),
+            path.join(scriptsDir, "command-validator"),
+            { overwrite: true },
+          );
+        }
+
+        if (options.postEditTypeScript) {
+          await fs.copy(
+            path.join(sourceDir!, "scripts/hook-post-file.ts"),
+            path.join(scriptsDir, "hook-post-file.ts"),
+            { overwrite: true },
+          );
+        }
+
+        if (options.customStatusline) {
+          await fs.copy(
+            path.join(sourceDir!, "scripts/statusline"),
+            path.join(scriptsDir, "statusline"),
+            { overwrite: true },
+          );
+        }
       }
       s.stop("Scripts installed");
     }
@@ -353,7 +376,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     }
 
     s.start("Updating settings.json");
-    await updateSettings(options, claudeDir);
+    await updateSettings(options, claudeDir, skipInteractive);
     s.stop("Settings updated");
 
     console.log(chalk.green("✨ Setup complete!"));

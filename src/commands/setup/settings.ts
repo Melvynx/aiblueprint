@@ -16,7 +16,7 @@ export interface SetupOptions {
   openCodeSymlink: boolean;
 }
 
-export async function updateSettings(options: SetupOptions, claudeDir: string) {
+export async function updateSettings(options: SetupOptions, claudeDir: string, skipInteractive = false) {
   const settingsPath = path.join(claudeDir, "settings.json");
   let settings: any = {};
 
@@ -28,7 +28,7 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
   }
 
   if (options.customStatusline) {
-    if (settings.statusLine) {
+    if (settings.statusLine && !skipInteractive) {
       const confirmAnswer = await inquirer.prompt([
         {
           type: "confirm",
