@@ -1,7 +1,19 @@
 import fs from "fs-extra";
 import path from "path";
+import os from "os";
 import inquirer from "inquirer";
 import chalk from "chalk";
+
+function getPlaySoundCommand(soundPath: string): string {
+  const platform = os.platform();
+  if (platform === "darwin") {
+    return `afplay -v 0.1 "${soundPath}"`;
+  } else if (platform === "win32") {
+    return `powershell -c "(New-Object Media.SoundPlayer '${soundPath}').PlaySync()"`;
+  } else {
+    return `paplay "${soundPath}" 2>/dev/null || aplay "${soundPath}" 2>/dev/null || true`;
+  }
+}
 
 export interface SetupOptions {
   shellShortcuts: boolean;
@@ -14,6 +26,7 @@ export interface SetupOptions {
   postEditTypeScript: boolean;
   codexSymlink: boolean;
   openCodeSymlink: boolean;
+  skipInteractive?: boolean;
 }
 
 export async function updateSettings(options: SetupOptions, claudeDir: string) {
@@ -28,7 +41,7 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
   }
 
   if (options.customStatusline) {
-    if (settings.statusLine) {
+    if (settings.statusLine && !options.skipInteractive) {
       const confirmAnswer = await inquirer.prompt([
         {
           type: "confirm",
@@ -89,12 +102,13 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
       settings.hooks.Stop = [];
     }
 
+    const finishSoundPath = path.join(claudeDir, "song/finish.mp3");
     const stopHook = {
       matcher: "",
       hooks: [
         {
           type: "command",
-          command: `afplay -v 0.1 ${path.join(claudeDir, "song/finish.mp3")}`,
+          command: getPlaySoundCommand(finishSoundPath),
         },
       ],
     };
@@ -110,12 +124,13 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
       settings.hooks.Notification = [];
     }
 
+    const needHumanSoundPath = path.join(claudeDir, "song/need-human.mp3");
     const notificationHook = {
       matcher: "",
       hooks: [
         {
           type: "command",
-          command: `afplay -v 0.1 ${path.join(claudeDir, "song/need-human.mp3")}`,
+          command: getPlaySoundCommand(needHumanSoundPath),
         },
       ],
     };

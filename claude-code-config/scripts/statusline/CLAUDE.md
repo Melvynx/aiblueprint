@@ -29,11 +29,16 @@ Add to `~/.claude/settings.json`:
 
 ### Authentication
 
-OAuth token stored in macOS Keychain:
+OAuth token storage (platform-specific):
+
+**macOS**: Stored in Keychain
 - **Service**: `Claude Code-credentials`
+- **Access**: `security find-generic-password -s "Claude Code-credentials" -w`
+
+**Windows & Linux**: Stored in file system
+- **Location**: `~/.claude/.credentials.json`
 - **Format**: JSON with `claudeAiOauth.accessToken`
 - **Token type**: `sk-ant-oat01-...` (OAuth token, not API key)
-- **Access**: `security find-generic-password -s "Claude Code-credentials" -w`
 
 ## Architecture
 
@@ -172,7 +177,7 @@ This ensures statusline never crashes Claude Code.
 
 ## Known Limitations
 
-- macOS only (uses Keychain)
 - Requires `git` CLI for git status
 - Requires Claude Code OAuth (not API key)
 - Transcript must be accessible (permissions)
+- Cross-platform support: macOS (Keychain), Windows & Linux (file-based credentials)

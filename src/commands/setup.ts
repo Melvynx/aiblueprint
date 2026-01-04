@@ -127,6 +127,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       postEditTypeScript: features.includes("postEditTypeScript"),
       codexSymlink: features.includes("codexSymlink"),
       openCodeSymlink: features.includes("openCodeSymlink"),
+      skipInteractive,
     };
 
     const s = new SimpleSpinner();
@@ -360,11 +361,20 @@ export async function setupCommand(params: SetupCommandParams = {}) {
 
     console.log(chalk.gray("\nNext steps:"));
     if (options.shellShortcuts) {
-      console.log(
-        chalk.gray(
-          "  • Restart your terminal or run: source ~/.zshenv (macOS) or source ~/.bashrc (Linux)",
-        ),
-      );
+      const platform = os.platform();
+      if (platform === "win32") {
+        console.log(
+          chalk.gray(
+            "  • Restart PowerShell to load the new functions",
+          ),
+        );
+      } else {
+        console.log(
+          chalk.gray(
+            "  • Restart your terminal or run: source ~/.zshenv (macOS) or source ~/.bashrc (Linux)",
+          ),
+        );
+      }
       console.log(
         chalk.gray('  • Use "cc" for Claude Code with permissions skipped'),
       );

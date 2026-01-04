@@ -45,29 +45,57 @@ export async function downloadDirectoryFromGitHub(
     const apiUrl = `https://api.github.com/repos/Melvynx/aiblueprint-cli/contents/claude-code-config/${dirPath}`;
     const response = await fetch(apiUrl);
     if (!response.ok) {
+      console.error(
+        chalk.yellow(
+          `  Warning: Failed to fetch directory from GitHub: ${dirPath} (HTTP ${response.status})`,
+        ),
+      );
       return false;
     }
 
     const files = await response.json();
     if (!Array.isArray(files)) {
+      console.error(
+        chalk.yellow(
+          `  Warning: Invalid response from GitHub API for: ${dirPath}`,
+        ),
+      );
       return false;
     }
 
     await fs.ensureDir(targetDir);
 
+    let allSuccess = true;
     for (const file of files) {
       const relativePath = `${dirPath}/${file.name}`;
       const targetPath = path.join(targetDir, file.name);
 
       if (file.type === "file") {
-        await downloadFromGitHub(relativePath, targetPath);
+        const success = await downloadFromGitHub(relativePath, targetPath);
+        if (!success) {
+          console.error(
+            chalk.yellow(`  Warning: Failed to download file: ${relativePath}`),
+          );
+          allSuccess = false;
+        }
       } else if (file.type === "dir") {
-        await downloadDirectoryFromGitHub(relativePath, targetPath);
+        const success = await downloadDirectoryFromGitHub(
+          relativePath,
+          targetPath,
+        );
+        if (!success) {
+          allSuccess = false;
+        }
       }
     }
 
-    return true;
+    return allSuccess;
   } catch (error) {
+    console.error(
+      chalk.yellow(
+        `  Warning: Error downloading directory ${dirPath}: ${error instanceof Error ? error.message : String(error)}`,
+      ),
+    );
     return false;
   }
 }

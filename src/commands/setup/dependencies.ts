@@ -1,11 +1,14 @@
 import { execSync } from "child_process";
 import chalk from "chalk";
 import path from "path";
+import os from "os";
 
 export async function checkAndInstallDependencies() {
+  const isWindows = os.platform() === "win32";
   const checkCommand = (cmd: string): boolean => {
     try {
-      execSync(`which ${cmd}`, { stdio: "ignore" });
+      const whichCmd = isWindows ? `where ${cmd}` : `which ${cmd}`;
+      execSync(whichCmd, { stdio: "ignore" });
       return true;
     } catch {
       return false;

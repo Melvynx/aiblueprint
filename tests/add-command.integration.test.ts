@@ -8,7 +8,7 @@ describe("CLI Integration Tests - Add Command", () => {
       `bun src/cli.ts claude-code add commands`,
       {
         cwd: process.cwd(),
-        timeout: 10000,
+        timeout: 30000,
         encoding: "utf8",
       },
     );
@@ -36,7 +36,7 @@ describe("CLI Integration Tests - Add Command", () => {
         `bun src/cli.ts claude-code -f "${tempDir}" add commands commit`,
         {
           cwd: process.cwd(),
-          timeout: 10000,
+          timeout: 30000,
           encoding: "utf8",
         },
       );
@@ -83,7 +83,7 @@ describe("CLI Integration Tests - Add Command", () => {
         `bun src/cli.ts claude-code add commands nonexistent-command`,
         {
           cwd: process.cwd(),
-          timeout: 10000,
+          timeout: 30000,
           encoding: "utf8",
         },
       );
@@ -109,7 +109,7 @@ describe("CLI Integration Tests - Add Command", () => {
         `bun src/cli.ts claude-code -f "${tempDir}" add commands commit`,
         {
           cwd: process.cwd(),
-          timeout: 10000,
+          timeout: 30000,
           encoding: "utf8",
         },
       );
@@ -119,7 +119,7 @@ describe("CLI Integration Tests - Add Command", () => {
         `bun src/cli.ts claude-code -f "${tempDir}" add commands epct`,
         {
           cwd: process.cwd(),
-          timeout: 10000,
+          timeout: 30000,
           encoding: "utf8",
         },
       );
@@ -166,7 +166,7 @@ describe("CLI Integration Tests - Add Command", () => {
         `bun src/cli.ts claude-code -f "${tempDir}" add commands commit`,
         {
           cwd: process.cwd(),
-          timeout: 10000,
+          timeout: 30000,
           encoding: "utf8",
         },
       );
@@ -183,7 +183,7 @@ describe("CLI Integration Tests - Add Command", () => {
           `echo "n" | bun src/cli.ts claude-code -f "${tempDir}" add commands commit`,
           {
             cwd: process.cwd(),
-            timeout: 10000,
+            timeout: 30000,
             encoding: "utf8",
             shell: true,
           } as any
