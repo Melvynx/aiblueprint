@@ -1,8 +1,6 @@
 import fs from "fs-extra";
 import path from "path";
 import os from "os";
-import inquirer from "inquirer";
-import chalk from "chalk";
 
 function getPlaySoundCommand(soundPath: string): string {
   const platform = os.platform();
@@ -27,6 +25,18 @@ export interface SetupOptions {
   codexSymlink: boolean;
   openCodeSymlink: boolean;
   skipInteractive?: boolean;
+  replaceStatusline?: boolean;
+}
+
+export async function hasExistingStatusLine(claudeDir: string): Promise<boolean> {
+  const settingsPath = path.join(claudeDir, "settings.json");
+  try {
+    const existingSettings = await fs.readFile(settingsPath, "utf-8");
+    const settings = JSON.parse(existingSettings);
+    return !!settings.statusLine;
+  } catch {
+    return false;
+  }
 }
 
 export async function updateSettings(options: SetupOptions, claudeDir: string) {
@@ -41,27 +51,9 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
   }
 
   if (options.customStatusline) {
-    if (settings.statusLine && !options.skipInteractive) {
-      const confirmAnswer = await inquirer.prompt([
-        {
-          type: "confirm",
-          name: "replace",
-          message: "You already have a statusLine configuration. Replace it?",
-        },
-      ]);
+    const shouldReplace = options.replaceStatusline !== false;
 
-      if (!confirmAnswer.replace) {
-        console.log(
-          chalk.yellow("  Keeping existing statusLine configuration"),
-        );
-      } else {
-        settings.statusLine = {
-          type: "command",
-          command: `bun ${path.join(claudeDir, "scripts/statusline/src/index.ts")}`,
-          padding: 0,
-        };
-      }
-    } else {
+    if (shouldReplace) {
       settings.statusLine = {
         type: "command",
         command: `bun ${path.join(claudeDir, "scripts/statusline/src/index.ts")}`,

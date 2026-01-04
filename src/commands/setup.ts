@@ -8,7 +8,7 @@ import { dirname } from "path";
 import { setupShellShortcuts } from "./setup/shell-shortcuts.js";
 import { setupCodexSymlink, setupOpenCodeSymlink } from "./setup/symlinks.js";
 import { checkAndInstallDependencies, installStatuslineDependencies } from "./setup/dependencies.js";
-import { updateSettings, type SetupOptions } from "./setup/settings.js";
+import { updateSettings, hasExistingStatusLine, type SetupOptions } from "./setup/settings.js";
 import {
   SimpleSpinner,
   downloadFromGitHub,
@@ -351,6 +351,24 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       s.start("Installing statusline dependencies");
       await installStatuslineDependencies(claudeDir);
       s.stop("Statusline dependencies installed");
+    }
+
+    if (options.customStatusline && !skipInteractive) {
+      const existingStatusLine = await hasExistingStatusLine(claudeDir);
+      if (existingStatusLine) {
+        const confirmAnswer = await inquirer.prompt([
+          {
+            type: "confirm",
+            name: "replace",
+            message: "You already have a statusLine configuration. Replace it?",
+            default: true,
+          },
+        ]);
+        options.replaceStatusline = confirmAnswer.replace;
+        if (!confirmAnswer.replace) {
+          console.log(chalk.yellow("  Keeping existing statusLine configuration"));
+        }
+      }
     }
 
     s.start("Updating settings.json");
