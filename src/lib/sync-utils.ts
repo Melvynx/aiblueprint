@@ -16,12 +16,20 @@ export interface SyncItem {
   name: string;
   relativePath: string;
   status: "new" | "modified" | "unchanged" | "deleted";
-  category: "commands" | "agents" | "skills" | "scripts";
+  category: "commands" | "agents" | "skills" | "scripts" | "settings";
   isFolder?: boolean;
+}
+
+export interface HookSyncItem {
+  hookType: string;
+  matcher: string;
+  status: "new" | "modified" | "unchanged";
+  remoteHook: any;
 }
 
 export interface SyncResult {
   items: SyncItem[];
+  hooks: HookSyncItem[];
   newCount: number;
   modifiedCount: number;
   deletedCount: number;
@@ -71,7 +79,7 @@ async function listRemoteFilesRecursive(
   const files = await listRemoteDirectory(dirPath, githubToken);
 
   for (const file of files) {
-    if (file.name === "node_modules") continue;
+    if (file.name === "node_modules" || file.name === ".DS_Store") continue;
 
     const relativePath = basePath ? `${basePath}/${file.name}` : file.name;
 
@@ -109,7 +117,7 @@ async function listLocalFiles(dir: string): Promise<string[]> {
 
   const items = await fs.readdir(dir);
   for (const item of items) {
-    if (item === "node_modules") continue;
+    if (item === "node_modules" || item === ".DS_Store") continue;
 
     const fullPath = path.join(dir, item);
     const stat = await fs.stat(fullPath);
@@ -130,7 +138,7 @@ async function listLocalFilesRecursive(dir: string, basePath: string): Promise<s
   const items = await fs.readdir(dir);
 
   for (const item of items) {
-    if (item === "node_modules") continue;
+    if (item === "node_modules" || item === ".DS_Store") continue;
 
     const fullPath = path.join(dir, item);
     const relativePath = `${basePath}/${item}`;
@@ -217,6 +225,84 @@ async function analyzeCategory(
   return items;
 }
 
+async function fetchRemoteSettings(githubToken: string): Promise<any | null> {
+  try {
+    const url = `https://raw.githubusercontent.com/${PREMIUM_REPO}/${PREMIUM_BRANCH}/claude-code-config/settings.json`;
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `token ${githubToken}`,
+        Accept: "application/vnd.github.v3.raw",
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+async function getLocalSettings(claudeDir: string): Promise<any> {
+  const settingsPath = path.join(claudeDir, "settings.json");
+  try {
+    const content = await fs.readFile(settingsPath, "utf-8");
+    return JSON.parse(content);
+  } catch {
+    return {};
+  }
+}
+
+function analyzeHooksChanges(
+  remoteSettings: any,
+  localSettings: any
+): HookSyncItem[] {
+  const hookItems: HookSyncItem[] = [];
+
+  if (!remoteSettings?.hooks) {
+    return hookItems;
+  }
+
+  const localHooks = localSettings?.hooks || {};
+
+  for (const [hookType, remoteHookArray] of Object.entries(remoteSettings.hooks)) {
+    if (!Array.isArray(remoteHookArray)) continue;
+
+    const localHookArray = localHooks[hookType] || [];
+
+    for (const remoteHook of remoteHookArray as any[]) {
+      const matcher = remoteHook.matcher || "";
+      const existingLocal = localHookArray.find(
+        (h: any) => h.matcher === matcher
+      );
+
+      if (!existingLocal) {
+        hookItems.push({
+          hookType,
+          matcher,
+          status: "new",
+          remoteHook,
+        });
+      } else {
+        const remoteStr = JSON.stringify(remoteHook);
+        const localStr = JSON.stringify(existingLocal);
+        if (remoteStr !== localStr) {
+          hookItems.push({
+            hookType,
+            matcher,
+            status: "modified",
+            remoteHook,
+          });
+        }
+      }
+    }
+  }
+
+  return hookItems;
+}
+
 export async function analyzeSyncChanges(
   claudeDir: string,
   githubToken: string
@@ -235,10 +321,18 @@ export async function analyzeSyncChanges(
     allItems.push(...items);
   }
 
+  const remoteSettings = await fetchRemoteSettings(githubToken);
+  const localSettings = await getLocalSettings(claudeDir);
+  const hooks = remoteSettings ? analyzeHooksChanges(remoteSettings, localSettings) : [];
+
+  const hooksNewCount = hooks.filter((h) => h.status === "new").length;
+  const hooksModifiedCount = hooks.filter((h) => h.status === "modified").length;
+
   return {
     items: allItems,
-    newCount: allItems.filter((i) => i.status === "new").length,
-    modifiedCount: allItems.filter((i) => i.status === "modified").length,
+    hooks,
+    newCount: allItems.filter((i) => i.status === "new").length + hooksNewCount,
+    modifiedCount: allItems.filter((i) => i.status === "modified").length + hooksModifiedCount,
     deletedCount: allItems.filter((i) => i.status === "deleted").length,
     unchangedCount: allItems.filter((i) => i.status === "unchanged").length,
   };
@@ -269,6 +363,61 @@ async function downloadFromPrivateGitHub(
   } catch {
     return false;
   }
+}
+
+export async function syncSelectedHooks(
+  claudeDir: string,
+  hooks: HookSyncItem[],
+  onProgress?: (hook: string, action: string) => void
+): Promise<{ success: number; failed: number }> {
+  if (hooks.length === 0) {
+    return { success: 0, failed: 0 };
+  }
+
+  const settingsPath = path.join(claudeDir, "settings.json");
+  let settings: any = {};
+
+  try {
+    const content = await fs.readFile(settingsPath, "utf-8");
+    settings = JSON.parse(content);
+  } catch {
+    settings = {};
+  }
+
+  if (!settings.hooks) {
+    settings.hooks = {};
+  }
+
+  let success = 0;
+  let failed = 0;
+
+  for (const hook of hooks) {
+    onProgress?.(`${hook.hookType}[${hook.matcher || "*"}]`, hook.status === "new" ? "adding" : "updating");
+
+    try {
+      if (!settings.hooks[hook.hookType]) {
+        settings.hooks[hook.hookType] = [];
+      }
+
+      const existingIndex = settings.hooks[hook.hookType].findIndex(
+        (h: any) => h.matcher === hook.matcher
+      );
+
+      if (existingIndex >= 0) {
+        settings.hooks[hook.hookType][existingIndex] = hook.remoteHook;
+      } else {
+        settings.hooks[hook.hookType].push(hook.remoteHook);
+      }
+
+      success++;
+    } catch {
+      failed++;
+    }
+  }
+
+  await fs.writeFile(settingsPath, JSON.stringify(settings, null, 2));
+
+  return { success, failed };
 }
 
 export async function syncSelectedItems(
