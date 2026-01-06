@@ -15,10 +15,10 @@ describe("CLI Integration Tests - Add Command", () => {
 
     // Check that the output contains expected commands
     expect(output).toContain("Available Claude Code Commands");
-    expect(output).toContain("commit");
-    expect(output).toContain("create-pull-request");
-    expect(output).toContain("epct");
-    expect(output).toContain("Quick commit and push with minimal, clean messages");
+    expect(output).toContain("apex");
+    expect(output).toContain("git/commit");
+    expect(output).toContain("git/create-pr");
+    expect(output).toContain("Systematic implementation using APEX methodology");
     expect(output).toContain("Usage:");
     expect(output).toContain("aiblueprint claude-code add commands <command-name>");
   });
@@ -31,9 +31,9 @@ describe("CLI Integration Tests - Add Command", () => {
       const realFs = await import("fs-extra");
 
       // Add a specific command
-      console.log("Adding commit command...");
+      console.log("Adding git/commit command...");
       const output = execSync(
-        `bun src/cli.ts claude-code -f "${tempDir}" add commands commit`,
+        `bun src/cli.ts claude-code -f "${tempDir}" add commands git/commit`,
         {
           cwd: process.cwd(),
           timeout: 30000,
@@ -43,12 +43,12 @@ describe("CLI Integration Tests - Add Command", () => {
 
       // Verify output messages
       expect(output).toContain("Command installed successfully!");
-      expect(output).toContain("Name: Commit");
+      expect(output).toContain("Name: Git/Commit");
       expect(output).toContain("Description: Quick commit and push with minimal, clean messages");
       expect(output).toContain("Tools: Bash(git :*)");
 
       // Verify command file was created
-      const commandFilePath = `${tempDir}/commands/commit.md`;
+      const commandFilePath = `${tempDir}/commands/git/commit.md`;
       const commandFileExists = await realFs.pathExists(commandFilePath);
       expect(commandFileExists).toBe(true);
 
@@ -57,7 +57,6 @@ describe("CLI Integration Tests - Add Command", () => {
       expect(commandContent).toContain("---");
       expect(commandContent).toContain("allowed-tools: Bash(git :*)");
       expect(commandContent).toContain("description: Quick commit and push with minimal, clean messages");
-      expect(commandContent).toContain("You are a git commit automation tool");
 
       console.log("✅ Command added successfully!");
 
@@ -93,7 +92,7 @@ describe("CLI Integration Tests - Add Command", () => {
       const output = error.stdout?.toString() || error.message;
       expect(output).toContain("Command 'nonexistent-command' not found");
       expect(output).toContain("Available commands:");
-      expect(output).toContain("commit:");
+      expect(output).toContain("apex:");
     }
   });
 
@@ -106,7 +105,7 @@ describe("CLI Integration Tests - Add Command", () => {
 
       // Add first command
       execSync(
-        `bun src/cli.ts claude-code -f "${tempDir}" add commands commit`,
+        `bun src/cli.ts claude-code -f "${tempDir}" add commands git/commit`,
         {
           cwd: process.cwd(),
           timeout: 30000,
@@ -116,7 +115,7 @@ describe("CLI Integration Tests - Add Command", () => {
 
       // Add second command
       execSync(
-        `bun src/cli.ts claude-code -f "${tempDir}" add commands epct`,
+        `bun src/cli.ts claude-code -f "${tempDir}" add commands apex`,
         {
           cwd: process.cwd(),
           timeout: 30000,
@@ -125,18 +124,18 @@ describe("CLI Integration Tests - Add Command", () => {
       );
 
       // Verify both files exist
-      const commitExists = await realFs.pathExists(`${tempDir}/commands/commit.md`);
-      const epctExists = await realFs.pathExists(`${tempDir}/commands/epct.md`);
+      const commitExists = await realFs.pathExists(`${tempDir}/commands/git/commit.md`);
+      const apexExists = await realFs.pathExists(`${tempDir}/commands/apex.md`);
 
       expect(commitExists).toBe(true);
-      expect(epctExists).toBe(true);
+      expect(apexExists).toBe(true);
 
       // Verify content of both files
-      const commitContent = await realFs.readFile(`${tempDir}/commands/commit.md`, 'utf-8');
-      const epctContent = await realFs.readFile(`${tempDir}/commands/epct.md`, 'utf-8');
+      const commitContent = await realFs.readFile(`${tempDir}/commands/git/commit.md`, 'utf-8');
+      const apexContent = await realFs.readFile(`${tempDir}/commands/apex.md`, 'utf-8');
 
-      expect(commitContent).toContain("git commit automation tool");
-      expect(epctContent).toContain("EPCT");
+      expect(commitContent).toContain("Quick commit and push");
+      expect(apexContent).toContain("APEX");
 
       console.log("✅ Multiple commands added successfully!");
 
@@ -163,7 +162,7 @@ describe("CLI Integration Tests - Add Command", () => {
 
       // Add command first time
       execSync(
-        `bun src/cli.ts claude-code -f "${tempDir}" add commands commit`,
+        `bun src/cli.ts claude-code -f "${tempDir}" add commands git/commit`,
         {
           cwd: process.cwd(),
           timeout: 30000,
@@ -172,7 +171,7 @@ describe("CLI Integration Tests - Add Command", () => {
       );
 
       // Verify file exists
-      const commandFilePath = `${tempDir}/commands/commit.md`;
+      const commandFilePath = `${tempDir}/commands/git/commit.md`;
       const fileExists = await realFs.pathExists(commandFilePath);
       expect(fileExists).toBe(true);
 
@@ -180,7 +179,7 @@ describe("CLI Integration Tests - Add Command", () => {
       // The command should detect the existing file and prompt for overwrite
       try {
         const conflictOutput = execSync(
-          `echo "n" | bun src/cli.ts claude-code -f "${tempDir}" add commands commit`,
+          `echo "n" | bun src/cli.ts claude-code -f "${tempDir}" add commands git/commit`,
           {
             cwd: process.cwd(),
             timeout: 30000,

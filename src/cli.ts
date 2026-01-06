@@ -11,6 +11,7 @@ import {
   proSetupCommand,
   proUpdateCommand,
 } from "./commands/pro.js";
+import { proSyncCommand } from "./commands/sync.js";
 import chalk from "chalk";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
@@ -157,6 +158,15 @@ proCmd
     const parentOptions = command.parent.parent.opts();
     const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
     proUpdateCommand({ folder: claudeCodeFolder });
+  });
+
+proCmd
+  .command("sync")
+  .description("Sync premium configurations with selective update")
+  .action((options, command) => {
+    const parentOptions = command.parent.parent.opts();
+    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
+    proSyncCommand({ folder: claudeCodeFolder });
   });
 
 program.parse(process.argv);

@@ -23,10 +23,19 @@ export async function listFilesFromGitHub(dirPath: string): Promise<string[]> {
     if (!response.ok) {
       return [];
     }
-    const files = await response.json();
-    return files
-      .filter((file: any) => file.type === 'file')
-      .map((file: any) => file.name);
+    const items = await response.json();
+    const files: string[] = [];
+
+    for (const item of items) {
+      if (item.type === 'file') {
+        files.push(item.name);
+      } else if (item.type === 'dir') {
+        const subFiles = await listFilesFromGitHub(`${dirPath}/${item.name}`);
+        files.push(...subFiles.map((f: string) => `${item.name}/${f}`));
+      }
+    }
+
+    return files;
   } catch (error) {
     return [];
   }
@@ -34,7 +43,7 @@ export async function listFilesFromGitHub(dirPath: string): Promise<string[]> {
 
 export async function isGitHubAvailable(): Promise<boolean> {
   try {
-    const testUrl = `${GITHUB_RAW_BASE}/commands/commit.md`;
+    const testUrl = `${GITHUB_RAW_BASE}/commands/apex.md`;
     const testResponse = await fetch(testUrl);
     return testResponse.ok;
   } catch {

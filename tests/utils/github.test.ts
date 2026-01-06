@@ -104,7 +104,7 @@ describe("GitHub Utils", () => {
 
       expect(result).toBe(true);
       expect(mockFetch).toHaveBeenCalledWith(
-        "https://raw.githubusercontent.com/Melvynx/aiblueprint-cli/main/claude-code-config/commands/commit.md"
+        "https://raw.githubusercontent.com/Melvynx/aiblueprint-cli/main/claude-code-config/commands/apex.md"
       );
     });
 

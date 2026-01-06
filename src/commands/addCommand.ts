@@ -32,6 +32,23 @@ interface CommandMetadata {
 }
 
 
+async function getLocalMdFilesRecursively(dir: string, basePath: string = ''): Promise<string[]> {
+  const files: string[] = [];
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const relativePath = basePath ? `${basePath}/${entry.name}` : entry.name;
+    if (entry.isDirectory()) {
+      const subFiles = await getLocalMdFilesRecursively(path.join(dir, entry.name), relativePath);
+      files.push(...subFiles);
+    } else if (entry.name.endsWith('.md')) {
+      files.push(relativePath);
+    }
+  }
+
+  return files;
+}
+
 async function discoverAvailableCommands(): Promise<Record<string, CommandMetadata>> {
   const commands: Record<string, CommandMetadata> = {};
   const useGitHub = await isGitHubAvailable();
@@ -39,7 +56,7 @@ async function discoverAvailableCommands(): Promise<Record<string, CommandMetada
   let mdFiles: string[] = [];
 
   if (useGitHub) {
-    // Get command list from GitHub
+    // Get command list from GitHub (includes nested folders)
     mdFiles = (await listFilesFromGitHub('commands')).filter(file => file.endsWith('.md'));
   }
 
@@ -50,8 +67,7 @@ async function discoverAvailableCommands(): Promise<Record<string, CommandMetada
       throw new Error('Commands directory not found');
     }
 
-    const files = await fs.readdir(commandsDir);
-    mdFiles = files.filter(file => file.endsWith('.md'));
+    mdFiles = await getLocalMdFilesRecursively(commandsDir);
   }
 
   // Process each command file
@@ -63,7 +79,7 @@ async function discoverAvailableCommands(): Promise<Record<string, CommandMetada
       const { metadata } = parseYamlFrontmatter(content);
 
       commands[commandName] = {
-        name: commandName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        name: commandName.split('/').map(part => part.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())).join('/'),
         description: metadata.description || 'No description available',
         allowedTools: metadata['allowed-tools'],
         argumentHint: metadata['argument-hint'],
