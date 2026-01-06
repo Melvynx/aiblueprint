@@ -14,6 +14,7 @@ import {
   downloadFromGitHub,
   downloadDirectoryFromGitHub,
 } from "./setup/utils.js";
+import { getVersion } from "../lib/version.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -36,7 +37,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     skipInteractive,
   } = params;
   try {
-    console.log(chalk.blue.bold("\n🚀 AIBlueprint Claude Code Setup\n"));
+    console.log(chalk.blue.bold(`\n🚀 AIBlueprint Claude Code Setup ${chalk.gray(`v${getVersion()}`)}\n`));
     console.log(chalk.bgBlue(" Setting up your Claude Code environment "));
 
     let features: string[];

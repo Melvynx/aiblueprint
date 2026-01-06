@@ -3,6 +3,7 @@ import chalk from "chalk";
 import os from "os";
 import path from "path";
 import { installProConfigs, type InstallProgressCallback } from "../lib/pro-installer.js";
+import { getVersion } from "../lib/version.js";
 import {
   saveToken,
   getToken,
@@ -58,7 +59,7 @@ async function countInstalledItems(claudeDir: string) {
 }
 
 export async function proActivateCommand(userToken?: string) {
-  p.intro(chalk.blue("🔑 Activate AIBlueprint CLI Premium"));
+  p.intro(chalk.blue(`🔑 Activate AIBlueprint CLI Premium ${chalk.gray(`v${getVersion()}`)}`));
 
   try {
     // If token not provided as argument, ask for it
@@ -148,7 +149,7 @@ export async function proActivateCommand(userToken?: string) {
 }
 
 export async function proStatusCommand() {
-  p.intro(chalk.blue("📊 Premium Token Status"));
+  p.intro(chalk.blue(`📊 Premium Token Status ${chalk.gray(`v${getVersion()}`)}`));
 
   try {
     const token = await getToken();
@@ -177,7 +178,7 @@ export async function proStatusCommand() {
 }
 
 export async function proSetupCommand(options: { folder?: string } = {}) {
-  p.intro(chalk.blue("⚙️  Setup AIBlueprint CLI Premium"));
+  p.intro(chalk.blue(`⚙️  Setup AIBlueprint CLI Premium ${chalk.gray(`v${getVersion()}`)}`));
 
   try {
     const githubToken = await getToken();
@@ -257,7 +258,7 @@ export async function proSetupCommand(options: { folder?: string } = {}) {
 }
 
 export async function proUpdateCommand(options: { folder?: string } = {}) {
-  p.intro(chalk.blue("🔄 Update Premium Configs"));
+  p.intro(chalk.blue(`🔄 Update Premium Configs ${chalk.gray(`v${getVersion()}`)}`));
 
   try {
     const githubToken = await getToken();

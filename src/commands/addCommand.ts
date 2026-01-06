@@ -5,6 +5,7 @@ import chalk from 'chalk';
 import { listFilesFromGitHub, isGitHubAvailable } from '../utils/github.js';
 import { parseYamlFrontmatter, getTargetDirectory, findLocalConfigDir } from '../utils/claude-config.js';
 import { installFileWithGitHubFallback, getFileContentWithGitHubFallback } from '../utils/file-installer.js';
+import { getVersion } from '../lib/version.js';
 
 class SimpleSpinner {
   private message: string = '';
@@ -117,7 +118,7 @@ function displayAvailableCommands(commands: Record<string, CommandMetadata>) {
 }
 
 export async function addCommandCommand(commandName?: string, options: AddCommandOptions = {}) {
-  console.log(chalk.bgBlue(' aiblueprint-cli '));
+  console.log(chalk.bgBlue(` aiblueprint-cli v${getVersion()} `));
 
   const availableCommands = await discoverAvailableCommands();
 

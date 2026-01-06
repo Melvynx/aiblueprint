@@ -4,6 +4,7 @@ import chalk from "chalk";
 import { homedir } from "os";
 import { checkAndInstallDependencies, installStatuslineDependencies } from "./setup/dependencies.js";
 import { downloadDirectoryFromGitHub } from "./setup/utils.js";
+import { getVersion } from "../lib/version.js";
 
 export interface StatuslineOptions {
   folder?: string;
@@ -14,7 +15,7 @@ export async function statuslineCommand(options: StatuslineOptions) {
     ? path.resolve(options.folder)
     : path.join(homedir(), ".claude");
 
-  console.log(chalk.blue("🚀 Setting up AIBlueprint Statusline..."));
+  console.log(chalk.blue(`🚀 Setting up AIBlueprint Statusline ${chalk.gray(`v${getVersion()}`)}...`));
   console.log(chalk.gray(`  Target: ${claudeDir}\n`));
 
   await fs.ensureDir(claudeDir);

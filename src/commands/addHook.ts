@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { getTargetDirectory } from '../utils/claude-config.js';
 import { installFileWithGitHubFallback } from '../utils/file-installer.js';
+import { getVersion } from '../lib/version.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -41,7 +42,7 @@ const supportedHooks = {
 };
 
 export async function addHookCommand(hookType: string, options: AddHookOptions) {
-  console.log(chalk.bgBlue(' aiblueprint-cli '));
+  console.log(chalk.bgBlue(` aiblueprint-cli v${getVersion()} `));
 
   if (!supportedHooks[hookType as keyof typeof supportedHooks]) {
     console.log(chalk.red(`❌ Unsupported hook type: ${hookType}`));

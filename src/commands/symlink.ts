@@ -6,6 +6,7 @@ import {
   type ToolType,
   type ContentType,
 } from "./setup/symlinks.js";
+import { getVersion } from "../lib/version.js";
 
 export interface SymlinkCommandParams {
   claudeCodeFolder?: string;
@@ -57,7 +58,7 @@ interface DestinationChoice {
 
 export async function symlinkCommand(params: SymlinkCommandParams = {}) {
   try {
-    console.log(chalk.blue.bold("\n🔗 Symlink Manager\n"));
+    console.log(chalk.blue.bold(`\n🔗 Symlink Manager ${chalk.gray(`v${getVersion()}`)}\n`));
     console.log(
       chalk.gray("Create symlinks between different CLI tool configurations"),
     );

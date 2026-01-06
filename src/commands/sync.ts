@@ -9,6 +9,7 @@ import {
   type SyncItem,
 } from "../lib/sync-utils.js";
 import { installScriptsDependencies } from "./setup/dependencies.js";
+import { getVersion } from "../lib/version.js";
 
 export interface SyncCommandOptions {
   folder?: string;
@@ -43,7 +44,7 @@ function groupByCategory(items: SyncItem[]): Map<string, SyncItem[]> {
 }
 
 export async function proSyncCommand(options: SyncCommandOptions = {}) {
-  p.intro(chalk.blue("🔄 Sync Premium Configurations"));
+  p.intro(chalk.blue(`🔄 Sync Premium Configurations ${chalk.gray(`v${getVersion()}`)}`));
 
   try {
     const githubToken = await getToken();
