@@ -42,21 +42,25 @@ export async function checkAndInstallDependencies() {
   }
 }
 
-export async function installStatuslineDependencies(claudeDir: string) {
-  const statuslineDir = path.join(claudeDir, "scripts/statusline");
+export async function installScriptsDependencies(claudeDir: string) {
+  const scriptsDir = path.join(claudeDir, "scripts");
 
-  console.log(chalk.yellow("\n  Installing statusline dependencies..."));
+  console.log(chalk.yellow("\n  Installing scripts dependencies..."));
   try {
     execSync("bun install", {
-      cwd: statuslineDir,
+      cwd: scriptsDir,
       stdio: "inherit"
     });
-    console.log(chalk.green("  ✓ Statusline dependencies installed"));
+    console.log(chalk.green("  ✓ Scripts dependencies installed"));
   } catch (error) {
     console.log(
       chalk.red(
-        "  Failed to install statusline dependencies. Please run 'bun install' manually in ~/.claude/scripts/statusline",
+        "  Failed to install scripts dependencies. Please run 'bun install' manually in ~/.claude/scripts",
       ),
     );
   }
+}
+
+export async function installStatuslineDependencies(claudeDir: string) {
+  await installScriptsDependencies(claudeDir);
 }

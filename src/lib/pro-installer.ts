@@ -5,9 +5,15 @@ import path from "path";
 const PREMIUM_REPO = "Melvynx/aiblueprint-cli-premium";
 const PREMIUM_BRANCH = "main";
 
+export type InstallProgressCallback = (
+  file: string,
+  type: "file" | "directory"
+) => void;
+
 interface InstallProConfigsOptions {
   githubToken: string;
   claudeCodeFolder?: string;
+  onProgress?: InstallProgressCallback;
 }
 
 /**
@@ -55,6 +61,7 @@ async function downloadDirectoryFromPrivateGitHub(
   dirPath: string,
   targetDir: string,
   githubToken: string,
+  onProgress?: InstallProgressCallback,
 ): Promise<boolean> {
   try {
     const apiUrl = `https://api.github.com/repos/${repo}/contents/${dirPath}?ref=${branch}`;
@@ -83,8 +90,10 @@ async function downloadDirectoryFromPrivateGitHub(
     for (const file of files) {
       const relativePath = dirPath ? `${dirPath}/${file.name}` : file.name;
       const targetPath = path.join(targetDir, file.name);
+      const displayPath = relativePath.replace("claude-code-config/", "");
 
       if (file.type === "file") {
+        onProgress?.(displayPath, "file");
         await downloadFromPrivateGitHub(
           repo,
           branch,
@@ -99,6 +108,7 @@ async function downloadDirectoryFromPrivateGitHub(
           relativePath,
           targetPath,
           githubToken,
+          onProgress,
         );
       }
     }
@@ -116,47 +126,39 @@ async function downloadDirectoryFromPrivateGitHub(
 export async function installProConfigs(
   options: InstallProConfigsOptions,
 ): Promise<void> {
-  const { githubToken, claudeCodeFolder } = options;
+  const { githubToken, claudeCodeFolder, onProgress } = options;
 
-  // Determine Claude Code folder
   const claudeFolder =
     claudeCodeFolder || path.join(os.homedir(), ".claude");
 
-  // Create a temporary directory for premium configs
   const tempDir = path.join(os.tmpdir(), `aiblueprint-premium-${Date.now()}`);
 
   try {
-    // Download the entire claude-code-config directory from premium repo
     const success = await downloadDirectoryFromPrivateGitHub(
       PREMIUM_REPO,
       PREMIUM_BRANCH,
       "claude-code-config",
       tempDir,
       githubToken,
+      onProgress,
     );
 
     if (!success) {
       throw new Error("Failed to download premium configurations");
     }
 
-    // Copy premium configs to Claude Code folder
-    // We merge the configs, premium files will override free files
     await fs.copy(tempDir, claudeFolder, {
       overwrite: true,
       recursive: true,
     });
-
-    console.log(`✓ Premium configurations installed to ${claudeFolder}`);
   } catch (error) {
     throw new Error(
       `Failed to install premium configs: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   } finally {
-    // Clean up temp directory
     try {
       await fs.remove(tempDir);
-    } catch (error) {
-      // Ignore cleanup errors
+    } catch {
     }
   }
 }

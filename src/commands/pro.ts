@@ -1,7 +1,8 @@
 import * as p from "@clack/prompts";
 import chalk from "chalk";
-import { installProConfigs } from "../lib/pro-installer.js";
-import { installBasicConfigs } from "../lib/setup-helper.js";
+import os from "os";
+import path from "path";
+import { installProConfigs, type InstallProgressCallback } from "../lib/pro-installer.js";
 import {
   saveToken,
   getToken,
@@ -10,8 +11,8 @@ import {
 } from "../lib/token-storage.js";
 import { setupShellShortcuts } from "./setup/shell-shortcuts.js";
 import { updateSettings } from "./setup/settings.js";
+import { checkAndInstallDependencies, installScriptsDependencies } from "./setup/dependencies.js";
 import fs from "fs-extra";
-import path from "path";
 
 const API_URL = "https://codeline.app/api/products";
 const PRODUCT_ID = "prd_XJVgxVPbGG";
@@ -188,25 +189,33 @@ export async function proSetupCommand(options: { folder?: string } = {}) {
       process.exit(1);
     }
 
+    const claudeDir = options.folder
+      ? path.resolve(options.folder)
+      : path.join(os.homedir(), ".claude");
+
     const spinner = p.spinner();
 
-    // Step 1: Install free configs (commands, agents ONLY - skip free statusline)
-    spinner.start("Installing free configurations...");
-    const claudeDir = await installBasicConfigs(
-      { claudeCodeFolder: options.folder },
-      true, // Skip free statusline
-    );
-    spinner.stop("Free configurations installed");
+    const onProgress: InstallProgressCallback = (file, type) => {
+      spinner.message(`Installing: ${chalk.cyan(file)} ${chalk.gray(`(${type})`)}`);
+    };
 
-    // Step 2: Install premium configs (commands, agents, statusline PREMIUM)
     spinner.start("Installing premium configurations...");
     await installProConfigs({
       githubToken,
       claudeCodeFolder: claudeDir,
+      onProgress,
     });
     spinner.stop("Premium configurations installed");
 
-    // Step 3: Setup shell shortcuts (cc, ccc)
+    spinner.start("Checking global dependencies...");
+    await checkAndInstallDependencies();
+    spinner.stop("Global dependencies ready");
+
+    spinner.start("Installing scripts dependencies...");
+    await installScriptsDependencies(claudeDir);
+    spinner.stop("Scripts dependencies installed");
+
+    // Setup shell shortcuts (cc, ccc)
     spinner.start("Setting up shell shortcuts...");
     await setupShellShortcuts();
     spinner.stop("Shell shortcuts configured");

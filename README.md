@@ -547,9 +547,26 @@ aiblueprint claude-code pro setup
 # Check premium status
 aiblueprint claude-code pro status
 
-# Update premium configs
+# Update premium configs (overwrites all)
 aiblueprint claude-code pro update
+
+# Sync premium configs (selective update)
+aiblueprint claude-code pro sync
 ```
+
+### Sync Command
+
+The `sync` command provides intelligent selective updates:
+
+```bash
+aiblueprint claude-code pro sync
+```
+
+**Features:**
+- 🔍 **Diff Analysis** - Compares your local config with the latest premium version
+- 📝 **Categorized Changes** - Shows NEW and MODIFIED items separately
+- ✅ **Selective Update** - Choose exactly which files/folders to update
+- 📁 **Smart Grouping** - Commands and agents shown individually, skills and scripts grouped as folders
 
 **Learn more:** https://mlv.sh/claude-cli
 
