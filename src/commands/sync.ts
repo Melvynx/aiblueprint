@@ -43,6 +43,108 @@ function groupByCategory(items: SyncItem[]): Map<string, SyncItem[]> {
   return grouped;
 }
 
+interface FolderSummary {
+  name: string;
+  newCount: number;
+  modifiedCount: number;
+  deletedCount: number;
+}
+
+function aggregateByTopLevelFolder(items: SyncItem[]): FolderSummary[] {
+  const folderMap = new Map<string, FolderSummary>();
+
+  for (const item of items) {
+    const parts = item.name.split("/");
+    const topLevel = parts[0];
+
+    if (!folderMap.has(topLevel)) {
+      folderMap.set(topLevel, { name: topLevel, newCount: 0, modifiedCount: 0, deletedCount: 0 });
+    }
+
+    const summary = folderMap.get(topLevel)!;
+    if (item.status === "new") summary.newCount++;
+    else if (item.status === "modified") summary.modifiedCount++;
+    else if (item.status === "deleted") summary.deletedCount++;
+  }
+
+  return Array.from(folderMap.values());
+}
+
+function formatFolderSummary(summary: FolderSummary): string {
+  const parts: string[] = [];
+  if (summary.newCount > 0) parts.push(chalk.green(`+${summary.newCount}`));
+  if (summary.modifiedCount > 0) parts.push(chalk.yellow(`~${summary.modifiedCount}`));
+  if (summary.deletedCount > 0) parts.push(chalk.red(`-${summary.deletedCount}`));
+
+  const countStr = parts.length > 0 ? ` (${parts.join(", ")})` : "";
+  return `📁 ${summary.name}${countStr}`;
+}
+
+type SelectionItem =
+  | { type: "file"; item: SyncItem }
+  | { type: "folder"; folder: string; category: string; items: SyncItem[] };
+
+function createSelectionChoices(
+  changedItems: SyncItem[]
+): { value: SelectionItem; label: string; hint?: string }[] {
+  const choices: { value: SelectionItem; label: string; hint?: string }[] = [];
+  const folderedCategories = ["scripts", "skills"];
+
+  const grouped = groupByCategory(changedItems);
+
+  for (const [category, items] of grouped) {
+    if (folderedCategories.includes(category)) {
+      const folderMap = new Map<string, SyncItem[]>();
+      for (const item of items) {
+        const topLevel = item.name.split("/")[0];
+        if (!folderMap.has(topLevel)) folderMap.set(topLevel, []);
+        folderMap.get(topLevel)!.push(item);
+      }
+
+      for (const [folder, folderItems] of folderMap) {
+        const summary = aggregateByTopLevelFolder(folderItems)[0];
+        choices.push({
+          value: { type: "folder", folder, category, items: folderItems },
+          label: `📁 ${category}/${folder}`,
+          hint: formatFolderHint(summary),
+        });
+      }
+    } else {
+      for (const item of items) {
+        const icons = { new: "🆕", modified: "📝", deleted: "🗑️", unchanged: "" };
+        const actions = { new: "add", modified: "update", deleted: "remove", unchanged: "" };
+        choices.push({
+          value: { type: "file", item },
+          label: `${icons[item.status]} ${item.relativePath}`,
+          hint: actions[item.status],
+        });
+      }
+    }
+  }
+
+  return choices;
+}
+
+function formatFolderHint(summary: FolderSummary): string {
+  const parts: string[] = [];
+  if (summary.newCount > 0) parts.push(`+${summary.newCount}`);
+  if (summary.modifiedCount > 0) parts.push(`~${summary.modifiedCount}`);
+  if (summary.deletedCount > 0) parts.push(`-${summary.deletedCount}`);
+  return parts.join(", ");
+}
+
+function expandSelections(selections: SelectionItem[]): SyncItem[] {
+  const items: SyncItem[] = [];
+  for (const sel of selections) {
+    if (sel.type === "file") {
+      items.push(sel.item);
+    } else {
+      items.push(...sel.items);
+    }
+  }
+  return items;
+}
+
 export async function proSyncCommand(options: SyncCommandOptions = {}) {
   p.intro(chalk.blue(`🔄 Sync Premium Configurations ${chalk.gray(`v${getVersion()}`)}`));
 
@@ -83,27 +185,27 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
     p.log.message(chalk.bold("Changes by category:"));
 
     const grouped = groupByCategory(changedItems);
+    const folderedCategories = ["scripts", "skills"];
+
     for (const [category, items] of grouped) {
       p.log.message("");
       p.log.message(chalk.cyan.bold(`  ${category.toUpperCase()}`));
-      for (const item of items) {
-        p.log.message(`    ${formatItem(item)}`);
+
+      if (folderedCategories.includes(category)) {
+        const folderSummaries = aggregateByTopLevelFolder(items);
+        for (const summary of folderSummaries) {
+          p.log.message(`    ${formatFolderSummary(summary)}`);
+        }
+      } else {
+        for (const item of items) {
+          p.log.message(`    ${formatItem(item)}`);
+        }
       }
     }
 
     p.log.message("");
 
-    const choices: { value: SyncItem; label: string; hint?: string }[] = [];
-
-    for (const item of changedItems) {
-      const icons = { new: "🆕", modified: "📝", deleted: "🗑️", unchanged: "" };
-      const actions = { new: "add", modified: "update", deleted: "remove", unchanged: "" };
-      choices.push({
-        value: item,
-        label: `${icons[item.status]} ${item.relativePath}`,
-        hint: actions[item.status],
-      });
-    }
+    const choices = createSelectionChoices(changedItems);
 
     const selected = await p.multiselect({
       message: "Select items to sync:",
@@ -117,7 +219,7 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
       process.exit(0);
     }
 
-    const selectedItems = selected as SyncItem[];
+    const selectedItems = expandSelections(selected as SelectionItem[]);
 
     if (selectedItems.length === 0) {
       p.log.warn("No items selected");

@@ -71,6 +71,8 @@ async function listRemoteFilesRecursive(
   const files = await listRemoteDirectory(dirPath, githubToken);
 
   for (const file of files) {
+    if (file.name === "node_modules") continue;
+
     const relativePath = basePath ? `${basePath}/${file.name}` : file.name;
 
     if (file.type === "file") {
@@ -107,6 +109,8 @@ async function listLocalFiles(dir: string): Promise<string[]> {
 
   const items = await fs.readdir(dir);
   for (const item of items) {
+    if (item === "node_modules") continue;
+
     const fullPath = path.join(dir, item);
     const stat = await fs.stat(fullPath);
     if (stat.isDirectory()) {
@@ -126,6 +130,8 @@ async function listLocalFilesRecursive(dir: string, basePath: string): Promise<s
   const items = await fs.readdir(dir);
 
   for (const item of items) {
+    if (item === "node_modules") continue;
+
     const fullPath = path.join(dir, item);
     const relativePath = `${basePath}/${item}`;
     const stat = await fs.stat(fullPath);
