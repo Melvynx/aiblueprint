@@ -12,6 +12,7 @@ import {
 } from "../lib/sync-utils.js";
 import { installScriptsDependencies } from "./setup/dependencies.js";
 import { getVersion } from "../lib/version.js";
+import { createBackup } from "../lib/backup-utils.js";
 
 export interface SyncCommandOptions {
   folder?: string;
@@ -239,21 +240,82 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
 
     const choices = createSelectionChoices(changedItems, changedHooks);
 
-    const selected = await p.multiselect({
-      message: "Select items to sync:",
-      options: choices,
-      initialValues: choices.map((c) => c.value),
-      required: false,
+    const newItems = changedItems.filter((i) => i.status === "new");
+    const modifiedItems = changedItems.filter((i) => i.status === "modified");
+    const deletedItems = changedItems.filter((i) => i.status === "deleted");
+    const newHooks = changedHooks.filter((h) => h.status === "new");
+    const modifiedHooks = changedHooks.filter((h) => h.status === "modified");
+
+    const hasDeletions = deletedItems.length > 0;
+
+    type SyncMode = "updates" | "updates_and_delete" | "custom";
+
+    const syncModeOptions: { value: SyncMode; label: string; hint: string }[] = [
+      {
+        value: "updates",
+        label: "Import all updates",
+        hint: `add ${newItems.length + newHooks.length} + update ${modifiedItems.length + modifiedHooks.length} files`,
+      },
+    ];
+
+    if (hasDeletions) {
+      syncModeOptions.push({
+        value: "updates_and_delete",
+        label: "Import all updates and delete files",
+        hint: `add ${newItems.length + newHooks.length} + update ${modifiedItems.length + modifiedHooks.length} + delete ${deletedItems.length} files`,
+      });
+    }
+
+    syncModeOptions.push({
+      value: "custom",
+      label: "Custom choice",
+      hint: "select specific files to sync",
     });
 
-    if (p.isCancel(selected)) {
+    const syncMode = await p.select({
+      message: "How would you like to sync?",
+      options: syncModeOptions,
+    });
+
+    if (p.isCancel(syncMode)) {
       p.cancel("Sync cancelled");
       process.exit(0);
     }
 
-    const expanded = expandSelections(selected as SelectionItem[]);
-    const selectedItems = expanded.items;
-    const selectedHooks = expanded.hooks;
+    let selectedItems: SyncItem[] = [];
+    let selectedHooks: HookSyncItem[] = [];
+
+    if (syncMode === "updates") {
+      selectedItems = [...newItems, ...modifiedItems];
+      selectedHooks = [...newHooks, ...modifiedHooks];
+    } else if (syncMode === "updates_and_delete") {
+      selectedItems = [...newItems, ...modifiedItems, ...deletedItems];
+      selectedHooks = [...newHooks, ...modifiedHooks];
+    } else {
+      const nonDeleteChoices = choices.filter((c) => {
+        if (c.value.type === "file") return c.value.item.status !== "deleted";
+        if (c.value.type === "folder") return !c.value.items.every((i) => i.status === "deleted");
+        return true;
+      });
+
+      const nonDeleteInitialValues = nonDeleteChoices.map((c) => c.value);
+
+      const customSelected = await p.multiselect({
+        message: "Select items to sync (deletions excluded by default):",
+        options: choices,
+        initialValues: nonDeleteInitialValues,
+        required: false,
+      });
+
+      if (p.isCancel(customSelected)) {
+        p.cancel("Sync cancelled");
+        process.exit(0);
+      }
+
+      const expanded = expandSelections(customSelected as SelectionItem[]);
+      selectedItems = expanded.items;
+      selectedHooks = expanded.hooks;
+    }
 
     if (selectedItems.length === 0 && selectedHooks.length === 0) {
       p.log.warn("No items selected");
@@ -265,22 +327,30 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
     const toUpdate = selectedItems.filter((i) => i.status === "modified").length + selectedHooks.filter((h) => h.status === "modified").length;
     const toRemove = selectedItems.filter((i) => i.status === "deleted").length;
 
-    const summary = [
-      toAdd > 0 ? `add ${toAdd}` : "",
-      toUpdate > 0 ? `update ${toUpdate}` : "",
-      toRemove > 0 ? `remove ${toRemove}` : "",
-    ]
-      .filter(Boolean)
-      .join(", ");
+    p.log.message("");
+    p.log.message(chalk.bold("What will happen:"));
+    if (toAdd > 0) p.log.message(chalk.green(`  ✓ Add ${toAdd} new file${toAdd > 1 ? "s" : ""}`));
+    if (toUpdate > 0) p.log.message(chalk.yellow(`  ✓ Update ${toUpdate} file${toUpdate > 1 ? "s" : ""}`));
+    if (toRemove > 0) p.log.message(chalk.red(`  ✓ Delete ${toRemove} file${toRemove > 1 ? "s" : ""}`));
+    p.log.message(chalk.gray(`  ✓ Backup current config to ~/.config/aiblueprint/backup/`));
+    p.log.message("");
 
     const confirmResult = await p.confirm({
-      message: `Proceed? (${summary})`,
+      message: "Proceed with sync?",
       initialValue: true,
     });
 
     if (p.isCancel(confirmResult) || !confirmResult) {
       p.cancel("Sync cancelled");
       process.exit(0);
+    }
+
+    spinner.start("Creating backup...");
+    const backupPath = await createBackup(claudeDir);
+    if (backupPath) {
+      spinner.stop(`Backup created: ${chalk.gray(backupPath)}`);
+    } else {
+      spinner.stop("No existing config to backup");
     }
 
     spinner.start("Syncing...");

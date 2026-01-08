@@ -15,6 +15,7 @@ import {
   downloadDirectoryFromGitHub,
 } from "./setup/utils.js";
 import { getVersion } from "../lib/version.js";
+import { createBackup } from "../lib/backup-utils.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -140,6 +141,14 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     console.log(chalk.gray(`Installing to: ${claudeDir}`));
 
     await fs.ensureDir(claudeDir);
+
+    s.start("Creating backup of existing configuration");
+    const backupPath = await createBackup(claudeDir);
+    if (backupPath) {
+      s.stop(`Backup created: ${chalk.gray(backupPath)}`);
+    } else {
+      s.stop("No existing config to backup");
+    }
 
     // Try to download from GitHub first, fallback to local files
     let useGitHub = true;
