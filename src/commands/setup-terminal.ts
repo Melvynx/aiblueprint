@@ -68,6 +68,44 @@ export function backupFile(filePath: string): string | null {
   }
 }
 
+function getPackageManager(): { cmd: string; installCmd: string } | null {
+  // Check for apt (Debian/Ubuntu)
+  if (commandExists("apt")) {
+    return { cmd: "apt", installCmd: "sudo apt install -y" };
+  }
+  // Check for apt-get (older Debian/Ubuntu)
+  if (commandExists("apt-get")) {
+    return { cmd: "apt-get", installCmd: "sudo apt-get install -y" };
+  }
+  // Check for brew (macOS)
+  if (commandExists("brew")) {
+    return { cmd: "brew", installCmd: "brew install" };
+  }
+  // Check for dnf (Fedora)
+  if (commandExists("dnf")) {
+    return { cmd: "dnf", installCmd: "sudo dnf install -y" };
+  }
+  // Check for yum (CentOS/RHEL)
+  if (commandExists("yum")) {
+    return { cmd: "yum", installCmd: "sudo yum install -y" };
+  }
+  // Check for pacman (Arch)
+  if (commandExists("pacman")) {
+    return { cmd: "pacman", installCmd: "sudo pacman -S --noconfirm" };
+  }
+  return null;
+}
+
+function installPrerequisiteSync(packageName: string, installCmd: string): boolean {
+  try {
+    const fullCmd = `${installCmd} ${packageName}`;
+    execSync(fullCmd, { stdio: "inherit", timeout: INSTALL_TIMEOUT });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function installOhMyZsh(homeDir: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const installCmd = `sh -c "$(curl -fsSL ${OHMYZSH_INSTALL_URL})" "" --unattended`;
@@ -207,18 +245,41 @@ export async function setupTerminalCommand(options: SetupTerminalOptions = {}) {
     }
 
     if (missingPrereqs.length > 0) {
-      s.stop(chalk.red("Missing prerequisites"));
-      console.log(chalk.red(`\n❌ Missing required tools: ${missingPrereqs.join(", ")}`));
-      console.log(chalk.yellow("\nPlease install them first:"));
+      s.stop(`Missing: ${missingPrereqs.join(", ")}`);
 
-      if (platformInfo.isMacOS) {
-        console.log(chalk.gray("  brew install " + missingPrereqs.join(" ")));
-      } else {
-        console.log(chalk.gray("  sudo apt install " + missingPrereqs.join(" ")));
+      const packageManager = getPackageManager();
+
+      if (!packageManager) {
+        console.log(chalk.red(`\n❌ Missing required tools: ${missingPrereqs.join(", ")}`));
+        console.log(chalk.yellow("\nCould not detect package manager. Please install manually:"));
+        if (platformInfo.isMacOS) {
+          console.log(chalk.gray("  brew install " + missingPrereqs.join(" ")));
+        } else {
+          console.log(chalk.gray("  sudo apt install " + missingPrereqs.join(" ")));
+        }
+        process.exit(1);
       }
-      process.exit(1);
+
+      console.log(chalk.yellow(`\nInstalling missing prerequisites: ${missingPrereqs.join(", ")}`));
+      console.log(chalk.gray(`Using package manager: ${packageManager.cmd}`));
+
+      for (const pkg of missingPrereqs) {
+        console.log(chalk.yellow(`\n📦 Installing ${pkg}...`));
+        const success = installPrerequisiteSync(pkg, packageManager.installCmd);
+        if (success) {
+          console.log(chalk.green(`✓ ${pkg} installed`));
+        } else {
+          console.log(chalk.red(`\n❌ Failed to install ${pkg}`));
+          console.log(chalk.yellow("Please install it manually:"));
+          console.log(chalk.gray(`  ${packageManager.installCmd} ${pkg}`));
+          process.exit(1);
+        }
+      }
+
+      console.log(chalk.green("✓ All prerequisites installed"));
+    } else {
+      s.stop("Prerequisites OK");
     }
-    s.stop("Prerequisites OK");
 
     let selectedTheme = "robbyrussell";
 
