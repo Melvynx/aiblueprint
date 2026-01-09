@@ -1,6 +1,7 @@
 import fs from "fs-extra";
 import path from "path";
 import crypto from "crypto";
+import { transformHook } from "./platform.js";
 
 const PREMIUM_REPO = "Melvynx/aiblueprint-cli-premium";
 const PREMIUM_BRANCH = "main";
@@ -403,10 +404,12 @@ export async function syncSelectedHooks(
         (h: any) => h.matcher === hook.matcher
       );
 
+      const transformedHook = transformHook(hook.remoteHook, claudeDir);
+
       if (existingIndex >= 0) {
-        settings.hooks[hook.hookType][existingIndex] = hook.remoteHook;
+        settings.hooks[hook.hookType][existingIndex] = transformedHook;
       } else {
-        settings.hooks[hook.hookType].push(hook.remoteHook);
+        settings.hooks[hook.hookType].push(transformedHook);
       }
 
       success++;

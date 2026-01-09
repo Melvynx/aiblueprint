@@ -1,16 +1,9 @@
 import fs from "fs-extra";
 import path from "path";
-import os from "os";
+import { getPlaySoundCommand } from "../../lib/platform.js";
 
-function getPlaySoundCommand(soundPath: string): string {
-  const platform = os.platform();
-  if (platform === "darwin") {
-    return `afplay -v 0.1 "${soundPath}"`;
-  } else if (platform === "win32") {
-    return `powershell -c "(New-Object Media.SoundPlayer '${soundPath}').PlaySync()"`;
-  } else {
-    return `paplay "${soundPath}" 2>/dev/null || aplay "${soundPath}" 2>/dev/null || true`;
-  }
+function toPosixPath(p: string): string {
+  return p.replace(/\\/g, "/");
 }
 
 export interface SetupOptions {
@@ -56,7 +49,7 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
     if (shouldReplace) {
       settings.statusLine = {
         type: "command",
-        command: `bun ${path.join(claudeDir, "scripts/statusline/src/index.ts")}`,
+        command: `bun ${toPosixPath(path.join(claudeDir, "scripts/statusline/src/index.ts"))}`,
         padding: 0,
       };
     }
@@ -76,7 +69,7 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
       hooks: [
         {
           type: "command",
-          command: `bun ${path.join(claudeDir, "scripts/command-validator/src/cli.ts")}`,
+          command: `bun ${toPosixPath(path.join(claudeDir, "scripts/command-validator/src/cli.ts"))}`,
         },
       ],
     };
@@ -90,49 +83,57 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
   }
 
   if (options.notificationSounds) {
-    if (!settings.hooks.Stop) {
-      settings.hooks.Stop = [];
+    const finishSoundPath = toPosixPath(path.join(claudeDir, "song/finish.mp3"));
+    const finishSoundCommand = getPlaySoundCommand(finishSoundPath);
+
+    if (finishSoundCommand) {
+      if (!settings.hooks.Stop) {
+        settings.hooks.Stop = [];
+      }
+
+      const stopHook = {
+        matcher: "",
+        hooks: [
+          {
+            type: "command",
+            command: finishSoundCommand,
+          },
+        ],
+      };
+
+      const existingStopHook = settings.hooks.Stop.find((h: any) =>
+        h.hooks?.some((hook: any) => hook.command?.includes("finish.mp3")),
+      );
+      if (!existingStopHook) {
+        settings.hooks.Stop.push(stopHook);
+      }
     }
 
-    const finishSoundPath = path.join(claudeDir, "song/finish.mp3");
-    const stopHook = {
-      matcher: "",
-      hooks: [
-        {
-          type: "command",
-          command: getPlaySoundCommand(finishSoundPath),
-        },
-      ],
-    };
+    const needHumanSoundPath = toPosixPath(path.join(claudeDir, "song/need-human.mp3"));
+    const needHumanSoundCommand = getPlaySoundCommand(needHumanSoundPath);
 
-    const existingStopHook = settings.hooks.Stop.find((h: any) =>
-      h.hooks?.some((hook: any) => hook.command?.includes("finish.mp3")),
-    );
-    if (!existingStopHook) {
-      settings.hooks.Stop.push(stopHook);
-    }
+    if (needHumanSoundCommand) {
+      if (!settings.hooks.Notification) {
+        settings.hooks.Notification = [];
+      }
 
-    if (!settings.hooks.Notification) {
-      settings.hooks.Notification = [];
-    }
+      const notificationHook = {
+        matcher: "",
+        hooks: [
+          {
+            type: "command",
+            command: needHumanSoundCommand,
+          },
+        ],
+      };
 
-    const needHumanSoundPath = path.join(claudeDir, "song/need-human.mp3");
-    const notificationHook = {
-      matcher: "",
-      hooks: [
-        {
-          type: "command",
-          command: getPlaySoundCommand(needHumanSoundPath),
-        },
-      ],
-    };
-
-    const existingNotificationHook = settings.hooks.Notification.find(
-      (h: any) =>
-        h.hooks?.some((hook: any) => hook.command?.includes("need-human.mp3")),
-    );
-    if (!existingNotificationHook) {
-      settings.hooks.Notification.push(notificationHook);
+      const existingNotificationHook = settings.hooks.Notification.find(
+        (h: any) =>
+          h.hooks?.some((hook: any) => hook.command?.includes("need-human.mp3")),
+      );
+      if (!existingNotificationHook) {
+        settings.hooks.Notification.push(notificationHook);
+      }
     }
   }
 
@@ -146,7 +147,7 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
       hooks: [
         {
           type: "command",
-          command: `bun ${path.join(claudeDir, "scripts/hook-post-file.ts")}`,
+          command: `bun ${toPosixPath(path.join(claudeDir, "scripts/hook-post-file.ts"))}`,
         },
       ],
     };

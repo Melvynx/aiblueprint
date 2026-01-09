@@ -232,6 +232,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
             "scripts/statusline",
             path.join(scriptsDir, "statusline"),
           );
+          await fs.ensureDir(path.join(scriptsDir, "statusline/data"));
         }
       } else {
         await fs.copy(
@@ -239,6 +240,9 @@ export async function setupCommand(params: SetupCommandParams = {}) {
           path.join(claudeDir, "scripts"),
           { overwrite: true },
         );
+        if (options.customStatusline) {
+          await fs.ensureDir(path.join(claudeDir, "scripts/statusline/data"));
+        }
       }
       s.stop("Scripts installed");
     }
