@@ -174,7 +174,7 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
 
     if (!githubToken) {
       p.log.error("No token found");
-      p.log.info("Run: aiblueprint claude-code pro activate <token>");
+      p.log.info("Run: npx aiblueprint-cli@latest claude-code pro activate <token>");
       p.outro(chalk.red("❌ Not activated"));
       process.exit(1);
     }

@@ -12,7 +12,7 @@ export async function requireProLicense(): Promise<string> {
     console.error(chalk.red("❌ This feature requires AIBlueprint CLI Premium"));
     console.log(
       chalk.yellow(
-        "Run: aiblueprint claude-code pro activate <token>",
+        "Run: npx aiblueprint-cli@latest claude-code pro activate <token>",
       ),
     );
     console.log(

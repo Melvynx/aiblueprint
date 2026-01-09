@@ -20,7 +20,7 @@ describe("CLI Integration Tests - Add Command", () => {
     expect(output).toContain("git/create-pr");
     expect(output).toContain("Systematic implementation using APEX methodology");
     expect(output).toContain("Usage:");
-    expect(output).toContain("aiblueprint claude-code add commands <command-name>");
+    expect(output).toContain("npx aiblueprint-cli@latest claude-code add commands <command-name>");
   });
 
   it("should add a specific command and verify file is created", async () => {

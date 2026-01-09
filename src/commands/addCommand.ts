@@ -113,8 +113,8 @@ function displayAvailableCommands(commands: Record<string, CommandMetadata>) {
   });
 
   console.log(chalk.gray('Usage:'));
-  console.log(chalk.gray('  aiblueprint claude-code add commands <command-name>  # Install specific command'));
-  console.log(chalk.gray('  aiblueprint claude-code add commands                 # Show this list'));
+  console.log(chalk.gray('  npx aiblueprint-cli@latest claude-code add commands <command-name>  # Install specific command'));
+  console.log(chalk.gray('  npx aiblueprint-cli@latest claude-code add commands                 # Show this list'));
 }
 
 export async function addCommandCommand(commandName?: string, options: AddCommandOptions = {}) {

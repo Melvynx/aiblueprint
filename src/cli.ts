@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { setupCommand } from "./commands/setup.js";
+import { setupTerminalCommand } from "./commands/setup-terminal.js";
 import { addHookCommand } from "./commands/addHook.js";
 import { addCommandCommand } from "./commands/addCommand.js";
 import { symlinkCommand } from "./commands/symlink.js";
@@ -67,14 +68,25 @@ claudeCodeCmd
     });
   });
 
+claudeCodeCmd
+  .command("setup-terminal")
+  .description("Setup terminal with Oh My ZSH, plugins, and a beautiful theme")
+  .action((options, command) => {
+    const parentOptions = command.parent.opts();
+    setupTerminalCommand({
+      skipInteractive: parentOptions.skip,
+      homeDir: parentOptions.claudeCodeFolder || parentOptions.folder,
+    });
+  });
+
 const addCmd = claudeCodeCmd
   .command("add")
   .description(
     "Add components to your Claude Code configuration\n" +
       "Examples:\n" +
-      "  aiblueprint claude-code add hook post-edit-typescript\n" +
-      "  aiblueprint claude-code add commands\n" +
-      "  aiblueprint claude-code add commands commit",
+      "  npx aiblueprint-cli@latest claude-code add hook post-edit-typescript\n" +
+      "  npx aiblueprint-cli@latest claude-code add commands\n" +
+      "  npx aiblueprint-cli@latest claude-code add commands commit",
   );
 
 addCmd
