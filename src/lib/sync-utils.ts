@@ -26,6 +26,7 @@ export interface HookSyncItem {
   matcher: string;
   status: "new" | "modified" | "unchanged";
   remoteHook: any;
+  localHook?: any;
 }
 
 export interface SyncResult {
@@ -295,6 +296,7 @@ function analyzeHooksChanges(
             matcher,
             status: "modified",
             remoteHook,
+            localHook: existingLocal,
           });
         }
       }

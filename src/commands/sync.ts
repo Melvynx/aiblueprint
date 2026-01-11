@@ -13,6 +13,7 @@ import {
 import { installScriptsDependencies } from "./setup/dependencies.js";
 import { getVersion } from "../lib/version.js";
 import { createBackup } from "../lib/backup-utils.js";
+import { transformHook } from "../lib/platform.js";
 
 export interface SyncCommandOptions {
   folder?: string;
@@ -372,17 +373,50 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
     p.log.success(results.join(", "));
 
     if (changedHooks.length > 0) {
+      const hookDescriptions: Record<string, string> = {
+        Stop: "Play sound when Claude finishes a task",
+        Notification: "Play sound when Claude needs human input",
+        PreToolUse: "Run before Claude uses a tool (e.g., command validation)",
+        PostToolUse: "Run after Claude uses a tool (e.g., auto-format)",
+      };
+
+      const getHookCommand = (hookData: any): string | null => {
+        if (hookData?.hooks?.[0]?.command) return hookData.hooks[0].command;
+        if (hookData?.command) return hookData.command;
+        return null;
+      };
+
       p.log.message("");
       p.log.message(chalk.bold.yellow("⚠️  Settings.json Sync (Optional)"));
       p.log.message(chalk.gray("The following hooks can be synced to your settings.json:"));
+      p.log.message("");
+
       for (const hook of changedHooks) {
         const icon = hook.status === "new" ? "🆕" : "📝";
         const color = hook.status === "new" ? chalk.green : chalk.yellow;
-        const matcherDisplay = hook.matcher || "*";
-        p.log.message(`  ${icon} ${color(`${hook.hookType}[${matcherDisplay}]`)}`);
+        const matcherDisplay = hook.matcher ? `[${hook.matcher}]` : "";
+        const description = hookDescriptions[hook.hookType] || "";
+
+        p.log.message(`  ${icon} ${color(`${hook.hookType}${matcherDisplay}`)} ${chalk.gray(description)}`);
+
+        const transformedHook = transformHook(hook.remoteHook, claudeDir);
+        const newCommand = getHookCommand(transformedHook);
+
+        if (hook.status === "modified" && hook.localHook) {
+          const oldCommand = getHookCommand(hook.localHook);
+          if (oldCommand) {
+            p.log.message(chalk.red(`     - ${oldCommand}`));
+          }
+        }
+
+        if (newCommand) {
+          p.log.message(chalk.green(`     + ${newCommand}`));
+        }
+
+        p.log.message("");
       }
-      p.log.message("");
-      p.log.message(chalk.gray("This will modify your ~/.claude/settings.json file."));
+
+      p.log.message(chalk.gray("This will add/update hooks in ~/.claude/settings.json"));
       p.log.message("");
 
       const syncSettingsResult = await p.confirm({

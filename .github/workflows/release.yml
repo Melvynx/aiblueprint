@@ -25,11 +25,17 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Setup Node for npm publish
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
+
+      - name: Update npm for OIDC support
+        run: npm install -g npm@latest
+
+      - name: Verify npm version
+        run: npm --version
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -63,6 +69,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish to npm
+      - name: Publish to npm with provenance
         if: steps.changes.outputs.has_changes == 'true'
-        run: npm publish --access public
+        run: npm publish --provenance --access public
