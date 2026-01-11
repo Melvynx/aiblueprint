@@ -9,7 +9,8 @@
   },
   "npm": {
     "publish": true,
-    "skipChecks": true
+    "skipChecks": true,
+    "publishArgs": ["--provenance", "--access", "public"]
   },
   "github": {
     "release": false
