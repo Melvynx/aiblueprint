@@ -63,6 +63,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish to npm with provenance
+      - name: Publish to npm
         if: steps.changes.outputs.has_changes == 'true'
-        run: npm publish --provenance --access public
+        run: npm publish --access public

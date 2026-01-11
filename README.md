@@ -63,6 +63,7 @@ The easiest way to get started is by installing AIBlueprint as a Claude Code plu
 ### What Gets Installed
 
 The `aibp-base` plugin includes:
+
 - ✅ **16 Custom Commands** - `/commit`, `/create-pull-request`, `/deep-code-analysis`, etc.
 - ✅ **3 Specialized Agents** - explore-codebase, Snipper, websearch
 - ✅ **Security Hooks** - Command validation and TypeScript processing
@@ -88,12 +89,14 @@ The `aibp-base` plugin includes:
 ### Plugin vs CLI Tool
 
 **Plugin Installation (Recommended)**:
+
 - ✅ Automatic updates via marketplace
 - ✅ No CLI tool installation needed
 - ✅ Direct integration with Claude Code
 - ✅ Easy to manage and update
 
 **CLI Tool Installation**:
+
 - ✅ More control over installation
 - ✅ Custom folder locations
 - ✅ Interactive feature selection
@@ -135,13 +138,13 @@ bunx aiblueprint-cli@latest claude-code setup  # Creates .claude/ in project roo
 
 ### Main Commands
 
-| Command | Description | Options |
-|---------|-------------|---------|
-| `bunx aiblueprint-cli@latest claude-code setup` | Interactive setup with feature selection | `-f, --folder <path>` (alias for --claudeCodeFolder), `--claudeCodeFolder <path>`, `--codexFolder <path>`, `--openCodeFolder <path>`, `--factoryAiFolder <path>`, `-s, --skip` |
-| `bunx aiblueprint-cli@latest claude-code symlink` | Create symlinks between CLI tools (Codex, OpenCode, FactoryAI) | `--claudeCodeFolder <path>`, `--codexFolder <path>`, `--openCodeFolder <path>`, `--factoryAiFolder <path>` |
-| `bunx aiblueprint-cli@latest claude-code statusline` | Setup custom statusline with git status, costs, and token usage | `-f, --folder <path>` |
-| `bunx aiblueprint-cli@latest claude-code add hook <type>` | Install specific hook | `-f, --folder <path>` |
-| `bunx aiblueprint-cli@latest claude-code add commands [name]` | List or install commands | `-f, --folder <path>` |
+| Command                                                       | Description                                                     | Options                                                                                                                                                                        |
+| ------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `bunx aiblueprint-cli@latest claude-code setup`               | Interactive setup with feature selection                        | `-f, --folder <path>` (alias for --claudeCodeFolder), `--claudeCodeFolder <path>`, `--codexFolder <path>`, `--openCodeFolder <path>`, `--factoryAiFolder <path>`, `-s, --skip` |
+| `bunx aiblueprint-cli@latest claude-code symlink`             | Create symlinks between CLI tools (Codex, OpenCode, FactoryAI)  | `--claudeCodeFolder <path>`, `--codexFolder <path>`, `--openCodeFolder <path>`, `--factoryAiFolder <path>`                                                                     |
+| `bunx aiblueprint-cli@latest claude-code statusline`          | Setup custom statusline with git status, costs, and token usage | `-f, --folder <path>`                                                                                                                                                          |
+| `bunx aiblueprint-cli@latest claude-code add hook <type>`     | Install specific hook                                           | `-f, --folder <path>`                                                                                                                                                          |
+| `bunx aiblueprint-cli@latest claude-code add commands [name]` | List or install commands                                        | `-f, --folder <path>`                                                                                                                                                          |
 
 ### Command Examples
 
@@ -183,17 +186,20 @@ The CLI intelligently determines where to install configurations:
 ## ✨ Available Features
 
 ### 🛡️ Shell Shortcuts
+
 - **`cc`** - Claude Code with permissions skipped (`claude --dangerously-skip-permissions`)
 - **`ccc`** - Claude Code with continue mode (`claude --dangerously-skip-permissions -c`)
 - Platform support: macOS (`.zshenv`), Linux (`.bashrc`/`.zshrc`)
 
 ### 🔒 Command Validation
+
 - **700+ line security system** protecting against dangerous bash commands
 - **Real-time validation** before command execution via PreToolUse hooks
 - **Smart detection** of privilege escalation, destructive operations, and command injection
 - **Comprehensive logging** to `~/.claude/security.log` with severity levels
 
 ### 📊 Custom Statusline
+
 - **Git integration** - Branch status, changes, and repository info
 - **Cost tracking** - Session costs, daily limits, and token usage via ccusage
 - **Real-time updates** - Command-triggered statusline refresh
@@ -203,17 +209,20 @@ The CLI intelligently determines where to install configurations:
 ### 🤖 AIBlueprint Commands (16 Available)
 
 **Development Workflow**
+
 - `commit` - Fast conventional commits with immediate push
 - `create-pull-request` - Auto-generated PR creation with templates
 - `fix-pr-comments` - Systematic PR review comment resolution
 - `run-tasks` - Execute GitHub issues with full EPCT workflow
 
 **Code Analysis & Research**
+
 - `deep-code-analysis` - Comprehensive codebase investigation with research
 - `explain-architecture` - Pattern analysis with ASCII diagrams
 - `cleanup-context` - Memory optimization and duplicate removal
 
 **Utilities & Automation**
+
 - `claude-memory` - Context management for long sessions
 - `watch-ci` - Automated CI/CD monitoring and failure fixing
 - `prompt-command` / `prompt-agent` - Template creation utilities
@@ -226,11 +235,13 @@ The CLI intelligently determines where to install configurations:
 - **websearch** (yellow) - Quick web research with authoritative sources
 
 ### 🔊 Notification Sounds
+
 - **Finish sound** - Audio alert for completed operations (macOS afplay)
 - **Need-human sound** - Audio alert for attention requests
 - **Volume control** - Configurable audio levels
 
 ### 🔗 Symlink Management
+
 - **Multi-tool integration** - Create symlinks between Claude Code, Codex, OpenCode, and FactoryAI
 - **Interactive selection** - Choose source, content type (commands/agents), and destinations
 - **Smart validation** - Prevents overwriting non-symlink directories and validates paths
@@ -258,13 +269,23 @@ The CLI automatically manages your `~/.claude/settings.json` with:
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "hooks": [{"type": "command", "command": "bun ~/.claude/scripts/validate-command.js"}]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun ~/.claude/scripts/validate-command.js"
+          }
+        ]
       }
     ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write|MultiEdit",
-        "hooks": [{"type": "command", "command": "bun ~/.claude/hooks/hook-post-file.ts"}]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun ~/.claude/hooks/hook-post-file.ts"
+          }
+        ]
       }
     ]
   }
@@ -285,59 +306,59 @@ The CLI automatically manages your `~/.claude/settings.json` with:
 <details>
 <summary><strong>Development Workflow (4 commands)</strong></summary>
 
-| Command | Tools | Purpose |
-|---------|-------|---------|
-| `commit` | `Bash(git :*)` | Quick conventional commits with immediate push |
-| `create-pull-request` | `Bash(git :*)`, `Bash(gh :*)` | PR creation with auto-generated descriptions |
-| `fix-pr-comments` | `Bash(gh :*)`, `Read`, `Edit` | Systematic PR review resolution |
-| `run-tasks` | `Bash(gh :*)`, `Bash(git :*)` | GitHub issue execution with EPCT |
+| Command               | Tools                         | Purpose                                        |
+| --------------------- | ----------------------------- | ---------------------------------------------- |
+| `commit`              | `Bash(git :*)`                | Quick conventional commits with immediate push |
+| `create-pull-request` | `Bash(git :*)`, `Bash(gh :*)` | PR creation with auto-generated descriptions   |
+| `fix-pr-comments`     | `Bash(gh :*)`, `Read`, `Edit` | Systematic PR review resolution                |
+| `run-tasks`           | `Bash(gh :*)`, `Bash(git :*)` | GitHub issue execution with EPCT               |
 
 </details>
 
 <details>
 <summary><strong>Analysis & Research (2 commands)</strong></summary>
 
-| Command | Tools | Purpose |
-|---------|-------|---------|
-| `deep-code-analysis` | `Task`, `WebSearch`, `mcp__context7__*` | Comprehensive codebase investigation |
-| `explain-architecture` | `Read`, `Glob`, `Grep`, `Task` | Architectural pattern analysis |
+| Command                | Tools                                   | Purpose                              |
+| ---------------------- | --------------------------------------- | ------------------------------------ |
+| `deep-code-analysis`   | `Task`, `WebSearch`, `mcp__context7__*` | Comprehensive codebase investigation |
+| `explain-architecture` | `Read`, `Glob`, `Grep`, `Task`          | Architectural pattern analysis       |
 
 </details>
 
 <details>
 <summary><strong>Maintenance & Optimization (2 commands)</strong></summary>
 
-| Command | Tools | Purpose |
-|---------|-------|---------|
+| Command           | Tools                            | Purpose                  |
+| ----------------- | -------------------------------- | ------------------------ |
 | `cleanup-context` | `TodoWrite`, `MultiEdit`, `Glob` | Memory bank optimization |
-| `watch-ci` | `Bash(gh :*)`, `Bash(sleep :*)` | Automated CI monitoring |
+| `watch-ci`        | `Bash(gh :*)`, `Bash(sleep :*)`  | Automated CI monitoring  |
 
 </details>
 
 <details>
 <summary><strong>Utilities (8 commands)</strong></summary>
 
-| Command | Tools | Purpose |
-|---------|-------|---------|
-| `claude-memory` | `Read`, `Write`, `Edit`, `Glob` | CLAUDE.md file management |
-| `epct` | `Task` | Explore-Plan-Code-Test methodology |
-| `prompt-command` | `Read`, `Write`, `Edit` | Command template creation |
-| `prompt-agent` | `Read`, `Write`, `Edit` | Agent template creation |
+| Command          | Tools                           | Purpose                            |
+| ---------------- | ------------------------------- | ---------------------------------- |
+| `claude-memory`  | `Read`, `Write`, `Edit`, `Glob` | CLAUDE.md file management          |
+| `epct`           | `Task`                          | Explore-Plan-Code-Test methodology |
+| `prompt-command` | `Read`, `Write`, `Edit`         | Command template creation          |
+| `prompt-agent`   | `Read`, `Write`, `Edit`         | Agent template creation            |
 
 </details>
 
 ### Hooks Available
 
-| Hook | Language | Purpose | Triggers |
-|------|----------|---------|----------|
+| Hook                   | Language       | Purpose                     | Triggers                           |
+| ---------------------- | -------------- | --------------------------- | ---------------------------------- |
 | `post-edit-typescript` | TypeScript/Bun | File processing after edits | Edit, Write, MultiEdit on .ts/.tsx |
 
 ### Scripts & Utilities
 
-| Script | Language | Purpose |
-|--------|----------|---------|
-| `validate-command.js` | Bun/JavaScript | Security validation for bash commands |
-| `statusline-ccusage.sh` | Bash | Git status and usage tracking display |
+| Script                  | Language       | Purpose                               |
+| ----------------------- | -------------- | ------------------------------------- |
+| `validate-command.js`   | Bun/JavaScript | Security validation for bash commands |
+| `statusline-ccusage.sh` | Bash           | Git status and usage tracking display |
 
 ## 🎯 Installation Targets
 
@@ -352,6 +373,7 @@ bunx aiblueprint-cli@latest claude-code setup
 ```
 
 **Benefits:**
+
 - Project-specific configurations
 - Team collaboration ready
 - Version control friendly
@@ -368,6 +390,7 @@ bunx aiblueprint-cli@latest claude-code setup
 ```
 
 **Benefits:**
+
 - System-wide configurations
 - Works across all projects
 - Persistent settings
@@ -388,6 +411,7 @@ bunx aiblueprint-cli@latest claude-code setup --folder /opt/claude-config
 The security system protects against dangerous operations:
 
 **Critical Commands Blocked:**
+
 - `rm -rf` (with path validation)
 - `dd`, `mkfs`, `fdisk` (disk operations)
 - `chmod 777`, `chown -R` (permission changes)
@@ -395,6 +419,7 @@ The security system protects against dangerous operations:
 - `sudo` operations (privilege escalation)
 
 **Security Logging:**
+
 ```json
 {
   "timestamp": "2024-01-15T10:30:00.000Z",
@@ -406,6 +431,7 @@ The security system protects against dangerous operations:
 ```
 
 **Safe Paths Allowed:**
+
 - `./`, `~/`, relative paths
 - `node_modules/`, `.git/`, common safe directories
 - Temporary directories (`/tmp/`, `/var/tmp/`)
@@ -488,15 +514,18 @@ bun run dev claude-code setup --folder ./test-config
 ## 📋 Requirements
 
 ### System Requirements
+
 - **Runtime**: Node.js 16+ or Bun
 - **Platform**: macOS (full support), Linux (partial), Windows (limited)
 - **Dependencies**: Git (for repository detection)
 
 ### Claude Code Requirements
+
 - **Claude Code**: Latest version installed
 - **Permissions**: Ability to modify `~/.claude/settings.json`
 
 ### Optional Dependencies
+
 - **bun**: Enhanced script execution and hooks
 - **ccusage**: Advanced statusline with cost tracking
 - **gh CLI**: GitHub integration for PR/issue commands
@@ -563,6 +592,7 @@ aiblueprint claude-code pro sync
 ```
 
 **Features:**
+
 - 🔍 **Diff Analysis** - Compares your local config with the latest premium version
 - 📝 **Categorized Changes** - Shows NEW and MODIFIED items separately
 - ✅ **Selective Update** - Choose exactly which files/folders to update
@@ -578,6 +608,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Created by AIBlueprint** - Enhancing Claude Code for modern development workflows.
+**Created by AIBlueprint** - Enhancing Claude Code for modern development workflows!
 
 Need help? [Open an issue](https://github.com/melvynx/aiblueprint/issues) or check our [documentation](https://docs.aiblueprint.dev).
