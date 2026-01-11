@@ -4,6 +4,10 @@
   "description": "AIBlueprint CLI for setting up Claude Code configurations",
   "author": "AIBlueprint",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Melvynx/aiblueprint.git"
+  },
   "type": "module",
   "bin": {
     "aiblueprint": "./dist/cli.js"
