@@ -1,0 +1,35 @@
+{
+	"session_id": "06a7b019-03f8-4083-a9db-410d95cb01e6",
+	"transcript_path": "/Users/melvynx/.claude/scripts/statusline/fixtures/mock-transcript.jsonl",
+	"cwd": "/Users/melvynx/.claude",
+	"model": {
+		"id": "claude-sonnet-4-5-20250929",
+		"display_name": "Sonnet 4.5"
+	},
+	"workspace": {
+		"current_dir": "/Users/melvynx/.claude",
+		"project_dir": "/Users/melvynx/.claude"
+	},
+	"version": "2.0.68",
+	"output_style": {
+		"name": "default"
+	},
+	"cost": {
+		"total_cost_usd": 0.17468000000000003,
+		"total_duration_ms": 385160,
+		"total_api_duration_ms": 252694,
+		"total_lines_added": 185,
+		"total_lines_removed": 75
+	},
+	"context_window": {
+		"total_input_tokens": 136349,
+		"total_output_tokens": 21612,
+		"context_window_size": 200000,
+		"current_usage": {
+			"input_tokens": 62500,
+			"cache_creation_input_tokens": 0,
+			"cache_read_input_tokens": 0
+		}
+	},
+	"exceeds_200k_tokens": false
+}

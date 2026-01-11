@@ -1,0 +1,39 @@
+{
+  "name": "scripts",
+  "type": "module",
+  "scripts": {
+    "test": "bun test auto-rename-session claude-code-ai statusline command-validator",
+    "auto-rename:start": "bun auto-rename-session/src/index.ts",
+    "auto-rename:rename-all": "bun auto-rename-session/src/rename-all.ts",
+    "auto-rename:test": "bun test auto-rename-session",
+    "validator:cli": "bun command-validator/src/cli.ts",
+    "validator:test": "bun test command-validator",
+    "validator:lint": "biome check --write command-validator",
+    "ai:test": "bun test claude-code-ai",
+    "statusline:start": "bun statusline/src/index.ts",
+    "statusline:test-fixtures": "bun statusline/test-with-fixtures.ts",
+    "statusline:test": "bun test statusline",
+    "statusline:spend:today": "bun statusline/src/lib/features/spend/commands/spend-today.ts",
+    "statusline:spend:month": "bun statusline/src/lib/features/spend/commands/spend-month.ts",
+    "statusline:spend:project": "bun statusline/src/lib/features/spend/commands/spend-project.ts",
+    "statusline:migrate": "bun statusline/src/lib/features/spend/commands/migrate-to-sqlite.ts",
+    "statusline:weekly": "bun statusline/src/lib/features/limits/commands/weekly-analysis.ts",
+    "statusline:lint": "biome check --write statusline",
+    "lint": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.6",
+    "ai": "^6.0.11",
+    "picocolors": "^1.1.1",
+    "table": "^6.9.0",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.2",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

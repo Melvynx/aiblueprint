@@ -1,6 +1,10 @@
 {
+  "features": {
+    "usageLimits": false,
+    "spendTracking": false
+  },
   "oneLine": true,
-  "showSonnetModel": true,
+  "showSonnetModel": false,
   "pathDisplayMode": "truncated",
   "git": {
     "enabled": true,
@@ -10,21 +14,12 @@
     "showStaged": true,
     "showUnstaged": true
   },
-  "separator": "·",
+  "separator": "•",
   "session": {
     "infoSeparator": null,
-    "cost": {
-      "enabled": true,
-      "format": "decimal1"
-    },
-    "duration": {
-      "enabled": true
-    },
-    "tokens": {
-      "enabled": true,
-      "showMax": false,
-      "showDecimals": false
-    },
+    "cost": { "enabled": true, "format": "decimal1" },
+    "duration": { "enabled": true },
+    "tokens": { "enabled": true, "showMax": false, "showDecimals": false },
     "percentage": {
       "enabled": true,
       "showValue": true,
@@ -41,53 +36,44 @@
     "usePayloadContextWindow": true,
     "maxContextTokens": 200000,
     "autocompactBufferTokens": 45000,
-    "useUsableContextOnly": false,
+    "useUsableContextOnly": true,
     "overheadTokens": 0
   },
   "limits": {
-    "enabled": true,
-    "showTimeLeft": true,
-    "showPacingDelta": true,
-    "cost": {
-      "enabled": false,
-      "format": "decimal1"
-    },
+    "enabled": false,
+    "showTimeLeft": false,
+    "showPacingDelta": false,
+    "cost": { "enabled": false, "format": "decimal1" },
     "percentage": {
-      "enabled": true,
-      "showValue": true,
+      "enabled": false,
+      "showValue": false,
       "progressBar": {
         "enabled": false,
         "length": 10,
-        "style": "filled",
+        "style": "braille",
         "color": "progressive",
         "background": "none"
       }
     }
   },
   "weeklyUsage": {
-    "enabled": true,
+    "enabled": false,
     "showTimeLeft": false,
-    "showPacingDelta": true,
-    "cost": {
-      "enabled": false,
-      "format": "decimal1"
-    },
+    "showPacingDelta": false,
+    "cost": { "enabled": false, "format": "decimal1" },
     "percentage": {
-      "enabled": true,
-      "showValue": true,
+      "enabled": false,
+      "showValue": false,
       "progressBar": {
         "enabled": false,
         "length": 10,
-        "style": "filled",
+        "style": "braille",
         "color": "progressive",
         "background": "none"
       }
     }
   },
   "dailySpend": {
-    "cost": {
-      "enabled": true,
-      "format": "decimal1"
-    }
+    "cost": { "enabled": false, "format": "decimal1" }
   }
 }

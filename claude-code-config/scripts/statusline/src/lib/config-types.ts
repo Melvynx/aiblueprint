@@ -50,6 +50,10 @@ export interface PercentageConfig {
 }
 
 export interface StatuslineConfig {
+	features?: {
+		usageLimits?: boolean;
+		spendTracking?: boolean;
+	};
 	oneLine: boolean;
 	showSonnetModel: boolean;
 	pathDisplayMode: "full" | "truncated" | "basename";
