@@ -8,7 +8,8 @@
     "pushArgs": ["--follow-tags"]
   },
   "npm": {
-    "publish": true
+    "publish": true,
+    "skipChecks": true
   },
   "github": {
     "release": false
