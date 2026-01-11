@@ -1,4 +1,7 @@
+import { homedir } from "os";
 import type { SecurityRules } from "./types";
+
+const HOME = homedir();
 
 export const SECURITY_RULES: SecurityRules = {
 	CRITICAL_COMMANDS: [
@@ -126,7 +129,7 @@ export const SECURITY_RULES: SecurityRules = {
 	],
 
 	SAFE_RM_PATHS: [
-		"/Users/melvynx/Developer/",
+		`${HOME}/Developer/`,
 		"/tmp/",
 		"/var/tmp/",
 		`${process.cwd()}/`,

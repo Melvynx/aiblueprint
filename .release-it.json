@@ -2,7 +2,10 @@
   "git": {
     "commitMessage": "chore: release v${version}",
     "tagName": "v${version}",
-    "requireCleanWorkingDir": false
+    "requireCleanWorkingDir": false,
+    "requireUpstream": false,
+    "push": true,
+    "pushArgs": ["--follow-tags"]
   },
   "npm": {
     "publish": true

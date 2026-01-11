@@ -254,7 +254,7 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
       {
         value: "updates",
         label: "Import all updates",
-        hint: `add ${newItems.length + newHooks.length} + update ${modifiedItems.length + modifiedHooks.length} files`,
+        hint: `add ${newItems.length} + update ${modifiedItems.length} files`,
       },
     ];
 
@@ -262,7 +262,7 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
       syncModeOptions.push({
         value: "updates_and_delete",
         label: "Import all updates and delete files",
-        hint: `add ${newItems.length + newHooks.length} + update ${modifiedItems.length + modifiedHooks.length} + delete ${deletedItems.length} files`,
+        hint: `add ${newItems.length} + update ${modifiedItems.length} + delete ${deletedItems.length} files`,
       });
     }
 
@@ -287,12 +287,11 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
 
     if (syncMode === "updates") {
       selectedItems = [...newItems, ...modifiedItems];
-      selectedHooks = [...newHooks, ...modifiedHooks];
     } else if (syncMode === "updates_and_delete") {
       selectedItems = [...newItems, ...modifiedItems, ...deletedItems];
-      selectedHooks = [...newHooks, ...modifiedHooks];
     } else {
-      const nonDeleteChoices = choices.filter((c) => {
+      const fileChoices = choices.filter((c) => c.value.type !== "hook");
+      const nonDeleteChoices = fileChoices.filter((c) => {
         if (c.value.type === "file") return c.value.item.status !== "deleted";
         if (c.value.type === "folder") return !c.value.items.every((i) => i.status === "deleted");
         return true;
@@ -301,8 +300,8 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
       const nonDeleteInitialValues = nonDeleteChoices.map((c) => c.value);
 
       const customSelected = await p.multiselect({
-        message: "Select items to sync (deletions excluded by default):",
-        options: choices,
+        message: "Select files to sync (deletions excluded by default):",
+        options: fileChoices,
         initialValues: nonDeleteInitialValues,
         required: false,
       });
@@ -314,17 +313,16 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
 
       const expanded = expandSelections(customSelected as SelectionItem[]);
       selectedItems = expanded.items;
-      selectedHooks = expanded.hooks;
     }
 
-    if (selectedItems.length === 0 && selectedHooks.length === 0) {
-      p.log.warn("No items selected");
+    if (selectedItems.length === 0) {
+      p.log.warn("No files selected");
       p.outro(chalk.yellow("⚠️ Nothing to sync"));
       return;
     }
 
-    const toAdd = selectedItems.filter((i) => i.status === "new").length + selectedHooks.filter((h) => h.status === "new").length;
-    const toUpdate = selectedItems.filter((i) => i.status === "modified").length + selectedHooks.filter((h) => h.status === "modified").length;
+    const toAdd = selectedItems.filter((i) => i.status === "new").length;
+    const toUpdate = selectedItems.filter((i) => i.status === "modified").length;
     const toRemove = selectedItems.filter((i) => i.status === "deleted").length;
 
     p.log.message("");
@@ -364,25 +362,58 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
       }
     );
 
-    const hooksResult = await syncSelectedHooks(
-      claudeDir,
-      selectedHooks,
-      (hook, action) => {
-        spinner.message(`${action}: ${chalk.cyan(hook)}`);
-      }
-    );
-
-    spinner.stop("Sync complete");
-
-    const totalSuccess = syncResult.success + hooksResult.success;
-    const totalFailed = syncResult.failed + hooksResult.failed;
+    spinner.stop("Files synced");
 
     const results: string[] = [];
-    if (totalSuccess > 0) results.push(chalk.green(`${totalSuccess} added/updated`));
+    if (syncResult.success > 0) results.push(chalk.green(`${syncResult.success} added/updated`));
     if (syncResult.deleted > 0) results.push(chalk.red(`${syncResult.deleted} removed`));
-    if (totalFailed > 0) results.push(chalk.yellow(`${totalFailed} failed`));
+    if (syncResult.failed > 0) results.push(chalk.yellow(`${syncResult.failed} failed`));
 
     p.log.success(results.join(", "));
+
+    if (changedHooks.length > 0) {
+      p.log.message("");
+      p.log.message(chalk.bold.yellow("⚠️  Settings.json Sync (Optional)"));
+      p.log.message(chalk.gray("The following hooks can be synced to your settings.json:"));
+      for (const hook of changedHooks) {
+        const icon = hook.status === "new" ? "🆕" : "📝";
+        const color = hook.status === "new" ? chalk.green : chalk.yellow;
+        const matcherDisplay = hook.matcher || "*";
+        p.log.message(`  ${icon} ${color(`${hook.hookType}[${matcherDisplay}]`)}`);
+      }
+      p.log.message("");
+      p.log.message(chalk.gray("This will modify your ~/.claude/settings.json file."));
+      p.log.message("");
+
+      const syncSettingsResult = await p.confirm({
+        message: "Do you want to sync these hooks to settings.json?",
+        initialValue: false,
+      });
+
+      if (!p.isCancel(syncSettingsResult) && syncSettingsResult) {
+        const spinner2 = p.spinner();
+        spinner2.start("Syncing hooks to settings.json...");
+
+        selectedHooks = [...changedHooks];
+        const hooksResult = await syncSelectedHooks(
+          claudeDir,
+          selectedHooks,
+          (hook, action) => {
+            spinner2.message(`${action}: ${chalk.cyan(hook)}`);
+          }
+        );
+
+        spinner2.stop("Hooks synced to settings.json");
+        if (hooksResult.success > 0) {
+          p.log.success(chalk.green(`${hooksResult.success} hook${hooksResult.success > 1 ? "s" : ""} synced`));
+        }
+        if (hooksResult.failed > 0) {
+          p.log.warn(chalk.yellow(`${hooksResult.failed} hook${hooksResult.failed > 1 ? "s" : ""} failed`));
+        }
+      } else {
+        p.log.info(chalk.gray("Skipped settings.json sync"));
+      }
+    }
 
     const scriptsWereSynced = selectedItems.some((i) => i.category === "scripts");
     if (scriptsWereSynced) {
