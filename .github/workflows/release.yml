@@ -57,8 +57,12 @@ jobs:
             fi
           fi
 
-      - name: Release patch version
+      - name: Bump version and create tag
         if: steps.changes.outputs.has_changes == 'true'
-        run: bun run release -- patch --ci --npm.provenance
+        run: bun run release -- patch --ci --no-npm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to npm with provenance
+        if: steps.changes.outputs.has_changes == 'true'
+        run: npm publish --provenance --access public
