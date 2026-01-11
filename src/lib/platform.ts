@@ -62,6 +62,24 @@ export function detectAudioPlayer(): string | null {
     return cachedAudioPlayer;
   }
 
+  // WSL: check for play (sox) or powershell.exe first
+  if (isWSL()) {
+    try {
+      execSync("which play", { stdio: "ignore" });
+      cachedAudioPlayer = "play";
+      return cachedAudioPlayer;
+    } catch {
+      // play not found, try powershell.exe
+      try {
+        execSync("which powershell.exe", { stdio: "ignore" });
+        cachedAudioPlayer = "powershell.exe";
+        return cachedAudioPlayer;
+      } catch {
+        // Fall through to Linux players
+      }
+    }
+  }
+
   const linuxPlayers = ["paplay", "aplay", "mpv", "ffplay"];
   for (const player of linuxPlayers) {
     try {
@@ -94,6 +112,17 @@ export function getPlaySoundCommand(soundPath: string): string | null {
   }
 
   switch (player) {
+    case "play":
+      // WSL with sox play command - use Windows sound if available
+      if (isWSL()) {
+        const windowsSound = "/mnt/c/Windows/Media/notify.wav";
+        return `play -v 0.3 ${escapeShellArg(windowsSound)} 2>/dev/null || true`;
+      }
+      return `play -v 0.3 ${safePath} 2>/dev/null || true`;
+    case "powershell.exe":
+      // WSL with powershell.exe - convert path to Windows format
+      const winPath = soundPath.replace(/^\/mnt\/([a-z])\//, "$1:/").replace(/\//g, "\\");
+      return `powershell.exe -c "(New-Object Media.SoundPlayer '${winPath}').PlaySync()" 2>/dev/null || true`;
     case "paplay":
       return `paplay ${safePath} 2>/dev/null || true`;
     case "aplay":
