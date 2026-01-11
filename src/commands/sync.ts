@@ -34,7 +34,8 @@ function formatItem(item: SyncItem): string {
     unchanged: chalk.gray,
   };
 
-  return `${icons[item.status]} ${colors[item.status](item.relativePath)}`;
+  const folderPrefix = item.isFolder ? "📁 " : "";
+  return `${icons[item.status]} ${folderPrefix}${colors[item.status](item.relativePath)}`;
 }
 
 function groupByCategory(items: SyncItem[]): Map<string, SyncItem[]> {

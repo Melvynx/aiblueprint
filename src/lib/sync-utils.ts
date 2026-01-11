@@ -209,17 +209,35 @@ async function analyzeCategory(
     }
   }
 
+  const deletedPaths = new Set<string>();
+
   for (const localPath of localSet) {
     if (!remoteSet.has(localPath)) {
+      const pathParts = localPath.split("/");
+      const parentAlreadyDeleted = pathParts.some((_, idx) => {
+        if (idx === 0) return false;
+        const parentPath = pathParts.slice(0, idx).join("/");
+        return deletedPaths.has(parentPath);
+      });
+
+      if (parentAlreadyDeleted) {
+        continue;
+      }
+
       const fullPath = path.join(localDir, localPath);
       const stat = await fs.stat(fullPath).catch(() => null);
-      if (stat && !stat.isDirectory()) {
+      if (stat) {
+        const isFolder = stat.isDirectory();
         items.push({
           name: localPath,
           relativePath: `${category}/${localPath}`,
           status: "deleted",
           category,
+          isFolder,
         });
+        if (isFolder) {
+          deletedPaths.add(localPath);
+        }
       }
     }
   }
