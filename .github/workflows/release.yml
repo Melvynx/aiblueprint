@@ -39,7 +39,23 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+      - name: Check for changes since last tag
+        id: changes
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            CHANGES=$(git diff --name-only $LAST_TAG HEAD -- . ':!package.json' ':!bun.lockb' | wc -l)
+            if [ "$CHANGES" -gt 0 ]; then
+              echo "has_changes=true" >> $GITHUB_OUTPUT
+            else
+              echo "has_changes=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
       - name: Release patch version
+        if: steps.changes.outputs.has_changes == 'true'
         run: bun run release -- patch --ci --npm.provenance
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
