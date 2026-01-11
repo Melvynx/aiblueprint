@@ -1,7 +1,6 @@
-import { homedir } from "os";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import type { SecurityRules } from "./types";
-
-const HOME = homedir();
 
 export const SECURITY_RULES: SecurityRules = {
 	CRITICAL_COMMANDS: [
@@ -129,7 +128,7 @@ export const SECURITY_RULES: SecurityRules = {
 	],
 
 	SAFE_RM_PATHS: [
-		`${HOME}/Developer/`,
+		join(homedir(), "Developer/"),
 		"/tmp/",
 		"/var/tmp/",
 		`${process.cwd()}/`,

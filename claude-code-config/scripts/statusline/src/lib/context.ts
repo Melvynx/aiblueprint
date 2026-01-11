@@ -1,12 +1,13 @@
 import { existsSync } from "node:fs";
 
-interface TokenUsage {
+export interface TokenUsage {
 	input_tokens: number;
+	output_tokens: number;
 	cache_creation_input_tokens?: number;
 	cache_read_input_tokens?: number;
 }
 
-interface TranscriptLine {
+export interface TranscriptLine {
 	message?: { usage?: TokenUsage };
 	timestamp?: string;
 	isSidechain?: boolean;
@@ -18,14 +19,16 @@ export interface ContextResult {
 	percentage: number;
 }
 
-async function getContextLength(transcriptPath: string): Promise<number> {
+export async function getContextLength(
+	transcriptPath: string,
+): Promise<number> {
 	try {
 		const content = await Bun.file(transcriptPath).text();
 		const lines = content.trim().split("\n");
 
 		if (lines.length === 0) return 0;
 
-		let mostRecentEntry: TranscriptLine | null = null;
+		let mostRecentMainChainEntry: TranscriptLine | null = null;
 		let mostRecentTimestamp: Date | null = null;
 
 		for (const line of lines) {
@@ -41,16 +44,16 @@ async function getContextLength(transcriptPath: string): Promise<number> {
 
 				if (!mostRecentTimestamp || entryTime > mostRecentTimestamp) {
 					mostRecentTimestamp = entryTime;
-					mostRecentEntry = data;
+					mostRecentMainChainEntry = data;
 				}
 			} catch {}
 		}
 
-		if (!mostRecentEntry?.message?.usage) {
+		if (!mostRecentMainChainEntry?.message?.usage) {
 			return 0;
 		}
 
-		const usage = mostRecentEntry.message.usage;
+		const usage = mostRecentMainChainEntry.message.usage;
 
 		return (
 			(usage.input_tokens || 0) +
@@ -62,21 +65,39 @@ async function getContextLength(transcriptPath: string): Promise<number> {
 	}
 }
 
-interface ContextDataParams {
+export interface ContextDataParams {
 	transcriptPath: string;
 	maxContextTokens: number;
+	autocompactBufferTokens: number;
+	useUsableContextOnly?: boolean;
+	overheadTokens?: number;
 }
 
 export async function getContextData({
 	transcriptPath,
 	maxContextTokens,
+	autocompactBufferTokens,
+	useUsableContextOnly = false,
+	overheadTokens = 0,
 }: ContextDataParams): Promise<ContextResult> {
 	if (!transcriptPath || !existsSync(transcriptPath)) {
 		return { tokens: 0, percentage: 0 };
 	}
 
-	const tokens = await getContextLength(transcriptPath);
-	const percentage = Math.min(100, Math.round((tokens / maxContextTokens) * 100));
+	const contextLength = await getContextLength(transcriptPath);
+	let totalTokens = contextLength + overheadTokens;
 
-	return { tokens, percentage };
+	// If useUsableContextOnly is true, add the autocompact buffer to displayed tokens
+	if (useUsableContextOnly) {
+		totalTokens += autocompactBufferTokens;
+	}
+
+	// Always calculate percentage based on max context window
+	// (matching /context display behavior)
+	const percentage = Math.min(100, (totalTokens / maxContextTokens) * 100);
+
+	return {
+		tokens: totalTokens,
+		percentage: Math.round(percentage),
+	};
 }

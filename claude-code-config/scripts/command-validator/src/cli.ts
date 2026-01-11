@@ -94,13 +94,15 @@ async function main() {
 			process.exit(0);
 		}
 
-		const confirmationMessage = `⚠️  Potentially dangerous command detected!\n\nCommand: ${command}\nViolations: ${result.violations.join(", ")}\nSeverity: ${result.severity}\n\nDo you want to proceed with this command?`;
+		const message = result.action === "deny"
+			? `Command blocked!\n\nCommand: ${command}\nReason: ${result.violations.join(", ")}\nSeverity: ${result.severity}`
+			: `⚠️ Potentially dangerous command\n\nCommand: ${command}\nReason: ${result.violations.join(", ")}\nSeverity: ${result.severity}\n\nDo you want to proceed?`;
 
 		const hookOutput: HookOutput = {
 			hookSpecificOutput: {
 				hookEventName: "PreToolUse",
-				permissionDecision: "ask",
-				permissionDecisionReason: confirmationMessage,
+				permissionDecision: result.action === "deny" ? "deny" : "ask",
+				permissionDecisionReason: message,
 			},
 		};
 

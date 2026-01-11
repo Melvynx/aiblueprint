@@ -7,6 +7,7 @@ Clean, type-safe statusline implementation for Claude Code using Bun + TypeScrip
 ## Project Setup & Configuration
 
 ### Dependencies
+
 - **Bun**: Runtime (uses `$` for shell commands)
 - **@biomejs/biome**: Linting & formatting
 - **TypeScript**: Type safety
@@ -29,16 +30,12 @@ Add to `~/.claude/settings.json`:
 
 ### Authentication
 
-OAuth token storage (platform-specific):
+OAuth token stored in macOS Keychain:
 
-**macOS**: Stored in Keychain
 - **Service**: `Claude Code-credentials`
-- **Access**: `security find-generic-password -s "Claude Code-credentials" -w`
-
-**Windows & Linux**: Stored in file system
-- **Location**: `~/.claude/.credentials.json`
 - **Format**: JSON with `claudeAiOauth.accessToken`
 - **Token type**: `sk-ant-oat01-...` (OAuth token, not API key)
+- **Access**: `security find-generic-password -s "Claude Code-credentials" -w`
 
 ## Architecture
 
@@ -78,6 +75,7 @@ Claude Code Hook → stdin JSON → index.ts
 ## Component Specifications
 
 ### Context Calculation (`lib/context.ts`)
+
 - **Purpose**: Calculate token usage from Claude Code transcript files
 - **Algorithm**: Parses `.jsonl` transcript, finds most recent main-chain entry
 - **Tokens counted**: `input_tokens + cache_read_input_tokens + cache_creation_input_tokens`
@@ -85,6 +83,7 @@ Claude Code Hook → stdin JSON → index.ts
 - **Output**: `{ tokens: number, percentage: number }` (0-100% of 200k context)
 
 ### Usage Limits (`lib/usage-limits.ts`)
+
 - **Purpose**: Fetch Claude API rate limits from OAuth endpoint
 - **Auth**: Retrieves OAuth token from macOS Keychain (`Claude Code-credentials`)
 - **API**: `https://api.anthropic.com/api/oauth/usage`
@@ -92,12 +91,14 @@ Claude Code Hook → stdin JSON → index.ts
 - **Error handling**: Fails silently, returns null on errors
 
 ### Git Status (`lib/git.ts`)
+
 - **Purpose**: Show current branch and uncommitted changes
 - **Detection**: Checks both staged and unstaged changes
 - **Output**: Branch name + line additions/deletions
 - **Display**: `main* (+123 -45)` with color coding
 
 ### Formatters (`lib/formatters.ts`)
+
 - **Colors**: ANSI color codes for terminal output
 - **Token display**: `62.5K`, `1.2M` format
 - **Time formatting**: `3h21m`, `45m` for countdowns
@@ -106,16 +107,19 @@ Claude Code Hook → stdin JSON → index.ts
 ## Output Specification
 
 ### Line 1: Session Info
+
 ```
 main* (+123 -45) | ~/.claude | Sonnet 4.5
 ```
 
 ### Line 2: Metrics
+
 ```
 $0.17 (6m) | 62.5K tokens | 31% | 15% (3h27m)
 ```
 
 **Components:**
+
 - `$0.17` - Session cost (USD)
 - `(6m)` - Session duration
 - `62.5K tokens` - Context tokens used (from transcript)
@@ -147,6 +151,7 @@ echo '{ ... }' | bun run start
 ### Error Handling & Performance
 
 **Error Handling** - All components fail silently:
+
 - Missing transcript → 0 tokens, 0%
 - API failure → No usage limits shown
 - Git errors → "no-git" branch
@@ -155,6 +160,7 @@ echo '{ ... }' | bun run start
 This ensures statusline never crashes Claude Code.
 
 **Performance Benchmarks:**
+
 - Context calculation: ~10-50ms (depends on transcript size)
 - API call: ~100-300ms (cached by Claude API)
 - Git operations: ~20-50ms
@@ -177,7 +183,23 @@ This ensures statusline never crashes Claude Code.
 
 ## Known Limitations
 
+- macOS only (uses Keychain)
 - Requires `git` CLI for git status
 - Requires Claude Code OAuth (not API key)
 - Transcript must be accessible (permissions)
-- Cross-platform support: macOS (Keychain), Windows & Linux (file-based credentials)
+
+## Critical Requirements
+
+### Configuration Updates
+
+- **CRITICAL**: When updating `statusline.config.json` or `statusline.config.ts`, you **MUST** update the interactive demo in `src/commands/interactive-config.ts`
+- **ALWAYS** run `bun run config` after config changes to verify the interactive demo works correctly
+- **REQUIRED**: Keep config file structure in sync with interactive prompts
+
+### Runtime & Dependencies
+
+- **ALWAYS** use Bun for all commands and runtime operations
+- Use `bun run <script>` instead of `npm run` or `pnpm run`
+- Use `bun install` for dependency management
+- **AUTHORIZED LIBRARIES**: `@biomejs/biome` for linting/formatting, third-party libraries like `tiers` are permitted if needed
+- **NEVER** add external npm packages without verification - prefer Bun APIs first

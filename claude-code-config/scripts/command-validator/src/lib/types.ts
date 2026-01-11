@@ -11,6 +11,7 @@ export interface ValidationResult {
 	severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 	violations: string[];
 	sanitizedCommand: string;
+	action: "allow" | "deny" | "ask";
 }
 
 export interface SecurityRules {
