@@ -16,7 +16,7 @@ import { checkAndInstallDependencies, installScriptsDependencies } from "./setup
 import fs from "fs-extra";
 
 const API_URL = "https://codeline.app/api/products";
-const PRODUCT_ID = "prd_XJVgxVPbGG";
+const PRODUCT_IDS = ["prd_XJVgxVPbGG", "prd_NKabAkdOkw"];
 
 async function countInstalledItems(claudeDir: string) {
   const counts = {
@@ -83,27 +83,29 @@ export async function proActivateCommand(userToken?: string) {
     }
 
     const spinner = p.spinner();
-    spinner.start("Validating token...");
+    spinner.start("Validating token against premium products...");
 
-    // Call API to validate token
-    const response = await fetch(
-      `${API_URL}/${PRODUCT_ID}/have-access?token=${userToken}`,
-    );
+    let validationSuccess = false;
+    let data: any = null;
 
-    if (!response.ok) {
-      spinner.stop("Failed to validate token");
-      p.log.error(`API error: ${response.status} ${response.statusText}`);
-      p.outro(
-        chalk.red("❌ Failed to activate. Please check your token and try again."),
+    for (const productId of PRODUCT_IDS) {
+      const response = await fetch(
+        `${API_URL}/${productId}/have-access?token=${userToken}`,
       );
-      process.exit(1);
+
+      if (response.ok) {
+        const responseData = await response.json();
+        if (responseData.hasAccess) {
+          data = responseData;
+          validationSuccess = true;
+          break;
+        }
+      }
     }
 
-    const data = await response.json();
-
-    if (!data.hasAccess) {
+    if (!validationSuccess || !data) {
       spinner.stop("Token validation failed");
-      p.log.error(data.error || "Invalid token");
+      p.log.error("Invalid token or no access to premium products");
       p.log.info("💎 Get AIBlueprint CLI Premium at: https://mlv.sh/claude-cli");
       p.outro(chalk.red("❌ Activation failed"));
       process.exit(1);
