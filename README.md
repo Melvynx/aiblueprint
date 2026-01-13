@@ -276,17 +276,6 @@ The CLI automatically manages your `~/.claude/settings.json` with:
           }
         ]
       }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bun ~/.claude/hooks/hook-post-file.ts"
-          }
-        ]
-      }
     ]
   }
 }

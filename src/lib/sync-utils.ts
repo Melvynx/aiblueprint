@@ -21,12 +21,18 @@ export interface SyncItem {
   isFolder?: boolean;
 }
 
+interface Hook {
+  matcher: string;
+  hooks?: unknown[];
+  [key: string]: unknown;
+}
+
 export interface HookSyncItem {
   hookType: string;
   matcher: string;
   status: "new" | "modified" | "unchanged";
-  remoteHook: any;
-  localHook?: any;
+  remoteHook: Hook;
+  localHook?: Hook;
 }
 
 export interface SyncResult {
@@ -292,10 +298,10 @@ function analyzeHooksChanges(
 
     const localHookArray = localHooks[hookType] || [];
 
-    for (const remoteHook of remoteHookArray as any[]) {
+    for (const remoteHook of remoteHookArray as Hook[]) {
       const matcher = remoteHook.matcher || "";
       const existingLocal = localHookArray.find(
-        (h: any) => h.matcher === matcher
+        (h: Hook) => h.matcher === matcher
       );
 
       if (!existingLocal) {
