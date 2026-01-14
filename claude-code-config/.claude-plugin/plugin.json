@@ -1,0 +1,23 @@
+{
+  "name": "aibp-base",
+  "version": "1.0.1",
+  "description": "AIBlueprint base configuration with custom agents, slash commands, hooks, and productivity workflows for Claude Code",
+  "author": {
+    "name": "Melvyn",
+    "url": "https://github.com/melvynx"
+  },
+  "homepage": "https://github.com/melvynx/aiblueprint",
+  "repository": "https://github.com/melvynx/aiblueprint",
+  "license": "MIT",
+  "keywords": [
+    "aiblueprint",
+    "melvynx",
+    "productivity",
+    "agents",
+    "commands",
+    "hooks",
+    "workflows",
+    "statusline"
+  ],
+  "category": "essentials"
+}
