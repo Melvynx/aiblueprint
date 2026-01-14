@@ -21,7 +21,7 @@ export function parseYamlFrontmatter(content: string): { metadata: any; body: st
   const frontmatterLines = lines.slice(1, endIndex);
   const body = lines.slice(endIndex + 1).join('\n');
 
-  const metadata: any = {};
+  const metadata: Record<string, string> = {};
   frontmatterLines.forEach(line => {
     const colonIndex = line.indexOf(':');
     if (colonIndex > -1) {

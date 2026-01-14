@@ -23,5 +23,11 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
-  }
+  },
+  "exclude": [
+    "claude-code-config",
+    "tmp",
+    "dist",
+    "node_modules"
+  ]
 }

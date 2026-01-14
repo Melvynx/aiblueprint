@@ -14,7 +14,6 @@ export interface SetupOptions {
   aiblueprintAgents: boolean;
   aiblueprintSkills: boolean;
   notificationSounds: boolean;
-  postEditTypeScript: boolean;
   codexSymlink: boolean;
   openCodeSymlink: boolean;
   skipInteractive?: boolean;
@@ -134,31 +133,6 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
       if (!existingNotificationHook) {
         settings.hooks.Notification.push(notificationHook);
       }
-    }
-  }
-
-  if (options.postEditTypeScript) {
-    if (!settings.hooks.PostToolUse) {
-      settings.hooks.PostToolUse = [];
-    }
-
-    const postEditHook = {
-      matcher: "Edit|Write|MultiEdit",
-      hooks: [
-        {
-          type: "command",
-          command: `bun ${toPosixPath(path.join(claudeDir, "scripts/hook-post-file.ts"))}`,
-        },
-      ],
-    };
-
-    const existingPostEditHook = settings.hooks.PostToolUse.find(
-      (h: any) =>
-        h.matcher === "Edit|Write|MultiEdit" &&
-        h.hooks?.some((hook: any) => hook.command?.includes("hook-post-file.ts")),
-    );
-    if (!existingPostEditHook) {
-      settings.hooks.PostToolUse.push(postEditHook);
     }
   }
 

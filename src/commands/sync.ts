@@ -292,7 +292,7 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
     } else if (syncMode === "updates_and_delete") {
       selectedItems = [...newItems, ...modifiedItems, ...deletedItems];
     } else {
-      const fileChoices = choices.filter((c) => c.value.type !== "hook");
+      const fileChoices = choices.filter((c) => c.value.type !== "hook") as { value: SelectionItem; label: string; hint?: string }[];
       const nonDeleteChoices = fileChoices.filter((c) => {
         if (c.value.type === "file") return c.value.item.status !== "deleted";
         if (c.value.type === "folder") return !c.value.items.every((i) => i.status === "deleted");
@@ -303,7 +303,7 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
 
       const customSelected = await p.multiselect({
         message: "Select files to sync (deletions excluded by default):",
-        options: fileChoices,
+        options: fileChoices as any,
         initialValues: nonDeleteInitialValues,
         required: false,
       });

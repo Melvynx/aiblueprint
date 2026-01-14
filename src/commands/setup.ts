@@ -93,11 +93,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
               checked: true,
             },
             {
-              value: "postEditTypeScript",
-              name: "Post-edit TypeScript hook - Auto-format and lint TypeScript files",
-              checked: false,
-            },
-            {
               value: "codexSymlink",
               name: "Codex symlink - Link commands to ~/.codex/prompts",
               checked: false,
@@ -125,8 +120,8 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       customStatusline: features.includes("customStatusline"),
       aiblueprintCommands: features.includes("aiblueprintCommands"),
       aiblueprintAgents: features.includes("aiblueprintAgents"),
+      aiblueprintSkills: false,
       notificationSounds: features.includes("notificationSounds"),
-      postEditTypeScript: features.includes("postEditTypeScript"),
       codexSymlink: features.includes("codexSymlink"),
       openCodeSymlink: features.includes("openCodeSymlink"),
       skipInteractive,
@@ -205,8 +200,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     if (
       options.commandValidation ||
       options.customStatusline ||
-      options.notificationSounds ||
-      options.postEditTypeScript
+      options.notificationSounds
     ) {
       s.start("Setting up scripts");
       if (useGitHub) {
@@ -217,13 +211,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
           await downloadDirectoryFromGitHub(
             "scripts/command-validator",
             path.join(scriptsDir, "command-validator"),
-          );
-        }
-
-        if (options.postEditTypeScript) {
-          await downloadFromGitHub(
-            "scripts/hook-post-file.ts",
-            path.join(scriptsDir, "hook-post-file.ts"),
           );
         }
 

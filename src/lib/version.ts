@@ -13,7 +13,7 @@ export function getVersion(): string {
       readFileSync(join(__dirname, "../package.json"), "utf8")
     );
     cachedVersion = packageJson.version;
-    return cachedVersion;
+    return cachedVersion ?? "unknown";
   } catch {
     return "unknown";
   }

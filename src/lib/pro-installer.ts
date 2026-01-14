@@ -1,6 +1,10 @@
 import fs from "fs-extra";
 import os from "os";
 import path from "path";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execAsync = promisify(exec);
 
 const PREMIUM_REPO = "Melvynx/aiblueprint-cli-premium";
 const PREMIUM_BRANCH = "main";
@@ -14,6 +18,93 @@ interface InstallProConfigsOptions {
   githubToken: string;
   claudeCodeFolder?: string;
   onProgress?: InstallProgressCallback;
+}
+
+/**
+ * Get the cache directory path for the premium repository
+ */
+function getCacheRepoDir(): string {
+  return path.join(
+    os.homedir(),
+    ".config",
+    "aiblueprint",
+    "pro-repos",
+    "aiblueprint-cli-premium",
+  );
+}
+
+/**
+ * Execute a git command with safe authentication that doesn't modify git config
+ */
+async function execGitWithAuth(
+  command: string,
+  token: string,
+  cwd?: string,
+): Promise<void> {
+  const authConfig = `http.https://github.com/.extraheader=AUTHORIZATION: token ${token}`;
+  const fullCommand = `git -c "${authConfig}" ${command}`;
+
+  try {
+    await execAsync(fullCommand, { cwd, timeout: 120000 });
+  } catch (error) {
+    throw new Error(
+      `Git command failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
+}
+
+/**
+ * Clone or update the cached premium repository
+ * Returns the path to the claude-code-config directory within the cache
+ */
+async function cloneOrUpdateRepo(token: string): Promise<string> {
+  const cacheDir = getCacheRepoDir();
+  const repoUrl = `https://github.com/${PREMIUM_REPO}.git`;
+
+  if (await fs.pathExists(path.join(cacheDir, ".git"))) {
+    try {
+      await execGitWithAuth("pull", token, cacheDir);
+    } catch (error) {
+      await fs.remove(cacheDir);
+      await fs.ensureDir(path.dirname(cacheDir));
+      await execGitWithAuth(`clone ${repoUrl} ${cacheDir}`, token);
+    }
+  } else {
+    await fs.ensureDir(path.dirname(cacheDir));
+    await execGitWithAuth(`clone ${repoUrl} ${cacheDir}`, token);
+  }
+
+  return path.join(cacheDir, "claude-code-config");
+}
+
+/**
+ * Copy files from cache to target directory with progress reporting
+ */
+async function copyConfigFromCache(
+  cacheConfigDir: string,
+  targetDir: string,
+  onProgress?: InstallProgressCallback,
+): Promise<void> {
+  const walk = async (dir: string, baseDir: string = dir): Promise<void> => {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const sourcePath = path.join(dir, entry.name);
+      const relativePath = path.relative(baseDir, sourcePath);
+      const targetPath = path.join(targetDir, relativePath);
+
+      if (entry.isDirectory()) {
+        await fs.ensureDir(targetPath);
+        onProgress?.(relativePath, "directory");
+        await walk(sourcePath, baseDir);
+      } else {
+        await fs.copy(sourcePath, targetPath, { overwrite: true });
+        onProgress?.(relativePath, "file");
+      }
+    }
+  };
+
+  await walk(cacheConfigDir);
 }
 
 /**
@@ -122,6 +213,7 @@ async function downloadDirectoryFromPrivateGitHub(
 
 /**
  * Install premium configurations from private GitHub repository
+ * Uses git-based caching for faster subsequent installs, with API fallback
  */
 export async function installProConfigs(
   options: InstallProConfigsOptions,
@@ -130,6 +222,14 @@ export async function installProConfigs(
 
   const claudeFolder =
     claudeCodeFolder || path.join(os.homedir(), ".claude");
+
+  try {
+    const cacheConfigDir = await cloneOrUpdateRepo(githubToken);
+    await copyConfigFromCache(cacheConfigDir, claudeFolder, onProgress);
+    return;
+  } catch (error) {
+    console.warn("Git caching failed, falling back to API download");
+  }
 
   const tempDir = path.join(os.tmpdir(), `aiblueprint-premium-${Date.now()}`);
 
@@ -149,7 +249,6 @@ export async function installProConfigs(
 
     await fs.copy(tempDir, claudeFolder, {
       overwrite: true,
-      recursive: true,
     });
   } catch (error) {
     throw new Error(

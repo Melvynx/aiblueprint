@@ -2,8 +2,6 @@
 import { Command } from "commander";
 import { setupCommand } from "./commands/setup.js";
 import { setupTerminalCommand } from "./commands/setup-terminal.js";
-import { addHookCommand } from "./commands/addHook.js";
-import { addCommandCommand } from "./commands/addCommand.js";
 import { symlinkCommand } from "./commands/symlink.js";
 import { statuslineCommand } from "./commands/statusline.js";
 import {
@@ -77,39 +75,6 @@ claudeCodeCmd
       skipInteractive: parentOptions.skip,
       homeDir: parentOptions.claudeCodeFolder || parentOptions.folder,
     });
-  });
-
-const addCmd = claudeCodeCmd
-  .command("add")
-  .description(
-    "Add components to your Claude Code configuration\n" +
-      "Examples:\n" +
-      "  npx aiblueprint-cli@latest claude-code add hook post-edit-typescript\n" +
-      "  npx aiblueprint-cli@latest claude-code add commands\n" +
-      "  npx aiblueprint-cli@latest claude-code add commands commit",
-  );
-
-addCmd
-  .command("hook <type>")
-  .description(
-    "Add a hook to your Claude Code configuration. Available types: post-edit-typescript",
-  )
-  .action((type, options, command) => {
-    const parentOptions = command.parent.parent.opts();
-    const claudeCodeFolder =
-      parentOptions.claudeCodeFolder || parentOptions.folder;
-    addHookCommand(type, { folder: claudeCodeFolder });
-  });
-
-addCmd
-  .command("commands [command-name]")
-  .description(
-    "Install a Claude Code command or list all available commands (use without argument to list)",
-  )
-  .action((commandName, options, command) => {
-    const parentOptions = command.parent.parent.opts();
-    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-    addCommandCommand(commandName, { folder: claudeCodeFolder });
   });
 
 claudeCodeCmd

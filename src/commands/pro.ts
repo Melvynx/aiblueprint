@@ -31,7 +31,9 @@ async function countInstalledItems(claudeDir: string) {
       const files = await fs.readdir(commandsDir);
       counts.commands = files.filter(f => f.endsWith(".md")).length;
     }
-  } catch {}
+  } catch (error) {
+    console.error("Failed to count commands:", error instanceof Error ? error.message : error);
+  }
 
   try {
     const agentsDir = path.join(claudeDir, "agents");
@@ -39,7 +41,9 @@ async function countInstalledItems(claudeDir: string) {
       const files = await fs.readdir(agentsDir);
       counts.agents = files.filter(f => f.endsWith(".md")).length;
     }
-  } catch {}
+  } catch (error) {
+    console.error("Failed to count agents:", error instanceof Error ? error.message : error);
+  }
 
   try {
     const skillsDir = path.join(claudeDir, "skills");
@@ -53,7 +57,9 @@ async function countInstalledItems(claudeDir: string) {
       );
       counts.skills = dirs.filter(Boolean).length;
     }
-  } catch {}
+  } catch (error) {
+    console.error("Failed to count skills:", error instanceof Error ? error.message : error);
+  }
 
   return counts;
 }
@@ -227,10 +233,15 @@ export async function proSetupCommand(options: { folder?: string } = {}) {
     spinner.start("Updating settings.json...");
     await updateSettings(
       {
+        shellShortcuts: false,
         commandValidation: true,
         customStatusline: true,
+        aiblueprintCommands: false,
+        aiblueprintAgents: false,
+        aiblueprintSkills: false,
         notificationSounds: true,
-        postEditTypeScript: true,
+        codexSymlink: false,
+        openCodeSymlink: false,
       },
       claudeDir,
     );

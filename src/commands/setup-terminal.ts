@@ -112,7 +112,7 @@ async function installOhMyZsh(homeDir: string): Promise<void> {
     const env = { ...process.env, HOME: homeDir, ZSH: path.join(homeDir, ".oh-my-zsh") };
     exec(installCmd, { timeout: INSTALL_TIMEOUT, env }, (error, stdout, stderr) => {
       if (error) {
-        if ((error as NodeJS.ErrnoException).killed) {
+        if ('killed' in error && error.killed) {
           reject(new Error("Oh My ZSH installation timed out. Please check your network connection."));
         } else {
           reject(new Error(`Failed to install Oh My ZSH: ${stderr || error.message}`));
@@ -145,7 +145,7 @@ export async function installPlugin(pluginName: string, repoUrl: string, homeDir
   return new Promise((resolve, reject) => {
     exec(`git clone ${repoUrl} "${customPluginsDir}"`, { timeout: PLUGIN_TIMEOUT }, (error, stdout, stderr) => {
       if (error) {
-        if ((error as NodeJS.ErrnoException).killed) {
+        if ('killed' in error && error.killed) {
           reject(new Error(`Plugin ${pluginName} installation timed out. Please check your network connection.`));
         } else {
           reject(new Error(`Failed to install ${pluginName}: ${stderr || error.message}`));
