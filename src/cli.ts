@@ -3,7 +3,6 @@ import { Command } from "commander";
 import { setupCommand } from "./commands/setup.js";
 import { setupTerminalCommand } from "./commands/setup-terminal.js";
 import { symlinkCommand } from "./commands/symlink.js";
-import { statuslineCommand } from "./commands/statusline.js";
 import {
   proActivateCommand,
   proStatusCommand,
@@ -11,10 +10,12 @@ import {
   proUpdateCommand,
 } from "./commands/pro.js";
 import { proSyncCommand } from "./commands/sync.js";
+import { registerDynamicScriptCommands } from "./commands/dynamic-scripts.js";
 import chalk from "chalk";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { homedir } from "os";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const packageJson = JSON.parse(
@@ -92,15 +93,6 @@ claudeCodeCmd
     });
   });
 
-claudeCodeCmd
-  .command("statusline")
-  .description("Setup custom statusline with git status, costs, and token usage")
-  .action((options, command) => {
-    const parentOptions = command.parent.opts();
-    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-    statuslineCommand({ folder: claudeCodeFolder });
-  });
-
 const proCmd = claudeCodeCmd
   .command("pro")
   .description("Manage AIBlueprint CLI Premium features");
@@ -145,6 +137,16 @@ proCmd
     const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
     proSyncCommand({ folder: claudeCodeFolder });
   });
+
+// Register dynamic script commands
+try {
+  const claudeDir = join(homedir(), ".claude");
+  await registerDynamicScriptCommands(claudeCodeCmd, claudeDir);
+} catch (error) {
+  if (process.env.DEBUG) {
+    console.error("Failed to register dynamic commands:", error);
+  }
+}
 
 program.parse(process.argv);
 
