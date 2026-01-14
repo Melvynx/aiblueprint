@@ -34,15 +34,16 @@ function getCacheRepoDir(): string {
 }
 
 /**
- * Execute a git command with safe authentication that doesn't modify git config
+ * Execute a git command with safe authentication using token in URL
  */
 async function execGitWithAuth(
   command: string,
   token: string,
+  repoUrl: string,
   cwd?: string,
 ): Promise<void> {
-  const authConfig = `http.https://github.com/.extraheader=AUTHORIZATION: token ${token}`;
-  const fullCommand = `git -c "${authConfig}" ${command}`;
+  const authenticatedUrl = `https://x-access-token:${token}@${repoUrl.replace(/^https?:\/\//, '')}`;
+  const fullCommand = `git ${command.replace(repoUrl, authenticatedUrl)}`;
 
   try {
     await execAsync(fullCommand, { cwd, timeout: 120000 });
@@ -63,15 +64,15 @@ async function cloneOrUpdateRepo(token: string): Promise<string> {
 
   if (await fs.pathExists(path.join(cacheDir, ".git"))) {
     try {
-      await execGitWithAuth("pull", token, cacheDir);
+      await execGitWithAuth("pull", token, repoUrl, cacheDir);
     } catch (error) {
       await fs.remove(cacheDir);
       await fs.ensureDir(path.dirname(cacheDir));
-      await execGitWithAuth(`clone ${repoUrl} ${cacheDir}`, token);
+      await execGitWithAuth(`clone ${repoUrl} ${cacheDir}`, token, repoUrl);
     }
   } else {
     await fs.ensureDir(path.dirname(cacheDir));
-    await execGitWithAuth(`clone ${repoUrl} ${cacheDir}`, token);
+    await execGitWithAuth(`clone ${repoUrl} ${cacheDir}`, token, repoUrl);
   }
 
   return path.join(cacheDir, "claude-code-config");
