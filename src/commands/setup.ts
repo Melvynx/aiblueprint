@@ -11,8 +11,8 @@ import { checkAndInstallDependencies, installStatuslineDependencies } from "./se
 import { updateSettings, hasExistingStatusLine, type SetupOptions } from "./setup/settings.js";
 import {
   SimpleSpinner,
-  downloadFromGitHub,
-  downloadDirectoryFromGitHub,
+  cloneRepository,
+  cleanupRepository,
 } from "./setup/utils.js";
 import { getVersion } from "../lib/version.js";
 import { createBackup } from "../lib/backup-utils.js";
@@ -20,8 +20,6 @@ import { createBackup } from "../lib/backup-utils.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const GITHUB_RAW_BASE =
-  "https://raw.githubusercontent.com/Melvynx/aiblueprint-cli/main/claude-code-config";
 
 export interface SetupCommandParams {
   claudeCodeFolder?: string;
@@ -37,6 +35,9 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     openCodeFolder: customOpenCodeFolder,
     skipInteractive,
   } = params;
+
+  let repoPath: string | null = null;
+
   try {
     console.log(chalk.blue.bold(`\n🚀 AIBlueprint Claude Code Setup ${chalk.gray(`v${getVersion()}`)}\n`));
     console.log(chalk.bgBlue(" Setting up your Claude Code environment "));
@@ -145,51 +146,26 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       s.stop("No existing config to backup");
     }
 
-    // Try to download from GitHub first, fallback to local files
-    let useGitHub = true;
-    let sourceDir: string | undefined;
-    const testUrl = `${GITHUB_RAW_BASE}/scripts/validate-command.js`;
-    try {
-      const testResponse = await fetch(testUrl);
-      useGitHub = testResponse.ok;
-    } catch {
-      useGitHub = false;
-    }
+    // Clone repository to temporary directory
+    s.start("Cloning configuration repository");
+    repoPath = await cloneRepository();
 
-    if (!useGitHub) {
-      // Fallback to local source directory
-      const currentDir = process.cwd();
-      const possiblePaths = [
-        path.join(currentDir, "claude-code-config"),
-        path.join(__dirname, "../../claude-code-config"),
-        path.join(__dirname, "../claude-code-config"),
-        path.join(path.dirname(process.argv[1]), "../claude-code-config"),
-      ];
-
-      sourceDir = possiblePaths.find((p) => {
-        try {
-          return fs.existsSync(p);
-        } catch {
-          return false;
-        }
-      });
-
-      if (!sourceDir) {
-        throw new Error(
-          "Could not find claude-code-config directory locally and GitHub is not accessible",
-        );
-      }
-
-      console.log(
-        chalk.yellow(
-          "  Using local configuration files (GitHub not accessible)",
-        ),
-      );
-    } else {
-      console.log(
-        chalk.green("  Downloading latest configuration from GitHub"),
+    if (!repoPath) {
+      throw new Error(
+        "Failed to clone repository. Please check your internet connection and try again.",
       );
     }
+
+    const sourceDir = path.join(repoPath, "claude-code-config");
+
+    if (!await fs.pathExists(sourceDir)) {
+      await cleanupRepository(repoPath);
+      throw new Error(
+        "Configuration directory not found in cloned repository",
+      );
+    }
+
+    s.stop("Repository cloned successfully");
 
     if (options.shellShortcuts) {
       s.start("Setting up shell shortcuts");
@@ -203,51 +179,24 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       options.notificationSounds
     ) {
       s.start("Setting up scripts");
-      if (useGitHub) {
-        const scriptsDir = path.join(claudeDir, "scripts");
-        await fs.ensureDir(scriptsDir);
-
-        if (options.commandValidation) {
-          await downloadDirectoryFromGitHub(
-            "scripts/command-validator",
-            path.join(scriptsDir, "command-validator"),
-          );
-        }
-
-        if (options.customStatusline) {
-          await downloadDirectoryFromGitHub(
-            "scripts/statusline",
-            path.join(scriptsDir, "statusline"),
-          );
-          await fs.ensureDir(path.join(scriptsDir, "statusline/data"));
-        }
-      } else {
-        await fs.copy(
-          path.join(sourceDir!, "scripts"),
-          path.join(claudeDir, "scripts"),
-          { overwrite: true },
-        );
-        if (options.customStatusline) {
-          await fs.ensureDir(path.join(claudeDir, "scripts/statusline/data"));
-        }
+      await fs.copy(
+        path.join(sourceDir, "scripts"),
+        path.join(claudeDir, "scripts"),
+        { overwrite: true },
+      );
+      if (options.customStatusline) {
+        await fs.ensureDir(path.join(claudeDir, "scripts/statusline/data"));
       }
       s.stop("Scripts installed");
     }
 
     if (options.aiblueprintCommands) {
       s.start("Setting up AIBlueprint commands");
-      if (useGitHub) {
-        await downloadDirectoryFromGitHub(
-          "commands",
-          path.join(claudeDir, "commands"),
-        );
-      } else {
-        await fs.copy(
-          path.join(sourceDir!, "commands"),
-          path.join(claudeDir, "commands"),
-          { overwrite: true },
-        );
-      }
+      await fs.copy(
+        path.join(sourceDir, "commands"),
+        path.join(claudeDir, "commands"),
+        { overwrite: true },
+      );
       s.stop("Commands installed");
     }
 
@@ -273,74 +222,36 @@ export async function setupCommand(params: SetupCommandParams = {}) {
 
     if (options.aiblueprintAgents) {
       s.start("Setting up AIBlueprint agents");
-      if (useGitHub) {
-        await downloadDirectoryFromGitHub(
-          "agents",
-          path.join(claudeDir, "agents"),
-        );
-      } else {
-        await fs.copy(
-          path.join(sourceDir!, "agents"),
-          path.join(claudeDir, "agents"),
-          { overwrite: true },
-        );
-      }
+      await fs.copy(
+        path.join(sourceDir, "agents"),
+        path.join(claudeDir, "agents"),
+        { overwrite: true },
+      );
       s.stop("Agents installed");
     }
 
     if (options.aiblueprintSkills) {
       s.start("Setting up AIBlueprint Skills");
-      if (useGitHub) {
-        const testSkillsUrl = `${GITHUB_RAW_BASE}/skills/create-prompt/SKILL.md`;
-        try {
-          const testResponse = await fetch(testSkillsUrl);
-          if (testResponse.ok) {
-            await downloadDirectoryFromGitHub(
-              "skills",
-              path.join(claudeDir, "skills"),
-            );
-            s.stop("Skills installed");
-          } else {
-            s.stop("Skills not available in repository");
-          }
-        } catch {
-          s.stop("Skills not available in repository");
-        }
+      const skillsSourcePath = path.join(sourceDir, "skills");
+      if (await fs.pathExists(skillsSourcePath)) {
+        await fs.copy(
+          skillsSourcePath,
+          path.join(claudeDir, "skills"),
+          { overwrite: true },
+        );
+        s.stop("Skills installed");
       } else {
-        const skillsSourcePath = path.join(sourceDir!, "skills");
-        if (await fs.pathExists(skillsSourcePath)) {
-          await fs.copy(
-            skillsSourcePath,
-            path.join(claudeDir, "skills"),
-            { overwrite: true },
-          );
-          s.stop("Skills installed");
-        } else {
-          s.stop("Skills not available in local repository");
-        }
+        s.stop("Skills not available in repository");
       }
     }
 
     if (options.notificationSounds) {
       s.start("Setting up notification sounds");
-      if (useGitHub) {
-        const songDir = path.join(claudeDir, "song");
-        await fs.ensureDir(songDir);
-        await downloadFromGitHub(
-          "song/finish.mp3",
-          path.join(songDir, "finish.mp3"),
-        );
-        await downloadFromGitHub(
-          "song/need-human.mp3",
-          path.join(songDir, "need-human.mp3"),
-        );
-      } else {
-        await fs.copy(
-          path.join(sourceDir!, "song"),
-          path.join(claudeDir, "song"),
-          { overwrite: true },
-        );
-      }
+      await fs.copy(
+        path.join(sourceDir, "song"),
+        path.join(claudeDir, "song"),
+        { overwrite: true },
+      );
       s.stop("Notification sounds installed");
     }
 
@@ -375,6 +286,10 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     s.start("Updating settings.json");
     await updateSettings(options, claudeDir);
     s.stop("Settings updated");
+
+    s.start("Cleaning up temporary files");
+    await cleanupRepository(repoPath);
+    s.stop("Cleanup complete");
 
     console.log(chalk.green("✨ Setup complete!"));
 
@@ -417,6 +332,11 @@ export async function setupCommand(params: SetupCommandParams = {}) {
   } catch (error) {
     console.error(chalk.red("\n❌ Setup failed:"), error);
     console.log(chalk.red("Setup failed!"));
+
+    if (repoPath) {
+      await cleanupRepository(repoPath);
+    }
+
     process.exit(1);
   }
 }

@@ -1,6 +1,11 @@
 import chalk from "chalk";
 import fs from "fs-extra";
 import path from "path";
+import os from "os";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execAsync = promisify(exec);
 
 export class SimpleSpinner {
   private message: string = "";
@@ -15,87 +20,34 @@ export class SimpleSpinner {
   }
 }
 
-const GITHUB_RAW_BASE =
-  "https://raw.githubusercontent.com/Melvynx/aiblueprint-cli/main/claude-code-config";
+const GITHUB_REPO = "https://github.com/Melvynx/aiblueprint.git";
 
-export async function downloadFromGitHub(
-  relativePath: string,
-  targetPath: string,
-): Promise<boolean> {
+export async function cloneRepository(): Promise<string | null> {
+  const tmpDir = path.join(os.tmpdir(), `aiblueprint-${Date.now()}`);
+
   try {
-    const url = `${GITHUB_RAW_BASE}/${relativePath}`;
-    const response = await fetch(url);
-    if (!response.ok) {
-      return false;
-    }
-    const content = await response.arrayBuffer();
-    await fs.ensureDir(path.dirname(targetPath));
-    await fs.writeFile(targetPath, Buffer.from(content));
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-
-export async function downloadDirectoryFromGitHub(
-  dirPath: string,
-  targetDir: string,
-): Promise<boolean> {
-  try {
-    const apiUrl = `https://api.github.com/repos/Melvynx/aiblueprint-cli/contents/claude-code-config/${dirPath}`;
-    const response = await fetch(apiUrl);
-    if (!response.ok) {
-      console.error(
-        chalk.yellow(
-          `  Warning: Failed to fetch directory from GitHub: ${dirPath} (HTTP ${response.status})`,
-        ),
-      );
-      return false;
-    }
-
-    const files = await response.json();
-    if (!Array.isArray(files)) {
-      console.error(
-        chalk.yellow(
-          `  Warning: Invalid response from GitHub API for: ${dirPath}`,
-        ),
-      );
-      return false;
-    }
-
-    await fs.ensureDir(targetDir);
-
-    let allSuccess = true;
-    for (const file of files) {
-      const relativePath = `${dirPath}/${file.name}`;
-      const targetPath = path.join(targetDir, file.name);
-
-      if (file.type === "file") {
-        const success = await downloadFromGitHub(relativePath, targetPath);
-        if (!success) {
-          console.error(
-            chalk.yellow(`  Warning: Failed to download file: ${relativePath}`),
-          );
-          allSuccess = false;
-        }
-      } else if (file.type === "dir") {
-        const success = await downloadDirectoryFromGitHub(
-          relativePath,
-          targetPath,
-        );
-        if (!success) {
-          allSuccess = false;
-        }
-      }
-    }
-
-    return allSuccess;
+    await fs.ensureDir(tmpDir);
+    await execAsync(`git clone --depth 1 --quiet ${GITHUB_REPO} "${tmpDir}"`);
+    return tmpDir;
   } catch (error) {
     console.error(
       chalk.yellow(
-        `  Warning: Error downloading directory ${dirPath}: ${error instanceof Error ? error.message : String(error)}`,
+        `  Warning: Failed to clone repository: ${error instanceof Error ? error.message : String(error)}`,
       ),
     );
-    return false;
+    await fs.remove(tmpDir).catch(() => {});
+    return null;
+  }
+}
+
+export async function cleanupRepository(repoPath: string): Promise<void> {
+  try {
+    await fs.remove(repoPath);
+  } catch (error) {
+    console.error(
+      chalk.yellow(
+        `  Warning: Failed to cleanup temporary directory: ${error instanceof Error ? error.message : String(error)}`,
+      ),
+    );
   }
 }

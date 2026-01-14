@@ -3,7 +3,7 @@ import path from "path";
 import chalk from "chalk";
 import { homedir } from "os";
 import { checkAndInstallDependencies, installStatuslineDependencies } from "./setup/dependencies.js";
-import { downloadDirectoryFromGitHub } from "./setup/utils.js";
+import { cloneRepository, cleanupRepository } from "./setup/utils.js";
 import { getVersion } from "../lib/version.js";
 
 export interface StatuslineOptions {
@@ -23,43 +23,58 @@ export async function statuslineCommand(options: StatuslineOptions) {
   console.log(chalk.cyan("📦 Checking dependencies..."));
   await checkAndInstallDependencies();
 
-  console.log(chalk.cyan("\n📥 Downloading statusline files..."));
-  const scriptsDir = path.join(claudeDir, "scripts");
-  await fs.ensureDir(scriptsDir);
+  console.log(chalk.cyan("\n📥 Cloning configuration repository..."));
+  const repoPath = await cloneRepository();
 
-  const success = await downloadDirectoryFromGitHub(
-    "scripts/statusline",
-    path.join(scriptsDir, "statusline")
-  );
-
-  if (!success) {
-    console.log(chalk.red("  Failed to download statusline files from GitHub"));
+  if (!repoPath) {
+    console.log(chalk.red("  Failed to clone repository. Please check your internet connection."));
     return;
   }
 
-  console.log(chalk.cyan("\n📦 Installing statusline dependencies..."));
-  await installStatuslineDependencies(claudeDir);
+  const sourceDir = path.join(repoPath, "claude-code-config");
 
-  console.log(chalk.cyan("\n⚙️  Configuring settings.json..."));
-  const settingsPath = path.join(claudeDir, "settings.json");
-  let settings: any = {};
-
-  try {
-    const existingSettings = await fs.readFile(settingsPath, "utf-8");
-    settings = JSON.parse(existingSettings);
-  } catch {
-    // Settings file doesn't exist or is invalid
+  if (!await fs.pathExists(sourceDir)) {
+    await cleanupRepository(repoPath);
+    console.log(chalk.red("  Configuration directory not found in cloned repository"));
+    return;
   }
 
-  settings.statusLine = {
-    type: "command",
-    command: `bun ${path.join(claudeDir, "scripts/statusline/src/index.ts")}`,
-    padding: 0,
-  };
+  try {
+    const scriptsDir = path.join(claudeDir, "scripts");
+    await fs.ensureDir(scriptsDir);
 
-  await fs.writeJson(settingsPath, settings, { spaces: 2 });
+    await fs.copy(
+      path.join(sourceDir, "scripts/statusline"),
+      path.join(scriptsDir, "statusline"),
+      { overwrite: true },
+    );
 
-  console.log(chalk.green("\n✅ Statusline setup complete!"));
-  console.log(chalk.gray("\nYour Claude Code statusline is now configured."));
-  console.log(chalk.gray("Restart Claude Code to see the changes.\n"));
+    console.log(chalk.cyan("\n📦 Installing statusline dependencies..."));
+    await installStatuslineDependencies(claudeDir);
+
+    console.log(chalk.cyan("\n⚙️  Configuring settings.json..."));
+    const settingsPath = path.join(claudeDir, "settings.json");
+    let settings: any = {};
+
+    try {
+      const existingSettings = await fs.readFile(settingsPath, "utf-8");
+      settings = JSON.parse(existingSettings);
+    } catch {
+      // Settings file doesn't exist or is invalid
+    }
+
+    settings.statusLine = {
+      type: "command",
+      command: `bun ${path.join(claudeDir, "scripts/statusline/src/index.ts")}`,
+      padding: 0,
+    };
+
+    await fs.writeJson(settingsPath, settings, { spaces: 2 });
+
+    console.log(chalk.green("\n✅ Statusline setup complete!"));
+    console.log(chalk.gray("\nYour Claude Code statusline is now configured."));
+    console.log(chalk.gray("Restart Claude Code to see the changes.\n"));
+  } finally {
+    await cleanupRepository(repoPath);
+  }
 }

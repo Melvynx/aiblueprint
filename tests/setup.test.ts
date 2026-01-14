@@ -2,11 +2,18 @@ import fs from "fs-extra";
 import inquirer from "inquirer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { setupCommand } from "../src/commands/setup";
+import { promisify } from "util";
+import { exec } from "child_process";
+
+const execAsync = promisify(exec);
 
 // Mock dependencies
 vi.mock("inquirer");
 vi.mock("fs-extra");
-vi.mock("child_process");
+vi.mock("child_process", () => ({
+  exec: vi.fn(),
+  execSync: vi.fn(),
+}));
 
 // Mock process.exit to prevent test termination
 const mockExit = vi.fn();
@@ -30,7 +37,7 @@ global.fetch = vi.fn(() =>
 ) as any;
 
 describe("Setup Command with Inquirer.js", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
 
     // Mock fs-extra methods
@@ -40,8 +47,24 @@ describe("Setup Command with Inquirer.js", () => {
     // @ts-expect-error Not important
     vi.mocked(fs.readFile).mockResolvedValue("{}");
     // @ts-expect-error Not important
-    vi.mocked(fs.pathExists).mockResolvedValue(false);
+    vi.mocked(fs.pathExists).mockImplementation((path: string) => {
+      // Mock the source directory to exist
+      if (path.includes("claude-code-config")) {
+        return Promise.resolve(true);
+      }
+      return Promise.resolve(false);
+    });
     vi.mocked(fs.copy).mockResolvedValue();
+    vi.mocked(fs.remove).mockResolvedValue();
+
+    // Mock exec for git clone
+    const { exec } = await import("child_process");
+    vi.mocked(exec).mockImplementation((cmd: any, callback: any) => {
+      if (typeof callback === "function") {
+        callback(null, { stdout: "", stderr: "" });
+      }
+      return {} as any;
+    });
 
     // Clear process.exit mock
     mockExit.mockClear();

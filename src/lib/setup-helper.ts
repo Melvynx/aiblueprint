@@ -2,7 +2,7 @@ import fs from "fs-extra";
 import path from "path";
 import os from "os";
 import chalk from "chalk";
-import { downloadDirectoryFromGitHub } from "../commands/setup/utils.js";
+import { cloneRepository, cleanupRepository } from "../commands/setup/utils.js";
 
 export interface BasicSetupOptions {
   claudeCodeFolder?: string;
@@ -21,30 +21,54 @@ export async function installBasicConfigs(
 
   console.log(chalk.gray("📦 Installing free configurations..."));
 
-  // Install commands
-  console.log(chalk.gray("  • Commands..."));
-  await downloadDirectoryFromGitHub(
-    "commands",
-    path.join(claudeDir, "commands"),
-  );
+  const repoPath = await cloneRepository();
 
-  // Install agents
-  console.log(chalk.gray("  • Agents..."));
-  await downloadDirectoryFromGitHub(
-    "agents",
-    path.join(claudeDir, "agents"),
-  );
-
-  // Install basic statusline only if not skipped (for pro setup)
-  if (!skipStatusline) {
-    console.log(chalk.gray("  • Statusline (basic)..."));
-    await downloadDirectoryFromGitHub(
-      "scripts/statusline",
-      path.join(claudeDir, "scripts", "statusline"),
+  if (!repoPath) {
+    throw new Error(
+      "Failed to clone repository. Please check your internet connection and try again.",
     );
   }
 
-  console.log(chalk.green("✓ Free configurations installed"));
+  const sourceDir = path.join(repoPath, "claude-code-config");
 
-  return claudeDir;
+  if (!await fs.pathExists(sourceDir)) {
+    await cleanupRepository(repoPath);
+    throw new Error(
+      "Configuration directory not found in cloned repository",
+    );
+  }
+
+  try {
+    // Install commands
+    console.log(chalk.gray("  • Commands..."));
+    await fs.copy(
+      path.join(sourceDir, "commands"),
+      path.join(claudeDir, "commands"),
+      { overwrite: true },
+    );
+
+    // Install agents
+    console.log(chalk.gray("  • Agents..."));
+    await fs.copy(
+      path.join(sourceDir, "agents"),
+      path.join(claudeDir, "agents"),
+      { overwrite: true },
+    );
+
+    // Install basic statusline only if not skipped (for pro setup)
+    if (!skipStatusline) {
+      console.log(chalk.gray("  • Statusline (basic)..."));
+      await fs.copy(
+        path.join(sourceDir, "scripts/statusline"),
+        path.join(claudeDir, "scripts", "statusline"),
+        { overwrite: true },
+      );
+    }
+
+    console.log(chalk.green("✓ Free configurations installed"));
+
+    return claudeDir;
+  } finally {
+    await cleanupRepository(repoPath);
+  }
 }
