@@ -169,3 +169,30 @@ export function transformHook(hook: any, claudeDir: string): any {
 
   return transformed;
 }
+
+const TEXT_FILE_EXTENSIONS = new Set([
+  ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs",
+  ".json", ".jsonl",
+  ".md", ".mdx", ".txt",
+  ".sh", ".bash", ".zsh",
+  ".yaml", ".yml",
+  ".toml", ".ini", ".cfg",
+  ".html", ".css", ".scss", ".less",
+]);
+
+export function isTextFile(filePath: string): boolean {
+  const ext = filePath.toLowerCase().slice(filePath.lastIndexOf("."));
+  return TEXT_FILE_EXTENSIONS.has(ext);
+}
+
+export function transformFileContent(content: string, claudeDir: string): string {
+  let transformed = content;
+
+  for (const pattern of KNOWN_CLAUDE_PATHS) {
+    transformed = transformed.replace(new RegExp(pattern.source, "g"), `${claudeDir}/`);
+  }
+
+  transformed = transformed.replace(/\\/g, "/");
+
+  return transformed;
+}

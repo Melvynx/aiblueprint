@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import path from "path";
 import crypto from "crypto";
-import { transformHook } from "./platform.js";
+import { transformHook, transformFileContent, isTextFile } from "./platform.js";
 
 const PREMIUM_REPO = "Melvynx/aiblueprint-cli-premium";
 const PREMIUM_BRANCH = "main";
@@ -368,7 +368,8 @@ export async function analyzeSyncChanges(
 async function downloadFromPrivateGitHub(
   relativePath: string,
   targetPath: string,
-  githubToken: string
+  githubToken: string,
+  claudeDir: string
 ): Promise<boolean> {
   try {
     const url = `https://raw.githubusercontent.com/${PREMIUM_REPO}/${PREMIUM_BRANCH}/claude-code-config/${relativePath}`;
@@ -385,7 +386,15 @@ async function downloadFromPrivateGitHub(
 
     const content = await response.arrayBuffer();
     await fs.ensureDir(path.dirname(targetPath));
-    await fs.writeFile(targetPath, Buffer.from(content));
+
+    if (isTextFile(relativePath)) {
+      const textContent = Buffer.from(content).toString("utf-8");
+      const transformedContent = transformFileContent(textContent, claudeDir);
+      await fs.writeFile(targetPath, transformedContent, "utf-8");
+    } else {
+      await fs.writeFile(targetPath, Buffer.from(content));
+    }
+
     return true;
   } catch {
     return false;
@@ -475,7 +484,8 @@ export async function syncSelectedItems(
       const ok = await downloadFromPrivateGitHub(
         item.relativePath,
         targetPath,
-        githubToken
+        githubToken,
+        claudeDir
       );
       if (ok) {
         success++;

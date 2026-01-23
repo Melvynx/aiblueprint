@@ -216,6 +216,94 @@ describe("Platform Utilities", () => {
     });
   });
 
+  describe("isTextFile", () => {
+    it("should return true for text file extensions", async () => {
+      const { isTextFile } = await import("../src/lib/platform");
+
+      expect(isTextFile("script.ts")).toBe(true);
+      expect(isTextFile("file.js")).toBe(true);
+      expect(isTextFile("config.json")).toBe(true);
+      expect(isTextFile("readme.md")).toBe(true);
+      expect(isTextFile("setup.sh")).toBe(true);
+      expect(isTextFile("config.yaml")).toBe(true);
+    });
+
+    it("should return false for binary file extensions", async () => {
+      const { isTextFile } = await import("../src/lib/platform");
+
+      expect(isTextFile("sound.mp3")).toBe(false);
+      expect(isTextFile("image.png")).toBe(false);
+      expect(isTextFile("video.mp4")).toBe(false);
+      expect(isTextFile("archive.zip")).toBe(false);
+    });
+
+    it("should handle case insensitivity", async () => {
+      const { isTextFile } = await import("../src/lib/platform");
+
+      expect(isTextFile("FILE.TS")).toBe(true);
+      expect(isTextFile("CONFIG.JSON")).toBe(true);
+      expect(isTextFile("IMAGE.PNG")).toBe(false);
+    });
+  });
+
+  describe("transformFileContent", () => {
+    it("should transform macOS paths in content", async () => {
+      const { transformFileContent } = await import("../src/lib/platform");
+
+      const content = `{
+  "command": "bun /Users/melvynx/.claude/scripts/test.ts",
+  "path": "/Users/someone/.claude/config"
+}`;
+      const result = transformFileContent(content, "/home/testuser/.claude");
+
+      expect(result).toContain("/home/testuser/.claude/scripts/test.ts");
+      expect(result).toContain("/home/testuser/.claude/config");
+      expect(result).not.toContain("/Users/melvynx/");
+      expect(result).not.toContain("/Users/someone/");
+    });
+
+    it("should transform Linux paths in content", async () => {
+      const { transformFileContent } = await import("../src/lib/platform");
+
+      const content = "chmod +x /home/melvyn/.claude/scripts/setup.sh";
+      const result = transformFileContent(content, "/Users/newuser/.claude");
+
+      expect(result).toBe("chmod +x /Users/newuser/.claude/scripts/setup.sh");
+    });
+
+    it("should transform multiple paths in same content", async () => {
+      const { transformFileContent } = await import("../src/lib/platform");
+
+      const content = `
+script1: /Users/melvynx/.claude/scripts/a.ts
+script2: /Users/melvynx/.claude/scripts/b.ts
+script3: /Users/melvynx/.claude/scripts/c.ts
+`;
+      const result = transformFileContent(content, "/home/user/.claude");
+
+      expect(result.match(/\/home\/user\/.claude/g)?.length).toBe(3);
+      expect(result).not.toContain("/Users/melvynx/");
+    });
+
+    it("should convert backslashes to forward slashes", async () => {
+      const { transformFileContent } = await import("../src/lib/platform");
+
+      const content = "path: C:\\Users\\test\\.claude\\scripts";
+      const result = transformFileContent(content, "/home/user/.claude");
+
+      expect(result).not.toContain("\\");
+    });
+
+    it("should not modify content without claude paths", async () => {
+      const { transformFileContent } = await import("../src/lib/platform");
+
+      const content = "export const version = '1.0.0';";
+      const result = transformFileContent(content, "/home/user/.claude");
+
+      expect(result).toBe("export const version = '1.0.0';");
+    });
+  });
+
   describe("detectAudioPlayer", () => {
     it("should return afplay on macOS", async () => {
       vi.spyOn(os, "platform").mockReturnValue("darwin");
