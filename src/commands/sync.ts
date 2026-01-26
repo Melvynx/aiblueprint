@@ -290,6 +290,31 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
     if (syncMode === "updates") {
       selectedItems = [...newItems, ...modifiedItems];
     } else if (syncMode === "updates_and_delete") {
+      p.log.message("");
+      p.log.message(chalk.red.bold("⚠️  WARNING: DESTRUCTIVE ACTION"));
+      p.log.message(chalk.red("━".repeat(50)));
+      p.log.message(
+        chalk.red(
+          "All your custom skills, commands, agents, and configuration files"
+        )
+      );
+      p.log.message(
+        chalk.red("that are not in the premium version will be PERMANENTLY DELETED")
+      );
+      p.log.message(chalk.red("and replaced by the new version."));
+      p.log.message(chalk.red("━".repeat(50)));
+      p.log.message("");
+
+      const deleteConfirm = await p.confirm({
+        message: chalk.red.bold("Are you sure you want to delete and replace all files?"),
+        initialValue: false,
+      });
+
+      if (p.isCancel(deleteConfirm) || !deleteConfirm) {
+        p.cancel("Sync cancelled");
+        process.exit(0);
+      }
+
       selectedItems = [...newItems, ...modifiedItems, ...deletedItems];
     } else {
       const fileChoices = choices.filter((c) => c.value.type !== "hook") as { value: SelectionItem; label: string; hint?: string }[];

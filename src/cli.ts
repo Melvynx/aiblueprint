@@ -10,6 +10,7 @@ import {
   proUpdateCommand,
 } from "./commands/pro.js";
 import { proSyncCommand } from "./commands/sync.js";
+import { backupLoadCommand } from "./commands/backup.js";
 import { registerDynamicScriptCommands } from "./commands/dynamic-scripts.js";
 import chalk from "chalk";
 import { readFileSync } from "fs";
@@ -136,6 +137,19 @@ proCmd
     const parentOptions = command.parent.parent.opts();
     const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
     proSyncCommand({ folder: claudeCodeFolder });
+  });
+
+const backupCmd = claudeCodeCmd
+  .command("backup")
+  .description("Manage Claude Code configuration backups");
+
+backupCmd
+  .command("load")
+  .description("Load a previous backup interactively")
+  .action((options, command) => {
+    const parentOptions = command.parent.parent.opts();
+    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
+    backupLoadCommand({ folder: claudeCodeFolder });
   });
 
 // Register dynamic script commands
