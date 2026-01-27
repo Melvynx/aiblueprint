@@ -236,12 +236,9 @@ export async function proSetupCommand(options: { folder?: string } = {}) {
         shellShortcuts: false,
         commandValidation: true,
         customStatusline: true,
-        aiblueprintCommands: false,
         aiblueprintAgents: false,
         aiblueprintSkills: false,
         notificationSounds: true,
-        codexSymlink: false,
-        openCodeSymlink: false,
       },
       claudeDir,
     );

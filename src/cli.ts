@@ -62,8 +62,6 @@ claudeCodeCmd
     const parentOptions = command.parent.opts();
     setupCommand({
       claudeCodeFolder: parentOptions.claudeCodeFolder || parentOptions.folder,
-      codexFolder: parentOptions.codexFolder,
-      openCodeFolder: parentOptions.openCodeFolder,
       skipInteractive: parentOptions.skip,
     });
   });

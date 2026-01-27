@@ -10,12 +10,9 @@ export interface SetupOptions {
   shellShortcuts: boolean;
   commandValidation: boolean;
   customStatusline: boolean;
-  aiblueprintCommands: boolean;
   aiblueprintAgents: boolean;
   aiblueprintSkills: boolean;
   notificationSounds: boolean;
-  codexSymlink: boolean;
-  openCodeSymlink: boolean;
   skipInteractive?: boolean;
   replaceStatusline?: boolean;
 }

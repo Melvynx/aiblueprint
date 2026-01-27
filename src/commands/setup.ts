@@ -3,10 +3,7 @@ import fs from "fs-extra";
 import path from "path";
 import os from "os";
 import chalk from "chalk";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
 import { setupShellShortcuts } from "./setup/shell-shortcuts.js";
-import { setupCodexSymlink, setupOpenCodeSymlink } from "./setup/symlinks.js";
 import { checkAndInstallDependencies, installStatuslineDependencies } from "./setup/dependencies.js";
 import { updateSettings, hasExistingStatusLine, type SetupOptions } from "./setup/settings.js";
 import {
@@ -17,22 +14,14 @@ import {
 import { getVersion } from "../lib/version.js";
 import { createBackup } from "../lib/backup-utils.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-
 export interface SetupCommandParams {
   claudeCodeFolder?: string;
-  codexFolder?: string;
-  openCodeFolder?: string;
   skipInteractive?: boolean;
 }
 
 export async function setupCommand(params: SetupCommandParams = {}) {
   const {
     claudeCodeFolder: customClaudeCodeFolder,
-    codexFolder: customCodexFolder,
-    openCodeFolder: customOpenCodeFolder,
     skipInteractive,
   } = params;
 
@@ -49,11 +38,8 @@ export async function setupCommand(params: SetupCommandParams = {}) {
         "shellShortcuts",
         "commandValidation",
         "customStatusline",
-        "aiblueprintCommands",
         "aiblueprintAgents",
         "notificationSounds",
-        "codexSymlink",
-        "openCodeSymlink",
       ];
       console.log(chalk.green("✓ Installing all features (--skip mode)"));
     } else {
@@ -79,11 +65,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
               checked: true,
             },
             {
-              value: "aiblueprintCommands",
-              name: "AIBlueprint commands - Pre-configured command templates",
-              checked: true,
-            },
-            {
               value: "aiblueprintAgents",
               name: "AIBlueprint agents - Specialized AI agents",
               checked: true,
@@ -92,16 +73,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
               value: "notificationSounds",
               name: "Notification sounds - Audio alerts for events",
               checked: true,
-            },
-            {
-              value: "codexSymlink",
-              name: "Codex symlink - Link commands to ~/.codex/prompts",
-              checked: false,
-            },
-            {
-              value: "openCodeSymlink",
-              name: "OpenCode symlink - Link commands to ~/.config/opencode/command",
-              checked: false,
             },
           ],
         },
@@ -119,12 +90,9 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       shellShortcuts: features.includes("shellShortcuts"),
       commandValidation: features.includes("commandValidation"),
       customStatusline: features.includes("customStatusline"),
-      aiblueprintCommands: features.includes("aiblueprintCommands"),
       aiblueprintAgents: features.includes("aiblueprintAgents"),
       aiblueprintSkills: false,
       notificationSounds: features.includes("notificationSounds"),
-      codexSymlink: features.includes("codexSymlink"),
-      openCodeSymlink: features.includes("openCodeSymlink"),
       skipInteractive,
     };
 
@@ -190,35 +158,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       s.stop("Scripts installed");
     }
 
-    if (options.aiblueprintCommands) {
-      s.start("Setting up AIBlueprint commands");
-      await fs.copy(
-        path.join(sourceDir, "commands"),
-        path.join(claudeDir, "commands"),
-        { overwrite: true },
-      );
-      s.stop("Commands installed");
-    }
-
-    if (options.codexSymlink && options.aiblueprintCommands) {
-      s.start("Setting up Codex symlink");
-      await setupCodexSymlink(
-        claudeDir,
-        customCodexFolder,
-        customClaudeCodeFolder,
-      );
-      s.stop("Codex symlink configured");
-    }
-
-    if (options.openCodeSymlink && options.aiblueprintCommands) {
-      s.start("Setting up OpenCode symlink");
-      await setupOpenCodeSymlink(
-        claudeDir,
-        customOpenCodeFolder,
-        customClaudeCodeFolder,
-      );
-      s.stop("OpenCode symlink configured");
-    }
 
     if (options.aiblueprintAgents) {
       s.start("Setting up AIBlueprint agents");
