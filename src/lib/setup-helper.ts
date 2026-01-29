@@ -40,12 +40,15 @@ export async function installBasicConfigs(
 
   try {
     // Install commands
-    console.log(chalk.gray("  • Commands..."));
-    await fs.copy(
-      path.join(sourceDir, "commands"),
-      path.join(claudeDir, "commands"),
-      { overwrite: true },
-    );
+    const commandsSourcePath = path.join(sourceDir, "commands");
+    if (await fs.pathExists(commandsSourcePath)) {
+      console.log(chalk.gray("  • Commands..."));
+      await fs.copy(
+        commandsSourcePath,
+        path.join(claudeDir, "commands"),
+        { overwrite: true },
+      );
+    }
 
     // Install agents
     console.log(chalk.gray("  • Agents..."));

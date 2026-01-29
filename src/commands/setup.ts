@@ -192,12 +192,17 @@ export async function setupCommand(params: SetupCommandParams = {}) {
 
     if (options.aiblueprintCommands) {
       s.start("Setting up AIBlueprint commands");
-      await fs.copy(
-        path.join(sourceDir, "commands"),
-        path.join(claudeDir, "commands"),
-        { overwrite: true },
-      );
-      s.stop("Commands installed");
+      const commandsSourcePath = path.join(sourceDir, "commands");
+      if (await fs.pathExists(commandsSourcePath)) {
+        await fs.copy(
+          commandsSourcePath,
+          path.join(claudeDir, "commands"),
+          { overwrite: true },
+        );
+        s.stop("Commands installed");
+      } else {
+        s.stop("Commands not available in repository");
+      }
     }
 
     if (options.codexSymlink && options.aiblueprintCommands) {
