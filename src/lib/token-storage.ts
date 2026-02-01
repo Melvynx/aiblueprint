@@ -33,8 +33,21 @@ export function getTokenFilePath(): string {
  */
 export async function saveToken(githubToken: string): Promise<void> {
   const tokenFile = getTokenFilePath();
-  await fs.ensureDir(path.dirname(tokenFile));
-  await fs.writeFile(tokenFile, githubToken, { mode: 0o600 }); // Read/write for owner only
+  const configDir = path.dirname(tokenFile);
+
+  try {
+    await fs.ensureDir(configDir);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "EACCES") {
+      throw new Error(
+        `Permission denied creating config directory: ${configDir}\n` +
+        `Please create the directory manually: mkdir -p ${configDir}`
+      );
+    }
+    throw error;
+  }
+
+  await fs.writeFile(tokenFile, githubToken, { mode: 0o600 });
 }
 
 /**
