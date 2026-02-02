@@ -15,38 +15,12 @@ const API_URL = "https://codeline.app/api/products";
 const OPENCLAW_PRODUCT_ID = "prd_t2GRwX3aH1";
 
 const CLAUDE_CODE_TOOLS_INSTRUCTIONS = `
-## Claude Code (CLI)
+## Critical Rule: Claude Code CLI
 
-Claude Code requires a TTY for interactive mode. When running in Docker or via exec without a PTY, use the \`script\` wrapper to simulate a TTY.
+When executing Claude Code CLI commands, you MUST use \`claude-run\` instead of \`claude\` directly.
 
-### Usage Pattern
-
-\`\`\`bash
-# ALWAYS use this pattern to run Claude Code:
-script -q -c "claude -p 'your prompt here' --output-format json" /dev/null
-
-# Examples:
-script -q -c "claude -p 'What is 4+4?' --output-format json" /dev/null
-script -q -c "claude -p 'Explain this error: connection refused' --output-format json" /dev/null
-\`\`\`
-
-### Why?
-
-Claude Code uses Ink (React for terminal) which requires \`stdin.setRawMode()\`. Without a TTY, this fails silently. The \`script\` command allocates a pseudo-TTY.
-
-### Wrapper Script
-
-A wrapper is available at \`/usr/local/bin/claude-run\`:
-
-\`\`\`bash
-claude-run "your prompt here"
-\`\`\`
-
-### Important
-
-- NEVER run \`claude -p "..."\` directly - it will hang or fail silently
-- ALWAYS use the \`script\` wrapper or \`claude-run\`
-- Use \`--output-format json\` for structured output
+- ✅ Correct: \`claude-run -p "your prompt" --output-format json\`
+- ❌ Wrong: \`claude -p "your prompt"\` (will hang and timeout)
 `.trim();
 
 export async function openclawProActivateCommand(userToken?: string) {
@@ -227,14 +201,9 @@ ${CLAUDE_CODE_TOOLS_INSTRUCTIONS}
     spinner.start("Creating claude-run wrapper...");
     const claudeRunWrapper = `#!/bin/bash
 # Claude Code wrapper that handles TTY requirement
-# Usage: claude-run "your prompt here"
+# Usage: claude-run -p "your prompt" [options]
 
-if [ -z "$1" ]; then
-  echo "Usage: claude-run 'your prompt'"
-  exit 1
-fi
-
-script -q -c "claude -p '$1' --output-format json" /dev/null
+script -q -c "claude $*" /dev/null
 `;
     const binDir = "/usr/local/bin";
     const wrapperPath = path.join(binDir, "claude-run");
