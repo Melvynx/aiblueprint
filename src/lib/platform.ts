@@ -139,6 +139,7 @@ export function getPlaySoundCommand(soundPath: string): string | null {
 const KNOWN_CLAUDE_PATHS = [
   /\/Users\/[^/]+\/\.claude\//,
   /\/home\/[^/]+\/\.claude\//,
+  /\/root\/\.claude\//,
   /C:\\Users\\[^\\]+\\\.claude\\/i,
 ];
 
@@ -150,6 +151,14 @@ export function transformHookCommand(command: string, claudeDir: string): string
   }
 
   transformed = transformed.replace(/\\/g, "/");
+
+  const isAudioCommand = /^(afplay|paplay|aplay|mpv|ffplay|powershell)\s/.test(transformed);
+  if (isAudioCommand) {
+    const newCommand = transformAudioCommand(transformed, claudeDir);
+    if (newCommand) {
+      return newCommand;
+    }
+  }
 
   return transformed;
 }
@@ -185,6 +194,22 @@ export function isTextFile(filePath: string): boolean {
   return TEXT_FILE_EXTENSIONS.has(ext);
 }
 
+export function transformAudioCommand(command: string, claudeDir: string): string | null {
+  const soundFileMatch = command.match(/(?:finish\.mp3|need-human\.mp3|[^'"\s]+\.(?:mp3|wav))/);
+  if (!soundFileMatch) return null;
+
+  const soundFile = soundFileMatch[0];
+  let soundPath: string;
+
+  if (soundFile.includes("/")) {
+    soundPath = soundFile;
+  } else {
+    soundPath = `${claudeDir}/song/${soundFile}`;
+  }
+
+  return getPlaySoundCommand(soundPath);
+}
+
 export function transformFileContent(content: string, claudeDir: string): string {
   let transformed = content;
 
@@ -193,6 +218,22 @@ export function transformFileContent(content: string, claudeDir: string): string
   }
 
   transformed = transformed.replace(/\\/g, "/");
+
+  const audioPatterns = [
+    /afplay\s+-v\s+[\d.]+\s+'[^']+'/g,
+    /afplay\s+'[^']+'/g,
+    /paplay\s+'[^']+'/g,
+    /aplay\s+'[^']+'/g,
+    /mpv\s+--no-video[^']*'[^']+'/g,
+    /ffplay\s+-nodisp[^']*'[^']+'/g,
+  ];
+
+  for (const pattern of audioPatterns) {
+    transformed = transformed.replace(pattern, (match) => {
+      const newCommand = transformAudioCommand(match, claudeDir);
+      return newCommand || match;
+    });
+  }
 
   return transformed;
 }
