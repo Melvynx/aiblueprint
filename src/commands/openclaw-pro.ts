@@ -14,6 +14,41 @@ import fs from "fs-extra";
 const API_URL = "https://codeline.app/api/products";
 const OPENCLAW_PRODUCT_ID = "prd_t2GRwX3aH1";
 
+const CLAUDE_CODE_TOOLS_INSTRUCTIONS = `
+## Claude Code (CLI)
+
+Claude Code requires a TTY for interactive mode. When running in Docker or via exec without a PTY, use the \`script\` wrapper to simulate a TTY.
+
+### Usage Pattern
+
+\`\`\`bash
+# ALWAYS use this pattern to run Claude Code:
+script -q -c "claude -p 'your prompt here' --output-format json" /dev/null
+
+# Examples:
+script -q -c "claude -p 'What is 4+4?' --output-format json" /dev/null
+script -q -c "claude -p 'Explain this error: connection refused' --output-format json" /dev/null
+\`\`\`
+
+### Why?
+
+Claude Code uses Ink (React for terminal) which requires \`stdin.setRawMode()\`. Without a TTY, this fails silently. The \`script\` command allocates a pseudo-TTY.
+
+### Wrapper Script
+
+A wrapper is available at \`/usr/local/bin/claude-run\`:
+
+\`\`\`bash
+claude-run "your prompt here"
+\`\`\`
+
+### Important
+
+- NEVER run \`claude -p "..."\` directly - it will hang or fail silently
+- ALWAYS use the \`script\` wrapper or \`claude-run\`
+- Use \`--output-format json\` for structured output
+`.trim();
+
 export async function openclawProActivateCommand(userToken?: string) {
   p.intro(chalk.blue(`🔑 Activate OpenClaw Pro ${chalk.gray(`v${getVersion()}`)}`));
 
@@ -165,10 +200,56 @@ export async function openclawProSetupCommand(options: { folder?: string } = {})
       skillCount = dirs.filter(Boolean).length;
     }
 
+    spinner.start("Setting up workspace TOOLS.md...");
+    const workspaceDir = path.join(openclawDir, "workspace");
+    const toolsPath = path.join(workspaceDir, "TOOLS.md");
+    await fs.ensureDir(workspaceDir);
+
+    if (await fs.pathExists(toolsPath)) {
+      const existingContent = await fs.readFile(toolsPath, "utf-8");
+      if (!existingContent.includes("Claude Code (CLI)")) {
+        await fs.appendFile(toolsPath, "\n\n" + CLAUDE_CODE_TOOLS_INSTRUCTIONS);
+        spinner.stop("TOOLS.md updated with Claude Code instructions");
+      } else {
+        spinner.stop("TOOLS.md already has Claude Code instructions");
+      }
+    } else {
+      const defaultToolsMd = `# TOOLS.md - Local Notes
+
+Skills define _how_ tools work. This file is for _your_ specifics — the stuff that's unique to your setup.
+
+${CLAUDE_CODE_TOOLS_INSTRUCTIONS}
+`;
+      await fs.writeFile(toolsPath, defaultToolsMd);
+      spinner.stop("TOOLS.md created with Claude Code instructions");
+    }
+
+    spinner.start("Creating claude-run wrapper...");
+    const claudeRunWrapper = `#!/bin/bash
+# Claude Code wrapper that handles TTY requirement
+# Usage: claude-run "your prompt here"
+
+if [ -z "$1" ]; then
+  echo "Usage: claude-run 'your prompt'"
+  exit 1
+fi
+
+script -q -c "claude -p '$1' --output-format json" /dev/null
+`;
+    const binDir = "/usr/local/bin";
+    const wrapperPath = path.join(binDir, "claude-run");
+    try {
+      await fs.writeFile(wrapperPath, claudeRunWrapper, { mode: 0o755 });
+      spinner.stop("claude-run wrapper created");
+    } catch {
+      spinner.stop("claude-run wrapper skipped (no write access to /usr/local/bin)");
+    }
+
     p.log.success("✅ Setup complete!");
     p.log.info("Installed:");
     p.log.info(`  • Skills (${skillCount})`);
     p.log.info(`  • IDENTITY.md`);
+    p.log.info(`  • TOOLS.md (Claude Code instructions)`);
 
     p.log.info(chalk.cyan("\n💡 Skills installed to: " + skillsDir));
 
