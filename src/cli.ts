@@ -11,6 +11,12 @@ import {
 } from "./commands/pro.js";
 import { proSyncCommand } from "./commands/sync.js";
 import { backupLoadCommand } from "./commands/backup.js";
+import {
+  openclawProActivateCommand,
+  openclawProStatusCommand,
+  openclawProSetupCommand,
+  openclawProUpdateCommand,
+} from "./commands/openclaw-pro.js";
 import { registerDynamicScriptCommands } from "./commands/dynamic-scripts.js";
 import chalk from "chalk";
 import { readFileSync } from "fs";
@@ -150,6 +156,53 @@ backupCmd
     const parentOptions = command.parent.parent.opts();
     const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
     backupLoadCommand({ folder: claudeCodeFolder });
+  });
+
+// ============================================
+// OPENCLAW DOMAIN
+// ============================================
+const openclawCmd = program
+  .command("openclaw")
+  .description("OpenClaw configuration commands")
+  .option(
+    "-f, --folder <path>",
+    "Specify custom OpenClaw folder path (default: ~/.openclaw)"
+  );
+
+const openclawProCmd = openclawCmd
+  .command("pro")
+  .description("Manage OpenClaw Pro features");
+
+openclawProCmd
+  .command("activate [token]")
+  .description("Activate OpenClaw Pro with your access token")
+  .action((token) => {
+    openclawProActivateCommand(token);
+  });
+
+openclawProCmd
+  .command("status")
+  .description("Check your OpenClaw Pro token status")
+  .action(() => {
+    openclawProStatusCommand();
+  });
+
+openclawProCmd
+  .command("setup")
+  .description("Install OpenClaw Pro configurations (requires activation)")
+  .action((options, command) => {
+    const parentOptions = command.parent.parent.opts();
+    const folder = parentOptions.folder;
+    openclawProSetupCommand({ folder });
+  });
+
+openclawProCmd
+  .command("update")
+  .description("Update OpenClaw Pro configurations")
+  .action((options, command) => {
+    const parentOptions = command.parent.parent.opts();
+    const folder = parentOptions.folder;
+    openclawProUpdateCommand({ folder });
   });
 
 // Register dynamic script commands
