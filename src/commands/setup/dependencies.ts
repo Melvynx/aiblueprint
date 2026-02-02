@@ -15,27 +15,39 @@ export async function checkAndInstallDependencies() {
     }
   };
 
-  if (!checkCommand("bun")) {
+  if (checkCommand("bun")) {
+    console.log(chalk.gray("  bun already installed, skipping..."));
+  } else {
     console.log(chalk.yellow("\n  Installing bun..."));
     try {
-      execSync("npm install -g bun", { stdio: "inherit" });
-    } catch (error) {
+      execSync("npm install -g bun", {
+        stdio: "inherit",
+        timeout: 60000,
+        env: { ...process.env, CI: "true" },
+      });
+    } catch {
       console.log(
-        chalk.red(
-          "  Failed to install bun. Please install it manually: npm install -g bun",
+        chalk.yellow(
+          "  ⚠ Failed to install bun. Please install it manually: npm install -g bun",
         ),
       );
     }
   }
 
-  if (!checkCommand("ccusage")) {
+  if (checkCommand("ccusage")) {
+    console.log(chalk.gray("  ccusage already installed, skipping..."));
+  } else {
     console.log(chalk.yellow("\n  Installing ccusage..."));
     try {
-      execSync("npm install -g ccusage", { stdio: "inherit" });
-    } catch (error) {
+      execSync("npm install -g ccusage", {
+        stdio: "inherit",
+        timeout: 60000,
+        env: { ...process.env, CI: "true" },
+      });
+    } catch {
       console.log(
-        chalk.red(
-          "  Failed to install ccusage. Please install it manually: npm install -g ccusage",
+        chalk.yellow(
+          "  ⚠ Failed to install ccusage. Please install it manually: npm install -g ccusage",
         ),
       );
     }
