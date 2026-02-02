@@ -1,6 +1,6 @@
 {
   "name": "aiblueprint-cli",
-  "version": "1.4.28",
+  "version": "1.4.29",
   "description": "AIBlueprint CLI for setting up Claude Code configurations",
   "author": "AIBlueprint",
   "license": "MIT",
