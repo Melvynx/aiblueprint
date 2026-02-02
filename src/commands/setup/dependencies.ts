@@ -47,17 +47,31 @@ export async function installScriptsDependencies(claudeDir: string) {
 
   console.log(chalk.yellow("\n  Installing scripts dependencies..."));
   try {
-    execSync("bun install", {
+    execSync("bun install --no-save", {
       cwd: scriptsDir,
-      stdio: "inherit"
+      stdio: "inherit",
+      timeout: 60000,
+      env: {
+        ...process.env,
+        CI: "true",
+      },
     });
     console.log(chalk.green("  ✓ Scripts dependencies installed"));
   } catch (error) {
-    console.log(
-      chalk.red(
-        "  Failed to install scripts dependencies. Please run 'bun install' manually in ~/.claude/scripts",
-      ),
-    );
+    const isTimeout = error instanceof Error && error.message.includes("ETIMEDOUT");
+    if (isTimeout) {
+      console.log(
+        chalk.yellow(
+          "  ⚠ Bun install timed out. Please run 'bun install' manually in ~/.claude/scripts",
+        ),
+      );
+    } else {
+      console.log(
+        chalk.yellow(
+          "  ⚠ Failed to install scripts dependencies. Please run 'bun install' manually in ~/.claude/scripts",
+        ),
+      );
+    }
   }
 }
 
