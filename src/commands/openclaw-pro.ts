@@ -181,7 +181,7 @@ export async function openclawProSetupCommand(options: { folder?: string } = {})
 
     if (await fs.pathExists(toolsPath)) {
       const existingContent = await fs.readFile(toolsPath, "utf-8");
-      if (!existingContent.includes("Claude Code (CLI)")) {
+      if (!existingContent.includes("Claude Code CLI")) {
         await fs.appendFile(toolsPath, "\n\n" + CLAUDE_CODE_TOOLS_INSTRUCTIONS);
         spinner.stop("TOOLS.md updated with Claude Code instructions");
       } else {
