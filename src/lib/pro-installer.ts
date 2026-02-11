@@ -93,6 +93,13 @@ async function copyConfigFromCache(
     for (const entry of entries) {
       const sourcePath = path.join(dir, entry.name);
       const relativePath = path.relative(baseDir, sourcePath);
+
+      // .claude/ subdirectory merges into target root (target IS ~/.claude)
+      if (entry.isDirectory() && entry.name === ".claude" && dir === baseDir) {
+        await walk(sourcePath, sourcePath);
+        continue;
+      }
+
       const targetPath = path.join(targetDir, relativePath);
 
       if (entry.isDirectory()) {
@@ -253,6 +260,13 @@ export async function installProConfigs(
 
     if (!success) {
       throw new Error("Failed to download premium configurations");
+    }
+
+    // Merge .claude/ subdirectory into root before copying
+    const dotClaudeDir = path.join(tempDir, ".claude");
+    if (await fs.pathExists(dotClaudeDir)) {
+      await fs.copy(dotClaudeDir, tempDir, { overwrite: true });
+      await fs.remove(dotClaudeDir);
     }
 
     await fs.copy(tempDir, claudeFolder, {
