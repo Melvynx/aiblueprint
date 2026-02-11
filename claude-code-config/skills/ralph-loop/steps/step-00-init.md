@@ -134,8 +134,8 @@ fi
 
 ```bash
 # Make script executable and run it
-chmod +x /Users/melvynx/.claude/skills/setup-ralph/scripts/setup.sh
-/Users/melvynx/.claude/skills/setup-ralph/scripts/setup.sh "{project_path}" "{feature_name}"
+chmod +x {SKILL_PATH}/scripts/setup.sh
+{SKILL_PATH}/scripts/setup.sh "{project_path}" "{feature_name}"
 ```
 
 The setup script creates:

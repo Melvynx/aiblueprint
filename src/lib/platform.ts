@@ -1,4 +1,6 @@
 import os from "os";
+import path from "path";
+import fs from "fs-extra";
 import { execSync } from "child_process";
 
 const SHELL_UNSAFE_CHARS = /[;&|`$(){}[\]<>*?!#~'"\\]/;
@@ -210,8 +212,31 @@ export function transformAudioCommand(command: string, claudeDir: string): strin
   return getPlaySoundCommand(soundPath);
 }
 
+export function replaceClaudePathPlaceholder(content: string, claudeDir: string): string {
+  return content.replaceAll("{CLAUDE_PATH}", claudeDir);
+}
+
+export async function replacePathPlaceholdersInDir(dir: string, claudeDir: string): Promise<void> {
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      await replacePathPlaceholdersInDir(fullPath, claudeDir);
+    } else if (isTextFile(entry.name)) {
+      const content = await fs.readFile(fullPath, "utf-8");
+      const replaced = replaceClaudePathPlaceholder(content, claudeDir);
+      if (replaced !== content) {
+        await fs.writeFile(fullPath, replaced, "utf-8");
+      }
+    }
+  }
+}
+
 export function transformFileContent(content: string, claudeDir: string): string {
   let transformed = content;
+
+  transformed = replaceClaudePathPlaceholder(transformed, claudeDir);
 
   for (const pattern of KNOWN_CLAUDE_PATHS) {
     transformed = transformed.replace(new RegExp(pattern.source, "g"), `${claudeDir}/`);

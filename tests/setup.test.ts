@@ -56,6 +56,8 @@ describe("Setup Command with Inquirer.js", () => {
     });
     vi.mocked(fs.copy).mockResolvedValue();
     vi.mocked(fs.remove).mockResolvedValue();
+    // @ts-expect-error Not important
+    vi.mocked(fs.readdir).mockResolvedValue([]);
 
     // Mock exec for git clone
     const { exec } = await import("child_process");

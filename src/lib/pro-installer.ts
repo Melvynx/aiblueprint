@@ -3,6 +3,7 @@ import os from "os";
 import path from "path";
 import { exec } from "child_process";
 import { promisify } from "util";
+import { isTextFile, replaceClaudePathPlaceholder } from "./platform.js";
 
 const execAsync = promisify(exec);
 
@@ -98,6 +99,12 @@ async function copyConfigFromCache(
         await fs.ensureDir(targetPath);
         onProgress?.(relativePath, "directory");
         await walk(sourcePath, baseDir);
+      } else if (isTextFile(entry.name)) {
+        const content = await fs.readFile(sourcePath, "utf-8");
+        const replaced = replaceClaudePathPlaceholder(content, targetDir);
+        await fs.ensureDir(path.dirname(targetPath));
+        await fs.writeFile(targetPath, replaced, "utf-8");
+        onProgress?.(relativePath, "file");
       } else {
         await fs.copy(sourcePath, targetPath, { overwrite: true });
         onProgress?.(relativePath, "file");

@@ -16,6 +16,7 @@ import {
 } from "./setup/utils.js";
 import { getVersion } from "../lib/version.js";
 import { createBackup } from "../lib/backup-utils.js";
+import { replacePathPlaceholdersInDir } from "../lib/platform.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -184,6 +185,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
         path.join(claudeDir, "scripts"),
         { overwrite: true },
       );
+      await replacePathPlaceholdersInDir(path.join(claudeDir, "scripts"), claudeDir);
       if (options.customStatusline) {
         await fs.ensureDir(path.join(claudeDir, "scripts/statusline/data"));
       }
@@ -199,6 +201,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
           path.join(claudeDir, "commands"),
           { overwrite: true },
         );
+        await replacePathPlaceholdersInDir(path.join(claudeDir, "commands"), claudeDir);
         s.stop("Commands installed");
       } else {
         s.stop("Commands not available in repository");
@@ -232,6 +235,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
         path.join(claudeDir, "agents"),
         { overwrite: true },
       );
+      await replacePathPlaceholdersInDir(path.join(claudeDir, "agents"), claudeDir);
       s.stop("Agents installed");
     }
 
@@ -244,6 +248,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
           path.join(claudeDir, "skills"),
           { overwrite: true },
         );
+        await replacePathPlaceholdersInDir(path.join(claudeDir, "skills"), claudeDir);
         s.stop("Skills installed");
       } else {
         s.stop("Skills not available in repository");
