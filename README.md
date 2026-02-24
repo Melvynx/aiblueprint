@@ -136,6 +136,38 @@ npx aiblueprint-cli@latest claude-code symlink
 - `cc` - Claude Code with permissions skipped
 - `ccc` - Claude Code with continue mode
 
+### Skills
+
+Install individual skills directly into `~/.claude/skills/`:
+
+```bash
+# Install a single skill
+npx skills add Melvynx/aiblueprint --skill ultrathink
+
+# Install multiple skills
+npx skills add Melvynx/aiblueprint --skill claude-memory
+npx skills add Melvynx/aiblueprint --skill fix-errors
+```
+
+**Available skills:**
+
+| Skill | Description |
+|-------|-------------|
+| `commit` | Quick commit and push with clean messages |
+| `create-pr` | Auto-generated pull requests |
+| `fix-pr-comments` | Resolve PR review comments |
+| `merge` | Context-aware branch merging |
+| `claude-memory` | CLAUDE.md and .claude/rules management |
+| `prompt-creator` | Expert prompt engineering |
+| `skill-creator` | Guide for creating Claude Code skills |
+| `subagent-creator` | Guide for building subagents |
+| `ralph-loop` | Autonomous AI coding loop |
+| `fix-errors` | Fix ESLint and TypeScript errors |
+| `fix-grammar` | Fix grammar and spelling |
+| `oneshot` | Ultra-fast feature implementation |
+| `ultrathink` | Deep thinking mode for elegant solutions |
+| `apex-free` | APEX methodology (Analyze-Plan-Execute-eXamine) |
+
 ## 💎 Premium
 
 Unlock advanced features at [mlv.sh/claude-cli](https://mlv.sh/claude-cli)
