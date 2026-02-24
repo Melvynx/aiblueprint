@@ -1,5 +1,5 @@
 ---
-name: setup-ralph
+name: ralph-loop
 description: Setup the Ralph autonomous AI coding loop - ships features while you sleep
 argument-hint: "<project-path> [-i/--interactive] [-f/--feature <name>]"
 ---
