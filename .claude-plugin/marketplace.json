@@ -5,13 +5,13 @@
     "email": "melvyn@aiblueprint.dev"
   },
   "description": "AIBlueprint Claude Code configuration marketplace with custom agents, commands, and workflows",
-  "version": "1.0.1",
+  "version": "1.4.14",
   "plugins": [
     {
       "name": "aibp-base",
       "source": "./claude-code-config",
       "description": "AIBlueprint base configuration with custom agents, slash commands, hooks, and productivity workflows for Claude Code",
-      "version": "1.0.1",
+      "version": "1.4.14",
       "author": {
         "name": "Melvyn",
         "url": "https://github.com/melvynx"
