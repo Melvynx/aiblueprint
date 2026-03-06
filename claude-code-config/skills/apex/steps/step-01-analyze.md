@@ -11,14 +11,11 @@ next_step: steps/step-02-plan.md
 - 🛑 NEVER plan or design solutions - that's step 2
 - 🛑 NEVER create todos or implementation tasks
 - 🛑 NEVER decide HOW to implement anything
-- 🛑 NEVER mark analyze as "complete" BEFORE writing findings to `{output_dir}/01-analyze.md` (if save_mode)
 - ✅ ALWAYS focus on discovering WHAT EXISTS
 - ✅ ALWAYS report findings with file paths and line numbers
-- ✅ IF save_mode: ALWAYS use Edit tool to append ALL findings to `{output_dir}/01-analyze.md` BEFORE proceeding
 - 📋 YOU ARE AN EXPLORER, not a planner
 - 💬 FOCUS on "What is here?" NOT "What should we build?"
 - 🚫 FORBIDDEN to suggest implementations or approaches
-- 🚫 FORBIDDEN to skip file saving when save_mode is true
 
 ## 🧠 SMART AGENT STRATEGY
 
@@ -33,10 +30,9 @@ Before exploring, THINK about what information you need and launch the RIGHT age
 ## EXECUTION PROTOCOLS:
 
 - 🎯 Launch parallel exploration agents (unless economy_mode)
-- 💾 IF save_mode: Use Edit tool to append findings to `{output_dir}/01-analyze.md` AFTER agents complete and BEFORE showing summary
+- 💾 Append findings to output file (if save_mode)
 - 📖 Document patterns with specific file:line references
 - 🚫 FORBIDDEN to proceed until context is complete
-- 🚫 FORBIDDEN to proceed to step-02 without saving findings first (if save_mode)
 
 ## CONTEXT BOUNDARIES:
 
@@ -218,14 +214,9 @@ Find common patterns and pitfalls.
 [Task: websearch - Stripe webhook security best practices]
 ```
 
-### 4. Synthesize Findings + Save to File
+### 4. Synthesize Findings
 
-<critical>
-**IF `{save_mode}` = true: You MUST write findings to the file BEFORE presenting the summary or proceeding.**
-This is the most commonly skipped step. DO NOT skip it.
-</critical>
-
-Combine all agent results into structured context using this format:
+Combine results into structured context:
 
 ```markdown
 ## Codebase Context
@@ -265,9 +256,7 @@ Combine all agent results into structured context using this format:
 - Use httpOnly cookies for tokens
 ```
 
-**IF `{save_mode}` = true (MANDATORY - DO THIS NOW):**
-
-Use the **Edit tool** to append the full synthesis to `{output_dir}/01-analyze.md`. Replace the placeholder text `_Findings will be appended here as exploration progresses..._` with all the structured findings above.
+**If `{save_mode}` = true:** Append synthesis to 01-analyze.md
 
 ### 5. Infer Acceptance Criteria
 
@@ -285,26 +274,9 @@ Based on "{task_description}" and existing patterns:
 _These will be refined in the planning step._
 ```
 
-**If `{save_mode}` = true:** Append acceptance criteria to `{output_dir}/01-analyze.md` using Edit tool.
+**If `{save_mode}` = true:** Update 00-context.md with acceptance criteria
 
-### 6. Complete Save Output (if save_mode)
-
-<critical>
-**This step MUST happen BEFORE presenting the summary to the user.**
-The file must already contain all findings before you proceed.
-</critical>
-
-**If `{save_mode}` = true:**
-
-1. Verify `{output_dir}/01-analyze.md` contains the full analysis (Read it to confirm)
-2. Update progress:
-
-```bash
-bash {skill_dir}/scripts/update-progress.sh "{task_id}" "01" "analyze" "complete"
-bash {skill_dir}/scripts/update-progress.sh "{task_id}" "02" "plan" "in_progress"
-```
-
-### 7. Present Context Summary
+### 6. Present Context Summary
 
 **Always (regardless of auto_mode):**
 
@@ -328,6 +300,17 @@ Present summary and proceed directly to planning:
 Do NOT ask for user confirmation here - always proceed directly to step-02-plan.
 </critical>
 
+### 7. Complete Save Output (if save_mode)
+
+**If `{save_mode}` = true:**
+
+Append summary to `{output_dir}/01-analyze.md` then:
+
+```bash
+bash {skill_dir}/scripts/update-progress.sh "{task_id}" "01" "analyze" "complete"
+bash {skill_dir}/scripts/update-progress.sh "{task_id}" "02" "plan" "in_progress"
+```
+
 ---
 
 ## SUCCESS METRICS:
@@ -346,7 +329,6 @@ Do NOT ask for user confirmation here - always proceed directly to step-02-plan.
 
 ## FAILURE MODES:
 
-❌ **CRITICAL**: Skipping file save when save_mode is true (proceeding to plan without writing to 01-analyze.md)
 ❌ Starting to plan or design (that's step 2!)
 ❌ Suggesting implementations or approaches
 ❌ Missing obvious related files
@@ -376,5 +358,4 @@ Always proceed directly to `./step-02-plan.md` after presenting context summary.
 <critical>
 Remember: Analysis is ONLY about "What exists?" - save all planning for step-02!
 Do NOT ask for confirmation - proceed directly!
-IF save_mode = true: The 01-analyze.md file MUST contain all findings BEFORE you load step-02-plan.md.
 </critical>

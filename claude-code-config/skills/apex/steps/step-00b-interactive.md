@@ -45,7 +45,6 @@ Show current flag values:
 | Economy (`-e`) | {economy_mode ? "✓ ON" : "✗ OFF"} | No subagents |
 | Branch (`-b`) | {branch_mode ? "✓ ON" : "✗ OFF"} | Verify/create branch |
 | PR (`-pr`) | {pr_mode ? "✓ ON" : "✗ OFF"} | Create pull request |
-| Teams (`-m`) | {teams_mode ? "✓ ON" : "✗ OFF"} | Agent Teams parallel execution |
 ```
 
 ### 2. Ask for Flag Changes
@@ -81,8 +80,6 @@ questions:
         description: "{branch_mode ? 'Disable' : 'Enable'} - verify/create git branch"
       - label: "PR mode"
         description: "{pr_mode ? 'Disable' : 'Enable'} - create pull request at end"
-      - label: "Teams mode"
-        description: "{teams_mode ? 'Disable' : 'Enable'} - Agent Teams parallel execution"
       - label: "Done - keep current"
         description: "No more changes, proceed with workflow"
     multiSelect: true
@@ -99,17 +96,9 @@ IF "Test mode" selected → {test_mode} = !{test_mode}
 IF "Economy mode" selected → {economy_mode} = !{economy_mode}
 IF "Branch mode" selected → {branch_mode} = !{branch_mode}
 IF "PR mode" selected → {pr_mode} = !{pr_mode}
-IF "Teams mode" selected → {teams_mode} = !{teams_mode}
 ```
 
-**Special rules:**
-
-If Teams mode enabled, auto-enable tasks mode (teams requires task breakdown):
-```
-IF {teams_mode} = true → {tasks_mode} = true
-```
-
-If PR mode enabled, auto-enable branch mode:
+**Special rule:** If PR mode enabled, auto-enable branch mode:
 ```
 IF {pr_mode} = true → {branch_mode} = true
 ```
@@ -129,7 +118,6 @@ Display updated configuration:
 | Economy | {economy_mode ? "✓ ON" : "✗ OFF"} |
 | Branch | {branch_mode ? "✓ ON" : "✗ OFF"} |
 | PR | {pr_mode ? "✓ ON" : "✗ OFF"} |
-| Teams | {teams_mode ? "✓ ON" : "✗ OFF"} |
 ```
 
 ### 6. Return

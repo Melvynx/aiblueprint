@@ -32,7 +32,6 @@ next_step: steps/step-04-validate.md
 - Files to modify are known from the plan
 - Patterns to follow are documented from step-01
 - Don't add features - stick to the plan
-- **If context was cleared ("Execute and clear context"):** The plan file contains all APEX state variables in the "APEX Workflow Context" section. Read the plan file first and restore all variables before proceeding.
 
 ## YOUR TASK:
 

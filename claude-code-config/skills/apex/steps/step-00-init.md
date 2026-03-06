@@ -49,20 +49,15 @@ Initialize the APEX workflow by parsing flags, detecting continuation state, and
 # ===========================================
 
 auto_mode: false # -a: Skip confirmations, use recommended options
-examine_mode: false # -x: Auto-proceed to adversarial review
 save_mode: false # -s: Save outputs to .claude/output/apex/
-test_mode: false # -t: Include test creation and runner steps
 economy_mode: false # -e: No subagents, save tokens (for limited plans)
 branch_mode: false # -b: Verify not on main, create branch if needed
-pr_mode: false # -pr: Create pull request at end (enables -b)
 interactive_mode: false # -i: Configure flags interactively
-tasks_mode: false # -k: Generate task breakdown after plan
-teams_mode: false # -m: Use Claude Code Agent Teams for parallel execution
 
 # Presets:
 # Budget-friendly:  economy_mode: true
-# Full quality:     examine_mode: true, save_mode: true, test_mode: true
-# Autonomous:       auto_mode: true, examine_mode: true, save_mode: true, test_mode: true
+# Full quality:     save_mode: true
+# Autonomous:       auto_mode: true, save_mode: true
 ```
 
 **Flag Reference:** See `SKILL.md` for complete flag documentation and examples.
@@ -79,15 +74,10 @@ teams_mode: false # -m: Use Claude Code Agent Teams for parallel execution
 
 ```
 {auto_mode}    = <default>
-{examine_mode} = <default>
 {save_mode}    = <default>
-{test_mode}    = <default>
 {economy_mode} = <default>
 {branch_mode}  = <default>
-{pr_mode}      = <default>
 {interactive_mode} = <default>
-{tasks_mode}   = <default>
-{teams_mode}   = <default>
 ```
 
 **Step 2: Parse user input and override defaults:**
@@ -95,31 +85,15 @@ teams_mode: false # -m: Use Claude Code Agent Teams for parallel execution
 ```
 Enable flags (lowercase - turn ON):
   -a or --auto     → {auto_mode} = true
-  -x or --examine  → {examine_mode} = true
   -s or --save     → {save_mode} = true
-  -t or --test     → {test_mode} = true
   -e or --economy  → {economy_mode} = true
+  -b or --branch   → {branch_mode} = true
 
 Disable flags (UPPERCASE - turn OFF):
   -A or --no-auto         → {auto_mode} = false
-  -X or --no-examine      → {examine_mode} = false
   -S or --no-save         → {save_mode} = false
-  -T or --no-test         → {test_mode} = false
   -E or --no-economy      → {economy_mode} = false
   -B or --no-branch       → {branch_mode} = false
-  -PR or --no-pull-request → {pr_mode} = false
-  -K or --no-tasks        → {tasks_mode} = false
-  -M or --no-teams        → {teams_mode} = false
-
-Tasks mode:
-  -k or --tasks           → {tasks_mode} = true
-
-Teams mode:
-  -m or --teams           → {teams_mode} = true, {tasks_mode} = true
-
-Branch/PR flags:
-  -b or --branch        → {branch_mode} = true
-  -pr or --pull-request → {pr_mode} = true, {branch_mode} = true
 
 Interactive:
   -i or --interactive   → {interactive_mode} = true
@@ -190,14 +164,39 @@ IF {branch_mode} = true:
 IF {economy_mode} = true:
   → Load steps/step-00b-economy.md
   → Apply economy overrides
-
-IF {save_mode} = true:
-  → Load steps/step-00b-save.md
-  → Create output structure, generate {task_id} and {output_dir}
-  → Return here with {task_id} and {output_dir} set
 ```
 
-### 4. Initialize and Proceed
+### 4. Create Output Structure (if save_mode)
+
+**If `{save_mode}` = true:**
+
+Run the template setup script to initialize all output files:
+
+```bash
+bash {skill_dir}/scripts/setup-templates.sh \
+  "{feature_name}" \
+  "{task_description}" \
+  "{auto_mode}" \
+  "{save_mode}" \
+  "{economy_mode}" \
+  "{branch_mode}" \
+  "{interactive_mode}" \
+  "{branch_name}" \
+  "{original_input}"
+```
+
+**Note:** Pass `{feature_name}` (without number prefix), NOT `{task_id}`.
+The script auto-detects the next available number from existing folders.
+
+This script:
+
+- Auto-generates `{task_id}` = `NN-{feature_name}` (next available number)
+- Creates `.claude/output/apex/{task_id}/` directory
+- Initializes `00-context.md` with configuration and progress table
+- Pre-creates all step files from templates (01-analyze.md, 02-plan.md, etc.)
+- Outputs the generated `{task_id}` for use in subsequent steps
+
+### 5. Initialize and Proceed
 
 **Always (regardless of auto_mode):**
 
@@ -210,14 +209,9 @@ Show COMPACT initialization summary (one table, then proceed immediately):
 |----------|-------|
 | `{task_id}` | 01-kebab-name |
 | `{auto_mode}` | true/false |
-| `{examine_mode}` | true/false |
 | `{save_mode}` | true/false |
-| `{test_mode}` | true/false |
 | `{economy_mode}` | true/false |
 | `{branch_mode}` | true/false |
-| `{pr_mode}` | true/false |
-| `{tasks_mode}` | true/false |
-| `{teams_mode}` | true/false |
 
 → Analyzing...
 ```

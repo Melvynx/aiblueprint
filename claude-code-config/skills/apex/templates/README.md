@@ -12,12 +12,7 @@ This directory contains template files used to initialize APEX workflow outputs 
 | `01-analyze.md` | Analysis findings | Always (if save_mode) |
 | `02-plan.md` | Implementation plan | Always (if save_mode) |
 | `03-execute.md` | Implementation log | Always (if save_mode) |
-| `04-validate.md` | Validation results | Always (if save_mode) |
-| `05-examine.md` | Adversarial review findings | Only if examine_mode enabled |
-| `06-resolve.md` | Finding resolution log | Only if examine_mode enabled |
-| `07-tests.md` | Test analysis and creation | Only if test_mode enabled |
-| `08-run-tests.md` | Test runner log | Only if test_mode enabled |
-| `09-finish.md` | PR creation log | Only if pr_mode enabled |
+| `04-validate.md` | Validation results and workflow completion | Always (if save_mode) |
 | `step-complete.md` | Completion marker template | Referenced in steps |
 
 ## Template Variables
@@ -30,18 +25,12 @@ Templates use `{{variable}}` syntax for placeholders:
 | `{{task_description}}` | Plain text task description | `add authentication middleware` |
 | `{{timestamp}}` | ISO 8601 timestamp | `2026-01-12T10:30:00Z` |
 | `{{auto_mode}}` | Auto mode flag | `true` or `false` |
-| `{{examine_mode}}` | Examine mode flag | `true` or `false` |
 | `{{save_mode}}` | Save mode flag | `true` or `false` |
-| `{{test_mode}}` | Test mode flag | `true` or `false` |
 | `{{economy_mode}}` | Economy mode flag | `true` or `false` |
 | `{{branch_mode}}` | Branch mode flag | `true` or `false` |
-| `{{pr_mode}}` | PR mode flag | `true` or `false` |
 | `{{interactive_mode}}` | Interactive mode flag | `true` or `false` |
 | `{{branch_name}}` | Git branch name | `feature/add-auth` |
 | `{{original_input}}` | Raw user input | `/apex -a -s add auth` |
-| `{{examine_status}}` | Progress status for examine steps | `⏸ Pending` or `⏭ Skip` |
-| `{{test_status}}` | Progress status for test steps | `⏸ Pending` or `⏭ Skip` |
-| `{{pr_status}}` | Progress status for PR step | `⏸ Pending` or `⏭ Skip` |
 
 ## Setup Script
 
@@ -52,15 +41,12 @@ Initializes all template files in the output directory with variables replaced.
 **Usage:**
 ```bash
 bash scripts/setup-templates.sh \
-  "task_id" \
+  "feature_name" \
   "task_description" \
   "auto_mode" \
-  "examine_mode" \
   "save_mode" \
-  "test_mode" \
   "economy_mode" \
   "branch_mode" \
-  "pr_mode" \
   "interactive_mode" \
   "branch_name" \
   "original_input"
@@ -73,12 +59,7 @@ bash scripts/setup-templates.sh \
 ├── 01-analyze.md      # Always created
 ├── 02-plan.md         # Always created
 ├── 03-execute.md      # Always created
-├── 04-validate.md     # Always created
-├── 05-examine.md      # Only if examine_mode
-├── 06-resolve.md      # Only if examine_mode
-├── 07-tests.md        # Only if test_mode
-├── 08-run-tests.md    # Only if test_mode
-└── 09-finish.md       # Only if pr_mode
+└── 04-validate.md     # Always created
 ```
 
 ## Progress Update Script
@@ -137,7 +118,7 @@ Update `00-context.md` progress:
 ```
 ```
 
-**Token cost per step:** ~200 tokens × 9 steps = ~1,800 tokens
+**Token cost per step:** ~200 tokens × 5 steps = ~1,000 tokens
 
 ### After Optimization
 
@@ -158,9 +139,9 @@ bash {skill_dir}/scripts/update-progress.sh "{task_id}" "01" "analyze" "in_progr
 Append your findings to `01-analyze.md` as you work.
 ```
 
-**Token cost per step:** ~50 tokens × 9 steps = ~450 tokens
+**Token cost per step:** ~50 tokens × 5 steps = ~250 tokens
 
-**Total savings:** ~1,350 tokens per workflow execution (75% reduction)
+**Total savings:** ~750 tokens per workflow execution (75% reduction)
 
 ## How It Works
 

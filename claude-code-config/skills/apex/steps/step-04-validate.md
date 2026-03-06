@@ -1,8 +1,8 @@
 ---
 name: step-04-validate
-description: Self-check - run tests, verify AC, audit implementation quality
+description: Self-check - run tests, verify AC, audit implementation quality, complete workflow
 prev_step: steps/step-03-execute.md
-next_step: steps/step-05-examine.md
+next_step: null
 ---
 
 # Step 4: Validate (Self-Check)
@@ -27,11 +27,10 @@ next_step: steps/step-05-examine.md
 
 ## CONTEXT BOUNDARIES:
 
-- Implementation from step-03 (or step-03-execute-teams) is complete
+- Implementation from step-03 is complete
 - Tests may or may not pass yet
 - Type errors may exist
 - Focus is on verification, not new implementation
-- **If `{teams_mode}` = true:** The agent team is still alive. Do NOT shutdown or dismiss teammates. Team shutdown happens in step-09-finish only.
 
 ## YOUR TASK:
 
@@ -49,8 +48,7 @@ From previous steps:
 | `{acceptance_criteria}` | Success criteria |
 | `{auto_mode}` | Skip confirmations |
 | `{save_mode}` | Save outputs to files |
-| `{test_mode}` | Include test steps |
-| `{examine_mode}` | Auto-proceed to review |
+| `{economy_mode}` | No subagents mode |
 | `{output_dir}` | Path to output (if save_mode) |
 | Implementation | Completed in step-03 |
 </available_state>
@@ -172,38 +170,28 @@ Both MUST pass.
 **Summary:** All checks passing, ready for next step.
 ```
 
-### 8. Determine Next Step
+### 8. Complete Workflow
 
-**Decision tree:**
-
-```
-IF {test_mode} = true:
-    → Load step-07-tests.md (test analysis and creation)
-
-ELSE IF {examine_mode} = true:
-    → Load step-05-examine.md (adversarial review)
-
-ELSE IF {auto_mode} = false:
-    → Ask user:
-```
-
-```yaml
-questions:
-  - header: "Next"
-    question: "Validation complete. What would you like to do?"
-    options:
-      - label: "Run adversarial review"
-        description: "Deep review for security, logic, and quality"
-      - label: "Complete workflow"
-        description: "Skip review and finalize"
-      - label: "Add tests"
-        description: "Create additional tests first"
-    multiSelect: false
-```
+**Show final summary:**
 
 ```
-ELSE:
-    → Complete workflow (show final summary)
+✅ APEX Workflow Complete
+
+**Task:** {task_description}
+**Task ID:** {task_id}
+
+**Validation Results:**
+- Typecheck: ✓ Passed
+- Lint: ✓ Passed
+- Tests: ✓ Passed
+
+**Acceptance Criteria:**
+- [✓] AC1: Verified
+- [✓] AC2: Verified
+
+**Files Modified:** {list}
+
+🎉 Implementation complete and validated!
 ```
 
 ### 9. Complete Save Output (if save_mode)
@@ -218,9 +206,11 @@ Append to `{output_dir}/04-validate.md`:
 **Typecheck:** ✓
 **Lint:** ✓
 **Tests:** ✓
-**Next:** {next step based on flags}
+**Workflow:** Complete
 **Timestamp:** {ISO timestamp}
 ```
+
+Run: `bash {skill_dir}/scripts/update-progress.sh "{task_id}" "04" "validate" "complete"`
 
 ---
 
@@ -232,6 +222,7 @@ Append to `{output_dir}/04-validate.md`:
 ✅ All AC verified
 ✅ Code formatted
 ✅ User informed of status
+✅ Workflow completed
 
 ## FAILURE MODES:
 
@@ -240,7 +231,6 @@ Append to `{output_dir}/04-validate.md`:
 ❌ Skipping tests for modified code
 ❌ Missing AC verification
 ❌ Proceeding with failures
-❌ **CRITICAL**: Not using AskUserQuestion for next step
 
 ## VALIDATION PROTOCOLS:
 
@@ -252,15 +242,10 @@ Append to `{output_dir}/04-validate.md`:
 
 ---
 
-## NEXT STEP:
+## WORKFLOW COMPLETE
 
-Based on flags (check in order):
-- **If test_mode:** Load `./step-07-tests.md`
-- **If examine_mode OR user requests:** Load `./step-05-examine.md`
-- **If pr_mode:** Load `./step-09-finish.md` to create pull request
-- **Otherwise:** Workflow complete - show summary
+This is the final step. After validation passes, the APEX workflow is complete.
 
 <critical>
-Remember: NEVER proceed with failing checks - fix everything first!
-If teams_mode is active: NEVER shutdown teammates — they stay alive until step-09-finish!
+Remember: NEVER claim completion with failing checks - fix everything first!
 </critical>
