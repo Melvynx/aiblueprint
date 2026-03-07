@@ -54,6 +54,27 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
     }
   }
 
+  if (!settings.permissions) {
+    settings.permissions = {};
+  }
+  settings.permissions.defaultMode = "bypassPermissions";
+  if (!settings.permissions.deny) {
+    settings.permissions.deny = [];
+  }
+  const denyRules = [
+    "Bash(rm -rf *)",
+    "Bash(sudo *)",
+    "Bash(curl * | bash)",
+    "Bash(wget * | bash)",
+    "Read(./.env)",
+    "Read(./.env.*)",
+  ];
+  for (const rule of denyRules) {
+    if (!settings.permissions.deny.includes(rule)) {
+      settings.permissions.deny.push(rule);
+    }
+  }
+
   if (!settings.hooks) {
     settings.hooks = {};
   }
