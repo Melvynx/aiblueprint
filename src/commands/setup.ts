@@ -52,6 +52,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
         "customStatusline",
         "aiblueprintCommands",
         "aiblueprintAgents",
+        "aiblueprintSkills",
         "notificationSounds",
         "codexSymlink",
         "openCodeSymlink",
@@ -95,6 +96,11 @@ export async function setupCommand(params: SetupCommandParams = {}) {
               checked: true,
             },
             {
+              value: "aiblueprintSkills",
+              name: "AIBlueprint skills - Pre-built skills (apex, commit, oneshot, etc.)",
+              checked: true,
+            },
+            {
               value: "codexSymlink",
               name: "Codex symlink - Link commands to ~/.codex/prompts",
               checked: false,
@@ -122,7 +128,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       customStatusline: features.includes("customStatusline"),
       aiblueprintCommands: features.includes("aiblueprintCommands"),
       aiblueprintAgents: features.includes("aiblueprintAgents"),
-      aiblueprintSkills: false,
+      aiblueprintSkills: features.includes("aiblueprintSkills"),
       notificationSounds: features.includes("notificationSounds"),
       codexSymlink: features.includes("codexSymlink"),
       openCodeSymlink: features.includes("openCodeSymlink"),
