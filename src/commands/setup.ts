@@ -17,6 +17,7 @@ import {
 import { getVersion } from "../lib/version.js";
 import { createBackup } from "../lib/backup-utils.js";
 import { replacePathPlaceholdersInDir } from "../lib/platform.js";
+import { trackEvent, trackError, flushTelemetry } from "../lib/telemetry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -309,6 +310,8 @@ export async function setupCommand(params: SetupCommandParams = {}) {
 
     console.log(chalk.green("✨ Setup complete!"));
 
+    trackEvent("setup", { features: options });
+
     console.log(chalk.gray("\nNext steps:"));
     if (options.shellShortcuts) {
       const platform = os.platform();
@@ -346,6 +349,8 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       ),
     );
   } catch (error) {
+    trackError(error, { command: "setup" });
+    await flushTelemetry();
     console.error(chalk.red("\n❌ Setup failed:"), error);
     console.log(chalk.red("Setup failed!"));
 

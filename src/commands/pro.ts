@@ -14,6 +14,7 @@ import { setupShellShortcuts } from "./setup/shell-shortcuts.js";
 import { updateSettings } from "./setup/settings.js";
 import { checkAndInstallDependencies, installScriptsDependencies } from "./setup/dependencies.js";
 import fs from "fs-extra";
+import { trackEvent, trackError, flushTelemetry } from "../lib/telemetry.js";
 
 const API_URL = "https://codeline.app/api/products";
 const PRODUCT_IDS = ["prd_XJVgxVPbGG", "prd_NKabAkdOkw"];
@@ -146,8 +147,12 @@ export async function proActivateCommand(userToken?: string) {
       ),
     );
 
+    trackEvent("pro-activate");
+
     p.outro(chalk.green("✅ Activation complete!"));
   } catch (error) {
+    trackError(error, { command: "pro-activate" });
+    await flushTelemetry();
     if (error instanceof Error) {
       p.log.error(error.message);
     }
@@ -251,6 +256,12 @@ export async function proSetupCommand(options: { folder?: string } = {}) {
     const counts = await countInstalledItems(claudeDir);
     spinner.stop("Installation summary ready");
 
+    trackEvent("pro-setup", {
+      commands: counts.commands,
+      agents: counts.agents,
+      skills: counts.skills,
+    });
+
     p.log.success("✅ Setup complete!");
     p.log.info("Installed:");
     p.log.info(`  • Commands (${counts.commands})`);
@@ -262,6 +273,8 @@ export async function proSetupCommand(options: { folder?: string } = {}) {
 
     p.outro(chalk.green("🚀 Ready to use!"));
   } catch (error) {
+    trackError(error, { command: "pro-setup" });
+    await flushTelemetry();
     if (error instanceof Error) {
       p.log.error(error.message);
     }
@@ -292,8 +305,13 @@ export async function proUpdateCommand(options: { folder?: string } = {}) {
     });
 
     spinner.stop("Premium configurations updated");
+
+    trackEvent("pro-update");
+
     p.outro(chalk.green("✅ Update completed"));
   } catch (error) {
+    trackError(error, { command: "pro-update" });
+    await flushTelemetry();
     if (error instanceof Error) {
       p.log.error(error.message);
     }

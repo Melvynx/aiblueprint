@@ -14,6 +14,7 @@ import { installScriptsDependencies } from "./setup/dependencies.js";
 import { getVersion } from "../lib/version.js";
 import { createBackup } from "../lib/backup-utils.js";
 import { transformHook } from "../lib/platform.js";
+import { trackEvent, trackError, flushTelemetry } from "../lib/telemetry.js";
 
 export interface SyncCommandOptions {
   folder?: string;
@@ -482,8 +483,17 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
       spinner.stop("Scripts dependencies installed");
     }
 
+    trackEvent("pro-sync", {
+      added: syncResult.success,
+      deleted: syncResult.deleted,
+      failed: syncResult.failed,
+      hookssynced: selectedHooks.length,
+    });
+
     p.outro(chalk.green("✅ Sync completed"));
   } catch (error) {
+    trackError(error, { command: "pro-sync" });
+    await flushTelemetry();
     if (error instanceof Error) {
       p.log.error(error.message);
     }
