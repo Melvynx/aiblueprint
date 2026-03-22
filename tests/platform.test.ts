@@ -176,6 +176,24 @@ describe("Platform Utilities", () => {
 
       expect(result).toBe("bun /home/testuser/.claude/scripts/test.ts");
     });
+
+    it("should replace {CLAUDE_PATH} placeholder", async () => {
+      const { transformHookCommand } = await import("../src/lib/platform");
+
+      const command = "bun {CLAUDE_PATH}/scripts/auto-rename-session/src/index.ts";
+      const result = transformHookCommand(command, "/home/testuser/.claude");
+
+      expect(result).toBe("bun /home/testuser/.claude/scripts/auto-rename-session/src/index.ts");
+    });
+
+    it("should replace multiple {CLAUDE_PATH} placeholders", async () => {
+      const { transformHookCommand } = await import("../src/lib/platform");
+
+      const command = "bun {CLAUDE_PATH}/scripts/test.ts --config {CLAUDE_PATH}/config.json";
+      const result = transformHookCommand(command, "/Users/user/.claude");
+
+      expect(result).toBe("bun /Users/user/.claude/scripts/test.ts --config /Users/user/.claude/config.json");
+    });
   });
 
   describe("transformHook", () => {

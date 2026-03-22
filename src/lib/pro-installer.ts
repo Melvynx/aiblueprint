@@ -3,7 +3,7 @@ import os from "os";
 import path from "path";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { isTextFile, replaceClaudePathPlaceholder } from "./platform.js";
+import { isTextFile, replaceClaudePathPlaceholder, replacePathPlaceholdersInDir } from "./platform.js";
 
 const execAsync = promisify(exec);
 
@@ -272,6 +272,8 @@ export async function installProConfigs(
     await fs.copy(tempDir, claudeFolder, {
       overwrite: true,
     });
+
+    await replacePathPlaceholdersInDir(claudeFolder, claudeFolder);
   } catch (error) {
     throw new Error(
       `Failed to install premium configs: ${error instanceof Error ? error.message : "Unknown error"}`,

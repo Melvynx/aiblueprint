@@ -148,6 +148,8 @@ const KNOWN_CLAUDE_PATHS = [
 export function transformHookCommand(command: string, claudeDir: string): string {
   let transformed = command;
 
+  transformed = replaceClaudePathPlaceholder(transformed, claudeDir);
+
   for (const pattern of KNOWN_CLAUDE_PATHS) {
     transformed = transformed.replace(pattern, `${claudeDir}/`);
   }

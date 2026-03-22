@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bun ${CLAUDE_PLUGIN_ROOT}/claude-code-config/scripts/validate-command.js"
+            "command": "bun {CLAUDE_PATH}/scripts/command-validator/src/cli.ts"
           }
         ]
       }
