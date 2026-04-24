@@ -1,7 +1,14 @@
 ---
-name: claude-memory
-description: Create and optimize CLAUDE.md memory files or .claude/rules/ modular rules for Claude Code projects. Comprehensive guidance on file hierarchy, content structure, path-scoped rules, best practices, and anti-patterns. Use when working with CLAUDE.md files, .claude/rules directories, setting up new projects, or improving Claude Code's context awareness.
+name: memory-manager
+description: "Create and optimize CLAUDE.md memory files or .claude/rules/ modular rules for projects. Provides guidance on file hierarchy, content structure, path-scoped rules, best practices, and anti-patterns. Use when working with CLAUDE.md files, .claude/rules directories, setting up new projects, or improving agent context awareness."
 argument-hint: [init | optimize | task description]
+user-invocable: true
+triggers:
+  - claude memory
+  - CLAUDE.md
+  - memory file
+  - rules directory
+  - .claude/rules
 ---
 
 <core_principle>

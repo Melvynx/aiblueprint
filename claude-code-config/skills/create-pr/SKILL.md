@@ -1,8 +1,14 @@
 ---
 name: create-pr
-description: Create and push PR with auto-generated title and description
+description: "Create and push a pull request with an auto-generated title and description from the current branch's commits and diff. Use when the user asks to open a PR, submit a pull request, push changes for review, or create a merge request."
 model: haiku
 allowed-tools: Bash(git :*), Bash(gh :*)
+user-invocable: true
+triggers:
+  - create pr
+  - open pr
+  - pull request
+  - push for review
 ---
 
 # Create PR
