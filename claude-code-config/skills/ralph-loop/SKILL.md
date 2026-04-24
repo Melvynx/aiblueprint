@@ -1,7 +1,13 @@
 ---
 name: ralph-loop
-description: Setup the Ralph autonomous AI coding loop - ships features while you sleep
+description: "Set up the Ralph autonomous AI coding loop — creates .claude/ralph/ structure, generates a PRD with user stories, and provides the run command. Use when the user wants to configure Ralph, set up an autonomous coding loop, or create a feature PRD for iterative AI-driven development."
 argument-hint: "<project-path> [-i/--interactive] [-f/--feature <name>]"
+user-invocable: true
+triggers:
+  - ralph
+  - autonomous loop
+  - setup ralph
+  - coding loop
 ---
 
 <objective>
@@ -35,10 +41,7 @@ bun run .claude/ralph/ralph.sh -f <feature-name>
 </quick_start>
 
 <critical_rule>
-🛑 NEVER run ralph.sh or any execution commands automatically
-🛑 NEVER execute the loop - only set up files and show instructions
-✅ ALWAYS let the user copy and run commands themselves
-✅ ALWAYS end by showing the exact command to run
+🛑 **NEVER** run ralph.sh or execute the loop — only set up files and show instructions. Always let the user copy and run commands themselves. End by showing the exact command to run.
 </critical_rule>
 
 <when_to_use>
@@ -68,19 +71,6 @@ bun run .claude/ralph/ralph.sh -f <feature-name>
 ```
 </parameters>
 
-<state_variables>
-| Variable | Type | Description |
-|----------|------|-------------|
-| `{project_path}` | string | Absolute path to target project |
-| `{ralph_dir}` | string | Path to .claude/ralph in project |
-| `{feature_name}` | string | Feature folder name (e.g., `01-add-auth`) |
-| `{feature_dir}` | string | Path to task folder |
-| `{interactive_mode}` | boolean | Whether to brainstorm PRD interactively |
-| `{prd_content}` | string | PRD markdown content |
-| `{user_stories}` | array | User stories extracted from PRD |
-| `{branch_name}` | string | Git branch for the feature |
-</state_variables>
-
 <entry_point>
 Load `steps/step-00-init.md`
 </entry_point>
@@ -106,12 +96,11 @@ Load `steps/step-00-init.md`
 3. **Interactive Mode**: If -i flag, run brainstorming conversation
 4. **State Persistence**: Track progress in feature_dir/progress.txt
 5. **Resume Support**: Detect existing PRD.md and resume from there
-6. **NEVER RUN RALPH**: Only setup and show commands - user runs them
 </execution_rules>
 
 <success_criteria>
 ✅ Ralph structure created at {project_path}/.claude/ralph
 ✅ Feature folder created with PRD.md, prd.json, progress.txt
 ✅ User stories properly formatted in prd.json
-✅ Clear run command provided to user (they run it themselves)
+✅ Run command displayed for user to execute manually
 </success_criteria>
