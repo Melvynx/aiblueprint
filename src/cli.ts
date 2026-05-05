@@ -59,6 +59,10 @@ const claudeCodeCmd = program
     "--factoryAiFolder <path>",
     "Specify custom FactoryAI folder path (default: ~/.factory)",
   )
+  .option(
+    "--agentsFolder <path>",
+    "Specify custom agents folder path (default: ~/.agents)",
+  )
   .option("-s, --skip", "Skip interactive prompts and install all features");
 
 claudeCodeCmd
@@ -70,6 +74,7 @@ claudeCodeCmd
       claudeCodeFolder: parentOptions.claudeCodeFolder || parentOptions.folder,
       codexFolder: parentOptions.codexFolder,
       openCodeFolder: parentOptions.openCodeFolder,
+      agentsFolder: parentOptions.agentsFolder,
       skipInteractive: parentOptions.skip,
     });
   });
@@ -124,7 +129,7 @@ proCmd
   .action((options, command) => {
     const parentOptions = command.parent.parent.opts();
     const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-    proSetupCommand({ folder: claudeCodeFolder });
+    proSetupCommand({ folder: claudeCodeFolder, agentsFolder: parentOptions.agentsFolder });
   });
 
 proCmd
@@ -133,7 +138,7 @@ proCmd
   .action((options, command) => {
     const parentOptions = command.parent.parent.opts();
     const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-    proUpdateCommand({ folder: claudeCodeFolder });
+    proUpdateCommand({ folder: claudeCodeFolder, agentsFolder: parentOptions.agentsFolder });
   });
 
 proCmd
@@ -142,7 +147,7 @@ proCmd
   .action((options, command) => {
     const parentOptions = command.parent.parent.opts();
     const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-    proSyncCommand({ folder: claudeCodeFolder });
+    proSyncCommand({ folder: claudeCodeFolder, agentsFolder: parentOptions.agentsFolder });
   });
 
 const backupCmd = claudeCodeCmd
@@ -155,7 +160,10 @@ backupCmd
   .action((options, command) => {
     const parentOptions = command.parent.parent.opts();
     const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-    backupLoadCommand({ folder: claudeCodeFolder });
+    backupLoadCommand({
+      folder: claudeCodeFolder,
+      agentsFolder: parentOptions.agentsFolder,
+    });
   });
 
 // ============================================

@@ -6,18 +6,17 @@ import { getToken } from "../lib/token-storage.js";
 import {
   analyzeSyncChanges,
   syncSelectedItems,
-  syncSelectedHooks,
   type SyncItem,
-  type HookSyncItem,
 } from "../lib/sync-utils.js";
 import { installScriptsDependencies } from "./setup/dependencies.js";
 import { getVersion } from "../lib/version.js";
 import { createBackup } from "../lib/backup-utils.js";
-import { transformHook } from "../lib/platform.js";
 import { trackEvent, trackError, flushTelemetry } from "../lib/telemetry.js";
+import { getAgentsDir } from "../lib/agents-installer.js";
 
 export interface SyncCommandOptions {
   folder?: string;
+  agentsFolder?: string;
 }
 
 function formatItem(item: SyncItem): string {
@@ -88,12 +87,10 @@ function formatFolderSummary(summary: FolderSummary): string {
 
 type SelectionItem =
   | { type: "file"; item: SyncItem }
-  | { type: "folder"; folder: string; category: string; items: SyncItem[] }
-  | { type: "hook"; hook: HookSyncItem };
+  | { type: "folder"; folder: string; category: string; items: SyncItem[] };
 
 function createSelectionChoices(
   changedItems: SyncItem[],
-  hooks: HookSyncItem[] = []
 ): { value: SelectionItem; label: string; hint?: string }[] {
   const choices: { value: SelectionItem; label: string; hint?: string }[] = [];
   const folderedCategories = ["scripts", "skills"];
@@ -130,17 +127,6 @@ function createSelectionChoices(
     }
   }
 
-  for (const hook of hooks) {
-    const icon = hook.status === "new" ? "🆕" : "📝";
-    const action = hook.status === "new" ? "add" : "update";
-    const matcherDisplay = hook.matcher || "*";
-    choices.push({
-      value: { type: "hook", hook },
-      label: `${icon} settings.json → ${hook.hookType}[${matcherDisplay}]`,
-      hint: action,
-    });
-  }
-
   return choices;
 }
 
@@ -152,21 +138,18 @@ function formatFolderHint(summary: FolderSummary): string {
   return parts.join(", ");
 }
 
-function expandSelections(selections: SelectionItem[]): { items: SyncItem[]; hooks: HookSyncItem[] } {
+function expandSelections(selections: SelectionItem[]): { items: SyncItem[] } {
   const items: SyncItem[] = [];
-  const hooks: HookSyncItem[] = [];
 
   for (const sel of selections) {
     if (sel.type === "file") {
       items.push(sel.item);
     } else if (sel.type === "folder") {
       items.push(...sel.items);
-    } else if (sel.type === "hook") {
-      hooks.push(sel.hook);
     }
   }
 
-  return { items, hooks };
+  return { items };
 }
 
 export async function proSyncCommand(options: SyncCommandOptions = {}) {
@@ -185,18 +168,18 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
     const claudeDir = options.folder
       ? path.resolve(options.folder)
       : path.join(os.homedir(), ".claude");
+    const agentsDir = getAgentsDir(options.agentsFolder);
 
     const spinner = p.spinner();
     spinner.start("Analyzing changes...");
 
-    const result = await analyzeSyncChanges(claudeDir, githubToken);
+    const result = await analyzeSyncChanges(claudeDir, githubToken, agentsDir);
 
     spinner.stop("Analysis complete");
 
     const changedItems = result.items.filter((i) => i.status !== "unchanged");
-    const changedHooks = result.hooks;
 
-    if (changedItems.length === 0 && changedHooks.length === 0) {
+    if (changedItems.length === 0) {
       p.log.success("Everything is up to date!");
       p.outro(chalk.green("✅ No changes needed"));
       return;
@@ -228,26 +211,13 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
       }
     }
 
-    if (changedHooks.length > 0) {
-      p.log.message("");
-      p.log.message(chalk.cyan.bold(`  SETTINGS (hooks)`));
-      for (const hook of changedHooks) {
-        const icon = hook.status === "new" ? "🆕" : "📝";
-        const color = hook.status === "new" ? chalk.green : chalk.yellow;
-        const matcherDisplay = hook.matcher || "*";
-        p.log.message(`    ${icon} ${color(`${hook.hookType}[${matcherDisplay}]`)}`);
-      }
-    }
-
     p.log.message("");
 
-    const choices = createSelectionChoices(changedItems, changedHooks);
+    const choices = createSelectionChoices(changedItems);
 
     const newItems = changedItems.filter((i) => i.status === "new");
     const modifiedItems = changedItems.filter((i) => i.status === "modified");
     const deletedItems = changedItems.filter((i) => i.status === "deleted");
-    const newHooks = changedHooks.filter((h) => h.status === "new");
-    const modifiedHooks = changedHooks.filter((h) => h.status === "modified");
 
     const hasDeletions = deletedItems.length > 0;
 
@@ -286,7 +256,6 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
     }
 
     let selectedItems: SyncItem[] = [];
-    let selectedHooks: HookSyncItem[] = [];
 
     if (syncMode === "updates") {
       selectedItems = [...newItems, ...modifiedItems];
@@ -318,7 +287,7 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
 
       selectedItems = [...newItems, ...modifiedItems, ...deletedItems];
     } else {
-      const fileChoices = choices.filter((c) => c.value.type !== "hook") as { value: SelectionItem; label: string; hint?: string }[];
+      const fileChoices = choices;
       const nonDeleteChoices = fileChoices.filter((c) => {
         if (c.value.type === "file") return c.value.item.status !== "deleted";
         if (c.value.type === "folder") return !c.value.items.every((i) => i.status === "deleted");
@@ -372,7 +341,7 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
     }
 
     spinner.start("Creating backup...");
-    const backupPath = await createBackup(claudeDir);
+    const backupPath = await createBackup(claudeDir, agentsDir);
     if (backupPath) {
       spinner.stop(`Backup created: ${chalk.gray(backupPath)}`);
     } else {
@@ -385,6 +354,7 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
       claudeDir,
       selectedItems,
       githubToken,
+      agentsDir,
       (file, action) => {
         spinner.message(`${action}: ${chalk.cyan(file)}`);
       }
@@ -399,83 +369,6 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
 
     p.log.success(results.join(", "));
 
-    if (changedHooks.length > 0) {
-      const hookDescriptions: Record<string, string> = {
-        Stop: "Play sound when Claude finishes a task",
-        Notification: "Play sound when Claude needs human input",
-        PreToolUse: "Run before Claude uses a tool (e.g., command validation)",
-        PostToolUse: "Run after Claude uses a tool (e.g., auto-format)",
-      };
-
-      const getHookCommand = (hookData: any): string | null => {
-        if (hookData?.hooks?.[0]?.command) return hookData.hooks[0].command;
-        if (hookData?.command) return hookData.command;
-        return null;
-      };
-
-      p.log.message("");
-      p.log.message(chalk.bold.yellow("⚠️  Settings.json Sync (Optional)"));
-      p.log.message(chalk.gray("The following hooks can be synced to your settings.json:"));
-      p.log.message("");
-
-      for (const hook of changedHooks) {
-        const icon = hook.status === "new" ? "🆕" : "📝";
-        const color = hook.status === "new" ? chalk.green : chalk.yellow;
-        const matcherDisplay = hook.matcher ? `[${hook.matcher}]` : "";
-        const description = hookDescriptions[hook.hookType] || "";
-
-        p.log.message(`  ${icon} ${color(`${hook.hookType}${matcherDisplay}`)} ${chalk.gray(description)}`);
-
-        const transformedHook = transformHook(hook.remoteHook, claudeDir);
-        const newCommand = getHookCommand(transformedHook);
-
-        if (hook.status === "modified" && hook.localHook) {
-          const oldCommand = getHookCommand(hook.localHook);
-          if (oldCommand) {
-            p.log.message(chalk.red(`     - ${oldCommand}`));
-          }
-        }
-
-        if (newCommand) {
-          p.log.message(chalk.green(`     + ${newCommand}`));
-        }
-
-        p.log.message("");
-      }
-
-      p.log.message(chalk.gray("This will add/update hooks in ~/.claude/settings.json"));
-      p.log.message("");
-
-      const syncSettingsResult = await p.confirm({
-        message: "Do you want to sync these hooks to settings.json?",
-        initialValue: false,
-      });
-
-      if (!p.isCancel(syncSettingsResult) && syncSettingsResult) {
-        const spinner2 = p.spinner();
-        spinner2.start("Syncing hooks to settings.json...");
-
-        selectedHooks = [...changedHooks];
-        const hooksResult = await syncSelectedHooks(
-          claudeDir,
-          selectedHooks,
-          (hook, action) => {
-            spinner2.message(`${action}: ${chalk.cyan(hook)}`);
-          }
-        );
-
-        spinner2.stop("Hooks synced to settings.json");
-        if (hooksResult.success > 0) {
-          p.log.success(chalk.green(`${hooksResult.success} hook${hooksResult.success > 1 ? "s" : ""} synced`));
-        }
-        if (hooksResult.failed > 0) {
-          p.log.warn(chalk.yellow(`${hooksResult.failed} hook${hooksResult.failed > 1 ? "s" : ""} failed`));
-        }
-      } else {
-        p.log.info(chalk.gray("Skipped settings.json sync"));
-      }
-    }
-
     const scriptsWereSynced = selectedItems.some((i) => i.category === "scripts");
     if (scriptsWereSynced) {
       spinner.start("Installing scripts dependencies...");
@@ -487,7 +380,6 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
       added: syncResult.success,
       deleted: syncResult.deleted,
       failed: syncResult.failed,
-      hookssynced: selectedHooks.length,
     });
 
     p.outro(chalk.green("✅ Sync completed"));

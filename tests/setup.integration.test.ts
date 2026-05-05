@@ -48,10 +48,8 @@ describe("CLI Integration Tests", () => {
       const settingsContent = await realFs.readFile(`${tempDir}/settings.json`, 'utf-8');
       const settings = JSON.parse(settingsContent);
 
-      expect(settings).toHaveProperty("hooks");
-      expect(settings.hooks).toHaveProperty("PreToolUse");
-      expect(settings.hooks).toHaveProperty("Stop");
-      expect(settings.hooks).toHaveProperty("Notification");
+      expect(settings).toHaveProperty("permissions");
+      expect(settings.permissions).toHaveProperty("defaultMode", "bypassPermissions");
 
       if (settings.statusLine) {
         expect(settings.statusLine).toHaveProperty("type", "command");

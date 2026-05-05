@@ -3,9 +3,11 @@ import chalk from "chalk";
 import os from "os";
 import path from "path";
 import { listBackups, loadBackup, createBackup, type BackupInfo } from "../lib/backup-utils.js";
+import { getAgentsDir } from "../lib/agents-installer.js";
 
 export interface BackupLoadOptions {
   folder?: string;
+  agentsFolder?: string;
 }
 
 function formatBackupDate(date: Date): string {
@@ -31,6 +33,7 @@ function formatBackupDate(date: Date): string {
 
 export async function backupLoadCommand(options: BackupLoadOptions = {}): Promise<void> {
   const claudeDir = options.folder || path.join(os.homedir(), ".claude");
+  const agentsDir = getAgentsDir(options.agentsFolder);
 
   p.intro(chalk.blue("📦 Load Backup"));
 
@@ -78,7 +81,7 @@ export async function backupLoadCommand(options: BackupLoadOptions = {}): Promis
   }
 
   spinner.start("Creating backup of current configuration...");
-  const currentBackup = await createBackup(claudeDir);
+  const currentBackup = await createBackup(claudeDir, agentsDir);
   if (currentBackup) {
     spinner.stop(`Current config backed up to: ${chalk.gray(currentBackup)}`);
   } else {
@@ -88,7 +91,7 @@ export async function backupLoadCommand(options: BackupLoadOptions = {}): Promis
   spinner.start("Restoring backup...");
 
   try {
-    await loadBackup(selected.path, claudeDir);
+    await loadBackup(selected.path, claudeDir, agentsDir);
     spinner.stop("Backup restored successfully");
 
     p.log.success(`Restored configuration from ${chalk.cyan(selected.name)}`);

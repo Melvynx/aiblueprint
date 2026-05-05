@@ -18,6 +18,10 @@ import { getVersion } from "../lib/version.js";
 import { createBackup } from "../lib/backup-utils.js";
 import { replacePathPlaceholdersInDir } from "../lib/platform.js";
 import { trackEvent, trackError, flushTelemetry } from "../lib/telemetry.js";
+import {
+  getAgentsDir,
+  installCategoryToAgents,
+} from "../lib/agents-installer.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -27,6 +31,7 @@ export interface SetupCommandParams {
   claudeCodeFolder?: string;
   codexFolder?: string;
   openCodeFolder?: string;
+  agentsFolder?: string;
   skipInteractive?: boolean;
 }
 
@@ -35,6 +40,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     claudeCodeFolder: customClaudeCodeFolder,
     codexFolder: customCodexFolder,
     openCodeFolder: customOpenCodeFolder,
+    agentsFolder: customAgentsFolder,
     skipInteractive,
   } = params;
 
@@ -49,12 +55,10 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     if (skipInteractive) {
       features = [
         "shellShortcuts",
-        "commandValidation",
         "customStatusline",
         "aiblueprintCommands",
         "aiblueprintAgents",
         "aiblueprintSkills",
-        "notificationSounds",
         "codexSymlink",
         "openCodeSymlink",
       ];
@@ -72,11 +76,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
               checked: true,
             },
             {
-              value: "commandValidation",
-              name: "Command validation - Security hook for bash commands",
-              checked: true,
-            },
-            {
               value: "customStatusline",
               name: "Custom statusline - Shows git, costs, tokens info",
               checked: true,
@@ -89,11 +88,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
             {
               value: "aiblueprintAgents",
               name: "AIBlueprint agents - Specialized AI agents",
-              checked: true,
-            },
-            {
-              value: "notificationSounds",
-              name: "Notification sounds - Audio alerts for events",
               checked: true,
             },
             {
@@ -125,12 +119,10 @@ export async function setupCommand(params: SetupCommandParams = {}) {
 
     const options: SetupOptions = {
       shellShortcuts: features.includes("shellShortcuts"),
-      commandValidation: features.includes("commandValidation"),
       customStatusline: features.includes("customStatusline"),
       aiblueprintCommands: features.includes("aiblueprintCommands"),
       aiblueprintAgents: features.includes("aiblueprintAgents"),
       aiblueprintSkills: features.includes("aiblueprintSkills"),
-      notificationSounds: features.includes("notificationSounds"),
       codexSymlink: features.includes("codexSymlink"),
       openCodeSymlink: features.includes("openCodeSymlink"),
       skipInteractive,
@@ -141,13 +133,16 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     const claudeDir = customClaudeCodeFolder
       ? path.resolve(customClaudeCodeFolder)
       : path.join(os.homedir(), ".claude");
+    const agentsDir = getAgentsDir(customAgentsFolder);
 
     console.log(chalk.gray(`Installing to: ${claudeDir}`));
+    console.log(chalk.gray(`Skills source: ${agentsDir}/skills`));
 
     await fs.ensureDir(claudeDir);
+    await fs.ensureDir(agentsDir);
 
     s.start("Creating backup of existing configuration");
-    const backupPath = await createBackup(claudeDir);
+    const backupPath = await createBackup(claudeDir, agentsDir);
     if (backupPath) {
       s.stop(`Backup created: ${chalk.gray(backupPath)}`);
     } else {
@@ -164,7 +159,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       );
     }
 
-    const sourceDir = path.join(repoPath, "claude-code-config");
+    const sourceDir = path.join(repoPath, "ai-config");
 
     if (!await fs.pathExists(sourceDir)) {
       await cleanupRepository(repoPath);
@@ -181,11 +176,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       s.stop("Shell shortcuts configured");
     }
 
-    if (
-      options.commandValidation ||
-      options.customStatusline ||
-      options.notificationSounds
-    ) {
+    if (options.customStatusline) {
       s.start("Setting up scripts");
       await fs.copy(
         path.join(sourceDir, "scripts"),
@@ -250,26 +241,30 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       s.start("Setting up AIBlueprint Skills");
       const skillsSourcePath = path.join(sourceDir, "skills");
       if (await fs.pathExists(skillsSourcePath)) {
-        await fs.copy(
+        const installResult = await installCategoryToAgents(
           skillsSourcePath,
-          path.join(claudeDir, "skills"),
-          { overwrite: true },
+          "skills",
+          agentsDir,
+          claudeDir,
+          { migrateClaudeDirs: true, silent: true },
         );
-        await replacePathPlaceholdersInDir(path.join(claudeDir, "skills"), claudeDir);
-        s.stop("Skills installed");
+        const summary = [
+          installResult.copied.length && `${installResult.copied.length} copied`,
+          installResult.migrated.length && `${installResult.migrated.length} migrated`,
+          installResult.symlinked.length && `${installResult.symlinked.length} linked`,
+          installResult.skipped.length && `${installResult.skipped.length} skipped`,
+        ]
+          .filter(Boolean)
+          .join(", ");
+        s.stop(`Skills installed${summary ? ` (${summary})` : ""}`);
+        if (installResult.skipped.length > 0) {
+          for (const sk of installResult.skipped) {
+            console.log(chalk.yellow(`  ⚠️  ${sk.name}: ${sk.reason}`));
+          }
+        }
       } else {
         s.stop("Skills not available in repository");
       }
-    }
-
-    if (options.notificationSounds) {
-      s.start("Setting up notification sounds");
-      await fs.copy(
-        path.join(sourceDir, "song"),
-        path.join(claudeDir, "song"),
-        { overwrite: true },
-      );
-      s.stop("Notification sounds installed");
     }
 
     if (options.customStatusline) {

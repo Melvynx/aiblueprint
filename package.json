@@ -47,7 +47,7 @@
   },
   "files": [
     "dist",
-    "claude-code-config"
+    "ai-config"
   ],
   "keywords": [
     "claude",

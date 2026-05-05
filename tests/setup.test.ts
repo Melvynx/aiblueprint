@@ -49,7 +49,7 @@ describe("Setup Command with Inquirer.js", () => {
     // @ts-expect-error Not important
     vi.mocked(fs.pathExists).mockImplementation((path: string) => {
       // Mock the source directory to exist
-      if (path.includes("claude-code-config")) {
+      if (path.includes("ai-config")) {
         return Promise.resolve(true);
       }
       return Promise.resolve(false);

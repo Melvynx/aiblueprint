@@ -25,7 +25,7 @@
     "noPropertyAccessFromIndexSignature": false
   },
   "exclude": [
-    "claude-code-config",
+    "ai-config",
     "tmp",
     "dist",
     "node_modules"

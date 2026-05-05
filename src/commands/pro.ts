@@ -190,7 +190,7 @@ export async function proStatusCommand() {
   }
 }
 
-export async function proSetupCommand(options: { folder?: string } = {}) {
+export async function proSetupCommand(options: { folder?: string; agentsFolder?: string } = {}) {
   p.intro(chalk.blue(`⚙️  Setup AIBlueprint CLI Premium ${chalk.gray(`v${getVersion()}`)}`));
 
   try {
@@ -217,6 +217,7 @@ export async function proSetupCommand(options: { folder?: string } = {}) {
     await installProConfigs({
       githubToken,
       claudeCodeFolder: claudeDir,
+      agentsFolder: options.agentsFolder,
       onProgress,
     });
     spinner.stop("Premium configurations installed");
@@ -234,17 +235,14 @@ export async function proSetupCommand(options: { folder?: string } = {}) {
     await setupShellShortcuts();
     spinner.stop("Shell shortcuts configured");
 
-    // Step 4: Update settings.json with hooks and statusline
     spinner.start("Updating settings.json...");
     await updateSettings(
       {
         shellShortcuts: false,
-        commandValidation: true,
         customStatusline: true,
         aiblueprintCommands: false,
         aiblueprintAgents: false,
         aiblueprintSkills: false,
-        notificationSounds: true,
         codexSymlink: false,
         openCodeSymlink: false,
       },
@@ -269,7 +267,7 @@ export async function proSetupCommand(options: { folder?: string } = {}) {
     p.log.info(`  • Premium Skills (${counts.skills})`);
     p.log.info("  • Premium statusline (advanced)");
     p.log.info("  • Shell shortcuts (cc, ccc)");
-    p.log.info("  • Settings.json with hooks and statusline");
+    p.log.info("  • Settings.json with statusline");
 
     p.outro(chalk.green("🚀 Ready to use!"));
   } catch (error) {
@@ -283,7 +281,7 @@ export async function proSetupCommand(options: { folder?: string } = {}) {
   }
 }
 
-export async function proUpdateCommand(options: { folder?: string } = {}) {
+export async function proUpdateCommand(options: { folder?: string; agentsFolder?: string } = {}) {
   p.intro(chalk.blue(`🔄 Update Premium Configs ${chalk.gray(`v${getVersion()}`)}`));
 
   try {
@@ -302,6 +300,7 @@ export async function proUpdateCommand(options: { folder?: string } = {}) {
     await installProConfigs({
       githubToken,
       claudeCodeFolder: options.folder,
+      agentsFolder: options.agentsFolder,
     });
 
     spinner.stop("Premium configurations updated");

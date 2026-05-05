@@ -36,8 +36,8 @@ export function parseYamlFrontmatter(content: string): { metadata: any; body: st
 
 export function getLocalConfigPaths(subDir: string): string[] {
   return [
-    path.join(__dirname, `../claude-code-config/${subDir}`),  // From dist/
-    path.join(__dirname, `../../claude-code-config/${subDir}`), // From src/
+    path.join(__dirname, `../ai-config/${subDir}`),  // From dist/
+    path.join(__dirname, `../../ai-config/${subDir}`), // From src/
   ];
 }
 

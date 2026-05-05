@@ -1,7 +1,7 @@
 {
   "name": "aibp-base",
   "version": "1.0.1",
-  "description": "AIBlueprint base configuration with custom agents, slash commands, hooks, and productivity workflows for Claude Code",
+  "description": "AIBlueprint base configuration with custom agents, slash commands, skills, and productivity workflows for Claude Code",
   "author": {
     "name": "Melvyn",
     "url": "https://github.com/melvynx"
@@ -15,7 +15,7 @@
     "productivity",
     "agents",
     "commands",
-    "hooks",
+    "skills",
     "workflows",
     "statusline"
   ],

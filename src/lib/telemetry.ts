@@ -1,4 +1,6 @@
 import os from "os";
+import fs from "fs";
+import path from "path";
 import { getVersion } from "./version.js";
 
 const TELEMETRY_URL = "https://codelynx.dev/api/cli/events";
@@ -13,6 +15,34 @@ const getBasePayload = () => ({
   arch: os.arch(),
   nodeVersion: process.version,
 });
+
+function getTokenFilePath(): string {
+  const homeDir = os.homedir();
+  if (os.platform() === "win32") {
+    const appData = process.env.APPDATA || path.join(homeDir, "AppData", "Roaming");
+    return path.join(appData, "aiblueprint", "token.txt");
+  }
+  const configHome = process.env.XDG_CONFIG_HOME || path.join(homeDir, ".config");
+  return path.join(configHome, "aiblueprint", "token.txt");
+}
+
+function getSystemInfo(): Record<string, unknown> {
+  let hasProToken = false;
+  try {
+    hasProToken = fs.existsSync(getTokenFilePath());
+  } catch {}
+
+  return {
+    osVersion: os.release(),
+    osType: os.type(),
+    totalMemory: `${Math.round(os.totalmem() / (1024 * 1024 * 1024))}GB`,
+    cpus: os.cpus().length,
+    shell: process.env.SHELL || process.env.COMSPEC || "unknown",
+    homeDir: os.homedir(),
+    locale: process.env.LANG || process.env.LC_ALL || "unknown",
+    hasProToken,
+  };
+}
 
 let pendingRequest: Promise<void> | null = null;
 
@@ -46,12 +76,13 @@ export function trackError(
   const message =
     error instanceof Error ? error.message : String(error);
   const stack = error instanceof Error
-    ? error.stack?.slice(0, 500)
+    ? error.stack?.slice(0, 1500)
     : undefined;
 
   trackEvent("error", {
     message,
     stack,
+    ...getSystemInfo(),
     ...context,
   });
 }

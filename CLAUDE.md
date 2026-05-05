@@ -25,7 +25,7 @@ This is a CLI tool built with TypeScript and Bun that sets up Claude Code config
 
 - **Entry Point**: `src/cli.ts` - Commander.js CLI setup with main command structure
 - **Commands**: `src/commands/setup.ts` - Main setup logic for configuring Claude Code
-- **Config Source**: `claude-code-config/` - Contains all the configuration templates to be copied
+- **Config Source**: `ai-config/` - Contains all the configuration templates to be copied
 
 ### Key Components
 
@@ -37,7 +37,7 @@ This is a CLI tool built with TypeScript and Bun that sets up Claude Code config
 **Setup Process** (`src/commands/setup.ts`):
 
 1. Interactive feature selection using `@clack/prompts`
-2. Copies configuration files from `claude-code-config/` to `~/.claude/` (or custom folder)
+2. Copies configuration files from `ai-config/` to `~/.claude/` (or custom folder)
 3. Updates `~/.claude/settings.json` with new hooks and configurations
 4. Installs dependencies (`bun`, `ccusage`) if needed
 5. Sets up shell aliases (`cc`, `ccc`) in shell config files
@@ -56,7 +56,7 @@ This is a CLI tool built with TypeScript and Bun that sets up Claude Code config
 
 - `package.json` - ESM module with Bun as runtime, Commander.js for CLI
 - `tsconfig.json` - Modern TypeScript config with ESNext target and bundler resolution
-- `claude-code-config/` - Contains all templates (agents, commands, scripts, etc.)
+- `ai-config/` - Contains all templates (agents, commands, scripts, etc.)
 
 ### Dependencies
 

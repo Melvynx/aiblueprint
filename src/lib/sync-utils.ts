@@ -1,7 +1,11 @@
 import fs from "fs-extra";
 import path from "path";
 import crypto from "crypto";
-import { transformHook, transformFileContent, isTextFile } from "./platform.js";
+import { transformFileContent, isTextFile } from "./platform.js";
+import {
+  isAgentCategory,
+  syncCategorySymlinks,
+} from "./agents-installer.js";
 
 const PREMIUM_REPO = "Melvynx/aiblueprint-cli-premium";
 const PREMIUM_BRANCH = "main";
@@ -21,23 +25,8 @@ export interface SyncItem {
   isFolder?: boolean;
 }
 
-interface Hook {
-  matcher: string;
-  hooks?: unknown[];
-  [key: string]: unknown;
-}
-
-export interface HookSyncItem {
-  hookType: string;
-  matcher: string;
-  status: "new" | "modified" | "unchanged";
-  remoteHook: Hook;
-  localHook?: Hook;
-}
-
 export interface SyncResult {
   items: SyncItem[];
-  hooks: HookSyncItem[];
   newCount: number;
   modifiedCount: number;
   deletedCount: number;
@@ -55,7 +44,7 @@ async function listRemoteDirectory(
   dirPath: string,
   githubToken: string
 ): Promise<RemoteFile[]> {
-  const apiUrl = `https://api.github.com/repos/${PREMIUM_REPO}/contents/claude-code-config/${dirPath}?ref=${PREMIUM_BRANCH}`;
+  const apiUrl = `https://api.github.com/repos/${PREMIUM_REPO}/contents/ai-config/${dirPath}?ref=${PREMIUM_BRANCH}`;
   const response = await fetch(apiUrl, {
     headers: {
       Authorization: `token ${githubToken}`,
@@ -166,10 +155,12 @@ async function listLocalFilesRecursive(dir: string, basePath: string): Promise<s
 async function analyzeCategory(
   category: "commands" | "agents" | "skills" | "scripts",
   claudeDir: string,
+  agentsDir: string,
   githubToken: string
 ): Promise<SyncItem[]> {
   const items: SyncItem[] = [];
-  const localDir = path.join(claudeDir, category);
+  const localBase = isAgentCategory(category) ? agentsDir : claudeDir;
+  const localDir = path.join(localBase, category);
 
   const remoteFiles = await listRemoteFilesRecursive(category, githubToken);
   const localFiles = await listLocalFiles(localDir);
@@ -251,88 +242,10 @@ async function analyzeCategory(
   return items;
 }
 
-async function fetchRemoteSettings(githubToken: string): Promise<any | null> {
-  try {
-    const url = `https://raw.githubusercontent.com/${PREMIUM_REPO}/${PREMIUM_BRANCH}/claude-code-config/settings.json`;
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `token ${githubToken}`,
-        Accept: "application/vnd.github.v3.raw",
-      },
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    return await response.json();
-  } catch {
-    return null;
-  }
-}
-
-async function getLocalSettings(claudeDir: string): Promise<any> {
-  const settingsPath = path.join(claudeDir, "settings.json");
-  try {
-    const content = await fs.readFile(settingsPath, "utf-8");
-    return JSON.parse(content);
-  } catch {
-    return {};
-  }
-}
-
-function analyzeHooksChanges(
-  remoteSettings: any,
-  localSettings: any
-): HookSyncItem[] {
-  const hookItems: HookSyncItem[] = [];
-
-  if (!remoteSettings?.hooks) {
-    return hookItems;
-  }
-
-  const localHooks = localSettings?.hooks || {};
-
-  for (const [hookType, remoteHookArray] of Object.entries(remoteSettings.hooks)) {
-    if (!Array.isArray(remoteHookArray)) continue;
-
-    const localHookArray = localHooks[hookType] || [];
-
-    for (const remoteHook of remoteHookArray as Hook[]) {
-      const matcher = remoteHook.matcher || "";
-      const existingLocal = localHookArray.find(
-        (h: Hook) => h.matcher === matcher
-      );
-
-      if (!existingLocal) {
-        hookItems.push({
-          hookType,
-          matcher,
-          status: "new",
-          remoteHook,
-        });
-      } else {
-        const remoteStr = JSON.stringify(remoteHook);
-        const localStr = JSON.stringify(existingLocal);
-        if (remoteStr !== localStr) {
-          hookItems.push({
-            hookType,
-            matcher,
-            status: "modified",
-            remoteHook,
-            localHook: existingLocal,
-          });
-        }
-      }
-    }
-  }
-
-  return hookItems;
-}
-
 export async function analyzeSyncChanges(
   claudeDir: string,
-  githubToken: string
+  githubToken: string,
+  agentsDir: string
 ): Promise<SyncResult> {
   const allItems: SyncItem[] = [];
 
@@ -344,22 +257,14 @@ export async function analyzeSyncChanges(
   ];
 
   for (const category of categories) {
-    const items = await analyzeCategory(category, claudeDir, githubToken);
+    const items = await analyzeCategory(category, claudeDir, agentsDir, githubToken);
     allItems.push(...items);
   }
 
-  const remoteSettings = await fetchRemoteSettings(githubToken);
-  const localSettings = await getLocalSettings(claudeDir);
-  const hooks = remoteSettings ? analyzeHooksChanges(remoteSettings, localSettings) : [];
-
-  const hooksNewCount = hooks.filter((h) => h.status === "new").length;
-  const hooksModifiedCount = hooks.filter((h) => h.status === "modified").length;
-
   return {
     items: allItems,
-    hooks,
-    newCount: allItems.filter((i) => i.status === "new").length + hooksNewCount,
-    modifiedCount: allItems.filter((i) => i.status === "modified").length + hooksModifiedCount,
+    newCount: allItems.filter((i) => i.status === "new").length,
+    modifiedCount: allItems.filter((i) => i.status === "modified").length,
     deletedCount: allItems.filter((i) => i.status === "deleted").length,
     unchangedCount: allItems.filter((i) => i.status === "unchanged").length,
   };
@@ -372,7 +277,7 @@ async function downloadFromPrivateGitHub(
   claudeDir: string
 ): Promise<boolean> {
   try {
-    const url = `https://raw.githubusercontent.com/${PREMIUM_REPO}/${PREMIUM_BRANCH}/claude-code-config/${relativePath}`;
+    const url = `https://raw.githubusercontent.com/${PREMIUM_REPO}/${PREMIUM_BRANCH}/ai-config/${relativePath}`;
     const response = await fetch(url, {
       headers: {
         Authorization: `token ${githubToken}`,
@@ -401,81 +306,40 @@ async function downloadFromPrivateGitHub(
   }
 }
 
-export async function syncSelectedHooks(
-  claudeDir: string,
-  hooks: HookSyncItem[],
-  onProgress?: (hook: string, action: string) => void
-): Promise<{ success: number; failed: number }> {
-  if (hooks.length === 0) {
-    return { success: 0, failed: 0 };
-  }
-
-  const settingsPath = path.join(claudeDir, "settings.json");
-  let settings: any = {};
-
-  try {
-    const content = await fs.readFile(settingsPath, "utf-8");
-    settings = JSON.parse(content);
-  } catch {
-    settings = {};
-  }
-
-  if (!settings.hooks) {
-    settings.hooks = {};
-  }
-
-  let success = 0;
-  let failed = 0;
-
-  for (const hook of hooks) {
-    onProgress?.(`${hook.hookType}[${hook.matcher || "*"}]`, hook.status === "new" ? "adding" : "updating");
-
-    try {
-      if (!settings.hooks[hook.hookType]) {
-        settings.hooks[hook.hookType] = [];
-      }
-
-      const existingIndex = settings.hooks[hook.hookType].findIndex(
-        (h: any) => h.matcher === hook.matcher
-      );
-
-      const transformedHook = transformHook(hook.remoteHook, claudeDir);
-
-      if (existingIndex >= 0) {
-        settings.hooks[hook.hookType][existingIndex] = transformedHook;
-      } else {
-        settings.hooks[hook.hookType].push(transformedHook);
-      }
-
-      success++;
-    } catch {
-      failed++;
-    }
-  }
-
-  await fs.writeFile(settingsPath, JSON.stringify(settings, null, 2));
-
-  return { success, failed };
-}
-
 export async function syncSelectedItems(
   claudeDir: string,
   items: SyncItem[],
   githubToken: string,
+  agentsDir: string,
   onProgress?: (file: string, action: string) => void
 ): Promise<{ success: number; failed: number; deleted: number }> {
   let success = 0;
   let failed = 0;
   let deleted = 0;
+  const touchedAgentCategories = new Set<string>();
 
   for (const item of items) {
-    const targetPath = path.join(claudeDir, item.relativePath);
+    const useAgents = isAgentCategory(item.category);
+    const baseDir = useAgents ? agentsDir : claudeDir;
+    const targetPath = path.join(baseDir, item.relativePath);
+
+    if (useAgents) {
+      const topName = item.name.split("/")[0];
+      const claudeTop = path.join(claudeDir, item.category, topName);
+      const claudeTopStat = await fs.lstat(claudeTop).catch(() => null);
+      if (claudeTopStat && !claudeTopStat.isSymbolicLink()) {
+        onProgress?.(item.relativePath, "skipping (real dir in .claude)");
+        failed++;
+        continue;
+      }
+    }
 
     if (item.status === "deleted") {
       onProgress?.(item.relativePath, "deleting");
       try {
         await fs.remove(targetPath);
         deleted++;
+        if (useAgents) touchedAgentCategories.add(item.category);
       } catch {
         failed++;
       }
@@ -489,9 +353,16 @@ export async function syncSelectedItems(
       );
       if (ok) {
         success++;
+        if (useAgents) touchedAgentCategories.add(item.category);
       } else {
         failed++;
       }
+    }
+  }
+
+  for (const category of touchedAgentCategories) {
+    if (isAgentCategory(category)) {
+      await syncCategorySymlinks(category, agentsDir, claudeDir, undefined, true);
     }
   }
 

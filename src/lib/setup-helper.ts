@@ -29,7 +29,7 @@ export async function installBasicConfigs(
     );
   }
 
-  const sourceDir = path.join(repoPath, "claude-code-config");
+  const sourceDir = path.join(repoPath, "ai-config");
 
   if (!await fs.pathExists(sourceDir)) {
     await cleanupRepository(repoPath);
