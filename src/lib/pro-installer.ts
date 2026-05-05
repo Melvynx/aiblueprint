@@ -95,7 +95,13 @@ async function cloneOrUpdateRepo(token: string): Promise<string> {
     await execGitWithAuth(`clone ${repoUrl} ${cacheDir}`, token, repoUrl);
   }
 
-  return path.join(cacheDir, "ai-config");
+  for (const candidate of ["ai-config", "claude-code-config"]) {
+    const candidatePath = path.join(cacheDir, candidate);
+    if (await fs.pathExists(candidatePath)) {
+      return candidatePath;
+    }
+  }
+  throw new Error("Premium repo missing config folder (ai-config or claude-code-config)");
 }
 
 /**
@@ -288,14 +294,18 @@ export async function installProConfigs(
   const tempDir = path.join(os.tmpdir(), `aiblueprint-premium-${Date.now()}`);
 
   try {
-    const success = await downloadDirectoryFromPrivateGitHub(
-      PREMIUM_REPO,
-      PREMIUM_BRANCH,
-      "ai-config",
-      tempDir,
-      githubToken,
-      onProgress,
-    );
+    let success = false;
+    for (const candidate of ["ai-config", "claude-code-config"]) {
+      success = await downloadDirectoryFromPrivateGitHub(
+        PREMIUM_REPO,
+        PREMIUM_BRANCH,
+        candidate,
+        tempDir,
+        githubToken,
+        onProgress,
+      );
+      if (success) break;
+    }
 
     if (!success) {
       throw new Error("Failed to download premium configurations");

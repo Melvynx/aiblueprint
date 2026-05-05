@@ -2,7 +2,7 @@ import fs from "fs-extra";
 import path from "path";
 import os from "os";
 import chalk from "chalk";
-import { cloneRepository, cleanupRepository } from "../commands/setup/utils.js";
+import { cloneRepository, cleanupRepository, resolveConfigDir } from "../commands/setup/utils.js";
 
 export interface BasicSetupOptions {
   claudeCodeFolder?: string;
@@ -29,9 +29,9 @@ export async function installBasicConfigs(
     );
   }
 
-  const sourceDir = path.join(repoPath, "ai-config");
+  const sourceDir = await resolveConfigDir(repoPath);
 
-  if (!await fs.pathExists(sourceDir)) {
+  if (!sourceDir) {
     await cleanupRepository(repoPath);
     throw new Error(
       "Configuration directory not found in cloned repository",

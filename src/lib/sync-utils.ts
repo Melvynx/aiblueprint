@@ -40,11 +40,33 @@ function computeFileSha(content: Buffer): string {
   return crypto.createHash("sha1").update(fullContent).digest("hex");
 }
 
+let resolvedConfigFolder: string | null = null;
+
+async function resolveRemoteConfigFolder(githubToken: string): Promise<string> {
+  if (resolvedConfigFolder) return resolvedConfigFolder;
+  for (const candidate of ["ai-config", "claude-code-config"]) {
+    const apiUrl = `https://api.github.com/repos/${PREMIUM_REPO}/contents/${candidate}?ref=${PREMIUM_BRANCH}`;
+    const response = await fetch(apiUrl, {
+      headers: {
+        Authorization: `token ${githubToken}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+    });
+    if (response.ok) {
+      resolvedConfigFolder = candidate;
+      return candidate;
+    }
+  }
+  resolvedConfigFolder = "ai-config";
+  return "ai-config";
+}
+
 async function listRemoteDirectory(
   dirPath: string,
   githubToken: string
 ): Promise<RemoteFile[]> {
-  const apiUrl = `https://api.github.com/repos/${PREMIUM_REPO}/contents/ai-config/${dirPath}?ref=${PREMIUM_BRANCH}`;
+  const configFolder = await resolveRemoteConfigFolder(githubToken);
+  const apiUrl = `https://api.github.com/repos/${PREMIUM_REPO}/contents/${configFolder}/${dirPath}?ref=${PREMIUM_BRANCH}`;
   const response = await fetch(apiUrl, {
     headers: {
       Authorization: `token ${githubToken}`,
@@ -117,7 +139,8 @@ async function listLocalFiles(dir: string): Promise<string[]> {
     if (item === "node_modules" || item === ".DS_Store") continue;
 
     const fullPath = path.join(dir, item);
-    const stat = await fs.stat(fullPath);
+    const stat = await fs.stat(fullPath).catch(() => null);
+    if (!stat) continue;
     if (stat.isDirectory()) {
       files.push(item);
       const subFiles = await listLocalFilesRecursive(fullPath, item);
@@ -132,14 +155,15 @@ async function listLocalFiles(dir: string): Promise<string[]> {
 
 async function listLocalFilesRecursive(dir: string, basePath: string): Promise<string[]> {
   const files: string[] = [];
-  const items = await fs.readdir(dir);
+  const items = await fs.readdir(dir).catch(() => [] as string[]);
 
   for (const item of items) {
     if (item === "node_modules" || item === ".DS_Store") continue;
 
     const fullPath = path.join(dir, item);
     const relativePath = `${basePath}/${item}`;
-    const stat = await fs.stat(fullPath);
+    const stat = await fs.stat(fullPath).catch(() => null);
+    if (!stat) continue;
     if (stat.isDirectory()) {
       files.push(relativePath);
       const subFiles = await listLocalFilesRecursive(fullPath, relativePath);
@@ -277,7 +301,8 @@ async function downloadFromPrivateGitHub(
   claudeDir: string
 ): Promise<boolean> {
   try {
-    const url = `https://raw.githubusercontent.com/${PREMIUM_REPO}/${PREMIUM_BRANCH}/ai-config/${relativePath}`;
+    const configFolder = await resolveRemoteConfigFolder(githubToken);
+    const url = `https://raw.githubusercontent.com/${PREMIUM_REPO}/${PREMIUM_BRANCH}/${configFolder}/${relativePath}`;
     const response = await fetch(url, {
       headers: {
         Authorization: `token ${githubToken}`,

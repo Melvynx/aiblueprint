@@ -13,6 +13,7 @@ import {
   SimpleSpinner,
   cloneRepository,
   cleanupRepository,
+  resolveConfigDir,
 } from "./setup/utils.js";
 import { getVersion } from "../lib/version.js";
 import { createBackup } from "../lib/backup-utils.js";
@@ -159,12 +160,12 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       );
     }
 
-    const sourceDir = path.join(repoPath, "ai-config");
+    const sourceDir = await resolveConfigDir(repoPath);
 
-    if (!await fs.pathExists(sourceDir)) {
+    if (!sourceDir) {
       await cleanupRepository(repoPath);
       throw new Error(
-        "Configuration directory not found in cloned repository",
+        "Configuration directory not found in cloned repository (looked for ai-config/ and claude-code-config/)",
       );
     }
 

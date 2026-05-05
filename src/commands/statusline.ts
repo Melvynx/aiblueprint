@@ -3,7 +3,7 @@ import path from "path";
 import chalk from "chalk";
 import { homedir } from "os";
 import { checkAndInstallDependencies, installStatuslineDependencies } from "./setup/dependencies.js";
-import { cloneRepository, cleanupRepository } from "./setup/utils.js";
+import { cloneRepository, cleanupRepository, resolveConfigDir } from "./setup/utils.js";
 import { getVersion } from "../lib/version.js";
 
 export interface StatuslineOptions {
@@ -31,9 +31,9 @@ export async function statuslineCommand(options: StatuslineOptions) {
     return;
   }
 
-  const sourceDir = path.join(repoPath, "ai-config");
+  const sourceDir = await resolveConfigDir(repoPath);
 
-  if (!await fs.pathExists(sourceDir)) {
+  if (!sourceDir) {
     await cleanupRepository(repoPath);
     console.log(chalk.red("  Configuration directory not found in cloned repository"));
     return;
