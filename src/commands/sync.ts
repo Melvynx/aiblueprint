@@ -38,11 +38,9 @@ function formatItem(item: SyncItem): string {
 
   const folderPrefix = item.isFolder ? "📁 " : "";
   const suffix =
-    item.status === "migration" && item.migrationKind === "move-from-claude"
+    item.status === "migration"
       ? chalk.gray(" (move .claude → .agents)")
-      : item.status === "migration"
-        ? chalk.gray(" (preserve in .agents)")
-        : "";
+      : "";
   return `${icons[item.status]} ${folderPrefix}${colors[item.status](item.relativePath)}${suffix}`;
 }
 
@@ -222,7 +220,6 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
     if (result.migrationCount > 0) {
       summaryParts.push(chalk.blue(`${result.migrationCount} to migrate`));
     }
-    summaryParts.push(chalk.red(`${result.deletedCount} to remove`));
     summaryParts.push(chalk.gray(`${result.unchangedCount} unchanged`));
     p.log.info(`Found: ${summaryParts.join(", ")}`);
 
@@ -254,13 +251,11 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
 
     const newItems = changedItems.filter((i) => i.status === "new");
     const modifiedItems = changedItems.filter((i) => i.status === "modified");
-    const deletedItems = changedItems.filter((i) => i.status === "deleted");
     const migrationItems = changedItems.filter((i) => i.status === "migration");
 
-    const hasDeletions = deletedItems.length > 0;
     const hasMigrations = migrationItems.length > 0;
 
-    type SyncMode = "updates" | "updates_and_delete" | "custom";
+    type SyncMode = "updates" | "custom";
 
     const updatesHintParts = [
       `add ${newItems.length}`,
@@ -276,22 +271,12 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
         label: "Import all updates",
         hint: `${updatesHintParts.join(" + ")} files`,
       },
+      {
+        value: "custom",
+        label: "Custom choice",
+        hint: "select specific files to sync",
+      },
     ];
-
-    if (hasDeletions) {
-      const deleteHintParts = [...updatesHintParts, `delete ${deletedItems.length}`];
-      syncModeOptions.push({
-        value: "updates_and_delete",
-        label: "Import all updates and delete files",
-        hint: `${deleteHintParts.join(" + ")} files`,
-      });
-    }
-
-    syncModeOptions.push({
-      value: "custom",
-      label: "Custom choice",
-      hint: "select specific files to sync",
-    });
 
     const syncMode = await p.select({
       message: "How would you like to sync?",
@@ -307,53 +292,14 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
 
     if (syncMode === "updates") {
       selectedItems = [...newItems, ...modifiedItems, ...migrationItems];
-    } else if (syncMode === "updates_and_delete") {
-      p.log.message("");
-      p.log.message(chalk.red.bold("⚠️  WARNING: DESTRUCTIVE ACTION"));
-      p.log.message(chalk.red("━".repeat(50)));
-      p.log.message(
-        chalk.red(
-          `${deletedItems.length} commands/agents/scripts not in the premium version`
-        )
-      );
-      p.log.message(
-        chalk.red("will be PERMANENTLY DELETED and replaced by the new version.")
-      );
-      if (hasMigrations) {
-        p.log.message(
-          chalk.gray(
-            `(Skills are NOT deleted - they will be migrated to ~/.agents instead.)`
-          )
-        );
-      }
-      p.log.message(chalk.red("━".repeat(50)));
-      p.log.message("");
-
-      const deleteConfirm = await p.confirm({
-        message: chalk.red.bold("Are you sure you want to delete and replace all files?"),
-        initialValue: false,
-      });
-
-      if (p.isCancel(deleteConfirm) || !deleteConfirm) {
-        p.cancel("Sync cancelled");
-        process.exit(0);
-      }
-
-      selectedItems = [...newItems, ...modifiedItems, ...migrationItems, ...deletedItems];
     } else {
       const fileChoices = choices;
-      const nonDeleteChoices = fileChoices.filter((c) => {
-        if (c.value.type === "file") return c.value.item.status !== "deleted";
-        if (c.value.type === "folder") return !c.value.items.every((i) => i.status === "deleted");
-        return true;
-      });
-
-      const nonDeleteInitialValues = nonDeleteChoices.map((c) => c.value);
+      const initialValues = fileChoices.map((c) => c.value);
 
       const customSelected = await p.multiselect({
-        message: "Select files to sync (deletions excluded by default):",
+        message: "Select files to sync:",
         options: fileChoices as any,
-        initialValues: nonDeleteInitialValues,
+        initialValues,
         required: false,
       });
 
@@ -374,15 +320,13 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
 
     const toAdd = selectedItems.filter((i) => i.status === "new").length;
     const toUpdate = selectedItems.filter((i) => i.status === "modified").length;
-    const toRemove = selectedItems.filter((i) => i.status === "deleted").length;
     const toMigrate = selectedItems.filter((i) => i.status === "migration").length;
 
     p.log.message("");
     p.log.message(chalk.bold("What will happen:"));
     if (toAdd > 0) p.log.message(chalk.green(`  ✓ Add ${toAdd} new file${toAdd > 1 ? "s" : ""}`));
     if (toUpdate > 0) p.log.message(chalk.yellow(`  ✓ Update ${toUpdate} file${toUpdate > 1 ? "s" : ""}`));
-    if (toMigrate > 0) p.log.message(chalk.blue(`  ✓ Migrate ${toMigrate} item${toMigrate > 1 ? "s" : ""} to .agents (preserve, no data loss)`));
-    if (toRemove > 0) p.log.message(chalk.red(`  ✓ Delete ${toRemove} file${toRemove > 1 ? "s" : ""}`));
+    if (toMigrate > 0) p.log.message(chalk.blue(`  ✓ Move ${toMigrate} skill${toMigrate > 1 ? "s" : ""} from .claude to .agents`));
     p.log.message(chalk.gray(`  ✓ Backup current config to ~/.config/aiblueprint/backup/`));
     p.log.message("");
 

@@ -24,7 +24,7 @@ export type SyncStatus =
   | "deleted"
   | "migration";
 
-export type MigrationKind = "move-from-claude" | "preserve-in-agents";
+export type MigrationKind = "move-from-claude";
 
 export interface SyncItem {
   name: string;
@@ -262,37 +262,17 @@ async function analyzeCategory(
     }
   }
 
-  const migrationTopLevels = new Set<string>();
-
   if (useAgents) {
     const agentsTopLevels = new Set<string>();
     for (const localPath of localSet) {
       agentsTopLevels.add(localPath.split("/")[0]);
     }
 
-    for (const top of agentsTopLevels) {
-      if (remoteTopLevels.has(top)) continue;
-      if (migrationTopLevels.has(top)) continue;
-      const fullPath = path.join(localDir, top);
-      const stat = await fs.stat(fullPath).catch(() => null);
-      if (!stat) continue;
-      migrationTopLevels.add(top);
-      items.push({
-        name: top,
-        relativePath: `${category}/${top}`,
-        status: "migration",
-        category,
-        isFolder: stat.isDirectory(),
-        migrationKind: "preserve-in-agents",
-      });
-    }
-
     const claudeCategoryDir = path.join(claudeDir, category);
     const claudeRealEntries = await listClaudeRealTopLevel(claudeCategoryDir);
     for (const top of claudeRealEntries) {
+      if (!remoteTopLevels.has(top)) continue;
       if (agentsTopLevels.has(top)) continue;
-      if (migrationTopLevels.has(top)) continue;
-      migrationTopLevels.add(top);
       items.push({
         name: top,
         relativePath: `${category}/${top}`,
@@ -301,42 +281,6 @@ async function analyzeCategory(
         isFolder: true,
         migrationKind: "move-from-claude",
       });
-    }
-  }
-
-  const deletedPaths = new Set<string>();
-
-  for (const localPath of localSet) {
-    if (remoteSet.has(localPath)) continue;
-
-    const topLevel = localPath.split("/")[0];
-    if (migrationTopLevels.has(topLevel)) continue;
-
-    const pathParts = localPath.split("/");
-    const parentAlreadyDeleted = pathParts.some((_, idx) => {
-      if (idx === 0) return false;
-      const parentPath = pathParts.slice(0, idx).join("/");
-      return deletedPaths.has(parentPath);
-    });
-
-    if (parentAlreadyDeleted) {
-      continue;
-    }
-
-    const fullPath = path.join(localDir, localPath);
-    const stat = await fs.stat(fullPath).catch(() => null);
-    if (stat) {
-      const isFolder = stat.isDirectory();
-      items.push({
-        name: localPath,
-        relativePath: `${category}/${localPath}`,
-        status: "deleted",
-        category,
-        isFolder,
-      });
-      if (isFolder) {
-        deletedPaths.add(localPath);
-      }
     }
   }
 
@@ -433,31 +377,21 @@ export async function syncSelectedItems(
       const claudeTop = path.join(claudeDir, item.category, topName);
 
       try {
-        if (item.migrationKind === "move-from-claude") {
-          const claudeStat = await fs.lstat(claudeTop).catch(() => null);
-          if (!claudeStat || claudeStat.isSymbolicLink()) {
-            onProgress?.(item.relativePath, "skipping (no real dir to migrate)");
-            failed++;
-            continue;
-          }
-          const agentsExists = await fs.pathExists(agentsTop);
-          if (agentsExists) {
-            onProgress?.(item.relativePath, "skipping (already in .agents)");
-            failed++;
-            continue;
-          }
-          onProgress?.(item.relativePath, "moving to .agents");
-          await fs.ensureDir(path.dirname(agentsTop));
-          await fs.move(claudeTop, agentsTop);
-        } else {
-          const claudeStat = await fs.lstat(claudeTop).catch(() => null);
-          if (claudeStat && !claudeStat.isSymbolicLink()) {
-            onProgress?.(item.relativePath, "skipping (real dir in .claude)");
-            failed++;
-            continue;
-          }
-          onProgress?.(item.relativePath, "preserving in .agents");
+        const claudeStat = await fs.lstat(claudeTop).catch(() => null);
+        if (!claudeStat || claudeStat.isSymbolicLink()) {
+          onProgress?.(item.relativePath, "skipping (no real dir to migrate)");
+          failed++;
+          continue;
         }
+        const agentsExists = await fs.pathExists(agentsTop);
+        if (agentsExists) {
+          onProgress?.(item.relativePath, "skipping (already in .agents)");
+          failed++;
+          continue;
+        }
+        onProgress?.(item.relativePath, "moving to .agents");
+        await fs.ensureDir(path.dirname(agentsTop));
+        await fs.move(claudeTop, agentsTop);
         migrated++;
         touchedAgentCategories.add(item.category);
       } catch {

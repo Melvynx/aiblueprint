@@ -66,45 +66,7 @@ describe("syncSelectedItems – migration", () => {
     expect(link.isSymbolicLink()).toBe(true);
   });
 
-  it("preserves an existing .agents/skills/<name> and ensures a symlink in .claude", async () => {
-    const agentsSkillDir = path.join(fixture.agentsDir, "skills/my-skill");
-    await fs.ensureDir(agentsSkillDir);
-    await fs.writeFile(
-      path.join(agentsSkillDir, "SKILL.md"),
-      "preserved",
-      "utf-8",
-    );
-
-    const item: SyncItem = {
-      name: "my-skill",
-      relativePath: "skills/my-skill",
-      status: "migration",
-      category: "skills",
-      isFolder: true,
-      migrationKind: "preserve-in-agents",
-    };
-
-    const result = await syncSelectedItems(
-      fixture.claudeDir,
-      [item],
-      "fake-token",
-      fixture.agentsDir,
-    );
-
-    expect(result.migrated).toBe(1);
-    expect(result.failed).toBe(0);
-
-    const stillThere = await fs.readFile(
-      path.join(fixture.agentsDir, "skills/my-skill/SKILL.md"),
-      "utf-8",
-    );
-    expect(stillThere).toBe("preserved");
-
-    const link = await fs.lstat(path.join(fixture.claudeDir, "skills/my-skill"));
-    expect(link.isSymbolicLink()).toBe(true);
-  });
-
-  it("does not delete user content when migration is selected (no fs.remove call)", async () => {
+  it("does not touch user content in .agents that is not in remote", async () => {
     const agentsSkillDir = path.join(fixture.agentsDir, "skills/user-skill");
     await fs.ensureDir(agentsSkillDir);
     await fs.writeFile(
@@ -119,7 +81,7 @@ describe("syncSelectedItems – migration", () => {
       status: "migration",
       category: "skills",
       isFolder: true,
-      migrationKind: "preserve-in-agents",
+      migrationKind: "move-from-claude",
     };
 
     await syncSelectedItems(
