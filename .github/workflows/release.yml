@@ -33,6 +33,9 @@ jobs:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
 
+      - name: Update npm for OIDC
+        run: npm install -g npm@11.6.0
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
