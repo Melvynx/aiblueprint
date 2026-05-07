@@ -17,12 +17,22 @@ export interface RemoteFile {
   type: "file" | "dir";
 }
 
+export type SyncStatus =
+  | "new"
+  | "modified"
+  | "unchanged"
+  | "deleted"
+  | "migration";
+
+export type MigrationKind = "move-from-claude" | "preserve-in-agents";
+
 export interface SyncItem {
   name: string;
   relativePath: string;
-  status: "new" | "modified" | "unchanged" | "deleted";
+  status: SyncStatus;
   category: "commands" | "agents" | "skills" | "scripts" | "settings";
   isFolder?: boolean;
+  migrationKind?: MigrationKind;
 }
 
 export interface SyncResult {
@@ -31,6 +41,7 @@ export interface SyncResult {
   modifiedCount: number;
   deletedCount: number;
   unchangedCount: number;
+  migrationCount: number;
 }
 
 function computeFileSha(content: Buffer): string {
@@ -176,6 +187,21 @@ async function listLocalFilesRecursive(dir: string, basePath: string): Promise<s
   return files;
 }
 
+async function listClaudeRealTopLevel(
+  claudeCategoryDir: string,
+): Promise<string[]> {
+  if (!(await fs.pathExists(claudeCategoryDir))) return [];
+  const entries = await fs.readdir(claudeCategoryDir).catch(() => [] as string[]);
+  const real: string[] = [];
+  for (const name of entries) {
+    if (name === "node_modules" || name === ".DS_Store") continue;
+    const stat = await fs.lstat(path.join(claudeCategoryDir, name)).catch(() => null);
+    if (!stat) continue;
+    if (stat.isDirectory()) real.push(name);
+  }
+  return real;
+}
+
 async function analyzeCategory(
   category: "commands" | "agents" | "skills" | "scripts",
   claudeDir: string,
@@ -183,7 +209,8 @@ async function analyzeCategory(
   githubToken: string
 ): Promise<SyncItem[]> {
   const items: SyncItem[] = [];
-  const localBase = isAgentCategory(category) ? agentsDir : claudeDir;
+  const useAgents = isAgentCategory(category);
+  const localBase = useAgents ? agentsDir : claudeDir;
   const localDir = path.join(localBase, category);
 
   const remoteFiles = await listRemoteFilesRecursive(category, githubToken);
@@ -192,6 +219,11 @@ async function analyzeCategory(
   const remoteSet = new Map<string, { sha: string; isFolder: boolean }>();
   for (const rf of remoteFiles) {
     remoteSet.set(rf.path, { sha: rf.sha, isFolder: rf.isFolder });
+  }
+
+  const remoteTopLevels = new Set<string>();
+  for (const remotePath of remoteSet.keys()) {
+    remoteTopLevels.add(remotePath.split("/")[0]);
   }
 
   const localSet = new Set(localFiles);
@@ -228,6 +260,49 @@ async function analyzeCategory(
         });
       }
     }
+  }
+
+  if (useAgents) {
+    const reportedMigrationFolders = new Set<string>();
+    const agentsTopLevels = new Set<string>();
+
+    for (const localPath of localSet) {
+      const top = localPath.split("/")[0];
+      agentsTopLevels.add(top);
+      if (remoteTopLevels.has(top)) continue;
+      if (reportedMigrationFolders.has(top)) continue;
+      reportedMigrationFolders.add(top);
+
+      const fullPath = path.join(localDir, top);
+      const stat = await fs.stat(fullPath).catch(() => null);
+      if (!stat) continue;
+      items.push({
+        name: top,
+        relativePath: `${category}/${top}`,
+        status: "migration",
+        category,
+        isFolder: stat.isDirectory(),
+        migrationKind: "preserve-in-agents",
+      });
+    }
+
+    const claudeCategoryDir = path.join(claudeDir, category);
+    const claudeRealEntries = await listClaudeRealTopLevel(claudeCategoryDir);
+    for (const top of claudeRealEntries) {
+      if (agentsTopLevels.has(top)) continue;
+      if (reportedMigrationFolders.has(top)) continue;
+      reportedMigrationFolders.add(top);
+      items.push({
+        name: top,
+        relativePath: `${category}/${top}`,
+        status: "migration",
+        category,
+        isFolder: true,
+        migrationKind: "move-from-claude",
+      });
+    }
+
+    return items;
   }
 
   const deletedPaths = new Set<string>();
@@ -291,6 +366,7 @@ export async function analyzeSyncChanges(
     modifiedCount: allItems.filter((i) => i.status === "modified").length,
     deletedCount: allItems.filter((i) => i.status === "deleted").length,
     unchangedCount: allItems.filter((i) => i.status === "unchanged").length,
+    migrationCount: allItems.filter((i) => i.status === "migration").length,
   };
 }
 
@@ -337,16 +413,56 @@ export async function syncSelectedItems(
   githubToken: string,
   agentsDir: string,
   onProgress?: (file: string, action: string) => void
-): Promise<{ success: number; failed: number; deleted: number }> {
+): Promise<{ success: number; failed: number; deleted: number; migrated: number }> {
   let success = 0;
   let failed = 0;
   let deleted = 0;
+  let migrated = 0;
   const touchedAgentCategories = new Set<string>();
 
   for (const item of items) {
     const useAgents = isAgentCategory(item.category);
     const baseDir = useAgents ? agentsDir : claudeDir;
     const targetPath = path.join(baseDir, item.relativePath);
+
+    if (item.status === "migration" && useAgents) {
+      const topName = item.name.split("/")[0];
+      const agentsTop = path.join(agentsDir, item.category, topName);
+      const claudeTop = path.join(claudeDir, item.category, topName);
+
+      try {
+        if (item.migrationKind === "move-from-claude") {
+          const claudeStat = await fs.lstat(claudeTop).catch(() => null);
+          if (!claudeStat || claudeStat.isSymbolicLink()) {
+            onProgress?.(item.relativePath, "skipping (no real dir to migrate)");
+            failed++;
+            continue;
+          }
+          const agentsExists = await fs.pathExists(agentsTop);
+          if (agentsExists) {
+            onProgress?.(item.relativePath, "skipping (already in .agents)");
+            failed++;
+            continue;
+          }
+          onProgress?.(item.relativePath, "moving to .agents");
+          await fs.ensureDir(path.dirname(agentsTop));
+          await fs.move(claudeTop, agentsTop);
+        } else {
+          const claudeStat = await fs.lstat(claudeTop).catch(() => null);
+          if (claudeStat && !claudeStat.isSymbolicLink()) {
+            onProgress?.(item.relativePath, "skipping (real dir in .claude)");
+            failed++;
+            continue;
+          }
+          onProgress?.(item.relativePath, "preserving in .agents");
+        }
+        migrated++;
+        touchedAgentCategories.add(item.category);
+      } catch {
+        failed++;
+      }
+      continue;
+    }
 
     if (useAgents) {
       const topName = item.name.split("/")[0];
@@ -391,5 +507,5 @@ export async function syncSelectedItems(
     }
   }
 
-  return { success, failed, deleted };
+  return { success, failed, deleted, migrated };
 }

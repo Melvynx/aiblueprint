@@ -25,6 +25,7 @@ function formatItem(item: SyncItem): string {
     modified: "📝",
     deleted: "🗑️",
     unchanged: "✅",
+    migration: "📦",
   };
 
   const colors = {
@@ -32,10 +33,17 @@ function formatItem(item: SyncItem): string {
     modified: chalk.yellow,
     deleted: chalk.red,
     unchanged: chalk.gray,
+    migration: chalk.blue,
   };
 
   const folderPrefix = item.isFolder ? "📁 " : "";
-  return `${icons[item.status]} ${folderPrefix}${colors[item.status](item.relativePath)}`;
+  const suffix =
+    item.status === "migration" && item.migrationKind === "move-from-claude"
+      ? chalk.gray(" (move .claude → .agents)")
+      : item.status === "migration"
+        ? chalk.gray(" (preserve in .agents)")
+        : "";
+  return `${icons[item.status]} ${folderPrefix}${colors[item.status](item.relativePath)}${suffix}`;
 }
 
 function groupByCategory(items: SyncItem[]): Map<string, SyncItem[]> {
@@ -53,6 +61,7 @@ interface FolderSummary {
   newCount: number;
   modifiedCount: number;
   deletedCount: number;
+  migrationCount: number;
 }
 
 function aggregateByTopLevelFolder(items: SyncItem[]): FolderSummary[] {
@@ -63,13 +72,20 @@ function aggregateByTopLevelFolder(items: SyncItem[]): FolderSummary[] {
     const topLevel = parts[0];
 
     if (!folderMap.has(topLevel)) {
-      folderMap.set(topLevel, { name: topLevel, newCount: 0, modifiedCount: 0, deletedCount: 0 });
+      folderMap.set(topLevel, {
+        name: topLevel,
+        newCount: 0,
+        modifiedCount: 0,
+        deletedCount: 0,
+        migrationCount: 0,
+      });
     }
 
     const summary = folderMap.get(topLevel)!;
     if (item.status === "new") summary.newCount++;
     else if (item.status === "modified") summary.modifiedCount++;
     else if (item.status === "deleted") summary.deletedCount++;
+    else if (item.status === "migration") summary.migrationCount++;
   }
 
   return Array.from(folderMap.values());
@@ -80,6 +96,7 @@ function formatFolderSummary(summary: FolderSummary): string {
   if (summary.newCount > 0) parts.push(chalk.green(`+${summary.newCount}`));
   if (summary.modifiedCount > 0) parts.push(chalk.yellow(`~${summary.modifiedCount}`));
   if (summary.deletedCount > 0) parts.push(chalk.red(`-${summary.deletedCount}`));
+  if (summary.migrationCount > 0) parts.push(chalk.blue(`→${summary.migrationCount}`));
 
   const countStr = parts.length > 0 ? ` (${parts.join(", ")})` : "";
   return `📁 ${summary.name}${countStr}`;
@@ -116,8 +133,20 @@ function createSelectionChoices(
       }
     } else {
       for (const item of items) {
-        const icons = { new: "🆕", modified: "📝", deleted: "🗑️", unchanged: "" };
-        const actions = { new: "add", modified: "update", deleted: "remove", unchanged: "" };
+        const icons = {
+          new: "🆕",
+          modified: "📝",
+          deleted: "🗑️",
+          unchanged: "",
+          migration: "📦",
+        };
+        const actions = {
+          new: "add",
+          modified: "update",
+          deleted: "remove",
+          unchanged: "",
+          migration: "migrate",
+        };
         choices.push({
           value: { type: "file", item },
           label: `${icons[item.status]} ${item.relativePath}`,
@@ -135,6 +164,7 @@ function formatFolderHint(summary: FolderSummary): string {
   if (summary.newCount > 0) parts.push(`+${summary.newCount}`);
   if (summary.modifiedCount > 0) parts.push(`~${summary.modifiedCount}`);
   if (summary.deletedCount > 0) parts.push(`-${summary.deletedCount}`);
+  if (summary.migrationCount > 0) parts.push(`→${summary.migrationCount}`);
   return parts.join(", ");
 }
 
@@ -185,9 +215,16 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
       return;
     }
 
-    p.log.info(
-      `Found: ${chalk.green(`${result.newCount} new`)}, ${chalk.yellow(`${result.modifiedCount} modified`)}, ${chalk.red(`${result.deletedCount} to remove`)}, ${chalk.gray(`${result.unchangedCount} unchanged`)}`
-    );
+    const summaryParts: string[] = [
+      chalk.green(`${result.newCount} new`),
+      chalk.yellow(`${result.modifiedCount} modified`),
+    ];
+    if (result.migrationCount > 0) {
+      summaryParts.push(chalk.blue(`${result.migrationCount} to migrate`));
+    }
+    summaryParts.push(chalk.red(`${result.deletedCount} to remove`));
+    summaryParts.push(chalk.gray(`${result.unchangedCount} unchanged`));
+    p.log.info(`Found: ${summaryParts.join(", ")}`);
 
     p.log.message("");
     p.log.message(chalk.bold("Changes by category:"));
@@ -218,24 +255,35 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
     const newItems = changedItems.filter((i) => i.status === "new");
     const modifiedItems = changedItems.filter((i) => i.status === "modified");
     const deletedItems = changedItems.filter((i) => i.status === "deleted");
+    const migrationItems = changedItems.filter((i) => i.status === "migration");
 
     const hasDeletions = deletedItems.length > 0;
+    const hasMigrations = migrationItems.length > 0;
 
     type SyncMode = "updates" | "updates_and_delete" | "custom";
+
+    const updatesHintParts = [
+      `add ${newItems.length}`,
+      `update ${modifiedItems.length}`,
+    ];
+    if (hasMigrations) {
+      updatesHintParts.push(`migrate ${migrationItems.length}`);
+    }
 
     const syncModeOptions: { value: SyncMode; label: string; hint: string }[] = [
       {
         value: "updates",
         label: "Import all updates",
-        hint: `add ${newItems.length} + update ${modifiedItems.length} files`,
+        hint: `${updatesHintParts.join(" + ")} files`,
       },
     ];
 
     if (hasDeletions) {
+      const deleteHintParts = [...updatesHintParts, `delete ${deletedItems.length}`];
       syncModeOptions.push({
         value: "updates_and_delete",
         label: "Import all updates and delete files",
-        hint: `add ${newItems.length} + update ${modifiedItems.length} + delete ${deletedItems.length} files`,
+        hint: `${deleteHintParts.join(" + ")} files`,
       });
     }
 
@@ -258,20 +306,26 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
     let selectedItems: SyncItem[] = [];
 
     if (syncMode === "updates") {
-      selectedItems = [...newItems, ...modifiedItems];
+      selectedItems = [...newItems, ...modifiedItems, ...migrationItems];
     } else if (syncMode === "updates_and_delete") {
       p.log.message("");
       p.log.message(chalk.red.bold("⚠️  WARNING: DESTRUCTIVE ACTION"));
       p.log.message(chalk.red("━".repeat(50)));
       p.log.message(
         chalk.red(
-          "All your custom skills, commands, agents, and configuration files"
+          `${deletedItems.length} commands/agents/scripts not in the premium version`
         )
       );
       p.log.message(
-        chalk.red("that are not in the premium version will be PERMANENTLY DELETED")
+        chalk.red("will be PERMANENTLY DELETED and replaced by the new version.")
       );
-      p.log.message(chalk.red("and replaced by the new version."));
+      if (hasMigrations) {
+        p.log.message(
+          chalk.gray(
+            `(Skills are NOT deleted - they will be migrated to ~/.agents instead.)`
+          )
+        );
+      }
       p.log.message(chalk.red("━".repeat(50)));
       p.log.message("");
 
@@ -285,7 +339,7 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
         process.exit(0);
       }
 
-      selectedItems = [...newItems, ...modifiedItems, ...deletedItems];
+      selectedItems = [...newItems, ...modifiedItems, ...migrationItems, ...deletedItems];
     } else {
       const fileChoices = choices;
       const nonDeleteChoices = fileChoices.filter((c) => {
@@ -321,11 +375,13 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
     const toAdd = selectedItems.filter((i) => i.status === "new").length;
     const toUpdate = selectedItems.filter((i) => i.status === "modified").length;
     const toRemove = selectedItems.filter((i) => i.status === "deleted").length;
+    const toMigrate = selectedItems.filter((i) => i.status === "migration").length;
 
     p.log.message("");
     p.log.message(chalk.bold("What will happen:"));
     if (toAdd > 0) p.log.message(chalk.green(`  ✓ Add ${toAdd} new file${toAdd > 1 ? "s" : ""}`));
     if (toUpdate > 0) p.log.message(chalk.yellow(`  ✓ Update ${toUpdate} file${toUpdate > 1 ? "s" : ""}`));
+    if (toMigrate > 0) p.log.message(chalk.blue(`  ✓ Migrate ${toMigrate} item${toMigrate > 1 ? "s" : ""} to .agents (preserve, no data loss)`));
     if (toRemove > 0) p.log.message(chalk.red(`  ✓ Delete ${toRemove} file${toRemove > 1 ? "s" : ""}`));
     p.log.message(chalk.gray(`  ✓ Backup current config to ~/.config/aiblueprint/backup/`));
     p.log.message("");
@@ -364,6 +420,7 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
 
     const results: string[] = [];
     if (syncResult.success > 0) results.push(chalk.green(`${syncResult.success} added/updated`));
+    if (syncResult.migrated > 0) results.push(chalk.blue(`${syncResult.migrated} migrated`));
     if (syncResult.deleted > 0) results.push(chalk.red(`${syncResult.deleted} removed`));
     if (syncResult.failed > 0) results.push(chalk.yellow(`${syncResult.failed} failed`));
 
@@ -378,6 +435,7 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
 
     trackEvent("pro-sync", {
       added: syncResult.success,
+      migrated: syncResult.migrated,
       deleted: syncResult.deleted,
       failed: syncResult.failed,
     });
