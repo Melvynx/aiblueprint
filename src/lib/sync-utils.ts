@@ -262,20 +262,21 @@ async function analyzeCategory(
     }
   }
 
+  const migrationTopLevels = new Set<string>();
+
   if (useAgents) {
-    const reportedMigrationFolders = new Set<string>();
     const agentsTopLevels = new Set<string>();
-
     for (const localPath of localSet) {
-      const top = localPath.split("/")[0];
-      agentsTopLevels.add(top);
-      if (remoteTopLevels.has(top)) continue;
-      if (reportedMigrationFolders.has(top)) continue;
-      reportedMigrationFolders.add(top);
+      agentsTopLevels.add(localPath.split("/")[0]);
+    }
 
+    for (const top of agentsTopLevels) {
+      if (remoteTopLevels.has(top)) continue;
+      if (migrationTopLevels.has(top)) continue;
       const fullPath = path.join(localDir, top);
       const stat = await fs.stat(fullPath).catch(() => null);
       if (!stat) continue;
+      migrationTopLevels.add(top);
       items.push({
         name: top,
         relativePath: `${category}/${top}`,
@@ -290,8 +291,8 @@ async function analyzeCategory(
     const claudeRealEntries = await listClaudeRealTopLevel(claudeCategoryDir);
     for (const top of claudeRealEntries) {
       if (agentsTopLevels.has(top)) continue;
-      if (reportedMigrationFolders.has(top)) continue;
-      reportedMigrationFolders.add(top);
+      if (migrationTopLevels.has(top)) continue;
+      migrationTopLevels.add(top);
       items.push({
         name: top,
         relativePath: `${category}/${top}`,
@@ -301,39 +302,40 @@ async function analyzeCategory(
         migrationKind: "move-from-claude",
       });
     }
-
-    return items;
   }
 
   const deletedPaths = new Set<string>();
 
   for (const localPath of localSet) {
-    if (!remoteSet.has(localPath)) {
-      const pathParts = localPath.split("/");
-      const parentAlreadyDeleted = pathParts.some((_, idx) => {
-        if (idx === 0) return false;
-        const parentPath = pathParts.slice(0, idx).join("/");
-        return deletedPaths.has(parentPath);
+    if (remoteSet.has(localPath)) continue;
+
+    const topLevel = localPath.split("/")[0];
+    if (migrationTopLevels.has(topLevel)) continue;
+
+    const pathParts = localPath.split("/");
+    const parentAlreadyDeleted = pathParts.some((_, idx) => {
+      if (idx === 0) return false;
+      const parentPath = pathParts.slice(0, idx).join("/");
+      return deletedPaths.has(parentPath);
+    });
+
+    if (parentAlreadyDeleted) {
+      continue;
+    }
+
+    const fullPath = path.join(localDir, localPath);
+    const stat = await fs.stat(fullPath).catch(() => null);
+    if (stat) {
+      const isFolder = stat.isDirectory();
+      items.push({
+        name: localPath,
+        relativePath: `${category}/${localPath}`,
+        status: "deleted",
+        category,
+        isFolder,
       });
-
-      if (parentAlreadyDeleted) {
-        continue;
-      }
-
-      const fullPath = path.join(localDir, localPath);
-      const stat = await fs.stat(fullPath).catch(() => null);
-      if (stat) {
-        const isFolder = stat.isDirectory();
-        items.push({
-          name: localPath,
-          relativePath: `${category}/${localPath}`,
-          status: "deleted",
-          category,
-          isFolder,
-        });
-        if (isFolder) {
-          deletedPaths.add(localPath);
-        }
+      if (isFolder) {
+        deletedPaths.add(localPath);
       }
     }
   }
