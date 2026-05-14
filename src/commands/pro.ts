@@ -143,7 +143,7 @@ export async function proActivateCommand(userToken?: string) {
 
     p.log.info(
       chalk.cyan(
-        "\n💡 Next step: Run 'npx aiblueprint-cli@latest claude-code pro setup' to install premium configs",
+        "\n💡 Next step: Run 'npx aiblueprint-cli@latest ai-coding pro setup' to install premium configs",
       ),
     );
 
@@ -169,7 +169,7 @@ export async function proStatusCommand() {
 
     if (!token) {
       p.log.warn("No token found");
-      p.log.info("Run: npx aiblueprint-cli@latest claude-code pro activate <token>");
+      p.log.info("Run: npx aiblueprint-cli@latest ai-coding pro activate <token>");
       p.log.info("Get your token at: https://mlv.sh/claude-cli");
       p.outro(chalk.yellow("⚠️  Not activated"));
       process.exit(0);
@@ -198,7 +198,7 @@ export async function proSetupCommand(options: { folder?: string; agentsFolder?:
 
     if (!githubToken) {
       p.log.error("No token found");
-      p.log.info("Run: npx aiblueprint-cli@latest claude-code pro activate <token>");
+      p.log.info("Run: npx aiblueprint-cli@latest ai-coding pro activate <token>");
       p.outro(chalk.red("❌ Not activated"));
       process.exit(1);
     }
@@ -289,7 +289,7 @@ export async function proUpdateCommand(options: { folder?: string; agentsFolder?
 
     if (!githubToken) {
       p.log.error("No token found");
-      p.log.info("Run: npx aiblueprint-cli@latest claude-code pro activate <token>");
+      p.log.info("Run: npx aiblueprint-cli@latest ai-coding pro activate <token>");
       p.outro(chalk.red("❌ Not activated"));
       process.exit(1);
     }

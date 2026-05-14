@@ -48,8 +48,8 @@ export async function setupCommand(params: SetupCommandParams = {}) {
   let repoPath: string | null = null;
 
   try {
-    console.log(chalk.blue.bold(`\n🚀 AIBlueprint Claude Code Setup ${chalk.gray(`v${getVersion()}`)}\n`));
-    console.log(chalk.bgBlue(" Setting up your Claude Code environment "));
+    console.log(chalk.blue.bold(`\n🚀 AIBlueprint AI Coding Setup ${chalk.gray(`v${getVersion()}`)}\n`));
+    console.log(chalk.bgBlue(" Setting up your AI coding environment "));
 
     let features: string[];
 
@@ -165,7 +165,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     if (!sourceDir) {
       await cleanupRepository(repoPath);
       throw new Error(
-        "Configuration directory not found in cloned repository (looked for ai-config/ and claude-code-config/)",
+        "Configuration directory not found in cloned repository (looked for ai-coding/, claude-code-config/, and ai-config/)",
       );
     }
 

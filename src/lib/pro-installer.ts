@@ -15,6 +15,7 @@ const execAsync = promisify(exec);
 
 const PREMIUM_REPO = "Melvynx/aiblueprint-cli-premium";
 const PREMIUM_BRANCH = "main";
+const CONFIG_FOLDER_CANDIDATES = ["ai-coding", "claude-code-config", "ai-config"] as const;
 
 export type InstallProgressCallback = (
   file: string,
@@ -76,7 +77,8 @@ async function execGitWithAuth(
 
 /**
  * Clone or update the cached premium repository
- * Returns the path to the ai-config directory within the cache
+ * Returns the path to the canonical ai-coding config directory within the cache.
+ * Legacy folder names are accepted as compatibility links.
  */
 async function cloneOrUpdateRepo(token: string): Promise<string> {
   const cacheDir = getCacheRepoDir();
@@ -95,13 +97,13 @@ async function cloneOrUpdateRepo(token: string): Promise<string> {
     await execGitWithAuth(`clone ${repoUrl} ${cacheDir}`, token, repoUrl);
   }
 
-  for (const candidate of ["ai-config", "claude-code-config"]) {
+  for (const candidate of CONFIG_FOLDER_CANDIDATES) {
     const candidatePath = path.join(cacheDir, candidate);
     if (await fs.pathExists(candidatePath)) {
       return candidatePath;
     }
   }
-  throw new Error("Premium repo missing config folder (ai-config or claude-code-config)");
+  throw new Error("Premium repo missing config folder (ai-coding or claude-code-config)");
 }
 
 /**
@@ -236,7 +238,7 @@ async function downloadDirectoryFromPrivateGitHub(
     for (const file of files) {
       const relativePath = dirPath ? `${dirPath}/${file.name}` : file.name;
       const targetPath = path.join(targetDir, file.name);
-      const displayPath = relativePath.replace("ai-config/", "");
+      const displayPath = relativePath.replace(/^(ai-coding|claude-code-config|ai-config)\//, "");
 
       if (file.type === "file") {
         onProgress?.(displayPath, "file");
@@ -295,7 +297,7 @@ export async function installProConfigs(
 
   try {
     let success = false;
-    for (const candidate of ["ai-config", "claude-code-config"]) {
+    for (const candidate of CONFIG_FOLDER_CANDIDATES) {
       success = await downloadDirectoryFromPrivateGitHub(
         PREMIUM_REPO,
         PREMIUM_BRANCH,

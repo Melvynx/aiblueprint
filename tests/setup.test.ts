@@ -49,7 +49,7 @@ describe("Setup Command with Inquirer.js", () => {
     // @ts-expect-error Not important
     vi.mocked(fs.pathExists).mockImplementation((path: string) => {
       // Mock the source directory to exist
-      if (path.includes("ai-config")) {
+      if (path.includes("ai-coding")) {
         return Promise.resolve(true);
       }
       return Promise.resolve(false);
@@ -88,7 +88,7 @@ describe("Setup Command with Inquirer.js", () => {
 
     // Should show setup intro
     expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining("🚀 AIBlueprint Claude Code Setup"),
+      expect.stringContaining("🚀 AIBlueprint AI Coding Setup"),
     );
 
     // Should show skip mode message

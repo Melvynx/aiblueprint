@@ -53,12 +53,11 @@ export async function cleanupRepository(repoPath: string): Promise<void> {
 }
 
 /**
- * Resolves the config folder inside a repo. Prefers "ai-config" but falls
- * back to the legacy "claude-code-config" name for repos that haven't been
- * renamed yet.
+ * Resolves the config folder inside a repo. "ai-coding" is the canonical
+ * folder; legacy folder names are treated as compatibility links.
  */
 export async function resolveConfigDir(repoPath: string): Promise<string | null> {
-  const candidates = ["ai-config", "claude-code-config"];
+  const candidates = CONFIG_FOLDER_CANDIDATES;
   for (const name of candidates) {
     const candidate = path.join(repoPath, name);
     if (await fs.pathExists(candidate)) {
@@ -68,4 +67,4 @@ export async function resolveConfigDir(repoPath: string): Promise<string | null>
   return null;
 }
 
-export const CONFIG_FOLDER_CANDIDATES = ["ai-config", "claude-code-config"] as const;
+export const CONFIG_FOLDER_CANDIDATES = ["ai-coding", "claude-code-config", "ai-config"] as const;

@@ -8,7 +8,7 @@ Supercharge Claude Code with security hooks, custom commands, intelligent status
 
 ```bash
 # Run setup (no installation required)
-npx aiblueprint-cli@latest claude-code setup
+npx aiblueprint-cli@latest ai-coding setup
 ```
 
 ## ✨ Features
@@ -32,7 +32,7 @@ npx aiblueprint-cli@latest claude-code setup
 
 ```bash
 # Run without installation
-npx aiblueprint-cli@latest claude-code setup
+npx aiblueprint-cli@latest ai-coding setup
 
 # Or install globally
 npm install -g aiblueprint-cli
@@ -44,13 +44,13 @@ npm install -g aiblueprint-cli
 
 ```bash
 # Interactive setup
-npx aiblueprint-cli@latest claude-code setup
+npx aiblueprint-cli@latest ai-coding setup
 
 # Install all features (no prompts)
-npx aiblueprint-cli@latest claude-code setup --skip
+npx aiblueprint-cli@latest ai-coding setup --skip
 
 # Custom location
-npx aiblueprint-cli@latest claude-code setup --folder ~/.my-claude
+npx aiblueprint-cli@latest ai-coding setup --folder ~/.my-claude
 ```
 
 ### Statusline Scripts
@@ -59,16 +59,16 @@ Run utility scripts from anywhere:
 
 ```bash
 # List available scripts
-npx aiblueprint-cli@latest claude-code statusline --list
+npx aiblueprint-cli@latest ai-coding statusline --list
 
 # Today's spending report
-npx aiblueprint-cli@latest claude-code statusline spend:today
+npx aiblueprint-cli@latest ai-coding statusline spend:today
 
 # Weekly usage analysis
-npx aiblueprint-cli@latest claude-code statusline weekly
+npx aiblueprint-cli@latest ai-coding statusline weekly
 
 # Configure statusline
-npx aiblueprint-cli@latest claude-code statusline config
+npx aiblueprint-cli@latest ai-coding statusline config
 ```
 
 **Available scripts:**
@@ -82,14 +82,14 @@ npx aiblueprint-cli@latest claude-code statusline config
 
 ```bash
 # Add specific hooks
-npx aiblueprint-cli@latest claude-code add hook post-edit-typescript
+npx aiblueprint-cli@latest ai-coding add hook post-edit-typescript
 
 # Manage commands
-npx aiblueprint-cli@latest claude-code add commands
-npx aiblueprint-cli@latest claude-code add commands commit
+npx aiblueprint-cli@latest ai-coding add commands
+npx aiblueprint-cli@latest ai-coding add commands commit
 
 # Create symlinks between tools
-npx aiblueprint-cli@latest claude-code symlink
+npx aiblueprint-cli@latest ai-coding symlink
 ```
 
 ## 📚 What You Get
@@ -174,10 +174,10 @@ Unlock advanced features at [mlv.sh/claude-cli](https://mlv.sh/claude-cli)
 
 ```bash
 # Activate premium
-npx aiblueprint-cli@latest claude-code pro activate YOUR_TOKEN
+npx aiblueprint-cli@latest ai-coding pro activate YOUR_TOKEN
 
 # Setup premium configs
-npx aiblueprint-cli@latest claude-code pro setup
+npx aiblueprint-cli@latest ai-coding pro setup
 ```
 
 ## 🛠️ Development
@@ -189,8 +189,8 @@ cd aiblueprint-cli
 bun install
 
 # Development mode
-bun run dev claude-code setup
-bun run dev claude-code statusline --list
+bun run dev ai-coding setup
+bun run dev ai-coding statusline --list
 
 # Run tests
 bun run test:run

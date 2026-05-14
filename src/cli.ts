@@ -33,138 +33,150 @@ const program = new Command();
 
 program
   .name("aiblueprint")
-  .description("AIBlueprint CLI for setting up Claude Code configurations")
+  .description("AIBlueprint CLI for setting up AI coding configurations")
   .version(packageJson.version);
+
+function registerAiCodingCommands(cmd: Command) {
+  cmd
+    .option(
+      "-f, --folder <path>",
+      "Specify custom Claude Code folder path (default: ~/.claude) - alias for --claudeCodeFolder",
+    )
+    .option(
+      "--claudeCodeFolder <path>",
+      "Specify custom Claude Code folder path (default: ~/.claude)",
+    )
+    .option(
+      "--codexFolder <path>",
+      "Specify custom Codex folder path (default: ~/.codex)",
+    )
+    .option(
+      "--openCodeFolder <path>",
+      "Specify custom OpenCode folder path (default: ~/.config/opencode)",
+    )
+    .option(
+      "--factoryAiFolder <path>",
+      "Specify custom FactoryAI folder path (default: ~/.factory)",
+    )
+    .option(
+      "--agentsFolder <path>",
+      "Specify custom agents folder path (default: ~/.agents)",
+    )
+    .option("-s, --skip", "Skip interactive prompts and install all features");
+
+  cmd
+    .command("setup")
+    .description("Setup AI coding configuration with AIBlueprint defaults")
+    .action((options, command) => {
+      const parentOptions = command.parent.opts();
+      setupCommand({
+        claudeCodeFolder: parentOptions.claudeCodeFolder || parentOptions.folder,
+        codexFolder: parentOptions.codexFolder,
+        openCodeFolder: parentOptions.openCodeFolder,
+        agentsFolder: parentOptions.agentsFolder,
+        skipInteractive: parentOptions.skip,
+      });
+    });
+
+  cmd
+    .command("setup-terminal")
+    .description("Setup terminal with Oh My ZSH, plugins, and a beautiful theme")
+    .action((options, command) => {
+      const parentOptions = command.parent.opts();
+      setupTerminalCommand({
+        skipInteractive: parentOptions.skip,
+        homeDir: parentOptions.claudeCodeFolder || parentOptions.folder,
+      });
+    });
+
+  cmd
+    .command("symlink")
+    .description(
+      "Create symlinks between different AI coding tools (Claude Code, Codex, OpenCode, FactoryAI)",
+    )
+    .action((options, command) => {
+      const parentOptions = command.parent.opts();
+      symlinkCommand({
+        claudeCodeFolder: parentOptions.claudeCodeFolder || parentOptions.folder,
+        codexFolder: parentOptions.codexFolder,
+        openCodeFolder: parentOptions.openCodeFolder,
+        factoryAiFolder: parentOptions.factoryAiFolder,
+      });
+    });
+
+  const proCmd = cmd
+    .command("pro")
+    .description("Manage AIBlueprint CLI Premium features");
+
+  proCmd
+    .command("activate [token]")
+    .description("Activate AIBlueprint CLI Premium with your access token")
+    .action((token) => {
+      proActivateCommand(token);
+    });
+
+  proCmd
+    .command("status")
+    .description("Check your Premium token status")
+    .action(() => {
+      proStatusCommand();
+    });
+
+  proCmd
+    .command("setup")
+    .description("Install premium configurations (requires activation)")
+    .action((options, command) => {
+      const parentOptions = command.parent.parent.opts();
+      const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
+      proSetupCommand({ folder: claudeCodeFolder, agentsFolder: parentOptions.agentsFolder });
+    });
+
+  proCmd
+    .command("update")
+    .description("Update premium configurations")
+    .action((options, command) => {
+      const parentOptions = command.parent.parent.opts();
+      const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
+      proUpdateCommand({ folder: claudeCodeFolder, agentsFolder: parentOptions.agentsFolder });
+    });
+
+  proCmd
+    .command("sync")
+    .description("Sync premium configurations with selective update")
+    .action((options, command) => {
+      const parentOptions = command.parent.parent.opts();
+      const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
+      proSyncCommand({ folder: claudeCodeFolder, agentsFolder: parentOptions.agentsFolder });
+    });
+
+  const backupCmd = cmd
+    .command("backup")
+    .description("Manage AI coding configuration backups");
+
+  backupCmd
+    .command("load")
+    .description("Load a previous backup interactively")
+    .action((options, command) => {
+      const parentOptions = command.parent.parent.opts();
+      const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
+      backupLoadCommand({
+        folder: claudeCodeFolder,
+        agentsFolder: parentOptions.agentsFolder,
+      });
+    });
+}
+
+const aiCodingCmd = program
+  .command("ai-coding")
+  .description("AI coding configuration commands");
+
+registerAiCodingCommands(aiCodingCmd);
 
 const claudeCodeCmd = program
   .command("claude-code")
-  .description("Claude Code configuration commands")
-  .option(
-    "-f, --folder <path>",
-    "Specify custom Claude Code folder path (default: ~/.claude) - alias for --claudeCodeFolder",
-  )
-  .option(
-    "--claudeCodeFolder <path>",
-    "Specify custom Claude Code folder path (default: ~/.claude)",
-  )
-  .option(
-    "--codexFolder <path>",
-    "Specify custom Codex folder path (default: ~/.codex)",
-  )
-  .option(
-    "--openCodeFolder <path>",
-    "Specify custom OpenCode folder path (default: ~/.config/opencode)",
-  )
-  .option(
-    "--factoryAiFolder <path>",
-    "Specify custom FactoryAI folder path (default: ~/.factory)",
-  )
-  .option(
-    "--agentsFolder <path>",
-    "Specify custom agents folder path (default: ~/.agents)",
-  )
-  .option("-s, --skip", "Skip interactive prompts and install all features");
+  .description("Legacy alias for ai-coding configuration commands");
 
-claudeCodeCmd
-  .command("setup")
-  .description("Setup Claude Code configuration with AIBlueprint defaults")
-  .action((options, command) => {
-    const parentOptions = command.parent.opts();
-    setupCommand({
-      claudeCodeFolder: parentOptions.claudeCodeFolder || parentOptions.folder,
-      codexFolder: parentOptions.codexFolder,
-      openCodeFolder: parentOptions.openCodeFolder,
-      agentsFolder: parentOptions.agentsFolder,
-      skipInteractive: parentOptions.skip,
-    });
-  });
-
-claudeCodeCmd
-  .command("setup-terminal")
-  .description("Setup terminal with Oh My ZSH, plugins, and a beautiful theme")
-  .action((options, command) => {
-    const parentOptions = command.parent.opts();
-    setupTerminalCommand({
-      skipInteractive: parentOptions.skip,
-      homeDir: parentOptions.claudeCodeFolder || parentOptions.folder,
-    });
-  });
-
-claudeCodeCmd
-  .command("symlink")
-  .description(
-    "Create symlinks between different CLI tools (Claude Code, Codex, OpenCode, FactoryAI)",
-  )
-  .action((options, command) => {
-    const parentOptions = command.parent.opts();
-    symlinkCommand({
-      claudeCodeFolder: parentOptions.claudeCodeFolder || parentOptions.folder,
-      codexFolder: parentOptions.codexFolder,
-      openCodeFolder: parentOptions.openCodeFolder,
-      factoryAiFolder: parentOptions.factoryAiFolder,
-    });
-  });
-
-const proCmd = claudeCodeCmd
-  .command("pro")
-  .description("Manage AIBlueprint CLI Premium features");
-
-proCmd
-  .command("activate [token]")
-  .description("Activate AIBlueprint CLI Premium with your access token")
-  .action((token) => {
-    proActivateCommand(token);
-  });
-
-proCmd
-  .command("status")
-  .description("Check your Premium token status")
-  .action(() => {
-    proStatusCommand();
-  });
-
-proCmd
-  .command("setup")
-  .description("Install premium configurations (requires activation)")
-  .action((options, command) => {
-    const parentOptions = command.parent.parent.opts();
-    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-    proSetupCommand({ folder: claudeCodeFolder, agentsFolder: parentOptions.agentsFolder });
-  });
-
-proCmd
-  .command("update")
-  .description("Update premium configurations")
-  .action((options, command) => {
-    const parentOptions = command.parent.parent.opts();
-    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-    proUpdateCommand({ folder: claudeCodeFolder, agentsFolder: parentOptions.agentsFolder });
-  });
-
-proCmd
-  .command("sync")
-  .description("Sync premium configurations with selective update")
-  .action((options, command) => {
-    const parentOptions = command.parent.parent.opts();
-    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-    proSyncCommand({ folder: claudeCodeFolder, agentsFolder: parentOptions.agentsFolder });
-  });
-
-const backupCmd = claudeCodeCmd
-  .command("backup")
-  .description("Manage Claude Code configuration backups");
-
-backupCmd
-  .command("load")
-  .description("Load a previous backup interactively")
-  .action((options, command) => {
-    const parentOptions = command.parent.parent.opts();
-    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-    backupLoadCommand({
-      folder: claudeCodeFolder,
-      agentsFolder: parentOptions.agentsFolder,
-    });
-  });
+registerAiCodingCommands(claudeCodeCmd);
 
 // ============================================
 // AGENTS DOMAIN (alias of claude-code pro for users who think in .agents)
@@ -293,6 +305,7 @@ openclawProCmd
 // Register dynamic script commands
 try {
   const claudeDir = join(homedir(), ".claude");
+  await registerDynamicScriptCommands(aiCodingCmd, claudeDir);
   await registerDynamicScriptCommands(claudeCodeCmd, claudeDir);
 } catch (error) {
   if (process.env.DEBUG) {

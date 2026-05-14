@@ -83,16 +83,16 @@ Body content`;
       const paths = getLocalConfigPaths("commands");
 
       expect(paths).toHaveLength(2);
-      expect(paths[0]).toMatch(/ai-config\/commands$/);
-      expect(paths[1]).toMatch(/ai-config\/commands$/);
+      expect(paths[0]).toMatch(/ai-coding\/commands$/);
+      expect(paths[1]).toMatch(/ai-coding\/commands$/);
     });
 
     it("should return correct paths for different subdirs", () => {
       const paths = getLocalConfigPaths("agents");
 
       expect(paths).toHaveLength(2);
-      expect(paths[0]).toMatch(/ai-config\/agents$/);
-      expect(paths[1]).toMatch(/ai-config\/agents$/);
+      expect(paths[0]).toMatch(/ai-coding\/agents$/);
+      expect(paths[1]).toMatch(/ai-coding\/agents$/);
     });
   });
 
@@ -109,7 +109,7 @@ Body content`;
       const result = await findLocalConfigDir("commands");
 
       expect(result).toBeTruthy();
-      expect(result).toContain('ai-config/commands');
+      expect(result).toContain('ai-coding/commands');
     });
 
     it("should return null when no paths exist", async () => {
