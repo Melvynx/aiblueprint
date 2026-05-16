@@ -56,11 +56,26 @@ async function platformSymlink(source: string, target: string): Promise<void> {
   await fs.ensureDir(path.dirname(target));
   const isWindows = os.platform() === "win32";
   const sourceStat = await fs.stat(source).catch(() => null);
+  const isDir = sourceStat?.isDirectory() ?? false;
 
-  if (isWindows && sourceStat?.isDirectory()) {
+  if (isWindows && isDir) {
+    // Junctions work without admin/Developer Mode for directories.
     await fs.symlink(source, target, "junction");
-  } else {
+    return;
+  }
+
+  try {
     await fs.symlink(source, target);
+  } catch (error: any) {
+    if (!isWindows || isDir) throw error;
+    // Windows file symlinks need admin/Developer Mode. Fall back to a hardlink
+    // (same volume, no privilege required, edits to source still propagate),
+    // and to a plain copy if even that fails (cross-volume case).
+    try {
+      await fs.link(source, target);
+    } catch {
+      await fs.copy(source, target, { overwrite: true });
+    }
   }
 }
 
