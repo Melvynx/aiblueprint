@@ -31,7 +31,7 @@ export interface SyncItem {
   name: string;
   relativePath: string;
   status: SyncStatus;
-  category: "commands" | "agents" | "skills" | "scripts" | "settings";
+  category: "agents" | "skills" | "scripts" | "settings";
   isFolder?: boolean;
   migrationKind?: MigrationKind;
 }
@@ -214,7 +214,7 @@ function getRemoteCategoryPath(category: string): string {
 }
 
 async function analyzeCategory(
-  category: "commands" | "agents" | "skills" | "scripts",
+  category: "agents" | "skills" | "scripts",
   claudeDir: string,
   agentsDir: string,
   githubToken: string
@@ -306,8 +306,7 @@ export async function analyzeSyncChanges(
 ): Promise<SyncResult> {
   const allItems: SyncItem[] = [];
 
-  const categories: Array<"commands" | "agents" | "skills" | "scripts"> = [
-    "commands",
+  const categories: Array<"agents" | "skills" | "scripts"> = [
     "agents",
     "skills",
     "scripts",

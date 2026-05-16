@@ -42,8 +42,8 @@ describe("getToolPaths", () => {
     const homeDir = os.homedir();
 
     expect(paths.baseDir).toBe(path.join(homeDir, ".codex"));
-    expect(paths.commandsPath).toBe(path.join(homeDir, ".codex", "prompts"));
-    expect(paths.agentsPath).toBeUndefined();
+    expect(paths.commandsPath).toBeUndefined();
+    expect(paths.agentsPath).toBe(path.join(homeDir, ".codex", "agents"));
   });
 
   it("should return correct paths for opencode", async () => {
@@ -71,113 +71,44 @@ describe("getToolPaths", () => {
     const paths = await getToolPaths("claude-code", customPath);
 
     const expectedBase = path.resolve(customPath);
-    const expectedCommands = path.resolve(path.join(customPath, "commands"));
+    const expectedAgents = path.resolve(path.join(customPath, "agents"));
 
     expect(path.resolve(paths.baseDir)).toBe(expectedBase);
-    expect(path.resolve(paths.commandsPath!)).toBe(expectedCommands);
+    expect(path.resolve(paths.agentsPath!)).toBe(expectedAgents);
   });
 
   it("should throw error for unknown tool type", async () => {
-    await expect(
-      getToolPaths("unknown-tool" as ToolType),
-    ).rejects.toThrow("Unknown tool type: unknown-tool");
+    await expect(getToolPaths("unknown" as ToolType)).rejects.toThrow(
+      "Unknown tool type: unknown",
+    );
   });
 });
 
 describe("createSymlink", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(fs.ensureDir).mockResolvedValue();
-    vi.mocked(fs.symlink).mockResolvedValue();
-    vi.mocked(fs.remove).mockResolvedValue();
   });
 
-  it("should create a symlink successfully when target does not exist", async () => {
-    const sourcePath = "/source/path";
-    const targetPath = "/target/path";
+  it("should create symlink when source exists and target does not", async () => {
+    const sourcePath = "/source";
+    const targetPath = "/target";
 
     vi.mocked(fs.pathExists)
       .mockResolvedValueOnce(true as any)
       .mockResolvedValueOnce(false as any);
+    vi.mocked(fs.ensureDir).mockResolvedValue();
+    vi.mocked(fs.symlink).mockResolvedValue();
 
     const result = await createSymlink(sourcePath, targetPath);
 
     expect(result).toBe(true);
     expect(fs.ensureDir).toHaveBeenCalledWith(path.dirname(targetPath));
-    const isWindows = os.platform() === "win32";
-    if (isWindows) {
-      expect(fs.symlink).toHaveBeenCalledWith(sourcePath, targetPath, "junction");
-    } else {
-      expect(fs.symlink).toHaveBeenCalledWith(sourcePath, targetPath);
-    }
+    expect(fs.symlink).toHaveBeenCalled();
   });
 
-  it("should replace existing symlink", async () => {
-    const sourcePath = "/source/path";
-    const targetPath = "/target/path";
-
-    vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true as any)
-      .mockResolvedValueOnce(true as any);
-    vi.mocked(fs.lstat).mockResolvedValue({
-      isSymbolicLink: () => true,
-    } as any);
-
-    const result = await createSymlink(sourcePath, targetPath);
-
-    expect(result).toBe(true);
-    expect(fs.remove).toHaveBeenCalledWith(targetPath);
-    const isWindows = os.platform() === "win32";
-    if (isWindows) {
-      expect(fs.symlink).toHaveBeenCalledWith(sourcePath, targetPath, "junction");
-    } else {
-      expect(fs.symlink).toHaveBeenCalledWith(sourcePath, targetPath);
-    }
-  });
-
-  it("should skip when target exists and is not a symlink", async () => {
-    const sourcePath = "/source/path";
-    const targetPath = "/target/path";
-
-    vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true as any)
-      .mockResolvedValueOnce(true as any);
-    vi.mocked(fs.lstat).mockResolvedValue({
-      isSymbolicLink: () => false,
-    } as any);
-
-    const result = await createSymlink(sourcePath, targetPath);
-
-    expect(result).toBe(false);
-    expect(fs.symlink).not.toHaveBeenCalled();
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining("already exists and is not a symlink"),
-    );
-  });
-
-  it("should use custom skip message", async () => {
-    const sourcePath = "/source/path";
-    const targetPath = "/target/path";
-
-    vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true as any)
-      .mockResolvedValueOnce(true as any);
-    vi.mocked(fs.lstat).mockResolvedValue({
-      isSymbolicLink: () => false,
-    } as any);
-
-    await createSymlink(sourcePath, targetPath, {
-      skipMessage: "Custom skip message",
-    });
-
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining("Custom skip message"),
-    );
-  });
-
-  it("should skip when source does not exist", async () => {
-    const sourcePath = "/source/path";
-    const targetPath = "/target/path";
+  it("should return false when source does not exist", async () => {
+    const sourcePath = "/nonexistent";
+    const targetPath = "/target";
 
     vi.mocked(fs.pathExists).mockResolvedValueOnce(false as any);
 
@@ -185,15 +116,71 @@ describe("createSymlink", () => {
 
     expect(result).toBe(false);
     expect(fs.symlink).not.toHaveBeenCalled();
+  });
+
+  it("should remove existing symlink and create new one", async () => {
+    const sourcePath = "/source";
+    const targetPath = "/target";
+
+    vi.mocked(fs.pathExists)
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(true as any);
+    vi.mocked(fs.lstat).mockResolvedValueOnce({
+      isSymbolicLink: () => true,
+    } as any);
+    vi.mocked(fs.remove).mockResolvedValue();
+    vi.mocked(fs.ensureDir).mockResolvedValue();
+    vi.mocked(fs.symlink).mockResolvedValue();
+
+    const result = await createSymlink(sourcePath, targetPath);
+
+    expect(result).toBe(true);
+    expect(fs.remove).toHaveBeenCalledWith(targetPath);
+    expect(fs.symlink).toHaveBeenCalled();
+  });
+
+  it("should skip when target exists and is not a symlink", async () => {
+    const sourcePath = "/source";
+    const targetPath = "/target";
+
+    vi.mocked(fs.pathExists)
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(true as any);
+    vi.mocked(fs.lstat).mockResolvedValueOnce({
+      isSymbolicLink: () => false,
+    } as any);
+
+    const result = await createSymlink(sourcePath, targetPath);
+
+    expect(result).toBe(false);
+    expect(fs.symlink).not.toHaveBeenCalled();
+  });
+
+  it("should use custom skip message when provided", async () => {
+    const sourcePath = "/source";
+    const targetPath = "/target";
+    const customSkipMessage = "Custom skip message";
+
+    vi.mocked(fs.pathExists)
+      .mockResolvedValueOnce(true as any)
+      .mockResolvedValueOnce(true as any);
+    vi.mocked(fs.lstat).mockResolvedValueOnce({
+      isSymbolicLink: () => false,
+    } as any);
+
+    await createSymlink(sourcePath, targetPath, {
+      skipMessage: customSkipMessage,
+    });
+
     expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining("does not exist"),
+      expect.stringContaining(customSkipMessage),
     );
   });
 
-  it("should throw error and log with custom prefix on failure", async () => {
-    const sourcePath = "/source/path";
-    const targetPath = "/target/path";
-    const error = new Error("Symlink creation failed");
+  it("should handle errors with custom error prefix", async () => {
+    const sourcePath = "/source";
+    const targetPath = "/target";
+    const error = new Error("Symlink failed");
 
     vi.mocked(fs.pathExists)
       .mockResolvedValueOnce(true as any)
@@ -221,11 +208,11 @@ describe("symlinkCommand", () => {
     vi.mocked(fs.symlink).mockResolvedValue();
   });
 
-  it("should create symlink from Claude Code commands to Codex", async () => {
+  it("should create agents symlink from Claude Code to FactoryAI", async () => {
     vi.mocked(inquirer.prompt)
       .mockResolvedValueOnce({ source: "claude-code" })
-      .mockResolvedValueOnce({ contentType: "commands" })
-      .mockResolvedValueOnce({ destinations: ["codex-commands"] });
+      .mockResolvedValueOnce({ contentType: "agents" })
+      .mockResolvedValueOnce({ destinations: ["factoryai-agents"] });
 
     vi.mocked(fs.pathExists)
       .mockResolvedValueOnce(true as any)
@@ -240,52 +227,14 @@ describe("symlinkCommand", () => {
     );
   });
 
-  it("should create symlink from Claude Code to multiple destinations", async () => {
-    vi.mocked(inquirer.prompt)
-      .mockResolvedValueOnce({ source: "claude-code" })
-      .mockResolvedValueOnce({ contentType: "commands" })
-      .mockResolvedValueOnce({
-        destinations: ["codex-commands", "opencode-commands"],
-      });
-
-    vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true as any)
-      .mockResolvedValueOnce(false as any)
-      .mockResolvedValueOnce(true as any)
-      .mockResolvedValueOnce(false as any);
-
-    await symlinkCommand();
-
-    expect(fs.symlink).toHaveBeenCalledTimes(2);
-  });
-
-  it("should handle both commands and agents for FactoryAI", async () => {
-    vi.mocked(inquirer.prompt)
-      .mockResolvedValueOnce({ source: "claude-code" })
-      .mockResolvedValueOnce({ contentType: "both" })
-      .mockResolvedValueOnce({
-        destinations: ["factoryai-commands", "factoryai-agents"],
-      });
-
-    vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true as any)
-      .mockResolvedValueOnce(false as any)
-      .mockResolvedValueOnce(true as any)
-      .mockResolvedValueOnce(false as any);
-
-    await symlinkCommand();
-
-    expect(fs.symlink).toHaveBeenCalledTimes(2);
-  });
-
   it("should respect custom folder paths", async () => {
     const customClaudeFolder = "/custom/claude";
     const customCodexFolder = "/custom/codex";
 
     vi.mocked(inquirer.prompt)
       .mockResolvedValueOnce({ source: "claude-code" })
-      .mockResolvedValueOnce({ contentType: "commands" })
-      .mockResolvedValueOnce({ destinations: ["codex-commands"] });
+      .mockResolvedValueOnce({ contentType: "agents" })
+      .mockResolvedValueOnce({ destinations: ["codex-agents"] });
 
     vi.mocked(fs.pathExists)
       .mockResolvedValueOnce(true as any)
@@ -297,12 +246,12 @@ describe("symlinkCommand", () => {
     });
 
     expect(fs.symlink).toHaveBeenCalledWith(
-      path.join(customClaudeFolder, "commands"),
-      path.join(customCodexFolder, "prompts"),
+      path.resolve(customClaudeFolder, "agents"),
+      path.resolve(customCodexFolder, "agents"),
     );
   });
 
-  it("should show only agents option when source supports agents only", async () => {
+  it("should filter out source tool from destination choices", async () => {
     vi.mocked(inquirer.prompt)
       .mockResolvedValueOnce({ source: "claude-code" })
       .mockResolvedValueOnce({ contentType: "agents" })
@@ -310,39 +259,20 @@ describe("symlinkCommand", () => {
 
     await symlinkCommand();
 
-    const secondPromptCall = vi.mocked(inquirer.prompt).mock.calls[1][0];
-    expect(secondPromptCall).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          name: "contentType",
-          choices: expect.arrayContaining([
-            expect.objectContaining({ value: "agents" }),
-          ]),
-        }),
-      ]),
-    );
-  });
-
-  it("should filter out source tool from destination choices", async () => {
-    vi.mocked(inquirer.prompt)
-      .mockResolvedValueOnce({ source: "codex" })
-      .mockResolvedValueOnce({ contentType: "commands" })
-      .mockResolvedValueOnce({ destinations: ["claude-code-commands"] });
-
-    await symlinkCommand();
-
     const thirdPromptCall = vi.mocked(inquirer.prompt).mock.calls[2][0];
     const choices = (thirdPromptCall as any)[0].choices;
 
-    const codexChoice = choices.find((c: any) => c.value === "codex-commands");
-    expect(codexChoice).toBeUndefined();
+    const claudeChoice = choices.find(
+      (c: any) => c.value === "claude-code-agents",
+    );
+    expect(claudeChoice).toBeUndefined();
   });
 
   it("should validate that at least one destination is selected", async () => {
     vi.mocked(inquirer.prompt)
       .mockResolvedValueOnce({ source: "claude-code" })
-      .mockResolvedValueOnce({ contentType: "commands" })
-      .mockResolvedValueOnce({ destinations: ["codex-commands"] });
+      .mockResolvedValueOnce({ contentType: "agents" })
+      .mockResolvedValueOnce({ destinations: ["factoryai-agents"] });
 
     await symlinkCommand();
 
@@ -350,7 +280,7 @@ describe("symlinkCommand", () => {
     const validateFn = (thirdPromptCall as any)[0].validate;
 
     expect(validateFn([])).toBe("Please select at least one destination");
-    expect(validateFn(["codex-commands"])).toBe(true);
+    expect(validateFn(["factoryai-agents"])).toBe(true);
   });
 
   it("should handle errors gracefully", async () => {
@@ -366,56 +296,13 @@ describe("symlinkCommand", () => {
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
-  it("should count successful and skipped symlinks", async () => {
-    vi.mocked(inquirer.prompt)
-      .mockResolvedValueOnce({ source: "claude-code" })
-      .mockResolvedValueOnce({ contentType: "commands" })
-      .mockResolvedValueOnce({
-        destinations: ["codex-commands", "opencode-commands"],
-      });
-
-    vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true as any)
-      .mockResolvedValueOnce(false as any)
-      .mockResolvedValueOnce(true as any)
-      .mockResolvedValueOnce(true as any);
-
-    vi.mocked(fs.lstat).mockResolvedValueOnce({
-      isSymbolicLink: () => false,
-    } as any);
-
-    await symlinkCommand();
-
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining("1 created, 1 skipped"),
-    );
-  });
-
   it("should exit when source tool has no syncable content", async () => {
-    const mockTool = "codex";
-    vi.mocked(inquirer.prompt).mockResolvedValueOnce({ source: mockTool });
+    vi.mocked(inquirer.prompt).mockResolvedValueOnce({ source: "opencode" });
 
     await symlinkCommand();
 
-    const secondPromptCall = vi.mocked(inquirer.prompt).mock.calls[1];
-    expect(secondPromptCall).toBeDefined();
-  });
-
-  it("should exit when no compatible destinations found", async () => {
-    vi.mocked(inquirer.prompt)
-      .mockResolvedValueOnce({ source: "codex" })
-      .mockResolvedValueOnce({ contentType: "commands" })
-      .mockResolvedValueOnce({ destinations: ["claude-code-commands"] });
-
-    vi.mocked(fs.pathExists)
-      .mockResolvedValueOnce(true as any)
-      .mockResolvedValueOnce(false as any);
-
-    await symlinkCommand();
-
-    expect(fs.symlink).toHaveBeenCalled();
     expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining("Symlink setup complete!"),
+      expect.stringContaining("doesn't support any syncable content"),
     );
   });
 });

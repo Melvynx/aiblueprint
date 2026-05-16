@@ -6,7 +6,6 @@ import chalk from "chalk";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { setupShellShortcuts } from "./setup/shell-shortcuts.js";
-import { setupCodexSymlink, setupOpenCodeSymlink } from "./setup/symlinks.js";
 import { checkAndInstallDependencies, installStatuslineDependencies } from "./setup/dependencies.js";
 import { updateSettings, hasExistingStatusLine, type SetupOptions } from "./setup/settings.js";
 import {
@@ -33,7 +32,6 @@ export interface SetupCommandParams {
   folder?: string;
   claudeCodeFolder?: string;
   codexFolder?: string;
-  openCodeFolder?: string;
   agentsFolder?: string;
   skipInteractive?: boolean;
 }
@@ -61,7 +59,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     folder,
     claudeCodeFolder,
     codexFolder,
-    openCodeFolder,
     agentsFolder,
     skipInteractive,
   } = params;
@@ -78,11 +75,9 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       features = [
         "shellShortcuts",
         "customStatusline",
-        "aiblueprintCommands",
         "aiblueprintAgents",
         "aiblueprintSkills",
-        "codexSymlink",
-        "openCodeSymlink",
+        "installCodex",
       ];
       console.log(chalk.green("✓ Installing all features (--skip mode)"));
     } else {
@@ -103,11 +98,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
               checked: true,
             },
             {
-              value: "aiblueprintCommands",
-              name: "AIBlueprint commands - Pre-configured command templates",
-              checked: true,
-            },
-            {
               value: "aiblueprintAgents",
               name: "AIBlueprint agents - Specialized AI agents",
               checked: true,
@@ -118,14 +108,9 @@ export async function setupCommand(params: SetupCommandParams = {}) {
               checked: true,
             },
             {
-              value: "codexSymlink",
-              name: "Codex symlink - Link commands/skills/agents to ~/.codex",
-              checked: false,
-            },
-            {
-              value: "openCodeSymlink",
-              name: "OpenCode symlink - Link commands to ~/.config/opencode/command",
-              checked: false,
+              value: "installCodex",
+              name: "Codex setup - Starter config + share skills/agents with ~/.codex",
+              checked: true,
             },
           ],
         },
@@ -142,11 +127,9 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     const options: SetupOptions = {
       shellShortcuts: features.includes("shellShortcuts"),
       customStatusline: features.includes("customStatusline"),
-      aiblueprintCommands: features.includes("aiblueprintCommands"),
       aiblueprintAgents: features.includes("aiblueprintAgents"),
       aiblueprintSkills: features.includes("aiblueprintSkills"),
-      codexSymlink: features.includes("codexSymlink"),
-      openCodeSymlink: features.includes("openCodeSymlink"),
+      installCodex: features.includes("installCodex"),
       skipInteractive,
     };
 
@@ -215,20 +198,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       }
     }
 
-    if (options.aiblueprintCommands) {
-      s.start("Setting up AIBlueprint commands");
-      const commandsSource = await resolveClaudeAssetPath(sourceDir, "commands");
-      if (commandsSource) {
-        await fs.copy(commandsSource, path.join(claudeDir, "commands"), {
-          overwrite: true,
-        });
-        await replacePathPlaceholdersInDir(path.join(claudeDir, "commands"), claudeDir);
-        s.stop("Commands installed");
-      } else {
-        s.stop("Commands not available in repository");
-      }
-    }
-
     if (options.aiblueprintAgents) {
       s.start("Setting up AIBlueprint agents");
       const agentsSource = path.join(sourceDir, "agents");
@@ -284,16 +253,16 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       }
     }
 
-    if (options.codexSymlink) {
-      s.start("Setting up Codex configuration");
+    if (options.installCodex) {
+      s.start("Setting up Codex");
+      await fs.ensureDir(codexDir);
+
       const codexConfigSource = path.join(sourceDir, "codex-config");
       if (await fs.pathExists(codexConfigSource)) {
+        // overwrite:false preserves any existing user config.toml / AGENTS.md
         await fs.copy(codexConfigSource, codexDir, { overwrite: false });
       }
 
-      if (options.aiblueprintCommands) {
-        await setupCodexSymlink(claudeDir, codexDir, claudeCodeFolder);
-      }
       if (options.aiblueprintSkills) {
         await syncCategorySymlinks("skills", agentsDir, codexDir, undefined, true);
       }
@@ -301,16 +270,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
         await syncCategorySymlinks("agents", agentsDir, codexDir, undefined, true);
       }
       s.stop("Codex configured");
-    }
-
-    if (options.openCodeSymlink && options.aiblueprintCommands) {
-      s.start("Setting up OpenCode symlink");
-      await setupOpenCodeSymlink(
-        claudeDir,
-        openCodeFolder,
-        claudeCodeFolder,
-      );
-      s.stop("OpenCode symlink configured");
     }
 
     if (options.customStatusline) {

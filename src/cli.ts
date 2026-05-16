@@ -51,14 +51,6 @@ function registerAgentsCommands(cmd: Command) {
       "Override Codex folder (default: {folder}/.codex)",
     )
     .option(
-      "--openCodeFolder <path>",
-      "Override OpenCode folder (default: ~/.config/opencode)",
-    )
-    .option(
-      "--factoryAiFolder <path>",
-      "Override FactoryAI folder (default: ~/.factory)",
-    )
-    .option(
       "--agentsFolder <path>",
       "Override shared agents folder (default: {folder}/.agents)",
     )
@@ -73,7 +65,6 @@ function registerAgentsCommands(cmd: Command) {
         folder: parentOptions.folder,
         claudeCodeFolder: parentOptions.claudeCodeFolder,
         codexFolder: parentOptions.codexFolder,
-        openCodeFolder: parentOptions.openCodeFolder,
         agentsFolder: parentOptions.agentsFolder,
         skipInteractive: parentOptions.skip,
       });
@@ -101,8 +92,6 @@ function registerAgentsCommands(cmd: Command) {
         folder: parentOptions.folder,
         claudeCodeFolder: parentOptions.claudeCodeFolder,
         codexFolder: parentOptions.codexFolder,
-        openCodeFolder: parentOptions.openCodeFolder,
-        factoryAiFolder: parentOptions.factoryAiFolder,
       });
     });
 

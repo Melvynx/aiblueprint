@@ -1,0 +1,6 @@
+# Codex CLI defaults installed by aiblueprint-cli.
+# This file is only written when ~/.codex/config.toml is absent — your own
+# config (project trust list, model preferences, etc.) is never overwritten.
+
+approval_policy = "never"
+sandbox_mode = "danger-full-access"

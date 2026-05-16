@@ -9,10 +9,9 @@ describe("CLI Integration Tests", () => {
       const { execSync } = await import("child_process");
 
       const codexDir = `${tempDir}-codex`;
-      const openCodeDir = `${tempDir}-opencode`;
       const agentsDir = `${tempDir}-agents`;
       const output = execSync(
-        `bun src/cli.ts agents --claudeCodeFolder "${tempDir}" --codexFolder "${codexDir}" --openCodeFolder "${openCodeDir}" --agentsFolder "${agentsDir}" --skip setup`,
+        `bun src/cli.ts agents --claudeCodeFolder "${tempDir}" --codexFolder "${codexDir}" --agentsFolder "${agentsDir}" --skip setup`,
         {
           cwd: process.cwd(),
           timeout: 30000,
@@ -62,16 +61,12 @@ describe("CLI Integration Tests", () => {
       try {
         const realFs = await import("fs-extra");
         const codexDir = `${tempDir}-codex`;
-        const openCodeDir = `${tempDir}-opencode`;
         const agentsDir = `${tempDir}-agents`;
         if (await realFs.pathExists(tempDir)) {
           await realFs.remove(tempDir);
         }
         if (await realFs.pathExists(codexDir)) {
           await realFs.remove(codexDir);
-        }
-        if (await realFs.pathExists(openCodeDir)) {
-          await realFs.remove(openCodeDir);
         }
         if (await realFs.pathExists(agentsDir)) {
           await realFs.remove(agentsDir);

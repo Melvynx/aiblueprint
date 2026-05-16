@@ -23,20 +23,9 @@ const PRODUCT_IDS = ["prd_XJVgxVPbGG", "prd_NKabAkdOkw"];
 
 async function countInstalledItems(claudeDir: string) {
   const counts = {
-    commands: 0,
     agents: 0,
     skills: 0,
   };
-
-  try {
-    const commandsDir = path.join(claudeDir, "commands");
-    if (await fs.pathExists(commandsDir)) {
-      const files = await fs.readdir(commandsDir);
-      counts.commands = files.filter(f => f.endsWith(".md")).length;
-    }
-  } catch (error) {
-    console.error("Failed to count commands:", error instanceof Error ? error.message : error);
-  }
 
   try {
     const agentsDir = path.join(claudeDir, "agents");
@@ -244,11 +233,9 @@ export async function proSetupCommand(
       {
         shellShortcuts: false,
         customStatusline: true,
-        aiblueprintCommands: false,
         aiblueprintAgents: false,
         aiblueprintSkills: false,
-        codexSymlink: false,
-        openCodeSymlink: false,
+        installCodex: false,
       },
       claudeDir,
     );
@@ -259,14 +246,12 @@ export async function proSetupCommand(
     spinner.stop("Installation summary ready");
 
     trackEvent("pro-setup", {
-      commands: counts.commands,
       agents: counts.agents,
       skills: counts.skills,
     });
 
     p.log.success("✅ Setup complete!");
     p.log.info("Installed:");
-    p.log.info(`  • Commands (${counts.commands})`);
     p.log.info(`  • Agents (${counts.agents})`);
     p.log.info(`  • Premium Skills (${counts.skills})`);
     p.log.info("  • Premium statusline (advanced)");

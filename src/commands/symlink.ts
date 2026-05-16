@@ -13,8 +13,6 @@ export interface SymlinkCommandParams {
   folder?: string;
   claudeCodeFolder?: string;
   codexFolder?: string;
-  openCodeFolder?: string;
-  factoryAiFolder?: string;
 }
 
 interface ToolConfig {
@@ -28,25 +26,25 @@ const TOOLS: ToolConfig[] = [
   {
     name: "Claude Code",
     value: "claude-code",
-    supportsCommands: true,
+    supportsCommands: false,
     supportsAgents: true,
   },
   {
     name: "Codex",
     value: "codex",
-    supportsCommands: true,
-    supportsAgents: false,
+    supportsCommands: false,
+    supportsAgents: true,
   },
   {
     name: "OpenCode",
     value: "opencode",
-    supportsCommands: true,
+    supportsCommands: false,
     supportsAgents: false,
   },
   {
     name: "FactoryAI",
     value: "factoryai",
-    supportsCommands: true,
+    supportsCommands: false,
     supportsAgents: true,
   },
 ];
@@ -177,11 +175,11 @@ export async function symlinkCommand(params: SymlinkCommandParams = {}) {
       codexFolder: params.codexFolder,
     });
 
-    const customFolders = {
+    const customFolders: Record<ToolType, string | undefined> = {
       "claude-code": claudeDir,
       codex: codexDir,
-      opencode: params.openCodeFolder,
-      factoryai: params.factoryAiFolder,
+      opencode: undefined,
+      factoryai: undefined,
     };
 
     const sourcePaths = await getToolPaths(

@@ -35,7 +35,7 @@ export async function getToolPaths(
         : path.join(os.homedir(), ".codex");
       return {
         baseDir,
-        commandsPath: path.join(baseDir, "prompts"),
+        agentsPath: path.join(baseDir, "agents"),
       };
 
     case "opencode":
@@ -113,58 +113,3 @@ export async function createSymlink(
   }
 }
 
-export async function setupCodexSymlink(
-  claudeDir: string,
-  customCodexFolder?: string,
-  customClaudeCodeFolder?: string,
-) {
-  try {
-    let codexDir: string;
-    if (customCodexFolder) {
-      codexDir = path.resolve(customCodexFolder);
-    } else if (customClaudeCodeFolder) {
-      const parentDir = path.dirname(claudeDir);
-      codexDir = path.join(parentDir, "codex");
-    } else {
-      codexDir = path.join(os.homedir(), ".codex");
-    }
-    const promptsPath = path.join(codexDir, "prompts");
-    const commandsPath = path.join(claudeDir, "commands");
-
-    await createSymlink(commandsPath, promptsPath, {
-      skipMessage:
-        "  ~/.codex/prompts already exists and is not a symlink. Skipping...",
-      errorPrefix: "Error setting up Codex symlink:",
-    });
-  } catch (error) {
-    console.error(chalk.red("Error setting up Codex symlink:"), error);
-  }
-}
-
-export async function setupOpenCodeSymlink(
-  claudeDir: string,
-  customOpenCodeFolder?: string,
-  customClaudeCodeFolder?: string,
-) {
-  try {
-    let openCodeDir: string;
-    if (customOpenCodeFolder) {
-      openCodeDir = path.resolve(customOpenCodeFolder);
-    } else if (customClaudeCodeFolder) {
-      const parentDir = path.dirname(claudeDir);
-      openCodeDir = path.join(parentDir, ".opencode");
-    } else {
-      openCodeDir = path.join(os.homedir(), ".config", "opencode");
-    }
-    const commandPath = path.join(openCodeDir, "command");
-    const commandsPath = path.join(claudeDir, "commands");
-
-    await createSymlink(commandsPath, commandPath, {
-      skipMessage:
-        "  ~/.config/opencode/command already exists and is not a symlink. Skipping...",
-      errorPrefix: "Error setting up OpenCode symlink:",
-    });
-  } catch (error) {
-    console.error(chalk.red("Error setting up OpenCode symlink:"), error);
-  }
-}

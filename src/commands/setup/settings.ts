@@ -8,11 +8,9 @@ function toPosixPath(p: string): string {
 export interface SetupOptions {
   shellShortcuts: boolean;
   customStatusline: boolean;
-  aiblueprintCommands: boolean;
   aiblueprintAgents: boolean;
   aiblueprintSkills: boolean;
-  codexSymlink: boolean;
-  openCodeSymlink: boolean;
+  installCodex: boolean;
   skipInteractive?: boolean;
   replaceStatusline?: boolean;
 }
