@@ -40,27 +40,27 @@ function registerAgentsCommands(cmd: Command) {
   cmd
     .option(
       "-f, --folder <path>",
-      "Specify custom Claude Code folder path (default: ~/.claude) - alias for --claudeCodeFolder",
+      "Root folder that contains .claude/, .codex/, .agents/ (default: $HOME)",
     )
     .option(
       "--claudeCodeFolder <path>",
-      "Specify custom Claude Code folder path (default: ~/.claude)",
+      "Override Claude Code folder (default: {folder}/.claude)",
     )
     .option(
       "--codexFolder <path>",
-      "Specify custom Codex folder path (default: ~/.codex)",
+      "Override Codex folder (default: {folder}/.codex)",
     )
     .option(
       "--openCodeFolder <path>",
-      "Specify custom OpenCode folder path (default: ~/.config/opencode)",
+      "Override OpenCode folder (default: ~/.config/opencode)",
     )
     .option(
       "--factoryAiFolder <path>",
-      "Specify custom FactoryAI folder path (default: ~/.factory)",
+      "Override FactoryAI folder (default: ~/.factory)",
     )
     .option(
       "--agentsFolder <path>",
-      "Specify custom agents folder path (default: ~/.agents)",
+      "Override shared agents folder (default: {folder}/.agents)",
     )
     .option("-s, --skip", "Skip interactive prompts and install all features");
 
@@ -70,7 +70,8 @@ function registerAgentsCommands(cmd: Command) {
     .action((options, command) => {
       const parentOptions = command.parent.opts();
       setupCommand({
-        claudeCodeFolder: parentOptions.claudeCodeFolder || parentOptions.folder,
+        folder: parentOptions.folder,
+        claudeCodeFolder: parentOptions.claudeCodeFolder,
         codexFolder: parentOptions.codexFolder,
         openCodeFolder: parentOptions.openCodeFolder,
         agentsFolder: parentOptions.agentsFolder,
@@ -85,7 +86,7 @@ function registerAgentsCommands(cmd: Command) {
       const parentOptions = command.parent.opts();
       setupTerminalCommand({
         skipInteractive: parentOptions.skip,
-        homeDir: parentOptions.claudeCodeFolder || parentOptions.folder,
+        homeDir: parentOptions.folder,
       });
     });
 
@@ -97,7 +98,8 @@ function registerAgentsCommands(cmd: Command) {
     .action((options, command) => {
       const parentOptions = command.parent.opts();
       symlinkCommand({
-        claudeCodeFolder: parentOptions.claudeCodeFolder || parentOptions.folder,
+        folder: parentOptions.folder,
+        claudeCodeFolder: parentOptions.claudeCodeFolder,
         codexFolder: parentOptions.codexFolder,
         openCodeFolder: parentOptions.openCodeFolder,
         factoryAiFolder: parentOptions.factoryAiFolder,
@@ -127,8 +129,12 @@ function registerAgentsCommands(cmd: Command) {
     .description("Install premium configurations (requires activation)")
     .action((options, command) => {
       const parentOptions = command.parent.parent.opts();
-      const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-      proSetupCommand({ folder: claudeCodeFolder, agentsFolder: parentOptions.agentsFolder });
+      proSetupCommand({
+        folder: parentOptions.folder,
+        claudeCodeFolder: parentOptions.claudeCodeFolder,
+        codexFolder: parentOptions.codexFolder,
+        agentsFolder: parentOptions.agentsFolder,
+      });
     });
 
   proCmd
@@ -136,8 +142,12 @@ function registerAgentsCommands(cmd: Command) {
     .description("Update premium configurations")
     .action((options, command) => {
       const parentOptions = command.parent.parent.opts();
-      const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-      proUpdateCommand({ folder: claudeCodeFolder, agentsFolder: parentOptions.agentsFolder });
+      proUpdateCommand({
+        folder: parentOptions.folder,
+        claudeCodeFolder: parentOptions.claudeCodeFolder,
+        codexFolder: parentOptions.codexFolder,
+        agentsFolder: parentOptions.agentsFolder,
+      });
     });
 
   proCmd
@@ -145,8 +155,12 @@ function registerAgentsCommands(cmd: Command) {
     .description("Sync premium configurations with selective update")
     .action((options, command) => {
       const parentOptions = command.parent.parent.opts();
-      const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-      proSyncCommand({ folder: claudeCodeFolder, agentsFolder: parentOptions.agentsFolder });
+      proSyncCommand({
+        folder: parentOptions.folder,
+        claudeCodeFolder: parentOptions.claudeCodeFolder,
+        codexFolder: parentOptions.codexFolder,
+        agentsFolder: parentOptions.agentsFolder,
+      });
     });
 
   const backupCmd = cmd
@@ -158,9 +172,9 @@ function registerAgentsCommands(cmd: Command) {
     .description("Load a previous backup interactively")
     .action((options, command) => {
       const parentOptions = command.parent.parent.opts();
-      const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
       backupLoadCommand({
-        folder: claudeCodeFolder,
+        folder: parentOptions.folder,
+        claudeCodeFolder: parentOptions.claudeCodeFolder,
         agentsFolder: parentOptions.agentsFolder,
       });
     });

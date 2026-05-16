@@ -6,10 +6,10 @@ import { promisify } from "util";
 import { isTextFile, replaceClaudePathPlaceholder, replacePathPlaceholdersInDir } from "./platform.js";
 import {
   AGENT_CATEGORIES,
-  getAgentsDir,
   syncCategorySymlinks,
   isAgentCategory,
 } from "./agents-installer.js";
+import { resolveFolders } from "./folder-paths.js";
 
 const execAsync = promisify(exec);
 
@@ -24,26 +24,47 @@ export type InstallProgressCallback = (
 
 interface InstallProConfigsOptions {
   githubToken: string;
+  folder?: string;
   claudeCodeFolder?: string;
+  codexFolder?: string;
   agentsFolder?: string;
   onProgress?: InstallProgressCallback;
 }
 
-function resolveBaseDir(
-  relativePath: string,
-  claudeDir: string,
-  agentsDir: string,
-): { base: string; isAgentTarget: boolean } {
-  const firstSeg = relativePath.split(path.sep)[0];
-  if (isAgentCategory(firstSeg)) {
-    return { base: agentsDir, isAgentTarget: true };
-  }
-  return { base: claudeDir, isAgentTarget: false };
-}
+type Route =
+  | { kind: "claude"; relativePath: string }
+  | { kind: "codex"; relativePath: string }
+  | { kind: "agents-category"; category: "skills" | "agents"; relativePath: string }
+  | { kind: "skip" };
 
 /**
- * Get the cache directory path for the premium repository
+ * Maps a path inside the source config tree (relative to the config root) to
+ * its install destination. Supports the new layout (claude-config/, codex-config/,
+ * skills/, agents/) and the legacy flat layout (scripts/, settings.json,
+ * commands/, .claude/...).
  */
+function routePath(relativePath: string): Route {
+  const segments = relativePath.split(path.sep);
+  const first = segments[0];
+  const rest = segments.slice(1).join(path.sep);
+
+  if (first === "claude-config") {
+    return { kind: "claude", relativePath: rest };
+  }
+  if (first === "codex-config") {
+    return { kind: "codex", relativePath: rest };
+  }
+  if (isAgentCategory(first)) {
+    return { kind: "agents-category", category: first, relativePath };
+  }
+  // Legacy: .claude/<stuff> means it goes into claudeDir/<stuff>
+  if (first === ".claude") {
+    return { kind: "claude", relativePath: rest };
+  }
+  // Legacy flat: scripts/, settings.json, commands/ at root → claudeDir
+  return { kind: "claude", relativePath };
+}
+
 function getCacheRepoDir(): string {
   return path.join(
     os.homedir(),
@@ -54,9 +75,6 @@ function getCacheRepoDir(): string {
   );
 }
 
-/**
- * Execute a git command with safe authentication using token in URL
- */
 async function execGitWithAuth(
   command: string,
   token: string,
@@ -75,11 +93,6 @@ async function execGitWithAuth(
   }
 }
 
-/**
- * Clone or update the cached premium repository
- * Returns the path to the canonical agents-config directory within the cache.
- * Legacy folder names are accepted as compatibility links.
- */
 async function cloneOrUpdateRepo(token: string): Promise<string> {
   const cacheDir = getCacheRepoDir();
   const repoUrl = `https://github.com/${PREMIUM_REPO}.git`;
@@ -106,43 +119,47 @@ async function cloneOrUpdateRepo(token: string): Promise<string> {
   throw new Error("Premium repo missing config folder (agents-config, ai-coding, or claude-code-config)");
 }
 
-/**
- * Copy files from cache to target directories with progress reporting.
- * Files in agent-backed categories (e.g. skills/) are written to agentsDir;
- * everything else is written to claudeDir.
- */
+interface InstallDestinations {
+  claudeDir: string;
+  codexDir: string;
+  agentsDir: string;
+}
+
 async function copyConfigFromCache(
   cacheConfigDir: string,
-  claudeDir: string,
-  agentsDir: string,
+  dest: InstallDestinations,
   onProgress?: InstallProgressCallback,
 ): Promise<void> {
   const walk = async (dir: string, baseDir: string = dir): Promise<void> => {
     const entries = await fs.readdir(dir, { withFileTypes: true });
 
     for (const entry of entries) {
+      if (entry.name === ".DS_Store" || entry.name === "node_modules") continue;
+
       const sourcePath = path.join(dir, entry.name);
       const relativePath = path.relative(baseDir, sourcePath);
+      const route = routePath(relativePath);
 
-      if (entry.isDirectory() && entry.name === ".claude" && dir === baseDir) {
-        await walk(sourcePath, sourcePath);
+      if (route.kind === "skip") continue;
+
+      // Agent categories: full tree handled by installCategoryToAgents-style copy.
+      if (route.kind === "agents-category") {
+        // Only handle when we hit the top-level category dir.
+        if (relativePath.split(path.sep).length === 1) {
+          await copyAgentCategory(
+            sourcePath,
+            route.category,
+            dest.agentsDir,
+            dest.claudeDir,
+            onProgress,
+          );
+        }
         continue;
       }
 
-      const { base, isAgentTarget } = resolveBaseDir(relativePath, claudeDir, agentsDir);
-      const targetPath = path.join(base, relativePath);
-
-      if (isAgentTarget) {
-        const segments = relativePath.split(path.sep);
-        if (segments.length >= 2) {
-          const claudeTop = path.join(claudeDir, segments[0], segments[1]);
-          const claudeStat = await fs.lstat(claudeTop).catch(() => null);
-          if (claudeStat && !claudeStat.isSymbolicLink()) {
-            onProgress?.(`${relativePath} (skipped - real dir)`, "file");
-            continue;
-          }
-        }
-      }
+      const targetBase =
+        route.kind === "claude" ? dest.claudeDir : dest.codexDir;
+      const targetPath = path.join(targetBase, route.relativePath);
 
       if (entry.isDirectory()) {
         await fs.ensureDir(targetPath);
@@ -150,7 +167,7 @@ async function copyConfigFromCache(
         await walk(sourcePath, baseDir);
       } else if (isTextFile(entry.name)) {
         const content = await fs.readFile(sourcePath, "utf-8");
-        const replaced = replaceClaudePathPlaceholder(content, claudeDir);
+        const replaced = replaceClaudePathPlaceholder(content, dest.claudeDir);
         await fs.ensureDir(path.dirname(targetPath));
         await fs.writeFile(targetPath, replaced, "utf-8");
         onProgress?.(relativePath, "file");
@@ -164,9 +181,35 @@ async function copyConfigFromCache(
   await walk(cacheConfigDir);
 }
 
-/**
- * Download a file from a private GitHub repository
- */
+async function copyAgentCategory(
+  sourceCategoryDir: string,
+  category: "skills" | "agents",
+  agentsDir: string,
+  claudeDir: string,
+  onProgress?: InstallProgressCallback,
+): Promise<void> {
+  const agentsCategoryDir = path.join(agentsDir, category);
+  await fs.ensureDir(agentsCategoryDir);
+
+  const entries = await fs.readdir(sourceCategoryDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.name === ".DS_Store") continue;
+    const src = path.join(sourceCategoryDir, entry.name);
+    const dst = path.join(agentsCategoryDir, entry.name);
+
+    const claudeTop = path.join(claudeDir, category, entry.name);
+    const claudeStat = await fs.lstat(claudeTop).catch(() => null);
+    if (claudeStat && !claudeStat.isSymbolicLink()) {
+      onProgress?.(`${category}/${entry.name} (skipped - real dir in claude)`, "file");
+      continue;
+    }
+
+    await fs.copy(src, dst, { overwrite: true });
+    await replacePathPlaceholdersInDir(dst, claudeDir);
+    onProgress?.(`${category}/${entry.name}`, entry.isDirectory() ? "directory" : "file");
+  }
+}
+
 async function downloadFromPrivateGitHub(
   repo: string,
   branch: string,
@@ -200,9 +243,6 @@ async function downloadFromPrivateGitHub(
   }
 }
 
-/**
- * Download a directory from a private GitHub repository
- */
 async function downloadDirectoryFromPrivateGitHub(
   repo: string,
   branch: string,
@@ -268,26 +308,27 @@ async function downloadDirectoryFromPrivateGitHub(
   }
 }
 
-/**
- * Install premium configurations from private GitHub repository
- * Uses git-based caching for faster subsequent installs, with API fallback
- */
 export async function installProConfigs(
   options: InstallProConfigsOptions,
 ): Promise<void> {
-  const { githubToken, claudeCodeFolder, agentsFolder, onProgress } = options;
+  const { githubToken, folder, claudeCodeFolder, codexFolder, agentsFolder, onProgress } = options;
 
-  const claudeFolder =
-    claudeCodeFolder || path.join(os.homedir(), ".claude");
-  const agentsDir = getAgentsDir(agentsFolder);
+  const { claudeDir, codexDir, agentsDir } = resolveFolders({
+    folder,
+    claudeCodeFolder,
+    codexFolder,
+    agentsFolder,
+  });
 
-  await fs.ensureDir(claudeFolder);
+  await fs.ensureDir(claudeDir);
   await fs.ensureDir(agentsDir);
+
+  const dest: InstallDestinations = { claudeDir, codexDir, agentsDir };
 
   try {
     const cacheConfigDir = await cloneOrUpdateRepo(githubToken);
-    await copyConfigFromCache(cacheConfigDir, claudeFolder, agentsDir, onProgress);
-    await syncAllAgentSymlinks(agentsDir, claudeFolder);
+    await copyConfigFromCache(cacheConfigDir, dest, onProgress);
+    await syncAllAgentSymlinks(agentsDir, claudeDir);
     return;
   } catch (error) {
     console.warn("Git caching failed, falling back to API download");
@@ -313,21 +354,15 @@ export async function installProConfigs(
       throw new Error("Failed to download premium configurations");
     }
 
-    const dotClaudeDir = path.join(tempDir, ".claude");
-    if (await fs.pathExists(dotClaudeDir)) {
-      await fs.copy(dotClaudeDir, tempDir, { overwrite: true });
-      await fs.remove(dotClaudeDir);
-    }
-
-    await copyTreeWithRouting(tempDir, claudeFolder, agentsDir);
-    await replacePathPlaceholdersInDir(claudeFolder, claudeFolder);
+    await copyConfigFromCache(tempDir, dest, onProgress);
+    await replacePathPlaceholdersInDir(claudeDir, claudeDir);
     for (const category of AGENT_CATEGORIES) {
       const agentsCategoryDir = path.join(agentsDir, category);
       if (await fs.pathExists(agentsCategoryDir)) {
-        await replacePathPlaceholdersInDir(agentsCategoryDir, claudeFolder);
+        await replacePathPlaceholdersInDir(agentsCategoryDir, claudeDir);
       }
     }
-    await syncAllAgentSymlinks(agentsDir, claudeFolder);
+    await syncAllAgentSymlinks(agentsDir, claudeDir);
   } catch (error) {
     throw new Error(
       `Failed to install premium configs: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -336,33 +371,6 @@ export async function installProConfigs(
     try {
       await fs.remove(tempDir);
     } catch {
-    }
-  }
-}
-
-async function copyTreeWithRouting(
-  source: string,
-  claudeDir: string,
-  agentsDir: string,
-): Promise<void> {
-  const entries = await fs.readdir(source, { withFileTypes: true });
-  for (const entry of entries) {
-    const src = path.join(source, entry.name);
-    const { base } = resolveBaseDir(entry.name, claudeDir, agentsDir);
-    const dst = path.join(base, entry.name);
-
-    if (entry.isDirectory() && isAgentCategory(entry.name)) {
-      const inner = await fs.readdir(src, { withFileTypes: true });
-      for (const innerEntry of inner) {
-        const innerSrc = path.join(src, innerEntry.name);
-        const innerDst = path.join(dst, innerEntry.name);
-        const claudeTop = path.join(claudeDir, entry.name, innerEntry.name);
-        const claudeStat = await fs.lstat(claudeTop).catch(() => null);
-        if (claudeStat && !claudeStat.isSymbolicLink()) continue;
-        await fs.copy(innerSrc, innerDst, { overwrite: true });
-      }
-    } else {
-      await fs.copy(src, dst, { overwrite: true });
     }
   }
 }

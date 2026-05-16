@@ -6,9 +6,11 @@ import {
   type ToolType,
   type ContentType,
 } from "./setup/symlinks.js";
+import { resolveFolders } from "../lib/folder-paths.js";
 import { getVersion } from "../lib/version.js";
 
 export interface SymlinkCommandParams {
+  folder?: string;
   claudeCodeFolder?: string;
   codexFolder?: string;
   openCodeFolder?: string;
@@ -169,9 +171,15 @@ export async function symlinkCommand(params: SymlinkCommandParams = {}) {
 
     const selectedDestinations = destinationAnswer.destinations as string[];
 
+    const { claudeDir, codexDir } = resolveFolders({
+      folder: params.folder,
+      claudeCodeFolder: params.claudeCodeFolder,
+      codexFolder: params.codexFolder,
+    });
+
     const customFolders = {
-      "claude-code": params.claudeCodeFolder,
-      codex: params.codexFolder,
+      "claude-code": claudeDir,
+      codex: codexDir,
       opencode: params.openCodeFolder,
       factoryai: params.factoryAiFolder,
     };

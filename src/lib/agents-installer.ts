@@ -2,11 +2,29 @@ import fs from "fs-extra";
 import os from "os";
 import path from "path";
 import chalk from "chalk";
-import { replacePathPlaceholdersInDir } from "./platform.js";
+import {
+  isTextFile,
+  replaceClaudePathPlaceholder,
+  replacePathPlaceholdersInDir,
+} from "./platform.js";
 
-export type AgentCategory = "skills";
+async function applyPathPlaceholders(target: string, claudeDir: string): Promise<void> {
+  const stat = await fs.stat(target).catch(() => null);
+  if (!stat) return;
+  if (stat.isDirectory()) {
+    await replacePathPlaceholdersInDir(target, claudeDir);
+  } else if (isTextFile(target)) {
+    const content = await fs.readFile(target, "utf-8");
+    const replaced = replaceClaudePathPlaceholder(content, claudeDir);
+    if (replaced !== content) {
+      await fs.writeFile(target, replaced, "utf-8");
+    }
+  }
+}
 
-export const AGENT_CATEGORIES: AgentCategory[] = ["skills"];
+export type AgentCategory = "skills" | "agents";
+
+export const AGENT_CATEGORIES: AgentCategory[] = ["skills", "agents"];
 
 export function getAgentsDir(custom?: string): string {
   return custom ? path.resolve(custom) : path.join(os.homedir(), ".agents");
@@ -103,13 +121,13 @@ export async function installCategoryToAgents(
 
       if (!migrated) {
         await fs.copy(sourcePath, agentsTarget, { overwrite: false });
-        await replacePathPlaceholdersInDir(agentsTarget, claudeDir);
+        await applyPathPlaceholders(agentsTarget, claudeDir);
         result.copied.push(entry.name);
       }
     } else if (options.overwrite) {
       await fs.remove(agentsTarget);
       await fs.copy(sourcePath, agentsTarget, { overwrite: false });
-      await replacePathPlaceholdersInDir(agentsTarget, claudeDir);
+      await applyPathPlaceholders(agentsTarget, claudeDir);
       result.copied.push(entry.name);
     }
   }

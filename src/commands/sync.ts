@@ -1,7 +1,5 @@
 import * as p from "@clack/prompts";
 import chalk from "chalk";
-import os from "os";
-import path from "path";
 import { getToken } from "../lib/token-storage.js";
 import {
   analyzeSyncChanges,
@@ -12,12 +10,9 @@ import { installScriptsDependencies } from "./setup/dependencies.js";
 import { getVersion } from "../lib/version.js";
 import { createBackup } from "../lib/backup-utils.js";
 import { trackEvent, trackError, flushTelemetry } from "../lib/telemetry.js";
-import { getAgentsDir } from "../lib/agents-installer.js";
+import { resolveFolders, type FolderOptions } from "../lib/folder-paths.js";
 
-export interface SyncCommandOptions {
-  folder?: string;
-  agentsFolder?: string;
-}
+export type SyncCommandOptions = FolderOptions;
 
 function formatItem(item: SyncItem): string {
   const icons = {
@@ -193,10 +188,7 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
       process.exit(1);
     }
 
-    const claudeDir = options.folder
-      ? path.resolve(options.folder)
-      : path.join(os.homedir(), ".claude");
-    const agentsDir = getAgentsDir(options.agentsFolder);
+    const { claudeDir, agentsDir } = resolveFolders(options);
 
     const spinner = p.spinner();
     spinner.start("Analyzing changes...");

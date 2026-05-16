@@ -1,9 +1,11 @@
 import * as p from "@clack/prompts";
 import chalk from "chalk";
-import os from "os";
 import path from "path";
 import { installProConfigs, type InstallProgressCallback } from "../lib/pro-installer.js";
+import { resolveFolders, type FolderOptions } from "../lib/folder-paths.js";
 import { getVersion } from "../lib/version.js";
+
+export type ProCommandOptions = FolderOptions;
 import {
   saveToken,
   getToken,
@@ -190,7 +192,9 @@ export async function proStatusCommand() {
   }
 }
 
-export async function proSetupCommand(options: { folder?: string; agentsFolder?: string } = {}) {
+export async function proSetupCommand(
+  options: ProCommandOptions = {},
+) {
   p.intro(chalk.blue(`⚙️  Setup AIBlueprint CLI Premium ${chalk.gray(`v${getVersion()}`)}`));
 
   try {
@@ -203,9 +207,7 @@ export async function proSetupCommand(options: { folder?: string; agentsFolder?:
       process.exit(1);
     }
 
-    const claudeDir = options.folder
-      ? path.resolve(options.folder)
-      : path.join(os.homedir(), ".claude");
+    const { claudeDir } = resolveFolders(options);
 
     const spinner = p.spinner();
 
@@ -216,7 +218,9 @@ export async function proSetupCommand(options: { folder?: string; agentsFolder?:
     spinner.start("Installing premium configurations...");
     await installProConfigs({
       githubToken,
-      claudeCodeFolder: claudeDir,
+      folder: options.folder,
+      claudeCodeFolder: options.claudeCodeFolder,
+      codexFolder: options.codexFolder,
       agentsFolder: options.agentsFolder,
       onProgress,
     });
@@ -281,7 +285,9 @@ export async function proSetupCommand(options: { folder?: string; agentsFolder?:
   }
 }
 
-export async function proUpdateCommand(options: { folder?: string; agentsFolder?: string } = {}) {
+export async function proUpdateCommand(
+  options: ProCommandOptions = {},
+) {
   p.intro(chalk.blue(`🔄 Update Premium Configs ${chalk.gray(`v${getVersion()}`)}`));
 
   try {
@@ -299,7 +305,9 @@ export async function proUpdateCommand(options: { folder?: string; agentsFolder?
 
     await installProConfigs({
       githubToken,
-      claudeCodeFolder: options.folder,
+      folder: options.folder,
+      claudeCodeFolder: options.claudeCodeFolder,
+      codexFolder: options.codexFolder,
       agentsFolder: options.agentsFolder,
     });
 

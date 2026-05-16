@@ -1,14 +1,9 @@
 import * as p from "@clack/prompts";
 import chalk from "chalk";
-import os from "os";
-import path from "path";
 import { listBackups, loadBackup, createBackup, type BackupInfo } from "../lib/backup-utils.js";
-import { getAgentsDir } from "../lib/agents-installer.js";
+import { resolveFolders, type FolderOptions } from "../lib/folder-paths.js";
 
-export interface BackupLoadOptions {
-  folder?: string;
-  agentsFolder?: string;
-}
+export type BackupLoadOptions = FolderOptions;
 
 function formatBackupDate(date: Date): string {
   const now = new Date();
@@ -32,8 +27,7 @@ function formatBackupDate(date: Date): string {
 }
 
 export async function backupLoadCommand(options: BackupLoadOptions = {}): Promise<void> {
-  const claudeDir = options.folder || path.join(os.homedir(), ".claude");
-  const agentsDir = getAgentsDir(options.agentsFolder);
+  const { claudeDir, agentsDir } = resolveFolders(options);
 
   p.intro(chalk.blue("📦 Load Backup"));
 

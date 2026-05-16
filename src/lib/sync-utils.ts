@@ -203,6 +203,16 @@ async function listClaudeRealTopLevel(
   return real;
 }
 
+/**
+ * Maps a logical category to its location inside the remote config tree.
+ * `scripts/` lives under `claude-config/scripts/` in the new layout but maps to
+ * `claudeDir/scripts/` locally.
+ */
+function getRemoteCategoryPath(category: string): string {
+  if (category === "scripts") return "claude-config/scripts";
+  return category;
+}
+
 async function analyzeCategory(
   category: "commands" | "agents" | "skills" | "scripts",
   claudeDir: string,
@@ -213,8 +223,9 @@ async function analyzeCategory(
   const useAgents = isAgentCategory(category);
   const localBase = useAgents ? agentsDir : claudeDir;
   const localDir = path.join(localBase, category);
+  const remoteCategoryPath = getRemoteCategoryPath(category);
 
-  const remoteFiles = await listRemoteFilesRecursive(category, githubToken);
+  const remoteFiles = await listRemoteFilesRecursive(remoteCategoryPath, githubToken);
   const localFiles = await listLocalFiles(localDir);
 
   const remoteSet = new Map<string, { sha: string; isFolder: boolean }>();
@@ -317,6 +328,14 @@ export async function analyzeSyncChanges(
   };
 }
 
+function translateRemotePath(relativePath: string): string {
+  // Local category names stay flat (commands/, agents/, skills/, scripts/) but
+  // their remote locations may live under claude-config/. Reroute as needed.
+  const [first, ...rest] = relativePath.split("/");
+  const remoteFirst = getRemoteCategoryPath(first);
+  return [remoteFirst, ...rest].join("/");
+}
+
 async function downloadFromPrivateGitHub(
   relativePath: string,
   targetPath: string,
@@ -325,7 +344,8 @@ async function downloadFromPrivateGitHub(
 ): Promise<boolean> {
   try {
     const configFolder = await resolveRemoteConfigFolder(githubToken);
-    const url = `https://raw.githubusercontent.com/${PREMIUM_REPO}/${PREMIUM_BRANCH}/${configFolder}/${relativePath}`;
+    const remotePath = translateRemotePath(relativePath);
+    const url = `https://raw.githubusercontent.com/${PREMIUM_REPO}/${PREMIUM_BRANCH}/${configFolder}/${remotePath}`;
     const response = await fetch(url, {
       headers: {
         Authorization: `token ${githubToken}`,

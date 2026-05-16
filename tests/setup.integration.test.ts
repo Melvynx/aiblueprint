@@ -10,8 +10,9 @@ describe("CLI Integration Tests", () => {
 
       const codexDir = `${tempDir}-codex`;
       const openCodeDir = `${tempDir}-opencode`;
+      const agentsDir = `${tempDir}-agents`;
       const output = execSync(
-        `bun src/cli.ts agents --claudeCodeFolder "${tempDir}" --codexFolder "${codexDir}" --openCodeFolder "${openCodeDir}" --skip setup`,
+        `bun src/cli.ts agents --claudeCodeFolder "${tempDir}" --codexFolder "${codexDir}" --openCodeFolder "${openCodeDir}" --agentsFolder "${agentsDir}" --skip setup`,
         {
           cwd: process.cwd(),
           timeout: 30000,
@@ -62,6 +63,7 @@ describe("CLI Integration Tests", () => {
         const realFs = await import("fs-extra");
         const codexDir = `${tempDir}-codex`;
         const openCodeDir = `${tempDir}-opencode`;
+        const agentsDir = `${tempDir}-agents`;
         if (await realFs.pathExists(tempDir)) {
           await realFs.remove(tempDir);
         }
@@ -70,6 +72,9 @@ describe("CLI Integration Tests", () => {
         }
         if (await realFs.pathExists(openCodeDir)) {
           await realFs.remove(openCodeDir);
+        }
+        if (await realFs.pathExists(agentsDir)) {
+          await realFs.remove(agentsDir);
         }
       } catch (error) {
         console.warn(`Cleanup failed for ${tempDir}:`, error);

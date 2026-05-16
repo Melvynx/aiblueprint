@@ -39,12 +39,12 @@ describe("getAgentsDir", () => {
 });
 
 describe("isAgentCategory", () => {
-  it("recognises skills", () => {
+  it("recognises skills and agents", () => {
     expect(isAgentCategory("skills")).toBe(true);
+    expect(isAgentCategory("agents")).toBe(true);
   });
   it("rejects others", () => {
     expect(isAgentCategory("commands")).toBe(false);
-    expect(isAgentCategory("agents")).toBe(false);
     expect(isAgentCategory("scripts")).toBe(false);
   });
 });

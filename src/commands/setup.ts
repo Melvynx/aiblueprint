@@ -20,15 +20,17 @@ import { createBackup } from "../lib/backup-utils.js";
 import { replacePathPlaceholdersInDir } from "../lib/platform.js";
 import { trackEvent, trackError, flushTelemetry } from "../lib/telemetry.js";
 import {
-  getAgentsDir,
   installCategoryToAgents,
+  syncCategorySymlinks,
 } from "../lib/agents-installer.js";
+import { resolveFolders } from "../lib/folder-paths.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 
 export interface SetupCommandParams {
+  folder?: string;
   claudeCodeFolder?: string;
   codexFolder?: string;
   openCodeFolder?: string;
@@ -36,12 +38,31 @@ export interface SetupCommandParams {
   skipInteractive?: boolean;
 }
 
+/**
+ * Resolves where a Claude-routed asset lives in the source repo. Prefers the
+ * new `claude-config/<name>` location; falls back to the legacy root path.
+ */
+async function resolveClaudeAssetPath(
+  sourceDir: string,
+  name: string,
+): Promise<string | null> {
+  const candidates = [
+    path.join(sourceDir, "claude-config", name),
+    path.join(sourceDir, name),
+  ];
+  for (const candidate of candidates) {
+    if (await fs.pathExists(candidate)) return candidate;
+  }
+  return null;
+}
+
 export async function setupCommand(params: SetupCommandParams = {}) {
   const {
-    claudeCodeFolder: customClaudeCodeFolder,
-    codexFolder: customCodexFolder,
-    openCodeFolder: customOpenCodeFolder,
-    agentsFolder: customAgentsFolder,
+    folder,
+    claudeCodeFolder,
+    codexFolder,
+    openCodeFolder,
+    agentsFolder,
     skipInteractive,
   } = params;
 
@@ -98,7 +119,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
             },
             {
               value: "codexSymlink",
-              name: "Codex symlink - Link commands to ~/.codex/prompts",
+              name: "Codex symlink - Link commands/skills/agents to ~/.codex",
               checked: false,
             },
             {
@@ -131,13 +152,16 @@ export async function setupCommand(params: SetupCommandParams = {}) {
 
     const s = new SimpleSpinner();
 
-    const claudeDir = customClaudeCodeFolder
-      ? path.resolve(customClaudeCodeFolder)
-      : path.join(os.homedir(), ".claude");
-    const agentsDir = getAgentsDir(customAgentsFolder);
+    const { claudeDir, codexDir, agentsDir } = resolveFolders({
+      folder,
+      claudeCodeFolder,
+      codexFolder,
+      agentsFolder,
+    });
 
-    console.log(chalk.gray(`Installing to: ${claudeDir}`));
-    console.log(chalk.gray(`Skills source: ${agentsDir}/skills`));
+    console.log(chalk.gray(`Claude:  ${claudeDir}`));
+    console.log(chalk.gray(`Codex:   ${codexDir}`));
+    console.log(chalk.gray(`Agents:  ${agentsDir}`));
 
     await fs.ensureDir(claudeDir);
     await fs.ensureDir(agentsDir);
@@ -150,7 +174,6 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       s.stop("No existing config to backup");
     }
 
-    // Clone repository to temporary directory
     s.start("Cloning configuration repository");
     repoPath = await cloneRepository();
 
@@ -179,27 +202,26 @@ export async function setupCommand(params: SetupCommandParams = {}) {
 
     if (options.customStatusline) {
       s.start("Setting up scripts");
-      await fs.copy(
-        path.join(sourceDir, "scripts"),
-        path.join(claudeDir, "scripts"),
-        { overwrite: true },
-      );
-      await replacePathPlaceholdersInDir(path.join(claudeDir, "scripts"), claudeDir);
-      if (options.customStatusline) {
+      const scriptsSource = await resolveClaudeAssetPath(sourceDir, "scripts");
+      if (scriptsSource) {
+        await fs.copy(scriptsSource, path.join(claudeDir, "scripts"), {
+          overwrite: true,
+        });
+        await replacePathPlaceholdersInDir(path.join(claudeDir, "scripts"), claudeDir);
         await fs.ensureDir(path.join(claudeDir, "scripts/statusline/data"));
+        s.stop("Scripts installed");
+      } else {
+        s.stop("Scripts not available in repository");
       }
-      s.stop("Scripts installed");
     }
 
     if (options.aiblueprintCommands) {
       s.start("Setting up AIBlueprint commands");
-      const commandsSourcePath = path.join(sourceDir, "commands");
-      if (await fs.pathExists(commandsSourcePath)) {
-        await fs.copy(
-          commandsSourcePath,
-          path.join(claudeDir, "commands"),
-          { overwrite: true },
-        );
+      const commandsSource = await resolveClaudeAssetPath(sourceDir, "commands");
+      if (commandsSource) {
+        await fs.copy(commandsSource, path.join(claudeDir, "commands"), {
+          overwrite: true,
+        });
         await replacePathPlaceholdersInDir(path.join(claudeDir, "commands"), claudeDir);
         s.stop("Commands installed");
       } else {
@@ -207,35 +229,29 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       }
     }
 
-    if (options.codexSymlink && options.aiblueprintCommands) {
-      s.start("Setting up Codex symlink");
-      await setupCodexSymlink(
-        claudeDir,
-        customCodexFolder,
-        customClaudeCodeFolder,
-      );
-      s.stop("Codex symlink configured");
-    }
-
-    if (options.openCodeSymlink && options.aiblueprintCommands) {
-      s.start("Setting up OpenCode symlink");
-      await setupOpenCodeSymlink(
-        claudeDir,
-        customOpenCodeFolder,
-        customClaudeCodeFolder,
-      );
-      s.stop("OpenCode symlink configured");
-    }
-
     if (options.aiblueprintAgents) {
       s.start("Setting up AIBlueprint agents");
-      await fs.copy(
-        path.join(sourceDir, "agents"),
-        path.join(claudeDir, "agents"),
-        { overwrite: true },
-      );
-      await replacePathPlaceholdersInDir(path.join(claudeDir, "agents"), claudeDir);
-      s.stop("Agents installed");
+      const agentsSource = path.join(sourceDir, "agents");
+      if (await fs.pathExists(agentsSource)) {
+        const installResult = await installCategoryToAgents(
+          agentsSource,
+          "agents",
+          agentsDir,
+          claudeDir,
+          { migrateClaudeDirs: true, silent: true },
+        );
+        const summary = [
+          installResult.copied.length && `${installResult.copied.length} copied`,
+          installResult.migrated.length && `${installResult.migrated.length} migrated`,
+          installResult.symlinked.length && `${installResult.symlinked.length} linked`,
+          installResult.skipped.length && `${installResult.skipped.length} skipped`,
+        ]
+          .filter(Boolean)
+          .join(", ");
+        s.stop(`Agents installed${summary ? ` (${summary})` : ""}`);
+      } else {
+        s.stop("Agents not available in repository");
+      }
     }
 
     if (options.aiblueprintSkills) {
@@ -266,6 +282,35 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       } else {
         s.stop("Skills not available in repository");
       }
+    }
+
+    if (options.codexSymlink) {
+      s.start("Setting up Codex configuration");
+      const codexConfigSource = path.join(sourceDir, "codex-config");
+      if (await fs.pathExists(codexConfigSource)) {
+        await fs.copy(codexConfigSource, codexDir, { overwrite: false });
+      }
+
+      if (options.aiblueprintCommands) {
+        await setupCodexSymlink(claudeDir, codexDir, claudeCodeFolder);
+      }
+      if (options.aiblueprintSkills) {
+        await syncCategorySymlinks("skills", agentsDir, codexDir, undefined, true);
+      }
+      if (options.aiblueprintAgents) {
+        await syncCategorySymlinks("agents", agentsDir, codexDir, undefined, true);
+      }
+      s.stop("Codex configured");
+    }
+
+    if (options.openCodeSymlink && options.aiblueprintCommands) {
+      s.start("Setting up OpenCode symlink");
+      await setupOpenCodeSymlink(
+        claudeDir,
+        openCodeFolder,
+        claudeCodeFolder,
+      );
+      s.stop("OpenCode symlink configured");
     }
 
     if (options.customStatusline) {
