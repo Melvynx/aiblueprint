@@ -15,7 +15,7 @@
   "scripts": {
     "build": "bun build src/cli.ts --outdir dist --target node && chmod +x dist/cli.js",
     "dev": "bun src/cli.ts",
-    "dev-test": "trash ./test-claude-config && bun src/cli.ts ai-coding -f ./test-claude-config --skip setup",
+    "dev-test": "trash ./test-claude-config && bun src/cli.ts agents -f ./test-claude-config --skip setup",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:watch": "vitest --watch",
@@ -47,11 +47,11 @@
   },
   "files": [
     "dist",
-    "ai-coding"
+    "agents-config"
   ],
   "keywords": [
     "claude",
-    "ai-coding",
+    "agents",
     "claude-code",
     "aiblueprint",
     "developer-tools"

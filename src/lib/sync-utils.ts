@@ -9,7 +9,7 @@ import {
 
 const PREMIUM_REPO = "Melvynx/aiblueprint-cli-premium";
 const PREMIUM_BRANCH = "main";
-const CONFIG_FOLDER_CANDIDATES = ["ai-coding", "claude-code-config", "ai-config"] as const;
+const CONFIG_FOLDER_CANDIDATES = ["agents-config", "ai-coding", "claude-code-config", "ai-config"] as const;
 
 export interface RemoteFile {
   name: string;
@@ -69,8 +69,8 @@ async function resolveRemoteConfigFolder(githubToken: string): Promise<string> {
       return candidate;
     }
   }
-  resolvedConfigFolder = "ai-coding";
-  return "ai-coding";
+  resolvedConfigFolder = "agents-config";
+  return "agents-config";
 }
 
 async function listRemoteDirectory(

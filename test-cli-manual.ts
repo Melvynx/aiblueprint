@@ -16,7 +16,7 @@ async function testCLI() {
     await fs.ensureDir('./tmp');
 
     console.log('⚡ Executing CLI command...');
-    const output = execSync(`bun src/cli.ts ai-coding -f "${tempDir}" --skip setup`, {
+    const output = execSync(`bun src/cli.ts agents -f "${tempDir}" --skip setup`, {
       cwd: process.cwd(),
       encoding: 'utf8',
       stdio: 'inherit' // Show output in real time

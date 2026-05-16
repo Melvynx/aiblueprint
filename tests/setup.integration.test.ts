@@ -11,7 +11,7 @@ describe("CLI Integration Tests", () => {
       const codexDir = `${tempDir}-codex`;
       const openCodeDir = `${tempDir}-opencode`;
       const output = execSync(
-        `bun src/cli.ts ai-coding --claudeCodeFolder "${tempDir}" --codexFolder "${codexDir}" --openCodeFolder "${openCodeDir}" --skip setup`,
+        `bun src/cli.ts agents --claudeCodeFolder "${tempDir}" --codexFolder "${codexDir}" --openCodeFolder "${openCodeDir}" --skip setup`,
         {
           cwd: process.cwd(),
           timeout: 30000,

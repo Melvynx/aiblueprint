@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "aibp-base",
-      "source": "./ai-config",
+      "source": "./agents-config",
       "description": "AIBlueprint base configuration with custom agents, slash commands, hooks, and productivity workflows for Claude Code",
       "version": "1.0.1",
       "author": {

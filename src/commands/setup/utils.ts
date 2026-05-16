@@ -53,7 +53,7 @@ export async function cleanupRepository(repoPath: string): Promise<void> {
 }
 
 /**
- * Resolves the config folder inside a repo. "ai-coding" is the canonical
+ * Resolves the config folder inside a repo. "agents-config" is the canonical
  * folder; legacy folder names are treated as compatibility links.
  */
 export async function resolveConfigDir(repoPath: string): Promise<string | null> {
@@ -67,4 +67,4 @@ export async function resolveConfigDir(repoPath: string): Promise<string | null>
   return null;
 }
 
-export const CONFIG_FOLDER_CANDIDATES = ["ai-coding", "claude-code-config", "ai-config"] as const;
+export const CONFIG_FOLDER_CANDIDATES = ["agents-config", "ai-coding", "claude-code-config", "ai-config"] as const;

@@ -165,7 +165,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     if (!sourceDir) {
       await cleanupRepository(repoPath);
       throw new Error(
-        "Configuration directory not found in cloned repository (looked for ai-coding/, claude-code-config/, and ai-config/)",
+        "Configuration directory not found in cloned repository (looked for agents-config/, ai-coding/, claude-code-config/, and ai-config/)",
       );
     }
 

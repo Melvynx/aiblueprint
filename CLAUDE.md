@@ -25,19 +25,19 @@ This is a CLI tool built with TypeScript and Bun that sets up AI coding configur
 
 - **Entry Point**: `src/cli.ts` - Commander.js CLI setup with main command structure
 - **Commands**: `src/commands/setup.ts` - Main setup logic for configuring Claude Code
-- **Config Source**: `ai-coding/` - Contains all the configuration templates to be copied
+- **Config Source**: `agents-config/` - Contains all the configuration templates to be copied
 
 ### Key Components
 
 **CLI Command Structure**:
 
-- `aiblueprint ai-coding setup` - Main setup command
+- `aiblueprint agents setup` - Main setup command
 - Options: `-f/--folder` (custom install path), `-s/--skip` (skip interactive prompts)
 
 **Setup Process** (`src/commands/setup.ts`):
 
 1. Interactive feature selection using `@clack/prompts`
-2. Copies configuration files from `ai-coding/` to `~/.claude/` (or custom folder)
+2. Copies configuration files from `agents-config/` to `~/.claude/` (or custom folder)
 3. Updates `~/.claude/settings.json` with new hooks and configurations
 4. Installs dependencies (`bun`, `ccusage`) if needed
 5. Sets up shell aliases (`cc`, `ccc`) in shell config files
@@ -56,7 +56,7 @@ This is a CLI tool built with TypeScript and Bun that sets up AI coding configur
 
 - `package.json` - ESM module with Bun as runtime, Commander.js for CLI
 - `tsconfig.json` - Modern TypeScript config with ESNext target and bundler resolution
-- `ai-coding/` - Contains all templates (agents, commands, scripts, etc.)
+- `agents-config/` - Contains all templates (agents, commands, scripts, etc.)
 
 ### Dependencies
 

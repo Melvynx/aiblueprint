@@ -36,7 +36,7 @@ program
   .description("AIBlueprint CLI for setting up AI coding configurations")
   .version(packageJson.version);
 
-function registerAiCodingCommands(cmd: Command) {
+function registerAgentsCommands(cmd: Command) {
   cmd
     .option(
       "-f, --folder <path>",
@@ -166,94 +166,23 @@ function registerAiCodingCommands(cmd: Command) {
     });
 }
 
-const aiCodingCmd = program
-  .command("ai-coding")
+const agentsCmd = program
+  .command("agents")
   .description("AI coding configuration commands");
 
-registerAiCodingCommands(aiCodingCmd);
+registerAgentsCommands(agentsCmd);
+
+const aiCodingCmd = program
+  .command("ai-coding")
+  .description("Legacy alias for agents configuration commands");
+
+registerAgentsCommands(aiCodingCmd);
 
 const claudeCodeCmd = program
   .command("claude-code")
-  .description("Legacy alias for ai-coding configuration commands");
+  .description("Legacy alias for agents configuration commands");
 
-registerAiCodingCommands(claudeCodeCmd);
-
-// ============================================
-// AGENTS DOMAIN (alias of claude-code pro for users who think in .agents)
-// ============================================
-const agentsCmd = program
-  .command("agents")
-  .description(
-    "Manage AIBlueprint configurations under ~/.agents (with ~/.claude symlinks)",
-  )
-  .option(
-    "-f, --folder <path>",
-    "Specify custom Claude Code folder path (default: ~/.claude) - alias for --claudeCodeFolder",
-  )
-  .option(
-    "--claudeCodeFolder <path>",
-    "Specify custom Claude Code folder path (default: ~/.claude)",
-  )
-  .option(
-    "--agentsFolder <path>",
-    "Specify custom agents folder path (default: ~/.agents)",
-  );
-
-const agentsProCmd = agentsCmd
-  .command("pro")
-  .description("Manage AIBlueprint CLI Premium features");
-
-agentsProCmd
-  .command("activate [token]")
-  .description("Activate AIBlueprint CLI Premium with your access token")
-  .action((token) => {
-    proActivateCommand(token);
-  });
-
-agentsProCmd
-  .command("status")
-  .description("Check your Premium token status")
-  .action(() => {
-    proStatusCommand();
-  });
-
-agentsProCmd
-  .command("setup")
-  .description(
-    "Install premium configurations into ~/.agents and symlink into ~/.claude",
-  )
-  .action((options, command) => {
-    const parentOptions = command.parent.parent.opts();
-    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-    proSetupCommand({
-      folder: claudeCodeFolder,
-      agentsFolder: parentOptions.agentsFolder,
-    });
-  });
-
-agentsProCmd
-  .command("update")
-  .description("Update premium configurations")
-  .action((options, command) => {
-    const parentOptions = command.parent.parent.opts();
-    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-    proUpdateCommand({
-      folder: claudeCodeFolder,
-      agentsFolder: parentOptions.agentsFolder,
-    });
-  });
-
-agentsProCmd
-  .command("sync")
-  .description("Sync premium configurations with selective update")
-  .action((options, command) => {
-    const parentOptions = command.parent.parent.opts();
-    const claudeCodeFolder = parentOptions.claudeCodeFolder || parentOptions.folder;
-    proSyncCommand({
-      folder: claudeCodeFolder,
-      agentsFolder: parentOptions.agentsFolder,
-    });
-  });
+registerAgentsCommands(claudeCodeCmd);
 
 // ============================================
 // OPENCLAW DOMAIN
@@ -305,6 +234,7 @@ openclawProCmd
 // Register dynamic script commands
 try {
   const claudeDir = join(homedir(), ".claude");
+  await registerDynamicScriptCommands(agentsCmd, claudeDir);
   await registerDynamicScriptCommands(aiCodingCmd, claudeDir);
   await registerDynamicScriptCommands(claudeCodeCmd, claudeDir);
 } catch (error) {

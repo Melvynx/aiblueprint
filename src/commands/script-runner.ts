@@ -57,7 +57,7 @@ export async function executeScript(
       chalk.red(`Scripts directory not found at ${scriptsDir}`),
     );
     console.log(
-      chalk.gray("Run: aiblueprint ai-coding setup"),
+      chalk.gray("Run: aiblueprint agents setup"),
     );
     return 1;
   }
