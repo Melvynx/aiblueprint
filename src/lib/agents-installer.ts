@@ -8,7 +8,7 @@ import {
   replacePathPlaceholdersInDir,
 } from "./platform.js";
 
-async function applyPathPlaceholders(target: string, claudeDir: string): Promise<void> {
+export async function applyPathPlaceholders(target: string, claudeDir: string): Promise<void> {
   const stat = await fs.stat(target).catch(() => null);
   if (!stat) return;
   if (stat.isDirectory()) {

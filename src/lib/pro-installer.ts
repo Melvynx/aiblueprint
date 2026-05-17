@@ -8,6 +8,7 @@ import {
   AGENT_CATEGORIES,
   syncCategorySymlinks,
   isAgentCategory,
+  applyPathPlaceholders,
 } from "./agents-installer.js";
 import { resolveFolders } from "./folder-paths.js";
 
@@ -181,7 +182,7 @@ async function copyConfigFromCache(
   await walk(cacheConfigDir);
 }
 
-async function copyAgentCategory(
+export async function copyAgentCategory(
   sourceCategoryDir: string,
   category: "skills" | "agents",
   agentsDir: string,
@@ -205,7 +206,7 @@ async function copyAgentCategory(
     }
 
     await fs.copy(src, dst, { overwrite: true });
-    await replacePathPlaceholdersInDir(dst, claudeDir);
+    await applyPathPlaceholders(dst, claudeDir);
     onProgress?.(`${category}/${entry.name}`, entry.isDirectory() ? "directory" : "file");
   }
 }
