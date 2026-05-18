@@ -235,6 +235,20 @@ export async function replacePathPlaceholdersInDir(dir: string, claudeDir: strin
   }
 }
 
+export async function applyPathPlaceholders(target: string, claudeDir: string): Promise<void> {
+  const stat = await fs.stat(target).catch(() => null);
+  if (!stat) return;
+  if (stat.isDirectory()) {
+    await replacePathPlaceholdersInDir(target, claudeDir);
+  } else if (isTextFile(target)) {
+    const content = await fs.readFile(target, "utf-8");
+    const replaced = replaceClaudePathPlaceholder(content, claudeDir);
+    if (replaced !== content) {
+      await fs.writeFile(target, replaced, "utf-8");
+    }
+  }
+}
+
 export function transformFileContent(content: string, claudeDir: string): string {
   let transformed = content;
 

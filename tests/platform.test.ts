@@ -419,4 +419,57 @@ script3: /Users/melvynx/.claude/scripts/c.ts
       vi.restoreAllMocks();
     });
   });
+
+  describe("applyPathPlaceholders", () => {
+    let tmpDir: string;
+
+    beforeEach(async () => {
+      const fs = await import("fs-extra");
+      const path = await import("path");
+      tmpDir = path.join(os.tmpdir(), `applyph-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      await fs.default.ensureDir(tmpDir);
+    });
+
+    it("rewrites placeholders in a text file passed directly (regression: ENOTDIR on .md agent)", async () => {
+      const fs = await import("fs-extra");
+      const path = await import("path");
+      const filePath = path.join(tmpDir, "action.md");
+      await fs.default.writeFile(filePath, "use {CLAUDE_PATH}/scripts/foo.sh", "utf-8");
+
+      const { applyPathPlaceholders } = await import("../src/lib/platform");
+      await expect(
+        applyPathPlaceholders(filePath, "/home/anton/.claude"),
+      ).resolves.not.toThrow();
+
+      const content = await fs.default.readFile(filePath, "utf-8");
+      expect(content).toBe("use /home/anton/.claude/scripts/foo.sh");
+
+      await fs.default.remove(tmpDir);
+    });
+
+    it("recurses into a directory and rewrites every text file", async () => {
+      const fs = await import("fs-extra");
+      const path = await import("path");
+      const nested = path.join(tmpDir, "sub");
+      await fs.default.ensureDir(nested);
+      await fs.default.writeFile(path.join(tmpDir, "a.md"), "{CLAUDE_PATH}/a", "utf-8");
+      await fs.default.writeFile(path.join(nested, "b.md"), "{CLAUDE_PATH}/b", "utf-8");
+
+      const { applyPathPlaceholders } = await import("../src/lib/platform");
+      await applyPathPlaceholders(tmpDir, "/x/.claude");
+
+      expect(await fs.default.readFile(path.join(tmpDir, "a.md"), "utf-8")).toBe("/x/.claude/a");
+      expect(await fs.default.readFile(path.join(nested, "b.md"), "utf-8")).toBe("/x/.claude/b");
+
+      await fs.default.remove(tmpDir);
+    });
+
+    it("is a noop when the target does not exist", async () => {
+      const path = await import("path");
+      const { applyPathPlaceholders } = await import("../src/lib/platform");
+      await expect(
+        applyPathPlaceholders(path.join(tmpDir, "missing"), "/x/.claude"),
+      ).resolves.not.toThrow();
+    });
+  });
 });

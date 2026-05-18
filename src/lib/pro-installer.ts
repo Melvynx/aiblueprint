@@ -3,7 +3,7 @@ import os from "os";
 import path from "path";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { isTextFile, replaceClaudePathPlaceholder, replacePathPlaceholdersInDir } from "./platform.js";
+import { applyPathPlaceholders, isTextFile, replaceClaudePathPlaceholder, replacePathPlaceholdersInDir } from "./platform.js";
 import {
   AGENT_CATEGORIES,
   syncCategorySymlinks,
@@ -205,7 +205,7 @@ async function copyAgentCategory(
     }
 
     await fs.copy(src, dst, { overwrite: true });
-    await replacePathPlaceholdersInDir(dst, claudeDir);
+    await applyPathPlaceholders(dst, claudeDir);
     onProgress?.(`${category}/${entry.name}`, entry.isDirectory() ? "directory" : "file");
   }
 }

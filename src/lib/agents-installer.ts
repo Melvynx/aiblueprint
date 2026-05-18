@@ -2,25 +2,7 @@ import fs from "fs-extra";
 import os from "os";
 import path from "path";
 import chalk from "chalk";
-import {
-  isTextFile,
-  replaceClaudePathPlaceholder,
-  replacePathPlaceholdersInDir,
-} from "./platform.js";
-
-async function applyPathPlaceholders(target: string, claudeDir: string): Promise<void> {
-  const stat = await fs.stat(target).catch(() => null);
-  if (!stat) return;
-  if (stat.isDirectory()) {
-    await replacePathPlaceholdersInDir(target, claudeDir);
-  } else if (isTextFile(target)) {
-    const content = await fs.readFile(target, "utf-8");
-    const replaced = replaceClaudePathPlaceholder(content, claudeDir);
-    if (replaced !== content) {
-      await fs.writeFile(target, replaced, "utf-8");
-    }
-  }
-}
+import { applyPathPlaceholders } from "./platform.js";
 
 export type AgentCategory = "skills" | "agents";
 
