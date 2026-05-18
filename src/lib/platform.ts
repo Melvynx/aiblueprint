@@ -146,19 +146,18 @@ const KNOWN_CLAUDE_PATHS = [
 ];
 
 export function transformHookCommand(command: string, claudeDir: string): string {
+  const normalizedClaudeDir = claudeDir.replace(/\\/g, "/");
   let transformed = command;
 
-  transformed = replaceClaudePathPlaceholder(transformed, claudeDir);
+  transformed = replaceClaudePathPlaceholder(transformed, normalizedClaudeDir);
 
   for (const pattern of KNOWN_CLAUDE_PATHS) {
-    transformed = transformed.replace(pattern, `${claudeDir}/`);
+    transformed = transformed.replace(pattern, `${normalizedClaudeDir}/`);
   }
-
-  transformed = transformed.replace(/\\/g, "/");
 
   const isAudioCommand = /^(afplay|paplay|aplay|mpv|ffplay|powershell)\s/.test(transformed);
   if (isAudioCommand) {
-    const newCommand = transformAudioCommand(transformed, claudeDir);
+    const newCommand = transformAudioCommand(transformed, normalizedClaudeDir);
     if (newCommand) {
       return newCommand;
     }
@@ -236,15 +235,14 @@ export async function replacePathPlaceholdersInDir(dir: string, claudeDir: strin
 }
 
 export function transformFileContent(content: string, claudeDir: string): string {
+  const normalizedClaudeDir = claudeDir.replace(/\\/g, "/");
   let transformed = content;
 
-  transformed = replaceClaudePathPlaceholder(transformed, claudeDir);
+  transformed = replaceClaudePathPlaceholder(transformed, normalizedClaudeDir);
 
   for (const pattern of KNOWN_CLAUDE_PATHS) {
-    transformed = transformed.replace(new RegExp(pattern.source, "g"), `${claudeDir}/`);
+    transformed = transformed.replace(new RegExp(pattern.source, "g"), `${normalizedClaudeDir}/`);
   }
-
-  transformed = transformed.replace(/\\/g, "/");
 
   const audioPatterns = [
     /afplay\s+-v\s+[\d.]+\s+'[^']+'/g,
@@ -257,7 +255,7 @@ export function transformFileContent(content: string, claudeDir: string): string
 
   for (const pattern of audioPatterns) {
     transformed = transformed.replace(pattern, (match) => {
-      const newCommand = transformAudioCommand(match, claudeDir);
+      const newCommand = transformAudioCommand(match, normalizedClaudeDir);
       return newCommand || match;
     });
   }
