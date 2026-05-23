@@ -10,6 +10,7 @@ import {
   isAgentCategory,
 } from "./agents-installer.js";
 import { resolveFolders } from "./folder-paths.js";
+import { mergeCodexConfigFile } from "./codex-config.js";
 
 const execAsync = promisify(exec);
 
@@ -165,6 +166,9 @@ async function copyConfigFromCache(
         await fs.ensureDir(targetPath);
         onProgress?.(relativePath, "directory");
         await walk(sourcePath, baseDir);
+      } else if (route.kind === "codex" && route.relativePath === "config.toml") {
+        await mergeCodexConfigFile(sourcePath, dest.codexDir);
+        onProgress?.(relativePath, "file");
       } else if (isTextFile(entry.name)) {
         const content = await fs.readFile(sourcePath, "utf-8");
         const replaced = replaceClaudePathPlaceholder(content, dest.claudeDir);

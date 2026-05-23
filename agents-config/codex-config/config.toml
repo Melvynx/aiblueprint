@@ -1,6 +1,21 @@
 # Codex CLI defaults installed by aiblueprint-cli.
-# This file is only written when ~/.codex/config.toml is absent — your own
-# config (project trust list, model preferences, etc.) is never overwritten.
+# Existing user config is merged, not overwritten. If you already have a
+# [tui].status_line configured, aiblueprint keeps your own statusline.
 
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
+
+[tui]
+status_line = [
+  "model-with-reasoning",
+  "run-state",
+  "project-name",
+  "git-branch",
+  "branch-changes",
+  "context-remaining",
+  "used-tokens",
+  "five-hour-limit",
+  "weekly-limit",
+  "task-progress",
+]
+status_line_use_colors = true

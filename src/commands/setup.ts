@@ -15,7 +15,6 @@ import {
   resolveConfigDir,
 } from "./setup/utils.js";
 import { getVersion } from "../lib/version.js";
-import { createBackup } from "../lib/backup-utils.js";
 import { replacePathPlaceholdersInDir } from "../lib/platform.js";
 import { trackEvent, trackError, flushTelemetry } from "../lib/telemetry.js";
 import {
@@ -23,6 +22,8 @@ import {
   syncCategorySymlinks,
 } from "../lib/agents-installer.js";
 import { resolveFolders } from "../lib/folder-paths.js";
+import { mergeCodexConfigFile } from "../lib/codex-config.js";
+import { createConfigBackup } from "../lib/configs-store.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -150,7 +151,12 @@ export async function setupCommand(params: SetupCommandParams = {}) {
     await fs.ensureDir(agentsDir);
 
     s.start("Creating backup of existing configuration");
-    const backupPath = await createBackup(claudeDir, agentsDir);
+    const backupPath = await createConfigBackup(
+      { folder, claudeCodeFolder, codexFolder, agentsFolder },
+      "Before running aiblueprint setup",
+      "setup",
+      "aiblueprint-setup",
+    );
     if (backupPath) {
       s.stop(`Backup created: ${chalk.gray(backupPath)}`);
     } else {
@@ -259,8 +265,18 @@ export async function setupCommand(params: SetupCommandParams = {}) {
 
       const codexConfigSource = path.join(sourceDir, "codex-config");
       if (await fs.pathExists(codexConfigSource)) {
-        // overwrite:false preserves any existing user config.toml / AGENTS.md
-        await fs.copy(codexConfigSource, codexDir, { overwrite: false });
+        const codexConfigPath = path.join(codexConfigSource, "config.toml");
+        if (await fs.pathExists(codexConfigPath)) {
+          await mergeCodexConfigFile(codexConfigPath, codexDir);
+        }
+
+        const entries = await fs.readdir(codexConfigSource);
+        for (const entry of entries) {
+          if (entry === "config.toml") continue;
+          await fs.copy(path.join(codexConfigSource, entry), path.join(codexDir, entry), {
+            overwrite: false,
+          });
+        }
       }
 
       if (options.aiblueprintSkills) {

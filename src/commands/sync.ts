@@ -8,9 +8,9 @@ import {
 } from "../lib/sync-utils.js";
 import { installScriptsDependencies } from "./setup/dependencies.js";
 import { getVersion } from "../lib/version.js";
-import { createBackup } from "../lib/backup-utils.js";
 import { trackEvent, trackError, flushTelemetry } from "../lib/telemetry.js";
 import { resolveFolders, type FolderOptions } from "../lib/folder-paths.js";
+import { createConfigBackup } from "../lib/configs-store.js";
 
 export type SyncCommandOptions = FolderOptions;
 
@@ -319,7 +319,7 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
     if (toAdd > 0) p.log.message(chalk.green(`  ✓ Add ${toAdd} new file${toAdd > 1 ? "s" : ""}`));
     if (toUpdate > 0) p.log.message(chalk.yellow(`  ✓ Update ${toUpdate} file${toUpdate > 1 ? "s" : ""}`));
     if (toMigrate > 0) p.log.message(chalk.blue(`  ✓ Move ${toMigrate} skill${toMigrate > 1 ? "s" : ""} from .claude to .agents`));
-    p.log.message(chalk.gray(`  ✓ Backup current config to ~/.config/aiblueprint/backup/`));
+    p.log.message(chalk.gray(`  ✓ Backup current config to ~/.aiblueprint/backups/`));
     p.log.message("");
 
     const confirmResult = await p.confirm({
@@ -333,7 +333,12 @@ export async function proSyncCommand(options: SyncCommandOptions = {}) {
     }
 
     spinner.start("Creating backup...");
-    const backupPath = await createBackup(claudeDir, agentsDir);
+    const backupPath = await createConfigBackup(
+      options,
+      "Before syncing premium aiblueprint configuration",
+      "sync",
+      "aiblueprint-sync",
+    );
     if (backupPath) {
       spinner.stop(`Backup created: ${chalk.gray(backupPath)}`);
     } else {
