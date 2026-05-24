@@ -90,6 +90,9 @@ npx aiblueprint-cli@latest agents add commands commit
 
 # Create symlinks between tools
 npx aiblueprint-cli@latest agents symlink
+
+# Centralize skills and agents in ~/.agents
+npx aiblueprint-cli@latest agents unify
 ```
 
 ## 📚 What You Get

@@ -3,6 +3,7 @@ import { Command } from "commander";
 import { setupCommand } from "./commands/setup.js";
 import { setupTerminalCommand } from "./commands/setup-terminal.js";
 import { symlinkCommand } from "./commands/symlink.js";
+import { agentsUnifyCommand } from "./commands/agents-unify.js";
 import {
   proActivateCommand,
   proStatusCommand,
@@ -101,6 +102,19 @@ function registerAgentsCommands(cmd: Command) {
         folder: parentOptions.folder,
         claudeCodeFolder: parentOptions.claudeCodeFolder,
         codexFolder: parentOptions.codexFolder,
+      });
+    });
+
+  cmd
+    .command("unify")
+    .description("Unify skills and agents into .agents and symlink tool folders back to it")
+    .action((options, command) => {
+      const parentOptions = command.parent.opts();
+      return agentsUnifyCommand({
+        folder: parentOptions.folder,
+        claudeCodeFolder: parentOptions.claudeCodeFolder,
+        codexFolder: parentOptions.codexFolder,
+        agentsFolder: parentOptions.agentsFolder,
       });
     });
 
