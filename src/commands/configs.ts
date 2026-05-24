@@ -44,6 +44,7 @@ function printSnapshots(title: string, snapshots: SnapshotInfo[]): void {
 
 export async function configsSaveCommand(name: string, options: ConfigCommandOptions = {}): Promise<void> {
   try {
+    console.log(chalk.gray("Saving .claude, .codex, and .agents config files..."));
     const snapshotPath = await saveNamedConfig(name, options);
     console.log(chalk.green(`Saved config "${name}"`));
     console.log(chalk.gray(snapshotPath));
@@ -55,6 +56,7 @@ export async function configsSaveCommand(name: string, options: ConfigCommandOpt
 
 export async function configsLoadCommand(name: string, options: ConfigCommandOptions = {}): Promise<void> {
   try {
+    console.log(chalk.gray(`Loading config "${name}"...`));
     const result = await loadNamedConfig(name, options);
     console.log(chalk.green(`Loaded config "${name}"`));
     if (result.backupPath) {
@@ -69,6 +71,7 @@ export async function configsLoadCommand(name: string, options: ConfigCommandOpt
 
 export async function configsUndoCommand(options: ConfigCommandOptions = {}): Promise<void> {
   try {
+    console.log(chalk.gray("Restoring the previous config backup..."));
     const result = await undoLastLoad(options);
     console.log(chalk.green(`Undid last config load using backup "${result.backupName}"`));
     if (result.backupPath) {
@@ -93,6 +96,7 @@ export async function configsBackupsListCommand(options: ConfigCommandOptions = 
 
 export async function configsBackupsLoadCommand(name: string, options: ConfigCommandOptions = {}): Promise<void> {
   try {
+    console.log(chalk.gray(`Loading backup "${name}"...`));
     const result = await loadBackupSnapshot(name, options);
     console.log(chalk.green(`Loaded backup "${name}"`));
     if (result.backupPath) {
@@ -107,6 +111,7 @@ export async function configsBackupsLoadCommand(name: string, options: ConfigCom
 
 export async function configsBackupsCreateCommand(reason: string | undefined, options: ConfigCommandOptions = {}): Promise<void> {
   try {
+    console.log(chalk.gray("Creating config backup..."));
     const backupPath = await createConfigBackup(
       options,
       reason ?? "Manual backup from configs backups create",

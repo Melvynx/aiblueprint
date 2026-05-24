@@ -32,6 +32,28 @@ describe("configs store", () => {
     expect(await fs.readFile(path.join(snapshotPath, ".agents", "skills", "demo", "SKILL.md"), "utf-8")).toBe("one");
   });
 
+  it("skips runtime sessions, caches, logs, and package folders when saving", async () => {
+    await fs.outputFile(path.join(rootDir, ".codex", "sessions", "session.jsonl"), "large session");
+    await fs.outputFile(path.join(rootDir, ".codex", "plugins", "cache", "plugin.bin"), "cache");
+    await fs.outputFile(path.join(rootDir, ".codex", "log", "codex-tui.log"), "log");
+    await fs.outputFile(path.join(rootDir, ".claude", "projects", "project.jsonl"), "project history");
+    await fs.outputFile(path.join(rootDir, ".claude", "file-history", "history.json"), "history");
+    await fs.outputFile(path.join(rootDir, ".claude", "hooks", "node_modules", "pkg", "index.js"), "dependency");
+    await fs.outputFile(path.join(rootDir, ".agents", ".git", "config"), "git");
+
+    const snapshotPath = await saveNamedConfig("work-main", { folder: rootDir });
+
+    expect(await fs.pathExists(path.join(snapshotPath, ".codex", "sessions"))).toBe(false);
+    expect(await fs.pathExists(path.join(snapshotPath, ".codex", "plugins", "cache"))).toBe(false);
+    expect(await fs.pathExists(path.join(snapshotPath, ".codex", "log"))).toBe(false);
+    expect(await fs.pathExists(path.join(snapshotPath, ".claude", "projects"))).toBe(false);
+    expect(await fs.pathExists(path.join(snapshotPath, ".claude", "file-history"))).toBe(false);
+    expect(await fs.pathExists(path.join(snapshotPath, ".claude", "hooks", "node_modules"))).toBe(false);
+    expect(await fs.pathExists(path.join(snapshotPath, ".agents", ".git"))).toBe(false);
+    expect(await fs.pathExists(path.join(snapshotPath, ".codex", "config.toml"))).toBe(true);
+    expect(await fs.pathExists(path.join(snapshotPath, ".agents", "skills", "demo", "SKILL.md"))).toBe(true);
+  });
+
   it("loads a named config and backs up the previous folders", async () => {
     await saveNamedConfig("work-main", { folder: rootDir });
     await fs.outputFile(path.join(rootDir, ".codex", "config.toml"), 'model = "two"');

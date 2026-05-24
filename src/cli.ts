@@ -198,6 +198,18 @@ function addConfigFolderOptions(cmd: Command): Command {
     );
 }
 
+function readConfigOptions(command: Command, options: Record<string, unknown> = {}) {
+  const parentOptions = command.parent?.opts() ?? {};
+  const grandParentOptions = command.parent?.parent?.opts() ?? {};
+
+  return {
+    folder: options.folder ?? parentOptions.folder ?? grandParentOptions.folder,
+    claudeCodeFolder: options.claudeCodeFolder ?? parentOptions.claudeCodeFolder ?? grandParentOptions.claudeCodeFolder,
+    codexFolder: options.codexFolder ?? parentOptions.codexFolder ?? grandParentOptions.codexFolder,
+    agentsFolder: options.agentsFolder ?? parentOptions.agentsFolder ?? grandParentOptions.agentsFolder,
+  };
+}
+
 const agentsCmd = program
   .command("agents")
   .description("AI coding configuration commands");
@@ -222,57 +234,45 @@ const configsCmd = addConfigFolderOptions(
     .description("Save, load, undo, and inspect .claude/.codex/.agents configurations"),
 );
 
-configsCmd
+addConfigFolderOptions(configsCmd
   .command("save <name>")
   .description("Save the current .claude, .codex, and .agents folders as a named config")
-  .option("--force", "Overwrite an existing saved config with the same name")
+  .option("--force", "Overwrite an existing saved config with the same name"))
   .action((name, options, command) => {
-    const parentOptions = command.parent.opts();
+    const folderOptions = readConfigOptions(command, options);
     configsSaveCommand(name, {
-      folder: parentOptions.folder,
-      claudeCodeFolder: parentOptions.claudeCodeFolder,
-      codexFolder: parentOptions.codexFolder,
-      agentsFolder: parentOptions.agentsFolder,
+      ...folderOptions,
       force: options.force,
     });
   });
 
-configsCmd
+addConfigFolderOptions(configsCmd
   .command("load <name>")
-  .description("Load a named config and backup the current folders first")
+  .description("Load a named config and backup the current folders first"))
   .action((name, options, command) => {
-    const parentOptions = command.parent.opts();
+    const folderOptions = readConfigOptions(command, options);
     configsLoadCommand(name, {
-      folder: parentOptions.folder,
-      claudeCodeFolder: parentOptions.claudeCodeFolder,
-      codexFolder: parentOptions.codexFolder,
-      agentsFolder: parentOptions.agentsFolder,
+      ...folderOptions,
     });
   });
 
-configsCmd
+addConfigFolderOptions(configsCmd
   .command("undo")
-  .description("Undo the most recent configs load by restoring its automatic backup")
+  .description("Undo the most recent configs load by restoring its automatic backup"))
   .action((options, command) => {
-    const parentOptions = command.parent.opts();
+    const folderOptions = readConfigOptions(command, options);
     configsUndoCommand({
-      folder: parentOptions.folder,
-      claudeCodeFolder: parentOptions.claudeCodeFolder,
-      codexFolder: parentOptions.codexFolder,
-      agentsFolder: parentOptions.agentsFolder,
+      ...folderOptions,
     });
   });
 
-configsCmd
+addConfigFolderOptions(configsCmd
   .command("list")
-  .description("List saved named configs")
+  .description("List saved named configs"))
   .action((options, command) => {
-    const parentOptions = command.parent.opts();
+    const folderOptions = readConfigOptions(command, options);
     configsListCommand({
-      folder: parentOptions.folder,
-      claudeCodeFolder: parentOptions.claudeCodeFolder,
-      codexFolder: parentOptions.codexFolder,
-      agentsFolder: parentOptions.agentsFolder,
+      ...folderOptions,
     });
   });
 
@@ -280,42 +280,33 @@ const configsBackupsCmd = configsCmd
   .command("backups")
   .description("Manage automatic config backups");
 
-configsBackupsCmd
+addConfigFolderOptions(configsBackupsCmd
   .command("list")
-  .description("List automatic backups with reasons")
+  .description("List automatic backups with reasons"))
   .action((options, command) => {
-    const parentOptions = command.parent.parent.opts();
+    const folderOptions = readConfigOptions(command, options);
     configsBackupsListCommand({
-      folder: parentOptions.folder,
-      claudeCodeFolder: parentOptions.claudeCodeFolder,
-      codexFolder: parentOptions.codexFolder,
-      agentsFolder: parentOptions.agentsFolder,
+      ...folderOptions,
     });
   });
 
-configsBackupsCmd
+addConfigFolderOptions(configsBackupsCmd
   .command("load <name>")
-  .description("Load a backup and backup the current folders first")
+  .description("Load a backup and backup the current folders first"))
   .action((name, options, command) => {
-    const parentOptions = command.parent.parent.opts();
+    const folderOptions = readConfigOptions(command, options);
     configsBackupsLoadCommand(name, {
-      folder: parentOptions.folder,
-      claudeCodeFolder: parentOptions.claudeCodeFolder,
-      codexFolder: parentOptions.codexFolder,
-      agentsFolder: parentOptions.agentsFolder,
+      ...folderOptions,
     });
   });
 
-configsBackupsCmd
+addConfigFolderOptions(configsBackupsCmd
   .command("create [reason]")
-  .description("Create a manual backup of the current config folders")
+  .description("Create a manual backup of the current config folders"))
   .action((reason, options, command) => {
-    const parentOptions = command.parent.parent.opts();
+    const folderOptions = readConfigOptions(command, options);
     configsBackupsCreateCommand(reason, {
-      folder: parentOptions.folder,
-      claudeCodeFolder: parentOptions.claudeCodeFolder,
-      codexFolder: parentOptions.codexFolder,
-      agentsFolder: parentOptions.agentsFolder,
+      ...folderOptions,
     });
   });
 
