@@ -1,6 +1,6 @@
 # AIBlueprint CLI
 
-Supercharge Claude Code with security hooks, custom commands, intelligent statusline, and workflow automation.
+Supercharge Claude Code with security hooks, custom commands, a lightweight statusline, and workflow automation.
 
 📚 **[Full Documentation](https://codelynx.dev/docs)** | 🎯 [Premium Features](https://mlv.sh/claude-cli)
 
@@ -14,10 +14,10 @@ npx aiblueprint-cli@latest agents setup
 ## ✨ Features
 
 - **🛡️ Security** - Command validation hooks blocking dangerous operations
-- **📊 Statusline** - Git status, cost tracking, and token usage display
+- **📊 Statusline** - Git status and session context display
 - **🤖 Commands** - 16 pre-configured workflow automation commands
 - **🎭 Agents** - 3 specialized AI agents for codebase exploration
-- **⚡ Scripts** - Built-in utilities for spending reports and usage stats
+- **⚡ Scripts** - Built-in statusline utilities
 
 ## 📦 Installation
 
@@ -53,30 +53,13 @@ npx aiblueprint-cli@latest agents setup --skip
 npx aiblueprint-cli@latest agents setup --folder ~/.my-claude
 ```
 
-### Statusline Scripts
+### Statusline
 
-Run utility scripts from anywhere:
+Install a lightweight Claude Code statusline:
 
 ```bash
-# List available scripts
-npx aiblueprint-cli@latest agents statusline --list
-
-# Today's spending report
-npx aiblueprint-cli@latest agents statusline spend:today
-
-# Weekly usage analysis
-npx aiblueprint-cli@latest agents statusline weekly
-
-# Configure statusline
-npx aiblueprint-cli@latest agents statusline config
+npx aiblueprint-cli@latest agents setup
 ```
-
-**Available scripts:**
-- `spend:today` / `spend:month` / `spend:project` - Spending reports
-- `stats` - Daily usage statistics
-- `weekly` - Weekly usage analysis
-- `config` - Interactive configuration
-- `migrate` - Migrate to SQLite database
 
 ### Other Commands
 
@@ -106,8 +89,7 @@ npx aiblueprint-cli@latest agents unify
 ### Custom Statusline
 
 - Git branch, changes, and repository info
-- Session costs and daily limits via ccusage
-- Real-time token usage tracking
+- Session context and duration
 - Colored visual indicators
 
 ### Commands (16 Available)
@@ -124,7 +106,7 @@ npx aiblueprint-cli@latest agents unify
 - `cleanup-context` - Memory optimization
 
 **Utilities:**
-- `claude-memory` - CLAUDE.md management
+- `rules-manager` - AGENTS.md and `.agents/rules/` management
 - `watch-ci` - Automated CI monitoring
 - `epct` - Explore-Plan-Code-Test methodology
 
@@ -148,8 +130,8 @@ Install individual skills directly into `~/.claude/skills/`:
 npx skills add Melvynx/aiblueprint --skill ultrathink
 
 # Install multiple skills
-npx skills add Melvynx/aiblueprint --skill claude-memory
-npx skills add Melvynx/aiblueprint --skill fix-errors
+npx skills add Melvynx/aiblueprint --skill rules-manager
+npx skills add Melvynx/aiblueprint --skill skill-manager
 ```
 
 **Available skills:**
@@ -160,16 +142,14 @@ npx skills add Melvynx/aiblueprint --skill fix-errors
 | `create-pr` | Auto-generated pull requests |
 | `fix-pr-comments` | Resolve PR review comments |
 | `merge` | Context-aware branch merging |
-| `claude-memory` | CLAUDE.md and .claude/rules management |
 | `prompt-creator` | Expert prompt engineering |
-| `skill-creator` | Guide for creating Claude Code skills |
-| `subagent-creator` | Guide for building subagents |
-| `ralph-loop` | Autonomous AI coding loop |
-| `fix-errors` | Fix ESLint and TypeScript errors |
-| `fix-grammar` | Fix grammar and spelling |
+| `skill-manager` | Manage skills and rules across Claude Code, Codex, and Cursor |
+| `rules-manager` | Create and maintain AGENTS.md and agent rule files |
+| `agents-managers` | Manage Claude Code agents and Task-tool orchestration |
+| `environments-manager` | Set up per-worktree agent environments |
+| `grill-me` | Stress-test a plan with focused design questions |
 | `oneshot` | Ultra-fast feature implementation |
 | `ultrathink` | Deep thinking mode for elegant solutions |
-| `apex-free` | APEX methodology (Analyze-Plan-Execute-eXamine) |
 
 ## 💎 Premium
 
@@ -207,7 +187,7 @@ bun run test-local
 
 - Node.js 16+ or Bun
 - Claude Code installed
-- Optional: `bun`, `ccusage`, `gh CLI`
+- Optional: `bun`, `gh CLI`
 
 ## 🤝 Contributing
 

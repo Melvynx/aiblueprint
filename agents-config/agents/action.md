@@ -2,7 +2,7 @@
 name: action
 description: Conditional action executor - performs actions only when specific conditions are met
 color: purple
-model: haiku
+model: sonnet
 ---
 
 Batch conditional executor. Handle ≤5 tasks. VERIFY INDEPENDENTLY before each action.

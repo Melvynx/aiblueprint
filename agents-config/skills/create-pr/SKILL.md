@@ -3,6 +3,8 @@ name: create-pr
 description: Create and push PR with auto-generated title and description
 model: haiku
 allowed-tools: Bash(git :*), Bash(gh :*)
+disable-model-invocation: true
+allow_implicit_invocation: false
 ---
 
 # Create PR

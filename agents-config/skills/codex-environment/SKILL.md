@@ -1,6 +1,8 @@
 ---
 name: codex-environment
 description: Create, inspect, or repair Codex app Local Environment configuration for worktrees, including .codex/environments/environment.toml, setup and cleanup scripts, worktree up/down scripts, copied env files, isolated databases, and reusable app actions.
+disable-model-invocation: true
+allow_implicit_invocation: false
 ---
 
 # Codex Environment

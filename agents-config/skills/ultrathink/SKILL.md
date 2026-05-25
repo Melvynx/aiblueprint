@@ -1,6 +1,8 @@
 ---
 name: ultrathink
 description: Deep thinking mode - approach problems like a craftsman, obsess over details, and create elegant solutions
+disable-model-invocation: true
+allow_implicit_invocation: false
 ---
 
 # Ultrathink

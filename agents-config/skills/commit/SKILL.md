@@ -3,6 +3,8 @@ name: commit
 description: Quick commit and push with minimal, clean messages
 model: haiku
 allowed-tools: Bash(git :*), Bash(npm :*), Bash(pnpm :*)
+disable-model-invocation: true
+allow_implicit_invocation: false
 ---
 
 # Commit

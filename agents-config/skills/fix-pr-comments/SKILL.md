@@ -2,6 +2,8 @@
 name: fix-pr-comments
 description: Fetch PR review comments and implement all requested changes
 allowed-tools: Bash(gh :*), Bash(git :*), Read, Edit, MultiEdit
+disable-model-invocation: true
+allow_implicit_invocation: false
 ---
 
 # Fix PR Comments
