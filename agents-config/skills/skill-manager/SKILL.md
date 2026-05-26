@@ -1,6 +1,6 @@
 ---
 name: skill-manager
-description: Create and edit skills/rules across Claude Code, OpenAI Codex, and Cursor. Use when the user asks to "create a skill", "build a skill", "write a skill", "make a cursor rule", "add a codex skill", "skill manager", or mentions SKILL.md, .cursor/rules, agents/openai.yaml, or multi-agent rule files. Handles frontmatter, file layout, and discovery rules for each platform.
+description: Create or edit Claude, Codex, and Cursor skills/rules. Use for SKILL.md, .cursor/rules, AGENTS.md, skill prompts, frontmatter, references, scripts, and discovery rules.
 ---
 
 # Skill Manager
@@ -18,6 +18,7 @@ Pick the platform first, then read the matching reference file:
 - Claude Code → see [references/claude-code.md](references/claude-code.md)
 - Codex      → see [references/codex.md](references/codex.md)
 - Cursor     → see [references/cursor.md](references/cursor.md)
+- Description quality → see [references/description-recommandation.md](references/description-recommandation.md)
 
 If unsure which the user wants, ask. Default to Claude Code when working under `~/.claude/` or `.claude/`, Codex when under `~/.agents/` or `.agents/`, Cursor when under `.cursor/`.
 
@@ -65,14 +66,31 @@ Do NOT add README, CHANGELOG, INSTALLATION_GUIDE, etc. Only files the agent need
 
 ## Writing the description
 
-The `description` field is the single most important line in the file - it's what the model uses to decide to load the skill. Write it as:
+The `description` field is the single most important line in the file - it's what the model uses to decide to load the skill. This is a hard rule: descriptions must be between 50 and 300 characters.
+
+Write it as:
 
 - Front-load trigger words ("Use when...", "create a skill", "review a PR").
 - State scope and boundaries explicitly.
 - Mention concrete file names or commands the user might type.
+- Keep it short enough to stay under 300 characters, while still specific enough to trigger reliably.
 
 Bad: `"Helper for skills."`
 Good: `"Create and edit skills/rules across Claude Code, OpenAI Codex, and Cursor. Use when the user asks to 'create a skill'..."`
+
+To validate skill descriptions, frontmatter fields, `agents/openai.yaml`, and skill directory shape, run:
+
+```bash
+bun scripts/inspect-description.ts
+```
+
+By default, this checks `~/.agents/skills` only and follows symlinked skill directories inside that root. Pass one or more roots to inspect a different set. Passing a `.cursor/rules` directory validates Cursor rule frontmatter too:
+
+```bash
+bun scripts/inspect-description.ts .agents/skills
+```
+
+For researched guidance and examples, see [references/description-recommandation.md](references/description-recommandation.md).
 
 ## Where each platform stores skills
 

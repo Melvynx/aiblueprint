@@ -1,7 +1,7 @@
 ---
 name: rules-manager
-description: Create and maintain agent rules in AGENTS.md and .agents/rules/. Use when adding project rules, conventions, or constraints for AI agents. AGENTS.md acts as the index - it must reference every rule file living in .agents/rules/. Triggers - "create a rule", "add a rule", "agents rule", "AGENTS.md", ".agents/rules", "new rule for", "rules-manager".
-argument-hint: [init | add <rule-name> | optimize | task description]
+description: Create and maintain agent rules in AGENTS.md and .agents/rules/. Use for project rules, conventions, constraints, rule indexes, or requests to add or optimize agent rules.
+argument-hint: "[init | add <rule-name> | optimize | task description]"
 ---
 
 <core_principle>

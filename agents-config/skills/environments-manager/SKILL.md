@@ -1,6 +1,6 @@
 ---
 name: environments-manager
-description: Set up a per-worktree environment for one or more IDEs (Claude Code, Cursor, Codex) in a single pass. Generates shared scripts/worktree-up.sh, scripts/worktree-down.sh, and scripts/dev.sh, then wires them into each selected IDE's config. Use whenever the user asks to "set up a worktree environment", "configure worktrees", "make this repo worktree-ready", or mentions any of .codex/environments/environment.toml, .cursor/worktrees.json, .claude/settings.json SessionStart, $CODEX_WORKTREE_PATH, $ROOT_WORKTREE_PATH, or $CLAUDE_PROJECT_DIR.
+description: Set up per-worktree environments for Claude Code, Cursor, or Codex. Use for worktree-ready repos, IDE environment config, worktree-up/down scripts, or dev.sh wiring.
 disable-model-invocation: false
 allow_implicit_invocation: true
 ---
