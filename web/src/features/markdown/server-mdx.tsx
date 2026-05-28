@@ -1,12 +1,11 @@
+import Markdown, { type MarkdownToJSX } from "markdown-to-jsx";
 import {
   DocCard,
   DocCardGrid,
   DocCardWrapper,
   DocSection,
-} from "@/components/docs/doc-card";
-import { slugifyHeading } from "@/lib/markdown";
-import { cn } from "@/lib/utils";
-import Markdown, { type MarkdownToJSX } from "markdown-to-jsx";
+} from "../../docs/_components/doc-card";
+import { cn } from "../../lib/utils";
 
 type ServerMdxProps = {
   source: string;
@@ -16,8 +15,8 @@ type ServerMdxProps = {
 const MdxComponents = {
   DocCard,
   DocCardGrid,
-  DocSection,
   DocCardWrapper,
+  DocSection,
 } satisfies MarkdownToJSX.Overrides;
 
 export function ServerMdx(props: ServerMdxProps) {
@@ -28,7 +27,11 @@ export function ServerMdx(props: ServerMdxProps) {
           forceBlock: true,
           overrides: MdxComponents,
           wrapper: "div",
-          slugify: slugifyHeading,
+          slugify: (value) =>
+            value
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/(^-|-$)/g, ""),
         }}
       >
         {props.source}

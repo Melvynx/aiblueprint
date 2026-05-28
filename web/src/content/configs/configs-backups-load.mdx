@@ -1,0 +1,20 @@
+---
+title: configs backups load
+description: Load a backup and backup the current folders first.
+---
+
+Use `configs backups load` to restore an automatic backup by name.
+
+```bash
+aiblueprint configs backups load before-load-2026-05-28
+```
+
+## Safety behavior
+
+The current folders are backed up before the selected backup is restored.
+
+## Common usage
+
+```bash
+aiblueprint configs backups load <name>
+```

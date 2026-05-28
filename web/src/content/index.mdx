@@ -1,0 +1,59 @@
+---
+title: AIBlueprint CLI
+description: Install, sync, backup, and render AI coding configurations for Claude Code, Codex, OpenCode, and shared agents.
+keywords:
+  - aiblueprint
+  - cli
+  - agents
+  - codex
+---
+
+`aiblueprint` is a command-line tool for setting up AI coding environments. It installs opinionated defaults, links compatible configuration folders, renders shared agent definitions, and keeps named configs recoverable.
+
+```bash
+npm install -g aiblueprint-cli
+aiblueprint agents setup
+```
+
+## Main capabilities
+
+<DocCardWrapper>
+  <DocSection title="Core workflows">
+    <DocCardGrid>
+      <DocCard href="/commands/agents-setup" icon="Play" title="Setup agents" description="Install AIBlueprint defaults into Claude Code, Codex, and shared agent folders." />
+      <DocCard href="/commands/agents-symlink" icon="FolderSync" title="Create symlinks" description="Keep compatible AI coding tool folders pointed at the same source of truth." />
+      <DocCard href="/commands/agents-unify" icon="Layers3" title="Unify agents" description="Collect skills and agents into .agents, then render Codex TOML agent files." />
+    </DocCardGrid>
+  </DocSection>
+
+  <DocSection title="Configuration safety">
+    <DocCardGrid>
+      <DocCard href="/configs/configs-save" icon="Archive" title="Save configs" description="Snapshot .claude, .codex, and .agents under a named config." />
+      <DocCard href="/configs/configs-load" icon="ShieldCheck" title="Load with backup" description="Restore a named config while backing up the current state first." />
+      <DocCard href="/configs/configs-undo" icon="Wrench" title="Undo a load" description="Roll back the most recent config load from its automatic backup." />
+    </DocCardGrid>
+  </DocSection>
+</DocCardWrapper>
+
+## Command families
+
+- `aiblueprint agents` manages AI coding configuration setup.
+- `aiblueprint ai-coding` is a legacy alias for `agents`.
+- `aiblueprint claude-code` is a legacy alias for `agents`.
+- `aiblueprint configs` saves, restores, lists, and backs up local configuration folders.
+- `aiblueprint openclaw` manages OpenClaw-specific configuration.
+
+## Default folders
+
+Most commands operate from your home folder by default and target:
+
+- `.claude/` for Claude Code configuration.
+- `.codex/` for Codex configuration.
+- `.agents/` for shared skills and agents.
+
+Use the folder options when your configuration lives somewhere else.
+
+```bash
+aiblueprint agents setup --folder ~/Developer/workbench
+aiblueprint configs save daily --codexFolder ~/custom-codex
+```

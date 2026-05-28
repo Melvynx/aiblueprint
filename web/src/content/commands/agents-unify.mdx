@@ -1,0 +1,27 @@
+---
+title: agents unify
+description: Unify skills and agents into .agents, then render Codex TOML agents.
+---
+
+Use `agents unify` to consolidate agent assets into the shared `.agents` folder and render Codex-compatible agent files.
+
+```bash
+aiblueprint agents unify
+```
+
+## What it does
+
+- Collects skills and agents from tool-specific folders.
+- Writes a shared `.agents` structure.
+- Renders Codex TOML custom agents from shared Markdown agents.
+
+## Common usage
+
+```bash
+aiblueprint agents unify
+aiblueprint agents unify --folder ~/Developer/workbench
+```
+
+## Related command
+
+Use [agents codex-agents](/commands/agents-codex-agents) when you only need to render Codex agents from existing shared Markdown files.

@@ -1,0 +1,21 @@
+---
+title: configs load
+description: Load a named config and backup the current folders first.
+---
+
+Use `configs load` to restore a named configuration snapshot.
+
+```bash
+aiblueprint configs load clean-start
+```
+
+## Safety behavior
+
+Before loading the named config, the command backs up the current folders. Use [configs undo](/configs/configs-undo) if you need to restore that automatic backup.
+
+## Common usage
+
+```bash
+aiblueprint configs load workbench
+aiblueprint configs load workbench --folder ~/Developer/workbench
+```

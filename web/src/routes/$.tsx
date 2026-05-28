@@ -6,11 +6,12 @@ import {
   getDocsTree,
 } from "../docs/doc-manager";
 
-export const Route = createFileRoute("/")({
-  loader: async () => {
+export const Route = createFileRoute("/$")({
+  loader: async ({ params }) => {
+    const slug = params._splat ? params._splat.split("/") : [];
     const [tree, doc, allDocs] = await Promise.all([
       getDocsTree(),
-      getCurrentDoc([]),
+      getCurrentDoc(slug),
       getAllDocs(),
     ]);
     return { tree, doc, allDocs };
@@ -37,12 +38,13 @@ export const Route = createFileRoute("/")({
       ],
     };
   },
-  component: DocsIndexRoute,
+  component: DocsSplatRoute,
 });
 
-function DocsIndexRoute() {
-  const { tree, allDocs } = Route.useLoaderData();
-  const currentDoc = tree.rootDocs.at(0) ?? allDocs.at(0);
+function DocsSplatRoute() {
+  const { tree, doc, allDocs } = Route.useLoaderData();
+  const { _splat } = Route.useParams();
+  const currentDoc = _splat ? doc : (tree.rootDocs.at(0) ?? allDocs.at(0));
 
   if (!currentDoc) {
     return <DocsNotFound tree={tree} />;

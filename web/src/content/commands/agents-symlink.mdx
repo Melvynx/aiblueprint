@@ -1,0 +1,27 @@
+---
+title: agents symlink
+description: Create symlinks between AI coding tools including Claude Code, Codex, OpenCode, and FactoryAI.
+---
+
+Use `agents symlink` to connect compatible AI coding configuration folders.
+
+```bash
+aiblueprint agents symlink
+```
+
+## What it does
+
+- Reads the selected Claude Code and Codex folders.
+- Creates links so shared configuration can be reused across tools.
+- Helps avoid duplicated skills, commands, and agent definitions.
+
+## Common usage
+
+```bash
+aiblueprint agents symlink
+aiblueprint agents symlink --claudeCodeFolder ~/.claude --codexFolder ~/.codex
+```
+
+## When to use it
+
+Run this after setup when multiple AI coding tools should share the same managed configuration.

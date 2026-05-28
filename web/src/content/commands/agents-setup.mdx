@@ -1,0 +1,27 @@
+---
+title: agents setup
+description: Setup AI coding configuration with AIBlueprint defaults.
+---
+
+Use `agents setup` to install the default AIBlueprint configuration for local AI coding tools.
+
+```bash
+aiblueprint agents setup
+```
+
+## What it does
+
+- Installs configuration under the selected root folder.
+- Targets Claude Code, Codex, and shared `.agents` paths.
+- Can run interactively or non-interactively with `--skip`.
+
+## Common usage
+
+```bash
+aiblueprint agents setup --skip
+aiblueprint agents setup --folder ~/Developer/workbench
+```
+
+## When to use it
+
+Run this command when setting up a new machine, refreshing a local agent environment, or applying AIBlueprint defaults to a custom folder.

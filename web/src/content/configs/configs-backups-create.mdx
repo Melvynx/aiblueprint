@@ -1,0 +1,23 @@
+---
+title: configs backups create
+description: Create a manual backup of the current config folders.
+---
+
+Use `configs backups create` to manually capture the current configuration state.
+
+```bash
+aiblueprint configs backups create "before experimenting"
+```
+
+## Arguments
+
+| Argument | Description |
+| --- | --- |
+| `[reason]` | Optional note explaining why the backup was created. |
+
+## Common usage
+
+```bash
+aiblueprint configs backups create
+aiblueprint configs backups create "before changing Codex agents"
+```

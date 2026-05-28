@@ -1,0 +1,29 @@
+---
+title: configs
+description: Save, load, undo, and inspect .claude, .codex, and .agents configurations.
+---
+
+`configs` manages named snapshots and automatic backups of local AI coding configuration folders.
+
+```bash
+aiblueprint configs <command>
+```
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `-f, --folder <path>` | Root folder containing `.claude/`, `.codex/`, and `.agents/`. |
+| `--claudeCodeFolder <path>` | Override the Claude Code folder. |
+| `--codexFolder <path>` | Override the Codex folder. |
+| `--agentsFolder <path>` | Override the shared agents folder. |
+
+## Subcommands
+
+- `save <name>`
+- `load <name>`
+- `undo`
+- `list`
+- `backups list`
+- `backups load <name>`
+- `backups create [reason]`

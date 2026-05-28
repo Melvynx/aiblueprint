@@ -1,0 +1,20 @@
+---
+title: dynamic script commands
+description: Runtime commands registered from local Claude scripts.
+---
+
+At startup, the CLI attempts to register dynamic script commands for `agents`, `ai-coding`, and `claude-code` from your local Claude scripts directory.
+
+```bash
+aiblueprint agents <script> [action]
+```
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `-l, --list` | List available actions for the dynamic script. |
+
+## Notes
+
+Dynamic commands depend on local files under your Claude configuration. They are not fixed at build time, so this documentation covers the command shape rather than every local script name.

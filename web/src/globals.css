@@ -5,149 +5,213 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-border: var(--border);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  --font-sans: "Geist", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", "SFMono-Regular", Consolas, monospace;
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
 }
 
 :root {
   --background: oklch(1 0 0);
-  --foreground: oklch(0.13 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.13 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.48 0 0);
-  --border: oklch(0.91 0 0);
-  --primary: oklch(0.2 0 0);
-  --primary-foreground: oklch(0.99 0 0);
+  --foreground: oklch(0.2 0 0);
+  --card: oklch(0.985 0 0);
+  --card-foreground: oklch(0.2 0 0);
+  --primary: oklch(0.628 0.258 29.23);
+  --primary-foreground: oklch(1 0 0);
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.45 0 0);
+  --accent: oklch(0.95 0.02 29.23);
+  --accent-foreground: oklch(0.628 0.258 29.23);
+  --border: oklch(0.92 0 0);
+  --input: oklch(0.92 0 0);
+  --font-sans: Inter, sans-serif;
+  --font-mono: JetBrains Mono, monospace;
+  --radius: 0.375rem;
+  --spacing: 0.25rem;
 }
 
-* {
-  border-color: var(--border);
-}
+@layer base {
+  * {
+    @apply border-border;
+  }
 
-html {
-  scroll-behavior: smooth;
-  overflow-x: hidden;
-}
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    letter-spacing: 0;
+  }
 
-body {
-  margin: 0;
-  background: var(--background);
-  color: var(--foreground);
-  overflow-x: hidden;
-}
+  a {
+    text-decoration: none;
+  }
 
-.typography {
-  min-width: 0;
-  color: var(--foreground);
-  font-size: 0.95rem;
-  line-height: 1.8;
-}
+  .typography {
+    max-width: 65ch;
+    color: var(--color-foreground);
+  }
 
-.typography h1,
-.typography h2,
-.typography h3,
-.typography h4 {
-  scroll-margin-top: 6rem;
-  letter-spacing: 0;
-}
+  .typography h1:not(.not-typography h1) {
+    scroll-margin: calc(var(--spacing) * 20);
+    font-size: var(--text-4xl);
+    line-height: var(--text-4xl--line-height);
+    font-weight: 800;
+    letter-spacing: 0;
+  }
 
-.typography h2 {
-  margin-top: 2.5rem;
-  border-top: 1px solid var(--border);
-  padding-top: 2rem;
-  font-size: 1.45rem;
-  font-weight: 650;
-  line-height: 1.3;
-}
+  .typography h2:not(.not-typography h2) {
+    scroll-margin: calc(var(--spacing) * 20);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: calc(var(--spacing) * 2);
+    font-size: var(--text-3xl);
+    line-height: var(--text-3xl--line-height);
+    font-weight: 600;
+    letter-spacing: 0;
+    margin-top: calc(var(--spacing) * 12);
+  }
 
-.typography h2:first-child {
-  margin-top: 0;
-  border-top: 0;
-  padding-top: 0;
-}
+  .typography h2:not(.not-typography h2):first-child,
+  .typography h3:not(.not-typography h3):first-child,
+  .typography h4:not(.not-typography h4):first-child {
+    margin-top: 0;
+  }
 
-.typography h3 {
-  margin-top: 1.75rem;
-  font-size: 1.05rem;
-  font-weight: 650;
-  line-height: 1.4;
-}
+  .typography h3:not(.not-typography h3) {
+    scroll-margin: calc(var(--spacing) * 20);
+    font-size: var(--text-2xl);
+    line-height: var(--text-2xl--line-height);
+    font-weight: 600;
+    letter-spacing: 0;
+    margin-top: calc(var(--spacing) * 12);
+  }
 
-.typography p {
-  margin: 0.85rem 0 0;
-  color: var(--muted-foreground);
-}
+  .typography h4:not(.not-typography h4) {
+    scroll-margin: calc(var(--spacing) * 20);
+    font-size: var(--text-xl);
+    line-height: var(--text-xl--line-height);
+    font-weight: 600;
+    letter-spacing: 0;
+    margin-top: calc(var(--spacing) * 12);
+  }
 
-.typography a {
-  color: var(--foreground);
-  font-weight: 500;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
+  .typography h1:not(.not-typography h1) + p,
+  .typography h2:not(.not-typography h2) + p,
+  .typography h3:not(.not-typography h3) + p,
+  .typography h4:not(.not-typography h4) + p {
+    margin-top: 0;
+  }
 
-.typography .not-typography a {
-  text-decoration: none;
-}
+  .typography p:not(.not-typography p) {
+    line-height: 1.75;
+  }
 
-.typography ul,
-.typography ol {
-  margin: 0.9rem 0 0;
-  padding-left: 1.25rem;
-  color: var(--muted-foreground);
-}
+  .typography p:not(.not-typography p):not(:first-child) {
+    margin-top: calc(var(--spacing) * 6);
+  }
 
-.typography li + li {
-  margin-top: 0.35rem;
-}
+  .typography li:not(.not-typography li) {
+    line-height: 1.75;
+  }
 
-.typography code:not(pre code) {
-  border-radius: 0.35rem;
-  background: var(--muted);
-  padding: 0.15rem 0.35rem;
-  color: var(--foreground);
-  font-family: var(--font-mono);
-  font-size: 0.85em;
-  font-weight: 600;
-}
+  .typography a:not(.not-typography a) {
+    font-weight: 500;
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: var(--spacing);
+  }
 
-.typography pre {
-  max-width: 100%;
-  overflow-x: auto;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  background: oklch(0.985 0 0);
-  padding: 1rem;
-  font-size: 0.85rem;
-  line-height: 1.7;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
+  .typography blockquote:not(.not-typography blockquote) {
+    margin-top: calc(var(--spacing) * 6);
+    border-left: 2px solid var(--color-border);
+    padding-left: calc(var(--spacing) * 6);
+    font-style: italic;
+  }
 
-.typography pre code {
-  font-family: var(--font-mono);
-}
+  .typography table:not(.not-typography table) {
+    margin-top: calc(var(--spacing) * 6);
+    margin-bottom: calc(var(--spacing) * 6);
+    width: 100%;
+    overflow-y: auto;
+  }
 
-.typography table {
-  width: 100%;
-  margin-top: 1rem;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-}
+  .typography th:not(.not-typography th),
+  .typography td:not(.not-typography td) {
+    border: 1px solid var(--color-border);
+    padding: calc(var(--spacing) * 2) calc(var(--spacing) * 4);
+    text-align: left;
+  }
 
-.typography th,
-.typography td {
-  border-bottom: 1px solid var(--border);
-  padding: 0.65rem 0.5rem;
-  text-align: left;
-}
+  .typography th:not(.not-typography th) {
+    font-weight: 700;
+  }
 
-.typography th {
-  color: var(--foreground);
-  font-weight: 650;
+  .typography tbody tr:nth-child(even) {
+    background-color: var(--color-muted);
+  }
+
+  .typography ul:not(.not-typography ul) {
+    margin-top: calc(var(--spacing) * 6);
+    margin-left: calc(var(--spacing) * 6);
+    list-style: disc;
+  }
+
+  .typography ol:not(.not-typography ol) {
+    margin-top: calc(var(--spacing) * 6);
+    margin-left: calc(var(--spacing) * 6);
+    list-style: decimal;
+  }
+
+  .typography ul:not(.not-typography ul) > li,
+  .typography ol:not(.not-typography ol) > li {
+    margin-top: calc(var(--spacing) * 2);
+  }
+
+  .typography ul:not(.not-typography ul) p,
+  .typography ol:not(.not-typography ol) p {
+    margin-top: 0;
+    margin-bottom: 0;
+    display: inline;
+  }
+
+  .typography pre:not(.not-typography pre) {
+    background-color: var(--color-muted);
+    border-radius: calc(var(--radius) - 2px);
+    padding: calc(var(--spacing) * 4);
+    margin-top: calc(var(--spacing) * 6);
+    margin-bottom: calc(var(--spacing) * 6);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+    overflow-y: auto;
+  }
+
+  .typography code:not(pre code):not(.not-typography code) {
+    position: relative;
+    border-radius: var(--radius);
+    background-color: var(--color-muted);
+    padding: calc(var(--spacing) * 0.2) calc(var(--spacing) * 0.3);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+    font-weight: 600;
+  }
+
+  .typography hr {
+    margin-top: calc(var(--spacing) * 10);
+    margin-bottom: calc(var(--spacing) * 10);
+  }
+
+  @media (min-width: 1024px) {
+    .typography h1:not(.not-typography h1) {
+      font-size: var(--text-5xl);
+      line-height: var(--text-5xl--line-height);
+    }
+  }
 }

@@ -1,0 +1,29 @@
+---
+title: configs save
+description: Save the current .claude, .codex, and .agents folders as a named config.
+---
+
+Use `configs save` to create a named snapshot of your current configuration folders.
+
+```bash
+aiblueprint configs save workbench
+```
+
+## Arguments
+
+| Argument | Description |
+| --- | --- |
+| `<name>` | Name of the saved config. |
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `--force` | Overwrite an existing saved config with the same name. |
+
+## Common usage
+
+```bash
+aiblueprint configs save clean-start
+aiblueprint configs save clean-start --force
+```

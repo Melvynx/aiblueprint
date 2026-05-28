@@ -1,0 +1,33 @@
+---
+title: Commands
+description: The static command surface exposed by the AIBlueprint CLI.
+---
+
+The CLI is organized around command families. Use `agents` for setup and rendering, `configs` for snapshots, and `openclaw` for OpenClaw configuration.
+
+```bash
+aiblueprint <family> <command>
+```
+
+## Command families
+
+<DocCardWrapper>
+  <DocSection title="Available families">
+    <DocCardGrid>
+      <DocCard href="/commands/agents" icon="Terminal" title="agents" description="Setup, symlink, unify, render, backup, and premium commands." />
+      <DocCard href="/configs" icon="Archive" title="configs" description="Save, load, undo, list, and manage automatic backups." />
+      <DocCard href="/openclaw" icon="Settings" title="openclaw" description="Manage OpenClaw Pro activation and installed configuration." />
+    </DocCardGrid>
+  </DocSection>
+</DocCardWrapper>
+
+## Shared folder options
+
+The `agents`, `ai-coding`, `claude-code`, and `configs` command families can target custom folders.
+
+```bash
+aiblueprint agents setup --folder ~/workspace
+aiblueprint configs list --agentsFolder ~/.agents
+```
+
+See [Folder options](/reference/folder-options) for the full list.

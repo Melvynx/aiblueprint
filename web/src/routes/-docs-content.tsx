@@ -1,23 +1,22 @@
-import { ServerMdx } from "@/features/markdown/server-mdx";
-import { DocsHeader } from "@/components/docs/docs-header";
-import { DocsSidebar } from "@/components/docs/docs-sidebar";
+import { Link } from "@tanstack/react-router";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import type { ReactNode } from "react";
+import { DocsHeader } from "../docs/_components/docs-header";
+import { DocsSidebar } from "../docs/_components/docs-sidebar";
 import {
   DocsTableOfContents,
   type TocItem,
-} from "@/components/docs/docs-toc";
-import type { DocTree, DocType } from "@/components/docs/doc-manager";
-import { slugifyHeading } from "@/lib/markdown";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import { Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+} from "../docs/_components/docs-toc";
+import type { DocTree, DocType } from "../docs/doc-manager";
+import { ServerMdx } from "../features/markdown/server-mdx";
 
 export function DocsShell(props: { tree: DocTree; children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-screen flex-col">
       <DocsHeader />
       <div className="flex flex-1">
         <DocsSidebar tree={props.tree} />
-        <main className="min-w-0 flex-1 overflow-x-hidden">{props.children}</main>
+        <main className="flex-1">{props.children}</main>
       </div>
     </div>
   );
@@ -57,54 +56,54 @@ export function DocsContent(props: {
     <DocsShell tree={props.tree}>
       <div className={toc.length > 0 ? "xl:pr-64" : ""}>
         <div className="flex w-full">
-          <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 flex-1">
             <div className="mx-auto px-6 py-8">
-              <article className="mx-auto flex w-full min-w-0 max-w-full flex-col gap-6 sm:max-w-prose">
-                <header className="flex flex-col gap-3">
-                  <h1 className="text-4xl font-bold tracking-normal">
+              <div className="mx-auto flex max-w-prose flex-col gap-6">
+                <div className="flex flex-col gap-3">
+                  <h1 className="flex-1 text-4xl font-bold tracking-normal">
                     {props.doc.attributes.title}
                   </h1>
-                  <p className="text-muted-foreground text-lg leading-8">
-                    {props.doc.attributes.description}
-                  </p>
-                </header>
+                  {props.doc.attributes.description && (
+                    <p className="text-muted-foreground text-lg leading-8">
+                      {props.doc.attributes.description}
+                    </p>
+                  )}
+                </div>
 
                 <ServerMdx source={props.doc.content} />
 
-                <nav className="border-border flex flex-col items-stretch gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
+                <div className="border-border flex items-center justify-between border-t pt-6">
                   {neighbours.previous && (
                     <Link
                       to={neighbours.previous.url}
-                      className="border-border hover:bg-muted inline-flex min-h-10 min-w-0 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors sm:w-auto"
+                      className="border-input hover:bg-accent hover:text-accent-foreground inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-medium"
                     >
                       <ArrowLeft className="size-4" />
-                      <span className="truncate">
-                        {neighbours.previous.attributes.title}
-                      </span>
+                      {neighbours.previous.attributes.title}
                     </Link>
                   )}
                   {neighbours.next && (
                     <Link
                       to={neighbours.next.url}
-                      className="border-border hover:bg-muted inline-flex min-h-10 min-w-0 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors sm:ml-auto sm:w-auto"
+                      className="border-input hover:bg-accent hover:text-accent-foreground ml-auto inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-medium"
                     >
-                      <span className="truncate">
-                        {neighbours.next.attributes.title}
-                      </span>
+                      {neighbours.next.attributes.title}
                       <ArrowRight className="size-4" />
                     </Link>
                   )}
-                </nav>
-              </article>
+                </div>
+              </div>
             </div>
           </div>
 
           {toc.length > 0 && (
-            <aside className="bg-background fixed top-16 right-0 hidden h-[calc(100vh-4rem)] w-64 overflow-y-auto border-l xl:block">
-              <div className="p-6">
-                <DocsTableOfContents toc={toc} />
-              </div>
-            </aside>
+            <div className="fixed top-16 right-0 hidden h-[calc(100vh-4rem)] overflow-y-auto xl:flex">
+              <aside className="bg-background w-64 overflow-y-auto border-l">
+                <div className="p-6">
+                  <DocsTableOfContents toc={toc} />
+                </div>
+              </aside>
+            </div>
           )}
         </div>
       </div>
@@ -120,9 +119,16 @@ function extractToc(content: string): TocItem[] {
   while ((match = headingRegex.exec(content)) !== null) {
     const depth = match[1].length;
     const title = match[2].trim();
-    const slug = slugifyHeading(title);
+    const slug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
 
-    toc.push({ title, url: `#${slug}`, depth });
+    toc.push({
+      title,
+      url: `#${slug}`,
+      depth,
+    });
   }
 
   return toc;

@@ -1,0 +1,21 @@
+---
+title: configs undo
+description: Undo the most recent configs load by restoring its automatic backup.
+---
+
+Use `configs undo` after a config load if you need to go back to the previous state.
+
+```bash
+aiblueprint configs undo
+```
+
+## What it restores
+
+The command restores the automatic backup created by the most recent `configs load`.
+
+## Common usage
+
+```bash
+aiblueprint configs undo
+aiblueprint configs undo --agentsFolder ~/.agents
+```

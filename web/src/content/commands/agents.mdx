@@ -1,0 +1,34 @@
+---
+title: agents
+description: AI coding configuration commands for setup, terminal setup, symlinks, unification, Codex rendering, premium features, backups, and dynamic scripts.
+---
+
+`agents` is the main command family for AI coding configuration.
+
+```bash
+aiblueprint agents <command>
+```
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `-f, --folder <path>` | Root folder containing `.claude/`, `.codex/`, and `.agents/`. Defaults to `$HOME`. |
+| `--claudeCodeFolder <path>` | Override the Claude Code folder. |
+| `--codexFolder <path>` | Override the Codex folder. |
+| `--agentsFolder <path>` | Override the shared agents folder. |
+| `-s, --skip` | Skip interactive prompts and install all features. |
+
+## Subcommands
+
+- `setup`
+- `setup-terminal`
+- `symlink`
+- `unify`
+- `codex-agents`
+- `pro`
+- `backup load`
+
+## Aliases
+
+`ai-coding` and `claude-code` register the same commands as `agents`.

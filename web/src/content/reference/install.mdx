@@ -1,0 +1,26 @@
+---
+title: install
+description: Install and run the AIBlueprint CLI.
+---
+
+Install the published CLI package globally.
+
+```bash
+npm install -g aiblueprint-cli
+```
+
+Then run commands through the `aiblueprint` binary.
+
+```bash
+aiblueprint --help
+aiblueprint agents setup
+```
+
+## Development
+
+Inside this repository, the CLI is built with Bun.
+
+```bash
+bun run build
+bun src/cli.ts --help
+```

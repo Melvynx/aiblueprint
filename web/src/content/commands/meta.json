@@ -1,0 +1,20 @@
+{
+  "title": "Commands",
+  "pages": [
+    "index",
+    "agents",
+    "agents-setup",
+    "agents-setup-terminal",
+    "agents-symlink",
+    "agents-unify",
+    "agents-codex-agents",
+    "agents-pro",
+    "agents-pro-activate",
+    "agents-pro-status",
+    "agents-pro-setup",
+    "agents-pro-update",
+    "agents-pro-sync",
+    "agents-backup-load",
+    "dynamic-scripts"
+  ]
+}

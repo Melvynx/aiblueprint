@@ -6,19 +6,21 @@ export function getRouter() {
     routeTree,
     scrollRestoration: true,
     defaultPendingComponent: () => null,
+    defaultPendingMinMs: 0,
     defaultNotFoundComponent: () => (
-      <main className="flex min-h-dvh items-center justify-center px-6">
-        <section className="max-w-md text-center">
-          <p className="bg-muted inline-flex rounded px-2 py-1 font-mono text-xs font-semibold">
-            404
-          </p>
-          <h1 className="mt-4 text-3xl font-semibold tracking-normal">
+      <main className="bg-background text-foreground flex min-h-dvh items-center justify-center px-6">
+        <div className="max-w-md text-center">
+          <p className="text-muted-foreground font-mono text-sm">404</p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-normal">
             Page not found
           </h1>
-          <p className="text-muted-foreground mt-3 text-sm">
-            This documentation page does not exist.
-          </p>
-        </section>
+          <a
+            href="/"
+            className="bg-primary text-primary-foreground mt-6 inline-flex h-10 items-center rounded-md px-4 text-sm font-medium"
+          >
+            Back to docs
+          </a>
+        </div>
       </main>
     ),
   });

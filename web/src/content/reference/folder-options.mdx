@@ -1,0 +1,21 @@
+---
+title: folder options
+description: Shared folder options used by agents, aliases, and configs commands.
+---
+
+Folder options let you run commands against a custom configuration root or explicit tool folders.
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `-f, --folder <path>` | `$HOME` | Root folder containing `.claude/`, `.codex/`, and `.agents/`. |
+| `--claudeCodeFolder <path>` | `{folder}/.claude` | Claude Code folder. |
+| `--codexFolder <path>` | `{folder}/.codex` | Codex folder. |
+| `--agentsFolder <path>` | `{folder}/.agents` | Shared agents folder. |
+
+## Examples
+
+```bash
+aiblueprint agents setup --folder ~/Developer/workbench
+aiblueprint agents codex-agents --agentsFolder ~/.agents --codexFolder ~/.codex
+aiblueprint configs save baseline --claudeCodeFolder ~/.claude
+```

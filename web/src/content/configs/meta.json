@@ -1,0 +1,13 @@
+{
+  "title": "Configs",
+  "pages": [
+    "index",
+    "configs-save",
+    "configs-load",
+    "configs-undo",
+    "configs-list",
+    "configs-backups-list",
+    "configs-backups-load",
+    "configs-backups-create"
+  ]
+}

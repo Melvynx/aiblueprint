@@ -1,11 +1,11 @@
-import { cn } from "@/lib/utils";
-import type { DocTree } from "./doc-manager";
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { cn } from "../../lib/utils";
+import type { DocTree } from "../doc-manager";
 
-const TOP_LEVEL_SECTIONS = [{ name: "Overview", href: "/" }];
+const TOP_LEVEL_SECTIONS = [{ name: "Introduction", href: "/" }];
 
 export function DocsSidebar({ tree }: { tree: DocTree }) {
-  const pathname = useLocation({ select: (location) => location.pathname });
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   return (
     <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 overflow-y-auto border-r lg:block">
@@ -16,12 +16,11 @@ export function DocsSidebar({ tree }: { tree: DocTree }) {
           </h4>
           <ul className="flex flex-col">
             {TOP_LEVEL_SECTIONS.map(({ name, href }) => {
-              const isActive = pathname === href || pathname === "/docs";
+              const isActive = pathname === href;
               return (
                 <li key={name}>
                   <Link
                     to={href}
-                    activeOptions={{ exact: true }}
                     className={cn(
                       "block rounded px-2 py-1 text-[13px] transition-colors",
                       isActive
@@ -49,19 +48,13 @@ export function DocsSidebar({ tree }: { tree: DocTree }) {
                   <li key={doc.slug}>
                     <Link
                       to={doc.url}
-                      activeOptions={{ exact: true }}
                       className={cn(
-                        "flex items-center gap-1.5 rounded px-2 py-1 text-[13px] transition-colors",
+                        "block rounded px-2 py-1 text-[13px] transition-colors",
                         isActive
                           ? "bg-muted text-foreground font-medium"
                           : "text-muted-foreground hover:text-foreground",
                       )}
                     >
-                      {doc.attributes.command && (
-                        <span className="text-muted-foreground shrink-0 font-mono text-[10px] font-semibold">
-                          CLI
-                        </span>
-                      )}
                       <span className="truncate">{doc.attributes.title}</span>
                     </Link>
                   </li>
