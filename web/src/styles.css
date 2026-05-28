@@ -1,0 +1,396 @@
+:root {
+  --background: #ffffff;
+  --foreground: #252525;
+  --muted: #f6f6f6;
+  --muted-foreground: #686868;
+  --border: #e4e4e4;
+  --primary: #e33b2f;
+  --primary-soft: #fff1ef;
+  --code-bg: #171717;
+  --code-fg: #f6f6f6;
+  --radius: 6px;
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+code {
+  border-radius: 4px;
+  background: var(--muted);
+  color: #1f1f1f;
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  padding: 0.1rem 0.28rem;
+}
+
+.docs-app {
+  min-height: 100vh;
+}
+
+.docs-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--background) 88%, transparent);
+  padding: 0 1.5rem;
+  backdrop-filter: blur(14px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.brand-mark {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: var(--radius);
+  background: var(--primary);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.header-nav a,
+.sidebar-section a,
+.toc a {
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+}
+
+.header-nav a {
+  font-size: 0.86rem;
+  padding: 0.45rem 0.65rem;
+}
+
+.header-nav a:hover,
+.sidebar-section a:hover,
+.sidebar-section a.active,
+.toc a:hover {
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.docs-layout {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr) 16rem;
+  align-items: start;
+}
+
+.docs-sidebar,
+.toc {
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.docs-sidebar {
+  border-right: 1px solid var(--border);
+}
+
+.toc {
+  border-left: 1px solid var(--border);
+}
+
+.sidebar-section h2,
+.toc h2 {
+  margin: 0 0 0.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.sidebar-section ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar-section a,
+.toc a {
+  display: block;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  padding: 0.32rem 0.48rem;
+}
+
+.toc nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+}
+
+.toc-depth-3 {
+  padding-left: 1rem !important;
+}
+
+.toc-depth-4 {
+  padding-left: 1.5rem !important;
+}
+
+.docs-main {
+  min-width: 0;
+}
+
+.doc-page {
+  width: min(100%, 780px);
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.doc-intro {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+}
+
+.doc-intro h1 {
+  margin: 0.35rem 0 1rem;
+  font-size: clamp(3rem, 8vw, 5.6rem);
+  font-weight: 850;
+  line-height: 0.92;
+}
+
+.doc-intro p:not(.eyebrow) {
+  max-width: 42rem;
+  color: var(--muted-foreground);
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--primary);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.markdown h1 {
+  display: none;
+}
+
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  scroll-margin-top: 82px;
+}
+
+.markdown h2 {
+  margin: 2.5rem 0 0.9rem;
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  line-height: 1.08;
+}
+
+.markdown h3 {
+  margin: 1.8rem 0 0.65rem;
+  font-size: 1.35rem;
+}
+
+.markdown h4 {
+  margin: 1.4rem 0 0.5rem;
+  font-size: 1.05rem;
+}
+
+.markdown p,
+.markdown li {
+  color: var(--muted-foreground);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.markdown a {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.markdown h2 code,
+.markdown h3 code,
+.markdown h4 code {
+  background: transparent;
+  color: inherit;
+  font-size: 0.82em;
+  padding: 0;
+}
+
+.markdown ul {
+  margin: 0.7rem 0 1.1rem;
+  padding-left: 1.2rem;
+}
+
+.code-block {
+  margin: 0.85rem 0 1.2rem;
+  overflow-x: auto;
+  border-radius: var(--radius);
+  background: var(--code-bg);
+  color: var(--code-fg);
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  padding: 0.85rem;
+}
+
+.code-block code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+.doc-pager {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  border-top: 1px solid var(--border);
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+}
+
+.doc-pager a {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.85rem;
+}
+
+.doc-pager a:last-child {
+  text-align: right;
+}
+
+.doc-pager span {
+  display: block;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.not-found {
+  width: min(100%, 42rem);
+  margin: 0 auto;
+  padding: 5rem 1.5rem;
+}
+
+.not-found h1 {
+  margin: 0.4rem 0 1rem;
+  font-size: clamp(2.4rem, 7vw, 4.4rem);
+  line-height: 1;
+}
+
+.not-found p:not(.eyebrow) {
+  color: var(--muted-foreground);
+  line-height: 1.7;
+}
+
+.not-found a {
+  display: inline-flex;
+  border-radius: var(--radius);
+  background: var(--primary);
+  color: #fff;
+  font-weight: 750;
+  margin-top: 1rem;
+  padding: 0.65rem 0.85rem;
+}
+
+@media (max-width: 1180px) {
+  .docs-layout {
+    grid-template-columns: 15rem minmax(0, 1fr);
+  }
+
+  .toc {
+    display: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .docs-header {
+    position: static;
+    flex-wrap: wrap;
+    padding: 0.85rem 1rem;
+  }
+
+  .header-nav {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .docs-layout {
+    display: block;
+  }
+
+  .docs-sidebar {
+    position: static;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .doc-page {
+    padding: 2rem 1rem;
+  }
+
+  .doc-intro h1 {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .brand {
+    font-size: 0.95rem;
+  }
+
+  .doc-intro h1 {
+    font-size: 2.45rem;
+  }
+
+  .doc-pager {
+    grid-template-columns: 1fr;
+  }
+
+  .doc-pager a:last-child {
+    text-align: left;
+  }
+}
