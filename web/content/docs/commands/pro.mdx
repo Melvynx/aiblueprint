@@ -1,0 +1,54 @@
+---
+title: agents pro
+description: Activate and install AIBlueprint Premium configurations.
+keywords: ["pro", "premium", "activate", "token", "sync"]
+---
+
+`agents pro` manages AIBlueprint Premium. Premium adds extra configurations on
+top of the free defaults. You need an access token to activate it.
+
+## Subcommands
+
+| Command | Description |
+| ------- | ----------- |
+| `agents pro activate [token]` | Activate Premium with an access token. |
+| `agents pro status` | Check the status of your Premium token. |
+| `agents pro setup` | Install Premium configurations (requires activation). |
+| `agents pro update` | Update Premium configurations. |
+| `agents pro sync` | Selectively update individual Premium items. |
+
+## Activate
+
+```bash
+aiblueprint agents pro activate YOUR_TOKEN
+```
+
+This validates the token, stores it, and saves any GitHub token attached to the
+product so the CLI can fetch Premium content. An internet connection is
+required.
+
+## Install Premium
+
+Once activated, install the Premium configuration:
+
+```bash
+aiblueprint agents pro setup
+```
+
+## Keep Premium up to date
+
+```bash
+# Update everything
+aiblueprint agents pro update
+
+# Choose which items to update
+aiblueprint agents pro sync
+```
+
+## Check status
+
+```bash
+aiblueprint agents pro status
+```
+
+Get a Premium token at [mlv.sh/claude-cli](https://mlv.sh/claude-cli).

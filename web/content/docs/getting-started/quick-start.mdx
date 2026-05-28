@@ -1,0 +1,62 @@
+---
+title: Quick Start
+description: Configure your full AI coding environment with a single command.
+keywords: ["quick start", "setup", "skip", "defaults"]
+---
+
+The fastest way to get started is the interactive setup. It walks you through
+each feature and lets you choose what to install.
+
+## Interactive setup
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+You will be prompted to enable:
+
+- Shell shortcuts (`cc`, `ccc`)
+- Command validation hooks
+- The custom statusline
+- AIBlueprint agents
+- AIBlueprint skills
+- Codex configuration
+
+## Install everything, no prompts
+
+Use `--skip` to accept every recommended default and install all features at
+once:
+
+```bash
+npx aiblueprint-cli@latest agents setup --skip
+```
+
+## Verify your setup
+
+After setup completes, open Claude Code with the new shortcut:
+
+```bash
+cc
+```
+
+You should see the statusline at the bottom showing your git branch, token
+usage, and session cost.
+
+## What happens during setup
+
+1. Configuration files are copied from the CLI into `~/.claude`, `~/.codex`,
+   and `~/.agents`.
+2. `~/.claude/settings.json` is updated with hooks and the statusline command.
+3. Missing dependencies (`bun`, `ccusage`) are installed if you opt in.
+4. Shell aliases are written to your shell config.
+5. A backup of your previous configuration is created automatically.
+
+## Undo a setup
+
+Every change is backed up. To roll back the most recent change:
+
+```bash
+aiblueprint configs undo
+```
+
+Read more about safe rollbacks in the [configs](/commands/configs) reference.

@@ -1,0 +1,54 @@
+---
+title: Statusline
+description: A rich statusline showing git, token usage, and session cost.
+keywords: ["statusline", "git", "tokens", "cost", "ccusage"]
+---
+
+The custom statusline shows live session information at the bottom of Claude
+Code, so you always know your context and spend.
+
+## What it shows
+
+- Current git branch and change count
+- Context remaining
+- Tokens used
+- Session and rolling cost (via `ccusage`)
+- Five-hour and weekly limits
+- Task progress
+
+## How it is installed
+
+During [agents setup](/commands/agents-setup), the CLI:
+
+1. Copies the statusline scripts into `~/.claude/scripts`.
+2. Installs `bun` and `ccusage` if they are missing.
+3. Runs `bun install` inside the scripts directory.
+4. Adds a `statusLine` entry to `~/.claude/settings.json`:
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bun ~/.claude/scripts/statusline/src/index.ts"
+  }
+}
+```
+
+## Codex
+
+For Codex, the same information is configured through the `status_line`
+components in `~/.codex/config.toml`:
+
+```toml
+[tui]
+status_line = [
+  "model-with-reasoning",
+  "git-branch",
+  "branch-changes",
+  "context-remaining",
+  "used-tokens",
+  "five-hour-limit",
+  "weekly-limit",
+  "task-progress"
+]
+```

@@ -1,0 +1,37 @@
+---
+title: Shell Shortcuts
+description: Quick aliases for launching Claude Code.
+keywords: ["shell", "alias", "cc", "ccc", "zsh"]
+---
+
+Setup can add two aliases that launch Claude Code with permission prompts
+skipped, so you can start working immediately.
+
+## Aliases
+
+| Alias | Expands to |
+| ----- | ---------- |
+| `cc` | `claude --dangerously-skip-permissions` |
+| `ccc` | `claude --dangerously-skip-permissions -c` |
+
+`ccc` adds `-c` to continue the previous conversation.
+
+## Where they are written
+
+| Platform | File |
+| -------- | ---- |
+| macOS | `~/.zshenv` |
+| Linux | `~/.zshrc` or `~/.bashrc` (detected) |
+| Windows | `~/Documents/PowerShell/Profile.ps1` (as functions) |
+
+## Usage
+
+After setup, reload your shell or open a new terminal, then run:
+
+```bash
+cc
+```
+
+> These aliases skip Claude Code permission prompts. Pair them with the
+> [security](/concepts/security) deny rules, which block dangerous commands even
+> when permissions are skipped.

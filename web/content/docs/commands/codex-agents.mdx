@@ -1,0 +1,39 @@
+---
+title: agents codex-agents
+description: Render shared Markdown agents into Codex TOML custom agents.
+keywords: ["codex", "agents", "toml", "render"]
+---
+
+`agents codex-agents` renders the shared Markdown agents in `~/.agents/agents`
+into Codex TOML custom agents.
+
+```bash
+aiblueprint agents codex-agents
+```
+
+## Options
+
+| Option | Description |
+| ------ | ----------- |
+| `--overwrite` | Overwrite existing, non-generated Codex agent files. |
+
+## What it does
+
+- Reads every `*.md` agent from the shared `~/.agents/agents` folder.
+- Converts each into the Codex TOML custom-agent format.
+- Writes the results into your Codex agents directory.
+- Reports the source directory, target directory, rendered count, and any
+  skipped files with reasons.
+
+## Example
+
+```bash
+# Render new agents only
+aiblueprint agents codex-agents
+
+# Force overwrite existing files
+aiblueprint agents codex-agents --overwrite
+```
+
+This command is also run automatically as the final step of
+[agents unify](/commands/unify).

@@ -1,0 +1,39 @@
+---
+title: agents unify
+description: Centralize skills and agents into ~/.agents, then render Codex agents.
+keywords: ["unify", "agents", "skills", "centralize", "codex"]
+---
+
+`agents unify` consolidates your skills and agents from `~/.claude` into the
+shared `~/.agents` folder, then renders the shared Markdown agents into Codex
+TOML custom agents.
+
+```bash
+aiblueprint agents unify
+```
+
+## What it does
+
+1. Imports skills and agents from `~/.claude` into `~/.agents`.
+2. Skips duplicates and renames files when there is a conflict.
+3. Creates symlinks back so existing tools keep working.
+4. Backs up the source before moving anything.
+5. Renders shared agents into Codex TOML format.
+
+## Output summary
+
+After running, the CLI reports per category (skills, agents):
+
+- Imported count
+- Duplicates skipped
+- Renamed files
+- Symlinks created
+- Already linked (skipped)
+- Source backups created
+
+## Why centralize
+
+A single `~/.agents` source of truth means your skills and agents work
+identically across Claude Code, Codex, and any other linked tool. To render
+only the Codex agents without a full unify, use
+[agents codex-agents](/commands/codex-agents).

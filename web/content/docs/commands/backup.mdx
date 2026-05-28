@@ -1,0 +1,26 @@
+---
+title: agents backup
+description: Restore a previous configuration from an automatic backup.
+keywords: ["backup", "restore", "load", "undo"]
+---
+
+`agents backup` works with the automatic backups the CLI creates before every
+change.
+
+```bash
+aiblueprint agents backup load
+```
+
+## What it does
+
+- Lists every backup stored in `~/.config/aiblueprint/backup/`.
+- Shows each backup's timestamp and relative time.
+- Lets you select one interactively.
+- Asks for confirmation before restoring.
+- Backs up your current configuration first, so a restore is itself reversible.
+
+## Related
+
+For named, manually managed snapshots - and a richer set of backup commands -
+see [configs](/commands/configs), which exposes `configs backups list`,
+`configs backups create`, and `configs backups load`.
