@@ -36,6 +36,8 @@ describe("unifyAgentsConfiguration", () => {
   });
 
   it("imports known tool skills and agents into .agents, skips exact duplicates, and replaces source dirs with symlinks", async () => {
+    await fs.outputFile(path.join(root, ".claude/CLAUDE.md"), "shared instructions");
+    await fs.outputFile(path.join(root, ".codex/AGENTS.md"), "shared instructions");
     await writeSkill(root, ".claude/skills", "alpha", "alpha skill");
     await writeSkill(root, ".cursor/skills", "alpha", "alpha skill");
     await writeSkill(root, ".cursor/skills-cursor", "cursor-only", "cursor skill");
@@ -48,6 +50,10 @@ describe("unifyAgentsConfiguration", () => {
 
     const result = await unifyAgentsConfiguration({ folder: root });
 
+    expect(await fs.readFile(path.join(root, ".agents/AGENTS.md"), "utf-8")).toBe("shared instructions");
+    expect((await fs.lstat(path.join(root, ".claude/CLAUDE.md"))).isSymbolicLink()).toBe(true);
+    expect((await fs.lstat(path.join(root, ".codex/AGENTS.md"))).isSymbolicLink()).toBe(true);
+
     expect(await fs.readFile(path.join(root, ".agents/skills/alpha/SKILL.md"), "utf-8")).toBe("alpha skill");
     expect(await fs.readFile(path.join(root, ".agents/skills/cursor-only/SKILL.md"), "utf-8")).toBe("cursor skill");
     expect(await fs.readFile(path.join(root, ".agents/skills/opencode-only/SKILL.md"), "utf-8")).toBe("opencode skill");
@@ -56,7 +62,7 @@ describe("unifyAgentsConfiguration", () => {
     expect(await fs.readFile(path.join(root, ".agents/agents/typo.md"), "utf-8")).toBe("typo agent");
     expect(await fs.readFile(path.join(root, ".agents/agents/factory.md"), "utf-8")).toBe("factory agent");
 
-    expect(result.duplicates.map((entry) => entry.name).sort()).toEqual(["alpha", "helper.md"]);
+    expect(result.duplicates.map((entry) => entry.name).sort()).toEqual(["AGENTS.md", "alpha", "helper.md"]);
 
     for (const sourcePath of [
       ".claude/skills",
@@ -74,7 +80,25 @@ describe("unifyAgentsConfiguration", () => {
     }
 
     expect(result.backupPath).toBeTruthy();
+    expect(await fs.pathExists(path.join(result.backupPath!, ".claude/CLAUDE.md"))).toBe(true);
     expect(await fs.pathExists(path.join(result.backupPath!, ".claude/agents/helper.md"))).toBe(true);
+  });
+
+  it("preserves conflicting instruction files before linking tool-specific paths to .agents", async () => {
+    await fs.outputFile(path.join(root, ".agents/AGENTS.md"), "shared base");
+    await fs.outputFile(path.join(root, ".codex/AGENTS.md"), "codex specific");
+
+    const result = await unifyAgentsConfiguration({ folder: root });
+
+    expect(await fs.readFile(path.join(root, ".agents/AGENTS.md"), "utf-8")).toBe("shared base");
+    expect(await fs.readFile(path.join(root, ".agents/AGENTS--codex-instructions.md"), "utf-8")).toBe("codex specific");
+    expect((await fs.lstat(path.join(root, ".codex/AGENTS.md"))).isSymbolicLink()).toBe(true);
+    expect(result.renamed).toContainEqual(expect.objectContaining({
+      category: "instructions",
+      to: path.join(root, ".agents/AGENTS--codex-instructions.md"),
+    }));
+    expect(result.backupPath).toBeTruthy();
+    expect(await fs.pathExists(path.join(result.backupPath!, ".codex/AGENTS.md"))).toBe(true);
   });
 
   it("renames same-name entries when their content differs", async () => {

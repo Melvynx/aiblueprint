@@ -16,12 +16,12 @@ export interface AgentsUnifyCommandParams {
 function countByCategory(
   result: AgentsUnifyResult,
   key: "imported" | "duplicates" | "renamed" | "linked" | "alreadyLinked",
-  category: "skills" | "agents",
+  category: "skills" | "agents" | "instructions",
 ): number {
   return result[key].filter((entry) => entry.category === category).length;
 }
 
-function printCategorySummary(result: AgentsUnifyResult, category: "skills" | "agents") {
+function printCategorySummary(result: AgentsUnifyResult, category: "skills" | "agents" | "instructions") {
   const imported = countByCategory(result, "imported", category);
   const duplicates = countByCategory(result, "duplicates", category);
   const renamed = countByCategory(result, "renamed", category);
@@ -45,6 +45,7 @@ export async function agentsUnifyCommand(params: AgentsUnifyCommandParams = {}) 
 
     console.log(chalk.green("\nUnify complete"));
     console.log(chalk.gray(`  Shared folder: ${result.agentsDir}`));
+    printCategorySummary(result, "instructions");
     printCategorySummary(result, "skills");
     printCategorySummary(result, "agents");
     console.log(

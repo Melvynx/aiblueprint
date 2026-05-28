@@ -5,14 +5,21 @@ import path from "path";
 import type { Dirent } from "fs";
 import { resolveFolders, type FolderOptions } from "./folder-paths.js";
 
-export type UnifiedAgentCategory = "skills" | "agents";
+export type UnifiedAgentCategory = "skills" | "agents" | "instructions";
 
 interface ContainerCandidate {
-  category: UnifiedAgentCategory;
+  category: Exclude<UnifiedAgentCategory, "instructions">;
   label: string;
   path: string;
   isDestination?: boolean;
   linkWhenParentExists?: boolean;
+  linkWhenMissing?: boolean;
+}
+
+interface InstructionFileCandidate {
+  label: string;
+  path: string;
+  isDestination?: boolean;
   linkWhenMissing?: boolean;
 }
 
@@ -63,9 +70,9 @@ const IGNORED_ENTRY_NAMES = new Set([
   "node_modules",
 ]);
 
-function uniqueByPath(candidates: ContainerCandidate[]): ContainerCandidate[] {
+function uniqueByPath<T extends { path: string }>(candidates: T[]): T[] {
   const seen = new Set<string>();
-  const unique: ContainerCandidate[] = [];
+  const unique: T[] = [];
 
   for (const candidate of candidates) {
     const resolved = path.resolve(candidate.path);
@@ -172,6 +179,28 @@ function getContainerCandidates(options: FolderOptions): ContainerCandidate[] {
       label: "opencode-agents",
       path: path.join(opencodeDir, "agents"),
       linkWhenParentExists: true,
+    },
+  ]);
+}
+
+function getInstructionFileCandidates(options: FolderOptions): InstructionFileCandidate[] {
+  const folders = resolveFolders(options);
+
+  return uniqueByPath([
+    {
+      label: "agents-instructions",
+      path: path.join(folders.agentsDir, "AGENTS.md"),
+      isDestination: true,
+    },
+    {
+      label: "claude-instructions",
+      path: path.join(folders.claudeDir, "CLAUDE.md"),
+      linkWhenMissing: true,
+    },
+    {
+      label: "codex-instructions",
+      path: path.join(folders.codexDir, "AGENTS.md"),
+      linkWhenMissing: true,
     },
   ]);
 }
@@ -415,6 +444,15 @@ async function createDirectorySymlink(source: string, target: string): Promise<v
   await fs.symlink(source, target, "dir");
 }
 
+async function createFileSymlink(source: string, target: string): Promise<void> {
+  await fs.ensureDir(path.dirname(target));
+  if (os.platform() === "win32") {
+    await fs.symlink(source, target, "file");
+    return;
+  }
+  await fs.symlink(source, target);
+}
+
 async function shouldLinkMissingContainer(candidate: ContainerCandidate): Promise<boolean> {
   if (candidate.linkWhenMissing) return true;
   if (!candidate.linkWhenParentExists) return false;
@@ -486,11 +524,160 @@ async function linkContainer(
   });
 }
 
+async function importInstructionFiles(
+  candidates: InstructionFileCandidate[],
+  destinationPath: string,
+  result: AgentsUnifyResult,
+): Promise<void> {
+  await fs.ensureDir(path.dirname(destinationPath));
+
+  const destinationRealPath = await realPathIfPossible(destinationPath);
+  let destinationHash = await pathExistsOrSymlink(destinationPath)
+    ? await hashPath(destinationPath)
+    : null;
+
+  for (const candidate of candidates) {
+    if (candidate.isDestination) continue;
+
+    const sourceStat = await fs.lstat(candidate.path).catch(() => null);
+    if (!sourceStat) continue;
+
+    const sourceRealPath = await realPathIfPossible(candidate.path);
+    if (
+      destinationRealPath &&
+      sourceRealPath &&
+      samePath(destinationRealPath, sourceRealPath)
+    ) {
+      continue;
+    }
+
+    const sourceHash = await hashPath(candidate.path);
+
+    if (!destinationHash) {
+      await fs.copy(candidate.path, destinationPath, {
+        dereference: false,
+        overwrite: false,
+      });
+      destinationHash = sourceHash;
+      result.imported.push({
+        category: "instructions",
+        name: path.basename(candidate.path),
+        from: candidate.path,
+        to: destinationPath,
+      });
+      continue;
+    }
+
+    if (sourceHash === destinationHash) {
+      result.duplicates.push({
+        category: "instructions",
+        name: path.basename(candidate.path),
+        from: candidate.path,
+        keptAs: destinationPath,
+      });
+      continue;
+    }
+
+    const targetName = await findTargetName(
+      path.dirname(destinationPath),
+      path.basename(destinationPath),
+      candidate.label,
+    );
+    const targetPath = path.join(path.dirname(destinationPath), targetName);
+    await fs.copy(candidate.path, targetPath, {
+      dereference: false,
+      overwrite: false,
+    });
+    result.renamed.push({
+      category: "instructions",
+      name: path.basename(candidate.path),
+      from: candidate.path,
+      to: targetPath,
+      reason: "Shared instruction file already exists with different content",
+    });
+  }
+}
+
+async function shouldLinkMissingInstruction(candidate: InstructionFileCandidate): Promise<boolean> {
+  if (candidate.linkWhenMissing) return true;
+  return false;
+}
+
+async function linkInstructionFile(
+  candidate: InstructionFileCandidate,
+  destinationPath: string,
+  result: AgentsUnifyResult,
+): Promise<void> {
+  if (candidate.isDestination || samePath(candidate.path, destinationPath)) {
+    return;
+  }
+
+  if (!(await pathExistsOrSymlink(destinationPath))) {
+    return;
+  }
+
+  const destinationRealPath = await realPathIfPossible(destinationPath);
+  const stat = await fs.lstat(candidate.path).catch(() => null);
+
+  if (!stat) {
+    if (!(await shouldLinkMissingInstruction(candidate))) return;
+    await createFileSymlink(destinationPath, candidate.path);
+    result.linked.push({
+      category: "instructions",
+      from: candidate.path,
+      to: destinationPath,
+    });
+    return;
+  }
+
+  if (stat.isSymbolicLink()) {
+    const existingRealPath = await realPathIfPossible(candidate.path);
+    if (
+      destinationRealPath &&
+      existingRealPath &&
+      samePath(destinationRealPath, existingRealPath)
+    ) {
+      result.alreadyLinked.push({
+        category: "instructions",
+        from: candidate.path,
+        to: destinationPath,
+      });
+      return;
+    }
+
+    await fs.remove(candidate.path);
+    await createFileSymlink(destinationPath, candidate.path);
+    result.linked.push({
+      category: "instructions",
+      from: candidate.path,
+      to: destinationPath,
+    });
+    return;
+  }
+
+  const backupRoot = await ensureBackupPath(result);
+  const backupTarget = path.join(
+    backupRoot,
+    safeRelativePath(result.rootDir, candidate.path),
+  );
+
+  await fs.ensureDir(path.dirname(backupTarget));
+  await fs.move(candidate.path, backupTarget, { overwrite: false });
+  await createFileSymlink(destinationPath, candidate.path);
+  result.linked.push({
+    category: "instructions",
+    from: candidate.path,
+    to: destinationPath,
+    movedToBackup: backupTarget,
+  });
+}
+
 export async function unifyAgentsConfiguration(
   options: FolderOptions = {},
 ): Promise<AgentsUnifyResult> {
   const folders = resolveFolders(options);
   const candidates = getContainerCandidates(options);
+  const instructionCandidates = getInstructionFileCandidates(options);
   const result: AgentsUnifyResult = {
     rootDir: folders.rootDir,
     agentsDir: folders.agentsDir,
@@ -506,9 +693,16 @@ export async function unifyAgentsConfiguration(
   const destinationByCategory: Record<UnifiedAgentCategory, string> = {
     skills: path.join(folders.agentsDir, "skills"),
     agents: path.join(folders.agentsDir, "agents"),
+    instructions: path.join(folders.agentsDir, "AGENTS.md"),
   };
 
   await fs.ensureDir(folders.agentsDir);
+
+  await importInstructionFiles(
+    instructionCandidates,
+    destinationByCategory.instructions,
+    result,
+  );
 
   for (const category of ["skills", "agents"] as const) {
     await importCategoryEntries(
@@ -523,6 +717,14 @@ export async function unifyAgentsConfiguration(
     await linkContainer(
       candidate,
       destinationByCategory[candidate.category],
+      result,
+    );
+  }
+
+  for (const candidate of instructionCandidates) {
+    await linkInstructionFile(
+      candidate,
+      destinationByCategory.instructions,
       result,
     );
   }
