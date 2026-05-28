@@ -17,6 +17,7 @@ status_line_use_colors = true`;
 
 const TUI_SECTION = `[tui]
 ${TUI_STATUS_LINE_BLOCK}`;
+const COMMAND_DENY_HOOK_MARKER = "command-deny-list.ts";
 
 function hasTopLevelKey(content: string, key: string): boolean {
   let inSection = false;
@@ -42,7 +43,7 @@ function getTopLevelAssignments(defaultConfig: string): string[] {
   for (const line of defaultConfig.split(/\r?\n/)) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) continue;
-    if (/^\[[^\]]+\]$/.test(trimmed)) break;
+    if (trimmed.startsWith("[")) break;
     if (/^[A-Za-z0-9_-]+\s*=/.test(trimmed)) {
       assignments.push(line);
     }
@@ -94,6 +95,59 @@ function appendBlock(content: string, block: string): string {
   return `${normalized}\n\n${block}\n`;
 }
 
+function getDefaultHookBlocks(defaultConfig: string): string[] {
+  const lines = defaultConfig.split(/\r?\n/);
+  const blocks: string[] = [];
+  let current: string[] | null = null;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const tableName = trimmed.startsWith("[[") && trimmed.endsWith("]]")
+      ? trimmed.slice(2, -2)
+      : trimmed.startsWith("[") && trimmed.endsWith("]")
+        ? trimmed.slice(1, -1)
+        : null;
+
+    if (tableName) {
+      const isHookTable = tableName.startsWith("hooks.");
+
+      if (!isHookTable) {
+        if (current) {
+          blocks.push(current.join("\n").trimEnd());
+          current = null;
+        }
+        continue;
+      }
+
+      current ??= [];
+    }
+
+    if (current) {
+      current.push(line);
+    }
+  }
+
+  if (current) {
+    blocks.push(current.join("\n").trimEnd());
+  }
+
+  return blocks.filter(Boolean);
+}
+
+function mergeDefaultHooks(existingConfig: string, defaultConfig: string): string {
+  let merged = existingConfig;
+
+  for (const hookBlock of getDefaultHookBlocks(defaultConfig)) {
+    if (hookBlock.includes(COMMAND_DENY_HOOK_MARKER) && merged.includes(COMMAND_DENY_HOOK_MARKER)) {
+      continue;
+    }
+
+    merged = appendBlock(merged, hookBlock);
+  }
+
+  return merged;
+}
+
 export function mergeCodexConfig(existingConfig: string, defaultConfig: string): string {
   let merged = existingConfig.trimEnd();
 
@@ -103,6 +157,8 @@ export function mergeCodexConfig(existingConfig: string, defaultConfig: string):
       merged = appendBlock(merged, assignment);
     }
   }
+
+  merged = mergeDefaultHooks(merged, defaultConfig).trimEnd();
 
   if (sectionHasKey(merged, "tui", "status_line")) {
     return `${merged}\n`;

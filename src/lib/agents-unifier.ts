@@ -151,12 +151,6 @@ function getContainerCandidates(options: FolderOptions): ContainerCandidate[] {
     },
     {
       category: "agents",
-      label: "codex-agents",
-      path: path.join(folders.codexDir, "agents"),
-      linkWhenMissing: true,
-    },
-    {
-      category: "agents",
       label: "cursor-agents",
       path: path.join(cursorDir, "agents"),
       linkWhenParentExists: true,

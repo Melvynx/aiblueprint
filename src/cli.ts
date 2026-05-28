@@ -4,6 +4,7 @@ import { setupCommand } from "./commands/setup.js";
 import { setupTerminalCommand } from "./commands/setup-terminal.js";
 import { symlinkCommand } from "./commands/symlink.js";
 import { agentsUnifyCommand } from "./commands/agents-unify.js";
+import { codexAgentsCommand } from "./commands/codex-agents.js";
 import {
   proActivateCommand,
   proStatusCommand,
@@ -107,7 +108,7 @@ function registerAgentsCommands(cmd: Command) {
 
   cmd
     .command("unify")
-    .description("Unify skills and agents into .agents and symlink tool folders back to it")
+    .description("Unify skills and agents into .agents, then render Codex TOML agents")
     .action((options, command) => {
       const parentOptions = command.parent.opts();
       return agentsUnifyCommand({
@@ -115,6 +116,21 @@ function registerAgentsCommands(cmd: Command) {
         claudeCodeFolder: parentOptions.claudeCodeFolder,
         codexFolder: parentOptions.codexFolder,
         agentsFolder: parentOptions.agentsFolder,
+      });
+    });
+
+  cmd
+    .command("codex-agents")
+    .description("Render shared Markdown agents from .agents/agents into Codex TOML custom agents")
+    .option("--overwrite", "Overwrite existing non-generated Codex agent files")
+    .action((options, command) => {
+      const parentOptions = command.parent.opts();
+      return codexAgentsCommand({
+        folder: parentOptions.folder,
+        claudeCodeFolder: parentOptions.claudeCodeFolder,
+        codexFolder: parentOptions.codexFolder,
+        agentsFolder: parentOptions.agentsFolder,
+        overwrite: options.overwrite,
       });
     });
 

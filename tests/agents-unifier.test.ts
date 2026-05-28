@@ -66,7 +66,6 @@ describe("unifyAgentsConfiguration", () => {
       ".config/opencode/skills",
       ".claude/agents",
       ".claude/agnets",
-      ".codex/agents",
       ".cursor/agents",
       ".factory/droids",
     ]) {

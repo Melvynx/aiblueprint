@@ -5,6 +5,15 @@
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 
+[[hooks.PreToolUse]]
+matcher = "^Bash$"
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "/usr/bin/env node \"$HOME/.codex/hooks/command-deny-list.ts\""
+timeout = 5
+statusMessage = "Checking command safety"
+
 [tui]
 status_line = [
   "model-with-reasoning",

@@ -4,6 +4,7 @@ import {
   unifyAgentsConfiguration,
   type AgentsUnifyResult,
 } from "../lib/agents-unifier.js";
+import { renderCodexAgentsFromMarkdown } from "../lib/codex-agents-renderer.js";
 
 export interface AgentsUnifyCommandParams {
   folder?: string;
@@ -37,14 +38,20 @@ function printCategorySummary(result: AgentsUnifyResult, category: "skills" | "a
 export async function agentsUnifyCommand(params: AgentsUnifyCommandParams = {}) {
   try {
     console.log(chalk.blue.bold(`\nAIBlueprint agents unify ${chalk.gray(`v${getVersion()}`)}\n`));
-    console.log(chalk.gray("Centralizing reusable skills and agents into .agents"));
+    console.log(chalk.gray("Centralizing reusable skills and agents into .agents, then rendering Codex agents"));
 
     const result = await unifyAgentsConfiguration(params);
+    const codexResult = await renderCodexAgentsFromMarkdown(params);
 
     console.log(chalk.green("\nUnify complete"));
     console.log(chalk.gray(`  Shared folder: ${result.agentsDir}`));
     printCategorySummary(result, "skills");
     printCategorySummary(result, "agents");
+    console.log(
+      chalk.gray(
+        `  codex agents: ${codexResult.rendered.length} rendered, ${codexResult.skipped.length} skipped`,
+      ),
+    );
 
     if (result.backupPath) {
       console.log(chalk.gray(`  Source backups: ${result.backupPath}`));

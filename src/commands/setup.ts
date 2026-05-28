@@ -24,6 +24,7 @@ import {
 import { resolveFolders } from "../lib/folder-paths.js";
 import { mergeCodexConfigFile } from "../lib/codex-config.js";
 import { createConfigBackup } from "../lib/configs-store.js";
+import { renderCodexAgentsFromMarkdown } from "../lib/codex-agents-renderer.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -283,7 +284,12 @@ export async function setupCommand(params: SetupCommandParams = {}) {
         await syncCategorySymlinks("skills", agentsDir, codexDir, undefined, true);
       }
       if (options.aiblueprintAgents) {
-        await syncCategorySymlinks("agents", agentsDir, codexDir, undefined, true);
+        await renderCodexAgentsFromMarkdown({
+          folder,
+          claudeCodeFolder,
+          codexFolder,
+          agentsFolder,
+        });
       }
       s.stop("Codex configured");
     }
