@@ -1,0 +1,27 @@
+---
+title: agents setup-terminal
+description: Set up terminal tooling with Oh My ZSH, plugins, and a selected theme.
+command: aiblueprint agents setup-terminal
+---
+
+`agents setup-terminal` configures the terminal environment used alongside AI coding tools.
+
+```bash
+aiblueprint agents setup-terminal
+```
+
+## What it does
+
+- Checks for package-manager support on the current platform.
+- Installs Oh My ZSH when needed.
+- Installs supported plugins such as `git`, `zsh-autosuggestions`, and `zsh-syntax-highlighting`.
+- Lets you choose or sanitize a ZSH theme.
+- Backs up `.zshrc` before editing it.
+
+## With folder override
+
+```bash
+aiblueprint agents --folder /tmp/test-home setup-terminal
+```
+
+Use folder overrides when testing setup behavior without touching your real home directory.

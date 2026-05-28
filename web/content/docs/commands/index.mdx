@@ -1,0 +1,47 @@
+---
+title: Command Reference
+description: Every available AIBlueprint CLI command, grouped by command family.
+tags:
+  - commands
+---
+
+The CLI is organized around command families. `agents` is the primary family, `configs` handles snapshots, and `openclaw` handles OpenClaw-specific premium setup.
+
+## Top-level commands
+
+| Command | Description |
+| --- | --- |
+| `aiblueprint agents` | AI coding configuration commands. |
+| `aiblueprint ai-coding` | Legacy alias for `agents`. |
+| `aiblueprint claude-code` | Legacy alias for `agents`. |
+| `aiblueprint configs` | Save, load, undo, and inspect configuration snapshots. |
+| `aiblueprint openclaw` | OpenClaw configuration commands. |
+
+## Command pages
+
+<DocCardWrapper>
+  <DocSection title="Agents">
+    <DocCardGrid>
+      <DocCard href="/docs/commands/agents" icon="Bot" title="agents" description="Parent command for AI coding configuration." />
+      <DocCard href="/docs/commands/agents-setup" icon="Settings" title="agents setup" description="Install the default AIBlueprint environment." />
+      <DocCard href="/docs/commands/agents-pro" icon="KeyRound" title="agents pro" description="Manage premium AIBlueprint features." />
+    </DocCardGrid>
+  </DocSection>
+  <DocSection title="Configs and OpenClaw">
+    <DocCardGrid>
+      <DocCard href="/docs/commands/configs" icon="ArchiveRestore" title="configs" description="Save, load, list, and restore configuration snapshots." />
+      <DocCard href="/docs/commands/openclaw" icon="Sparkles" title="openclaw" description="Manage OpenClaw configuration." />
+      <DocCard href="/docs/commands/dynamic-scripts" icon="Terminal" title="dynamic scripts" description="Run discovered script commands." />
+    </DocCardGrid>
+  </DocSection>
+</DocCardWrapper>
+
+## Help
+
+Every command supports `--help`.
+
+```bash
+aiblueprint --help
+aiblueprint agents --help
+aiblueprint configs backups --help
+```

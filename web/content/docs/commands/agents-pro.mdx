@@ -1,0 +1,31 @@
+---
+title: agents pro
+description: Manage AIBlueprint CLI Premium activation, installation, updates, and selective sync.
+command: aiblueprint agents pro
+---
+
+`agents pro` manages premium AIBlueprint CLI features.
+
+```bash
+aiblueprint agents pro [command]
+```
+
+## Subcommands
+
+| Command | Description |
+| --- | --- |
+| `activate [token]` | Save a premium access token after validating access. |
+| `status` | Check whether a premium token is saved. |
+| `setup` | Install premium configurations. |
+| `update` | Update premium configurations. |
+| `sync` | Selectively sync premium configuration changes. |
+
+## Common flow
+
+```bash
+aiblueprint agents pro activate <token>
+aiblueprint agents pro setup
+aiblueprint agents pro sync
+```
+
+`sync` analyzes local differences and lets you apply selected premium changes.

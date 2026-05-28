@@ -1,0 +1,22 @@
+---
+title: Legacy aliases
+description: ai-coding and claude-code are legacy aliases for the agents command group.
+command: aiblueprint ai-coding
+---
+
+The CLI keeps two legacy aliases for compatibility:
+
+```bash
+aiblueprint ai-coding [options] [command]
+aiblueprint claude-code [options] [command]
+```
+
+Both aliases register the same subcommands as `aiblueprint agents`.
+
+## Prefer new commands
+
+Use `aiblueprint agents` in new documentation, scripts, and examples.
+
+```bash
+aiblueprint agents setup
+```

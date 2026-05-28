@@ -1,0 +1,29 @@
+---
+title: openclaw pro
+description: Activate, inspect, install, and update OpenClaw Pro configuration.
+command: aiblueprint openclaw pro
+---
+
+`openclaw pro` manages OpenClaw Pro features.
+
+```bash
+aiblueprint openclaw pro [command]
+```
+
+## Subcommands
+
+| Command | Description |
+| --- | --- |
+| `activate [token]` | Activate OpenClaw Pro with an access token. |
+| `status` | Check saved OpenClaw Pro token status. |
+| `setup` | Install OpenClaw Pro configurations. |
+| `update` | Update OpenClaw Pro configurations. |
+
+## Common flow
+
+```bash
+aiblueprint openclaw pro activate <token>
+aiblueprint openclaw pro setup
+```
+
+The default target folder is `~/.openclaw`; override it with `aiblueprint openclaw --folder <path> pro setup`.

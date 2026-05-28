@@ -1,0 +1,19 @@
+---
+title: agents backup
+description: Load an automatic backup created by AIBlueprint setup or sync commands.
+command: aiblueprint agents backup
+---
+
+`agents backup` manages automatic configuration backups from the `agents` command family.
+
+```bash
+aiblueprint agents backup load
+```
+
+## load
+
+`backup load` scans for backups, lets you choose one interactively, backs up the current configuration, then restores the selected backup.
+
+## Backup location
+
+Backups are stored under the AIBlueprint configuration backup area. The CLI prints exact paths when listing or loading backups.

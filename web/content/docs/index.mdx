@@ -1,0 +1,61 @@
+---
+title: AIBlueprint CLI
+description: Install, sync, back up, and share AI coding configuration across Claude Code, Codex, OpenCode, FactoryAI, and OpenClaw.
+tags:
+  - overview
+---
+
+AIBlueprint CLI manages local AI coding configuration. It installs a shared `.agents` folder, renders Codex agent files, links tool folders, handles premium configuration updates, and keeps recoverable backups around risky changes.
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+## Main capabilities
+
+<DocCardWrapper>
+  <DocSection title="Core workflows">
+    <DocCardGrid>
+      <DocCard href="/docs/commands/agents-setup" icon="Settings" title="Install AI coding setup" description="Install shell shortcuts, statusline scripts, agents, skills, and Codex configuration." />
+      <DocCard href="/docs/commands/agents-unify" icon="Boxes" title="Unify agents" description="Move shared skills and agents into .agents, then render Codex TOML agents." />
+      <DocCard href="/docs/commands/configs" icon="ArchiveRestore" title="Save and restore configs" description="Snapshot .claude, .codex, and .agents as named configs or automatic backups." />
+    </DocCardGrid>
+  </DocSection>
+  <DocSection title="Distribution and extensions">
+    <DocCardGrid>
+      <DocCard href="/docs/commands/agents-pro" icon="KeyRound" title="Premium configuration" description="Activate, install, update, and selectively sync premium AIBlueprint assets." />
+      <DocCard href="/docs/commands/openclaw" icon="Sparkles" title="OpenClaw Pro" description="Manage OpenClaw-specific premium configuration under ~/.openclaw." />
+      <DocCard href="/docs/commands/dynamic-scripts" icon="Terminal" title="Dynamic scripts" description="Run script groups discovered from ~/.claude/scripts/package.json." />
+    </DocCardGrid>
+  </DocSection>
+</DocCardWrapper>
+
+## Command map
+
+| Command | Purpose |
+| --- | --- |
+| `aiblueprint agents` | Main AI coding configuration command group. |
+| `aiblueprint ai-coding` | Legacy alias for `agents`. |
+| `aiblueprint claude-code` | Legacy alias for `agents`. |
+| `aiblueprint configs` | Named saves, restores, undo, and backup inspection. |
+| `aiblueprint openclaw` | OpenClaw configuration command group. |
+
+## Folder options
+
+Most configuration commands accept these shared options:
+
+| Option | Meaning |
+| --- | --- |
+| `-f, --folder <path>` | Root folder containing `.claude`, `.codex`, and `.agents`. Defaults to `$HOME`. |
+| `--claudeCodeFolder <path>` | Override the Claude Code folder. |
+| `--codexFolder <path>` | Override the Codex folder. |
+| `--agentsFolder <path>` | Override the shared agents folder. |
+
+## Recommended first run
+
+Use `agents setup` for a complete install. Use `configs save` before experimenting with local configuration changes.
+
+```bash
+npx aiblueprint-cli@latest agents setup
+npx aiblueprint-cli@latest configs save before-experiment
+```

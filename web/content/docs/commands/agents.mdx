@@ -1,0 +1,34 @@
+---
+title: agents
+description: Parent command for AI coding configuration setup, synchronization, premium features, backups, and script runners.
+command: aiblueprint agents
+---
+
+`agents` is the main command group. It manages local AI coding setup across Claude Code, Codex, shared `.agents`, premium configuration, backups, and script runners.
+
+```bash
+aiblueprint agents [options] [command]
+```
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `-f, --folder <path>` | Root folder containing `.claude`, `.codex`, and `.agents`. |
+| `--claudeCodeFolder <path>` | Override Claude Code folder. |
+| `--codexFolder <path>` | Override Codex folder. |
+| `--agentsFolder <path>` | Override shared agents folder. |
+| `-s, --skip` | Skip prompts and install all setup features where supported. |
+
+## Subcommands
+
+| Command | Description |
+| --- | --- |
+| `setup` | Install the default AIBlueprint AI coding setup. |
+| `setup-terminal` | Install terminal shell tooling and theme helpers. |
+| `symlink` | Create symlinks between supported tool configurations. |
+| `unify` | Unify shared skills and agents, then render Codex TOML agents. |
+| `codex-agents` | Render shared Markdown agents into Codex TOML files. |
+| `pro` | Manage premium AIBlueprint features. |
+| `backup load` | Load a previous automatic backup interactively. |
+| `auto-rename`, `validator`, `statusline` | Dynamic script groups discovered from `~/.claude/scripts`. |

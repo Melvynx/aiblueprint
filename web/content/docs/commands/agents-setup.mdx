@@ -1,0 +1,32 @@
+---
+title: agents setup
+description: Install AIBlueprint defaults for shell shortcuts, statusline scripts, agents, skills, and Codex configuration.
+command: aiblueprint agents setup
+---
+
+`agents setup` installs the standard AIBlueprint AI coding environment.
+
+```bash
+aiblueprint agents setup
+```
+
+## What it installs
+
+- Shell shortcuts such as `cc` and `ccc`.
+- Custom statusline scripts.
+- AIBlueprint agents.
+- AIBlueprint skills.
+- Codex starter configuration.
+- Shared `.agents` folders for reusable skills and agents.
+
+## Non-interactive install
+
+Use `--skip` on the parent command to install all default features.
+
+```bash
+aiblueprint agents --skip setup
+```
+
+## Safety behavior
+
+Before setup changes local configuration, it creates a backup of existing `.claude`, `.codex`, and `.agents` folders when they exist.

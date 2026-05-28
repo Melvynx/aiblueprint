@@ -1,0 +1,25 @@
+---
+title: configs
+description: Save, load, undo, and inspect named configuration snapshots and automatic backups.
+command: aiblueprint configs
+---
+
+`configs` manages snapshots of `.claude`, `.codex`, and `.agents`.
+
+```bash
+aiblueprint configs [options] [command]
+```
+
+## Subcommands
+
+| Command | Description |
+| --- | --- |
+| `save <name>` | Save current folders as a named config. |
+| `load <name>` | Load a named config and backup current folders first. |
+| `undo` | Restore the automatic backup from the most recent load. |
+| `list` | List saved named configs. |
+| `backups` | Manage automatic config backups. |
+
+## Shared options
+
+`configs` supports `--folder`, `--claudeCodeFolder`, `--codexFolder`, and `--agentsFolder`.

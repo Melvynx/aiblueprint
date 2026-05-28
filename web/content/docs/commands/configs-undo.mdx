@@ -1,0 +1,15 @@
+---
+title: configs undo
+description: Undo the most recent configs load by restoring its automatic backup.
+command: aiblueprint configs undo
+---
+
+`configs undo` rolls back the last `configs load`.
+
+```bash
+aiblueprint configs undo
+```
+
+## Behavior
+
+The command restores the backup created immediately before the most recent config load. It also backs up the current state before applying the undo.

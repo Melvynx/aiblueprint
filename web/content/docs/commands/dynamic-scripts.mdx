@@ -1,0 +1,54 @@
+---
+title: Dynamic scripts
+description: Run script groups discovered from ~/.claude/scripts/package.json.
+command: aiblueprint agents <script-group>
+---
+
+Dynamic script commands are registered at runtime from `~/.claude/scripts/package.json`. In the current environment, these groups are available.
+
+## auto-rename
+
+```bash
+aiblueprint agents auto-rename --list
+aiblueprint agents auto-rename rename-all
+```
+
+Available action:
+
+- `rename-all`
+
+## validator
+
+```bash
+aiblueprint agents validator --list
+aiblueprint agents validator cli
+```
+
+Available action:
+
+- `cli`
+
+## statusline
+
+```bash
+aiblueprint agents statusline --list
+aiblueprint agents statusline stats
+```
+
+Available actions:
+
+- `spend:day`
+- `spend:month`
+- `spend:project`
+- `stats`
+- `config`
+- `migrate`
+- `weekly`
+- `debug`
+- `usage`
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `-l, --list` | List available actions for the script group. |

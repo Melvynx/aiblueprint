@@ -1,0 +1,33 @@
+---
+title: agents symlink
+description: Create symlinks between supported AI coding tool configuration folders.
+command: aiblueprint agents symlink
+---
+
+`agents symlink` links compatible configuration folders between supported AI coding tools.
+
+```bash
+aiblueprint agents symlink
+```
+
+## Supported tools
+
+| Tool | Agent support |
+| --- | --- |
+| Claude Code | Yes |
+| Codex | Yes |
+| OpenCode | No shared agent support in this command |
+| FactoryAI | Yes |
+
+## Flow
+
+1. Select a source tool.
+2. Select syncable content.
+3. Select destination tools.
+4. Confirm symlink creation.
+
+## Folder overrides
+
+```bash
+aiblueprint agents --claudeCodeFolder ~/.claude --codexFolder ~/.codex symlink
+```

@@ -1,0 +1,26 @@
+---
+title: agents codex-agents
+description: Render shared Markdown agents from .agents/agents into Codex TOML custom agents.
+command: aiblueprint agents codex-agents
+---
+
+`agents codex-agents` renders `.agents/agents/*.md` definitions into Codex custom agent TOML files.
+
+```bash
+aiblueprint agents codex-agents
+```
+
+## Options
+
+| Option | Description |
+| --- | --- |
+| `--overwrite` | Overwrite existing non-generated Codex agent files. |
+
+## Examples
+
+```bash
+aiblueprint agents codex-agents
+aiblueprint agents codex-agents --overwrite
+```
+
+Use `--overwrite` only when you intentionally want generated output to replace an existing manual Codex agent file.

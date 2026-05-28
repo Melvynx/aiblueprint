@@ -1,0 +1,27 @@
+---
+title: configs backups
+description: List, load, or manually create automatic configuration backups.
+command: aiblueprint configs backups
+---
+
+`configs backups` manages automatic backup snapshots.
+
+```bash
+aiblueprint configs backups [command]
+```
+
+## Subcommands
+
+| Command | Description |
+| --- | --- |
+| `list` | List automatic backups with reasons. |
+| `load <name>` | Load a backup and backup current folders first. |
+| `create [reason]` | Create a manual backup of current config folders. |
+
+## Examples
+
+```bash
+aiblueprint configs backups list
+aiblueprint configs backups create "before testing symlinks"
+aiblueprint configs backups load backup-name
+```

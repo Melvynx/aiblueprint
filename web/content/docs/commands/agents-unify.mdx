@@ -1,0 +1,25 @@
+---
+title: agents unify
+description: Unify skills and agents into .agents, then render Codex TOML agents.
+command: aiblueprint agents unify
+---
+
+`agents unify` consolidates shared skills and agents into `.agents`, then renders Markdown agents into Codex TOML custom agents.
+
+```bash
+aiblueprint agents unify
+```
+
+## Use this when
+
+- You want Claude Code and Codex to share the same source agent definitions.
+- You changed files under `.agents/agents`.
+- Codex needs refreshed generated TOML agent files.
+
+## Inputs
+
+The command uses the configured `.claude`, `.codex`, and `.agents` folders. Override them from the parent command when needed.
+
+```bash
+aiblueprint agents --folder /Users/me unify
+```

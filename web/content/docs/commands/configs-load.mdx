@@ -1,0 +1,15 @@
+---
+title: configs load
+description: Load a named config and create a backup of the current folders first.
+command: aiblueprint configs load
+---
+
+`configs load` restores a named snapshot.
+
+```bash
+aiblueprint configs load <name>
+```
+
+## Behavior
+
+Before restoring, the command backs up the current `.claude`, `.codex`, and `.agents` folders. The output prints the backup path and the restored folders.
