@@ -1,6 +1,7 @@
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
+import { nitro } from "nitro/vite";
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { defineConfig } from "vite";
@@ -67,6 +68,7 @@ export default defineConfig({
       },
       pages: publicPages,
     }),
+    nitro(),
     viteReact(),
   ],
 });
