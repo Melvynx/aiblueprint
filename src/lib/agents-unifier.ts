@@ -2,6 +2,7 @@ import crypto from "crypto";
 import fs from "fs-extra";
 import os from "os";
 import path from "path";
+import { createBackupNameSuffix, createTimestampedBackupName, getBackupDir } from "./backup-utils.js";
 import { resolveFolders, type FolderOptions, type ResolvedFolders } from "./folder-paths.js";
 
 export type AgentsUnifyScope = "global" | "repository";
@@ -95,7 +96,7 @@ function uniqueByPath<T extends { path: string }>(candidates: T[]): T[] {
   return unique;
 }
 
-function getContainerCandidates(options: FolderOptions): ContainerCandidate[] {
+function getContainerCandidates(options: FolderOptions, includeCodex = true): ContainerCandidate[] {
   const folders = resolveFolders(options);
   const cursorDir = path.join(folders.rootDir, ".cursor");
   const factoryDir = path.join(folders.rootDir, ".factory");
@@ -114,12 +115,12 @@ function getContainerCandidates(options: FolderOptions): ContainerCandidate[] {
       path: path.join(folders.claudeDir, "skills"),
       linkWhenMissing: true,
     },
-    {
+    ...(includeCodex ? [{
       category: "skills",
       label: "codex-skills",
       path: path.join(folders.codexDir, "skills"),
       linkWhenMissing: true,
-    },
+    } satisfies ContainerCandidate] : []),
     {
       category: "skills",
       label: "cursor-skills",
@@ -194,7 +195,7 @@ function getContainerCandidates(options: FolderOptions): ContainerCandidate[] {
   ]);
 }
 
-function getInstructionFileCandidates(options: FolderOptions): InstructionFileCandidate[] {
+function getInstructionFileCandidates(options: FolderOptions, includeCodex = true): InstructionFileCandidate[] {
   const folders = resolveFolders(options);
 
   return uniqueByPath([
@@ -208,11 +209,11 @@ function getInstructionFileCandidates(options: FolderOptions): InstructionFileCa
       path: path.join(folders.claudeDir, "CLAUDE.md"),
       linkWhenMissing: true,
     },
-    {
+    ...(includeCodex ? [{
       label: "codex-instructions",
       path: path.join(folders.codexDir, "AGENTS.md"),
       linkWhenMissing: true,
-    },
+    } satisfies InstructionFileCandidate] : []),
   ]);
 }
 
@@ -221,7 +222,7 @@ function getRepositoryContainerCandidates(options: FolderOptions): ContainerCand
   const cursorDir = path.join(folders.rootDir, ".cursor");
 
   return uniqueByPath([
-    ...getContainerCandidates(options),
+    ...getContainerCandidates(options, false),
     {
       category: "rules",
       label: "agents-rules",
@@ -236,12 +237,6 @@ function getRepositoryContainerCandidates(options: FolderOptions): ContainerCand
     },
     {
       category: "rules",
-      label: "codex-rules",
-      path: path.join(folders.codexDir, "rules"),
-      linkWhenParentExists: true,
-    },
-    {
-      category: "rules",
       label: "cursor-rules",
       path: path.join(cursorDir, "rules"),
       linkWhenParentExists: true,
@@ -250,12 +245,6 @@ function getRepositoryContainerCandidates(options: FolderOptions): ContainerCand
       category: "rules",
       label: "claude-memories",
       path: path.join(folders.claudeDir, "memories"),
-      linkSource: false,
-    },
-    {
-      category: "rules",
-      label: "codex-memories",
-      path: path.join(folders.codexDir, "memories"),
       linkSource: false,
     },
     {
@@ -272,12 +261,6 @@ function getRepositoryContainerCandidates(options: FolderOptions): ContainerCand
     },
     {
       category: "rules",
-      label: "codex-memory",
-      path: path.join(folders.codexDir, "memory.md"),
-      linkSource: false,
-    },
-    {
-      category: "rules",
       label: "cursor-memory",
       path: path.join(cursorDir, "memory.md"),
       linkSource: false,
@@ -286,12 +269,6 @@ function getRepositoryContainerCandidates(options: FolderOptions): ContainerCand
       category: "rules",
       label: "claude-memory-uppercase",
       path: path.join(folders.claudeDir, "MEMORY.md"),
-      linkSource: false,
-    },
-    {
-      category: "rules",
-      label: "codex-memory-uppercase",
-      path: path.join(folders.codexDir, "MEMORY.md"),
       linkSource: false,
     },
     {
@@ -484,12 +461,12 @@ async function importCategoryEntries(
   candidates: ContainerCandidate[],
   destinationDir: string,
   result: AgentsUnifyResult,
-): Promise<void> {
-  await fs.ensureDir(destinationDir);
-
-  const destinationRealPath = await realPathIfPossible(destinationDir);
-  const knownHashes = new Map<string, string>();
-  await addExistingDestinationHashes(destinationDir, knownHashes);
+): Promise<boolean> {
+  const sourceEntries: Array<{ candidate: ContainerCandidate; entries: SourceEntry[] }> = [];
+  const destinationExists = await pathExistsOrSymlink(destinationDir);
+  const destinationRealPath = destinationExists
+    ? await realPathIfPossible(destinationDir)
+    : null;
 
   for (const candidate of candidates) {
     if (candidate.category !== category || candidate.isDestination) continue;
@@ -516,9 +493,28 @@ async function importCategoryEntries(
       continue;
     }
 
+    const collectableEntries: SourceEntry[] = [];
     for (const entry of entries) {
-      if (!shouldCollectPath(category, entry.name, entry.path)) continue;
+      if (!(await shouldCollectPath(category, entry.name, entry.path))) continue;
+      collectableEntries.push(entry);
+    }
 
+    if (collectableEntries.length > 0) {
+      sourceEntries.push({ candidate, entries: collectableEntries });
+    }
+  }
+
+  if (!destinationExists && sourceEntries.length === 0) {
+    return false;
+  }
+
+  await fs.ensureDir(destinationDir);
+
+  const knownHashes = new Map<string, string>();
+  await addExistingDestinationHashes(destinationDir, knownHashes);
+
+  for (const { candidate, entries } of sourceEntries) {
+    for (const entry of entries) {
       const sourcePath = entry.path;
       const sourceHash = await hashPath(sourcePath);
       const existingName = knownHashes.get(sourceHash);
@@ -553,7 +549,7 @@ async function importCategoryEntries(
         overwrite: false,
       });
       await normalizePortableContent(targetPath);
-      knownHashes.set(sourceHash, targetName);
+      knownHashes.set(await hashPath(targetPath), targetName);
       result.imported.push({
         category,
         name: entry.name,
@@ -562,6 +558,8 @@ async function importCategoryEntries(
       });
     }
   }
+
+  return true;
 }
 
 interface SourceEntry {
@@ -612,13 +610,6 @@ async function shouldCollectPath(
   return stat.isFile() || stat.isDirectory() || stat.isSymbolicLink();
 }
 
-function timestamp(date = new Date()): string {
-  return date
-    .toISOString()
-    .replace(/\.\d{3}Z$/, "")
-    .replace(/[:T]/g, "-");
-}
-
 function safeRelativePath(rootDir: string, targetPath: string): string {
   const relativePath = path.relative(rootDir, targetPath);
   if (!relativePath || relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
@@ -628,12 +619,10 @@ function safeRelativePath(rootDir: string, targetPath: string): string {
 }
 
 function createBackupPath(rootDir: string): string {
+  const projectKey = createBackupNameSuffix(path.resolve(rootDir));
   return path.join(
-    rootDir,
-    ".aiblueprint",
-    "backups",
-    "agents-unify-sources",
-    timestamp(),
+    getBackupDir(),
+    createTimestampedBackupName(`project-${projectKey}-agents-unify-sources`),
   );
 }
 
@@ -742,13 +731,12 @@ async function importInstructionFiles(
   candidates: InstructionFileCandidate[],
   destinationPath: string,
   result: AgentsUnifyResult,
-): Promise<void> {
-  await fs.ensureDir(path.dirname(destinationPath));
-
-  const destinationRealPath = await realPathIfPossible(destinationPath);
-  let destinationHash = await pathExistsOrSymlink(destinationPath)
-    ? await hashPath(destinationPath)
+): Promise<boolean> {
+  const destinationExists = await pathExistsOrSymlink(destinationPath);
+  const destinationRealPath = destinationExists
+    ? await realPathIfPossible(destinationPath)
     : null;
+  const sourceCandidates: InstructionFileCandidate[] = [];
 
   for (const candidate of candidates) {
     if (candidate.isDestination) continue;
@@ -765,6 +753,19 @@ async function importInstructionFiles(
       continue;
     }
 
+    sourceCandidates.push(candidate);
+  }
+
+  if (!destinationExists && sourceCandidates.length === 0) {
+    return false;
+  }
+
+  await fs.ensureDir(path.dirname(destinationPath));
+  let destinationHash = destinationExists
+    ? await hashPath(destinationPath)
+    : null;
+
+  for (const candidate of sourceCandidates) {
     const sourceHash = await hashPath(candidate.path);
 
     if (!destinationHash) {
@@ -810,6 +811,8 @@ async function importInstructionFiles(
       reason: "Shared instruction file already exists with different content",
     });
   }
+
+  return true;
 }
 
 async function shouldLinkMissingInstruction(candidate: InstructionFileCandidate): Promise<boolean> {
@@ -1041,9 +1044,15 @@ async function writeRepositoryInstructionIndex(
   folders: ResolvedFolders,
 ): Promise<void> {
   const rulesDir = path.join(folders.agentsDir, "rules");
-  await fs.ensureDir(rulesDir);
+  if (!(await pathExistsOrSymlink(rulesDir))) {
+    return;
+  }
 
   const rules = await collectRuleIndexEntries(rulesDir, folders.rootDir);
+  if (rules.length === 0) {
+    return;
+  }
+
   const existing = stripGeneratedRulesIndex(await readExistingInstructions(folders.rootDir));
   const content = `${existing}\n\n${renderRulesIndexBlock(rules)}\n`;
   const agentsPath = path.join(folders.rootDir, "AGENTS.md");
@@ -1072,7 +1081,8 @@ export async function unifyAgentsConfiguration(
 ): Promise<AgentsUnifyResult> {
   const scope = options.scope ?? "global";
   const folders = resolveFolders(options);
-  const instructionCandidates = getInstructionFileCandidates(options);
+  const includeCodex = scope !== "repository";
+  const instructionCandidates = getInstructionFileCandidates(options, includeCodex);
   const candidates = scope === "repository"
     ? getRepositoryContainerCandidates(options)
     : getContainerCandidates(options);
@@ -1097,8 +1107,6 @@ export async function unifyAgentsConfiguration(
     rules: path.join(folders.agentsDir, "rules"),
   };
 
-  await fs.ensureDir(folders.agentsDir);
-
   await importInstructionFiles(
     instructionCandidates,
     destinationByCategory.instructions,
@@ -1109,16 +1117,21 @@ export async function unifyAgentsConfiguration(
     ? ["skills", "agents", "rules"]
     : ["skills", "agents"];
 
+  const activeCategories = new Set<Exclude<UnifiedAgentCategory, "instructions">>();
   for (const category of categories) {
-    await importCategoryEntries(
+    const isActive = await importCategoryEntries(
       category,
       candidates,
       destinationByCategory[category],
       result,
     );
+    if (isActive) {
+      activeCategories.add(category);
+    }
   }
 
   for (const candidate of candidates) {
+    if (!activeCategories.has(candidate.category)) continue;
     await linkContainer(
       candidate,
       destinationByCategory[candidate.category],

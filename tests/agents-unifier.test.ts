@@ -26,13 +26,18 @@ async function writeAgent(root: string, relativeDir: string, name: string, conte
 
 describe("unifyAgentsConfiguration", () => {
   let root: string;
+  let backupRoot: string;
 
   beforeEach(async () => {
     root = await makeFixture("unify");
+    backupRoot = await makeFixture("backup");
+    process.env.AIBLUEPRINT_BACKUP_DIR = backupRoot;
   });
 
   afterEach(async () => {
+    delete process.env.AIBLUEPRINT_BACKUP_DIR;
     await fs.remove(root).catch(() => {});
+    await fs.remove(backupRoot).catch(() => {});
   });
 
   it("imports known tool skills and agents into .agents, skips exact duplicates, and replaces source dirs with symlinks", async () => {
@@ -127,6 +132,21 @@ describe("unifyAgentsConfiguration", () => {
     expect(stat.isSymbolicLink()).toBe(true);
   });
 
+  it("does not create empty project category folders or .codex when only rules exist", async () => {
+    await fs.ensureDir(path.join(root, ".claude/rules"));
+    await fs.writeFile(path.join(root, ".claude/rules/testing.md"), "# Testing\n", "utf-8");
+
+    const result = await unifyAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect(await fs.pathExists(path.join(root, ".agents/rules/testing.md"))).toBe(true);
+    expect(await fs.pathExists(path.join(root, ".agents/skills"))).toBe(false);
+    expect(await fs.pathExists(path.join(root, ".agents/agents"))).toBe(false);
+    expect(await fs.pathExists(path.join(root, ".codex"))).toBe(false);
+    expect(result.backupPath).toBeTruthy();
+    expect(result.backupPath!.startsWith(root)).toBe(false);
+    expect(path.basename(result.backupPath!)).toContain("project-");
+  });
+
   it("unifies repository rules and memories, indexes them in AGENTS.md, and symlinks CLAUDE.md", async () => {
     await writeSkill(
       root,
@@ -139,8 +159,8 @@ describe("unifyAgentsConfiguration", () => {
     await fs.writeFile(path.join(root, ".claude/rules/testing.md"), "# Testing\n\nRun the test suite.", "utf-8");
     await fs.ensureDir(path.join(root, ".cursor/rules"));
     await fs.writeFile(path.join(root, ".cursor/rules/ui.mdc"), "# UI\n\nUse accessible controls.", "utf-8");
-    await fs.ensureDir(path.join(root, ".codex/memories"));
-    await fs.writeFile(path.join(root, ".codex/memories/project.md"), "# Project Memory\n\nPrefer .codex/rules.", "utf-8");
+    await fs.ensureDir(path.join(root, ".cursor/memories"));
+    await fs.writeFile(path.join(root, ".cursor/memories/project.md"), "# Project Memory\n\nPrefer .codex/rules.", "utf-8");
     await fs.writeFile(path.join(root, "CLAUDE.md"), "# Project Guide\n\nKeep this content.", "utf-8");
 
     const result = await unifyAgentsConfiguration({ folder: root, scope: "repository" });

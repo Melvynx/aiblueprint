@@ -21,7 +21,7 @@ npx aiblueprint-cli@latest agents config unify sessions
 | Mode | Default folder | What it does |
 | ---- | -------------- | ------------ |
 | `global` | `$HOME` | Imports global skills and agents from Claude, Codex, Cursor, OpenCode, and Factory paths into `~/.agents`, then links tool folders back to the shared source. |
-| `projects` | Current working directory | Alias for repository mode. Imports project-local skills, agents, rules, and memories into `.agents`, links `.claude/rules` back to `.agents/rules`, creates `AGENTS.md`, and symlinks `CLAUDE.md` to it. |
+| `projects` | Current working directory | Alias for repository mode. Imports project-local skills, agents, rules, and memories into `.agents`, creates only the needed category folders, links `.claude/rules` back to `.agents/rules`, creates `AGENTS.md`, and symlinks `CLAUDE.md` to it. |
 | `repository` | Current working directory | Same behavior as `projects`. Kept as the explicit technical name for repo-local configuration. |
 
 Use `--folder <path>` with any mode to target a specific root.
@@ -29,7 +29,7 @@ Use `--folder <path>` with any mode to target a specific root.
 ## Projects Mode
 
 Projects mode is designed for repositories that already have tool-specific
-configuration in `.claude`, `.codex`, or `.cursor`.
+configuration in `.claude`, `.cursor`, or `.agents`.
 
 ```bash
 npx aiblueprint-cli@latest agents unify projects
@@ -41,10 +41,14 @@ It will:
 2. Move Markdown agents into `.agents/agents`.
 3. Move rules and memory notes into `.agents/rules`.
 4. Rewrite copied text references from tool-specific paths like
-   `.claude/rules` or `.codex/agents` to `.agents/rules` and `.agents/agents`.
+   `.claude/rules` or `.cursor/agents` to `.agents/rules` and `.agents/agents`.
 5. Create compatibility symlinks so existing tools keep reading the shared
    folders.
 6. Generate an `AGENTS.md` rules index and make `CLAUDE.md` point to it.
+
+If a project has no skills, agents, or rules, the command does not create empty
+`.agents/skills`, `.agents/agents`, or `.agents/rules` folders. Project mode
+also does not create `.codex`; Codex reads the shared `.agents` project context.
 
 ## Global Mode
 
@@ -73,6 +77,10 @@ After running, the CLI reports per category:
 - Already linked (skipped)
 - Source backups created
 - Project rules indexed, when projects mode is used
+
+Project-mode source backups are stored in the global AIBlueprint backup root,
+not inside the repository. The backup folder name includes the project path with
+slashes replaced, so a project backup is easy to identify and restore later.
 
 ## Session Unify
 

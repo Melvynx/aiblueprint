@@ -19,6 +19,21 @@ export interface BackupInfo {
   date: Date;
 }
 
+export function createBackupNameSuffix(value: string): string {
+  return value
+    .trim()
+    .replace(/^[a-zA-Z]:/, (drive) => drive.replace(":", ""))
+    .replace(/[\\/]+/g, "--")
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "root";
+}
+
+export function createTimestampedBackupName(suffix?: string, date = new Date()): string {
+  const base = formatDate(date);
+  if (!suffix) return base;
+  return `${base}--${createBackupNameSuffix(suffix)}`;
+}
+
 export async function listBackups(): Promise<BackupInfo[]> {
   const backupBaseDir = getBackupDir();
   const exists = await fs.pathExists(backupBaseDir);
@@ -32,7 +47,7 @@ export async function listBackups(): Promise<BackupInfo[]> {
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
 
-    const match = entry.name.match(/^(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})-(\d{2})$/);
+    const match = entry.name.match(/^(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})-(\d{2})(?:--.+)?$/);
     if (!match) continue;
 
     const [, year, month, day, hour, minute, second] = match;
@@ -142,8 +157,7 @@ export async function createBackup(
     return null;
   }
 
-  const timestamp = formatDate(new Date());
-  const backupPath = path.join(getBackupDir(), timestamp);
+  const backupPath = path.join(getBackupDir(), createTimestampedBackupName());
 
   await fs.ensureDir(backupPath);
 

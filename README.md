@@ -77,7 +77,7 @@ npx aiblueprint-cli@latest agents symlink
 # Centralize global skills and agents in ~/.agents
 npx aiblueprint-cli@latest agents unify
 
-# Unify project-local .claude/.codex/.cursor config into .agents
+# Unify project-local .claude/.cursor config into .agents
 npx aiblueprint-cli@latest agents unify projects
 
 # Recover sessions from saved configs and backups

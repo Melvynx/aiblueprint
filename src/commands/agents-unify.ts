@@ -42,10 +42,16 @@ export async function agentsUnifyCommand(params: AgentsUnifyCommandParams = {}) 
   try {
     console.log(chalk.blue.bold(`\nAIBlueprint agents unify ${chalk.gray(`v${getVersion()}`)}\n`));
     console.log(chalk.gray(`Scope: ${params.scope ?? "global"}`));
-    console.log(chalk.gray("Centralizing reusable agent configuration into .agents, then rendering Codex agents"));
+    console.log(chalk.gray(
+      params.scope === "repository"
+        ? "Centralizing project agent configuration into .agents"
+        : "Centralizing reusable agent configuration into .agents, then rendering Codex agents",
+    ));
 
     const result = await unifyAgentsConfiguration(params);
-    const codexResult = await renderCodexAgentsFromMarkdown(params);
+    const codexResult = params.scope === "repository"
+      ? null
+      : await renderCodexAgentsFromMarkdown(params);
 
     console.log(chalk.green("\nUnify complete"));
     console.log(chalk.gray(`  Shared folder: ${result.agentsDir}`));
@@ -55,11 +61,13 @@ export async function agentsUnifyCommand(params: AgentsUnifyCommandParams = {}) 
     if (result.scope === "repository") {
       printCategorySummary(result, "rules");
     }
-    console.log(
-      chalk.gray(
-        `  codex agents: ${codexResult.rendered.length} rendered, ${codexResult.skipped.length} skipped`,
-      ),
-    );
+    if (codexResult) {
+      console.log(
+        chalk.gray(
+          `  codex agents: ${codexResult.rendered.length} rendered, ${codexResult.skipped.length} skipped`,
+        ),
+      );
+    }
     if (result.instructionIndex) {
       console.log(
         chalk.gray(

@@ -2,7 +2,7 @@ import fs from "fs-extra";
 import os from "os";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createBackup, loadBackup } from "../src/lib/backup-utils";
+import { createBackup, createTimestampedBackupName, listBackups, loadBackup } from "../src/lib/backup-utils";
 
 describe("backup utils", () => {
   let rootDir: string;
@@ -48,5 +48,15 @@ describe("backup utils", () => {
     expect(await fs.readFile(path.join(restoreDir, ".claude", "projects", "project.jsonl"), "utf-8")).toBe("claude session");
     expect(await fs.readFile(path.join(restoreDir, ".codex", "sessions", "session.jsonl"), "utf-8")).toBe("codex session");
     expect(await fs.readFile(path.join(restoreDir, ".agents", "sessions", "agent-session.jsonl"), "utf-8")).toBe("agent session");
+  });
+
+  it("lists project-suffixed backup folders by their timestamp prefix", async () => {
+    const name = createTimestampedBackupName("/Users/melvynx/Documents/TestCodex", new Date(2026, 4, 29, 10, 30, 0));
+    await fs.ensureDir(path.join(process.env.AIBLUEPRINT_BACKUP_DIR!, name));
+
+    const backups = await listBackups();
+
+    expect(backups[0].name).toBe(name);
+    expect(name).toContain("Users--melvynx--Documents--TestCodex");
   });
 });

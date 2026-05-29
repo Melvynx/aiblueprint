@@ -18,11 +18,16 @@ describe("agentsUnifyCommand", () => {
 
   beforeEach(async () => {
     root = await makeFixture("unify-command");
+    process.env.AIBLUEPRINT_BACKUP_DIR = await makeFixture("unify-command-backups");
     logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
   });
 
   afterEach(async () => {
     logSpy.mockRestore();
+    if (process.env.AIBLUEPRINT_BACKUP_DIR) {
+      await fs.remove(process.env.AIBLUEPRINT_BACKUP_DIR).catch(() => {});
+    }
+    delete process.env.AIBLUEPRINT_BACKUP_DIR;
     await fs.remove(root).catch(() => {});
   });
 
@@ -64,6 +69,9 @@ Review the assigned code carefully.
 
     expect(await fs.pathExists(path.join(root, ".agents/rules/testing.md"))).toBe(true);
     expect(await fs.pathExists(path.join(root, "AGENTS.md"))).toBe(true);
+    expect(await fs.pathExists(path.join(root, ".agents/skills"))).toBe(false);
+    expect(await fs.pathExists(path.join(root, ".agents/agents"))).toBe(false);
+    expect(await fs.pathExists(path.join(root, ".codex"))).toBe(false);
     expect(logSpy.mock.calls.flat().join("\n")).toContain("rules index: 1 rules indexed");
   });
 });
