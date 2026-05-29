@@ -109,14 +109,17 @@ function registerAgentsCommands(cmd: Command) {
 
   cmd
     .command("unify [scope]")
-    .description("Unify agent configuration into .agents (scope: global or repository; default: global)")
+    .description("Unify agent configuration into .agents (scope: global or projects/repository; default: global)")
     .action((scope, options, command) => {
       const parentOptions = command.parent.opts();
-      const selectedScope = scope ?? "global";
+      const requestedScope = scope ?? "global";
+      const selectedScope = requestedScope === "projects" || requestedScope === "project"
+        ? "repository"
+        : requestedScope;
 
       if (selectedScope !== "global" && selectedScope !== "repository") {
-        console.error(chalk.red(`Invalid unify scope: ${selectedScope}`));
-        console.error(chalk.gray("Use `global` or `repository`."));
+        console.error(chalk.red(`Invalid unify scope: ${requestedScope}`));
+        console.error(chalk.gray("Use `global`, `projects`, or `repository`."));
         process.exitCode = 1;
         return;
       }

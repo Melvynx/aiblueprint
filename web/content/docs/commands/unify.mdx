@@ -1,28 +1,70 @@
 ---
 title: agents unify
-description: Centralize skills and agents into ~/.agents, then render Codex agents.
-keywords: ["unify", "agents", "skills", "centralize", "codex"]
+description: Centralize global or project agent configuration into .agents.
+keywords: ["unify", "agents", "skills", "rules", "projects", "centralize", "codex"]
 ---
 
-`agents unify` consolidates your skills and agents from `~/.claude` into the
-shared `~/.agents` folder, then renders the shared Markdown agents into Codex
-TOML custom agents.
+`agents unify` centralizes agent configuration into `.agents`. By default it
+uses global mode and consolidates your home-level skills and agents into
+`~/.agents`.
 
 ```bash
 aiblueprint agents unify
+aiblueprint agents unify global
+aiblueprint agents unify projects
+aiblueprint agents unify repository
+npx aiblueprint-cli@latest agents config unify sessions
 ```
 
-## What it does
+## Modes
 
-1. Imports skills and agents from `~/.claude` into `~/.agents`.
-2. Skips duplicates and renames files when there is a conflict.
-3. Creates symlinks back so existing tools keep working.
-4. Backs up the source before moving anything.
-5. Renders shared agents into Codex TOML format.
+| Mode | Default folder | What it does |
+| ---- | -------------- | ------------ |
+| `global` | `$HOME` | Imports global skills and agents from Claude, Codex, Cursor, OpenCode, and Factory paths into `~/.agents`, then links tool folders back to the shared source. |
+| `projects` | Current working directory | Alias for repository mode. Imports project-local skills, agents, rules, and memories into `.agents`, links `.claude/rules` back to `.agents/rules`, creates `AGENTS.md`, and symlinks `CLAUDE.md` to it. |
+| `repository` | Current working directory | Same behavior as `projects`. Kept as the explicit technical name for repo-local configuration. |
+
+Use `--folder <path>` with any mode to target a specific root.
+
+## Projects Mode
+
+Projects mode is designed for repositories that already have tool-specific
+configuration in `.claude`, `.codex`, or `.cursor`.
+
+```bash
+npx aiblueprint-cli@latest agents unify projects
+```
+
+It will:
+
+1. Move reusable skills into `.agents/skills`.
+2. Move Markdown agents into `.agents/agents`.
+3. Move rules and memory notes into `.agents/rules`.
+4. Rewrite copied text references from tool-specific paths like
+   `.claude/rules` or `.codex/agents` to `.agents/rules` and `.agents/agents`.
+5. Create compatibility symlinks so existing tools keep reading the shared
+   folders.
+6. Generate an `AGENTS.md` rules index and make `CLAUDE.md` point to it.
+
+## Global Mode
+
+Global mode preserves the original behavior.
+
+```bash
+npx aiblueprint-cli@latest agents unify global
+```
+
+It will:
+
+1. Import global skills and agents into `~/.agents`.
+2. Skip duplicates and rename files when there is a conflict.
+3. Create symlinks back so existing tools keep working.
+4. Back up the source before moving anything.
+5. Render shared agents into Codex TOML format.
 
 ## Output summary
 
-After running, the CLI reports per category (skills, agents):
+After running, the CLI reports per category:
 
 - Imported count
 - Duplicates skipped
@@ -30,10 +72,18 @@ After running, the CLI reports per category (skills, agents):
 - Symlinks created
 - Already linked (skipped)
 - Source backups created
+- Project rules indexed, when projects mode is used
+
+## Session Unify
+
+`agents config unify sessions` scans saved configs and backups, then imports
+Claude, Codex, and shared agent session roots into the current folders. It
+keeps current files, skips identical duplicates, and preserves conflicts with a
+source suffix instead of overwriting session history.
 
 ## Why centralize
 
-A single `~/.agents` source of truth means your skills and agents work
-identically across Claude Code, Codex, and any other linked tool. To render
-only the Codex agents without a full unify, use
+A single `.agents` source of truth means your skills, agents, and project rules
+work consistently across Claude Code, Codex, Cursor, and other linked tools. To
+render only the Codex agents without a full unify, use
 [agents codex-agents](/commands/codex-agents).

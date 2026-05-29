@@ -1,16 +1,16 @@
 {
   "name": "aiblueprint-cli",
-  "version": "1.4.64",
+  "version": "1.4.65",
   "description": "AIBlueprint CLI for setting up AI coding configurations",
   "author": "AIBlueprint",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Melvynx/aiblueprint.git"
+    "url": "git+https://github.com/Melvynx/aiblueprint.git"
   },
   "type": "module",
   "bin": {
-    "aiblueprint": "./dist/cli.js"
+    "aiblueprint": "dist/cli.js"
   },
   "scripts": {
     "build": "bun build src/cli.ts --outdir dist --target node && chmod +x dist/cli.js",
