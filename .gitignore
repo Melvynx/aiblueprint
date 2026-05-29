@@ -178,3 +178,4 @@ dist
 test-claude-config/
 
 tmp
+.vercel

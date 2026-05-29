@@ -88,7 +88,9 @@
 
   .typography {
     max-width: 65ch;
+    min-width: 0;
     color: var(--color-foreground);
+    overflow-wrap: break-word;
   }
   .typography h1:not(.not-typography h1) {
     scroll-margin: calc(var(--spacing) * 20);
@@ -160,10 +162,13 @@
     font-style: italic;
   }
   .typography table:not(.not-typography table) {
+    display: block;
     margin-top: calc(var(--spacing) * 6);
     margin-bottom: calc(var(--spacing) * 6);
+    max-width: 100%;
     width: 100%;
-    overflow-y: auto;
+    overflow-x: auto;
+    border-collapse: collapse;
   }
   .typography table:not(.not-typography table) thead tr {
     margin: 0;
@@ -175,6 +180,7 @@
     padding: calc(var(--spacing) * 2) calc(var(--spacing) * 4);
     text-align: left;
     font-weight: 700;
+    vertical-align: top;
   }
   .typography table:not(.not-typography table) th[align="center"] {
     text-align: center;
@@ -194,6 +200,7 @@
     border: 1px solid var(--color-border);
     padding: calc(var(--spacing) * 2) calc(var(--spacing) * 4);
     text-align: left;
+    vertical-align: top;
   }
   .typography table:not(.not-typography table) td[align="center"] {
     text-align: center;

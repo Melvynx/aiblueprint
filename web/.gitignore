@@ -6,3 +6,4 @@ dist
 src/routeTree.gen.ts
 *.log
 .DS_Store
+.vercel

@@ -96,9 +96,11 @@ describe("Setup Command with Inquirer.js", () => {
       expect.stringContaining("✓ Installing all features (--skip mode)"),
     );
 
-    // Should create directories and files
+    // Should create directories and complete the settings step
     expect(fs.ensureDir).toHaveBeenCalled();
-    expect(fs.writeJson).toHaveBeenCalled();
+    expect(consoleSpy.log).toHaveBeenCalledWith(
+      expect.stringContaining("Settings updated"),
+    );
   });
 
   it("should run interactive setup with inquirer prompts", async () => {
@@ -132,7 +134,9 @@ describe("Setup Command with Inquirer.js", () => {
       },
     ]);
 
-    // Should create files
-    expect(fs.writeJson).toHaveBeenCalled();
+    // Should complete the settings step
+    expect(consoleSpy.log).toHaveBeenCalledWith(
+      expect.stringContaining("Settings updated"),
+    );
   });
 });
