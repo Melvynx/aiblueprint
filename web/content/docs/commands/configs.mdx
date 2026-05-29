@@ -4,8 +4,10 @@ description: Save, load, list, and restore named configurations and automatic ba
 keywords: ["configs", "save", "load", "undo", "backups"]
 ---
 
-`configs` manages snapshots of your `.claude`, `.codex`, and `.agents` folders.
-Use it to keep multiple setups and switch between them safely.
+`configs` manages full snapshots of your `.claude`, `.codex`, and `.agents`
+folders. Saved configs and backups include sessions, projects, logs, caches,
+and every other file inside those folders so switching configs does not discard
+history.
 
 ## Named configs
 
@@ -55,3 +57,15 @@ aiblueprint configs backups load 2026-05-28-setup
 
 Each entry shows its name, date, reason, trigger, the folders included, and its
 path on disk.
+
+## Session recovery
+
+If you have sessions spread across saved configs and backups, merge them back
+into the current folders without overwriting existing files:
+
+```bash
+npx aiblueprint-cli@latest agents config unify sessions
+```
+
+Identical session files are skipped. If the same session path exists with
+different content, the imported file is copied with a source suffix.

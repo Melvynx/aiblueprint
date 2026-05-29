@@ -5,48 +5,6 @@ import { resolveFolders, type FolderOptions, type ResolvedFolders } from "./fold
 const MANAGED_FOLDER_NAMES = [".claude", ".codex", ".agents"] as const;
 type ManagedFolderName = typeof MANAGED_FOLDER_NAMES[number];
 
-const COMMON_EXCLUDED_NAMES = new Set([
-  ".git",
-  ".DS_Store",
-  "node_modules",
-]);
-
-const EXCLUDED_RUNTIME_PATHS: Record<ManagedFolderName, Set<string>> = {
-  ".claude": new Set([
-    "backups",
-    "cache",
-    "debug",
-    "file-history",
-    "logs",
-    "output",
-    "paste-cache",
-    "plugins/cache",
-    "projects",
-    "session-env",
-    "sessions",
-    "stats-cache.json",
-    "security.log",
-  ]),
-  ".codex": new Set([
-    "archived_sessions",
-    "browser/sessions",
-    "cache",
-    "log",
-    "logs_2.sqlite",
-    "logs_2.sqlite-shm",
-    "logs_2.sqlite-wal",
-    "models_cache.json",
-    "plugins/cache",
-    "sessions",
-    "vendor_imports/skills-curated-cache.json",
-  ]),
-  ".agents": new Set([
-    "cache",
-    "logs",
-    "sessions",
-  ]),
-};
-
 export interface ConfigStorePaths {
   baseDir: string;
   configsDir: string;
@@ -132,39 +90,10 @@ async function hasContent(folderPath: string): Promise<boolean> {
   return entries.some((entry) => entry !== ".DS_Store");
 }
 
-function normalizeRelativePath(relativePath: string): string {
-  return relativePath.split(path.sep).join("/");
-}
-
-function shouldCopyManagedPath(folderName: ManagedFolderName, sourceRoot: string, sourcePath: string): boolean {
-  const basename = path.basename(sourcePath);
-  if (COMMON_EXCLUDED_NAMES.has(basename)) return false;
-
-  const relativePath = normalizeRelativePath(path.relative(sourceRoot, sourcePath));
-  if (!relativePath) return true;
-
-  const excludedPaths = EXCLUDED_RUNTIME_PATHS[folderName];
-  if (excludedPaths.has(relativePath)) return false;
-
-  for (const excludedPath of excludedPaths) {
-    if (relativePath.startsWith(`${excludedPath}/`)) return false;
-  }
-
-  return true;
-}
-
-async function copyManagedFolder(name: ManagedFolderName, source: string, destination: string): Promise<void> {
+async function copyManagedFolder(source: string, destination: string): Promise<void> {
   await fs.copy(source, destination, {
     overwrite: true,
     dereference: false,
-    filter: async (src) => {
-      try {
-        const stat = await fs.lstat(src);
-        return !stat.isSymbolicLink() && shouldCopyManagedPath(name, source, src);
-      } catch {
-        return true;
-      }
-    },
   });
 }
 
@@ -204,7 +133,7 @@ async function snapshotByCopy(
 
   for (const folder of managedFolders(folders)) {
     if (!(await hasContent(folder.path))) continue;
-    await copyManagedFolder(folder.name, folder.path, path.join(snapshotPath, folder.name));
+    await copyManagedFolder(folder.path, path.join(snapshotPath, folder.name));
     copied.push(folder.name);
   }
 
@@ -325,7 +254,7 @@ async function restoreSnapshot(snapshotPath: string, folders: ResolvedFolders): 
     const source = path.join(snapshotPath, folder.name);
     if (!(await fs.pathExists(source))) continue;
     await fs.ensureDir(path.dirname(folder.path));
-    await copyManagedFolder(folder.name, source, folder.path);
+    await copyManagedFolder(source, folder.path);
     restored.push(folder.name);
   }
 

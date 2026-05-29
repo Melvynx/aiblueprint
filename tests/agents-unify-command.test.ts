@@ -14,7 +14,7 @@ async function makeFixture(suffix: string) {
 
 describe("agentsUnifyCommand", () => {
   let root: string;
-  let logSpy: ReturnType<typeof vi.spyOn>;
+  let logSpy: any;
 
   beforeEach(async () => {
     root = await makeFixture("unify-command");
@@ -54,5 +54,16 @@ Review the assigned code carefully.
     expect(output).toContain('description = "Review changed code"');
     expect(output).toContain('model = "gpt-5.5"');
     expect(output).toContain("Review the assigned code carefully.");
+  });
+
+  it("prints repository rule indexing when repository scope is used", async () => {
+    await fs.ensureDir(path.join(root, ".claude/rules"));
+    await fs.writeFile(path.join(root, ".claude/rules/testing.md"), "# Testing\n", "utf-8");
+
+    await agentsUnifyCommand({ folder: root, scope: "repository" });
+
+    expect(await fs.pathExists(path.join(root, ".agents/rules/testing.md"))).toBe(true);
+    expect(await fs.pathExists(path.join(root, "AGENTS.md"))).toBe(true);
+    expect(logSpy.mock.calls.flat().join("\n")).toContain("rules index: 1 rules indexed");
   });
 });

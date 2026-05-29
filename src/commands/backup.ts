@@ -27,7 +27,7 @@ function formatBackupDate(date: Date): string {
 }
 
 export async function backupLoadCommand(options: BackupLoadOptions = {}): Promise<void> {
-  const { claudeDir, agentsDir } = resolveFolders(options);
+  const { claudeDir, codexDir, agentsDir } = resolveFolders(options);
 
   p.intro(chalk.blue("📦 Load Backup"));
 
@@ -75,7 +75,7 @@ export async function backupLoadCommand(options: BackupLoadOptions = {}): Promis
   }
 
   spinner.start("Creating backup of current configuration...");
-  const currentBackup = await createBackup(claudeDir, agentsDir);
+  const currentBackup = await createBackup(claudeDir, codexDir, agentsDir);
   if (currentBackup) {
     spinner.stop(`Current config backed up to: ${chalk.gray(currentBackup)}`);
   } else {
@@ -85,7 +85,7 @@ export async function backupLoadCommand(options: BackupLoadOptions = {}): Promis
   spinner.start("Restoring backup...");
 
   try {
-    await loadBackup(selected.path, claudeDir, agentsDir);
+    await loadBackup(selected.path, claudeDir, codexDir, agentsDir);
     spinner.stop("Backup restored successfully");
 
     p.log.success(`Restored configuration from ${chalk.cyan(selected.name)}`);
