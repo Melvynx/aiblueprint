@@ -2,7 +2,7 @@ import fs from "fs-extra";
 import os from "os";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { unifySessionsFromSnapshots } from "../src/lib/session-unifier";
+import { previewSessionsFromSnapshots, unifySessionsFromSnapshots } from "../src/lib/session-unifier";
 
 describe("session unifier", () => {
   let rootDir: string;
@@ -39,5 +39,17 @@ describe("session unifier", () => {
     expect(result.imported).toHaveLength(4);
     expect(result.duplicates).toHaveLength(1);
     expect(result.conflicts).toHaveLength(1);
+  });
+
+  it("previews session imports without writing files", async () => {
+    await fs.outputFile(path.join(rootDir, ".aiblueprint", "configs", "work", ".codex", "sessions", "saved.jsonl"), "saved codex");
+
+    const result = await previewSessionsFromSnapshots({ folder: rootDir });
+
+    expect(result.imported).toContainEqual(expect.objectContaining({
+      from: path.join(rootDir, ".aiblueprint", "configs", "work", ".codex", "sessions", "saved.jsonl"),
+      to: path.join(rootDir, ".codex", "sessions", "saved.jsonl"),
+    }));
+    expect(await fs.pathExists(path.join(rootDir, ".codex", "sessions", "saved.jsonl"))).toBe(false);
   });
 });

@@ -10,6 +10,7 @@ export type UnifiedAgentCategory = "skills" | "agents" | "instructions" | "rules
 
 export interface AgentsUnifyOptions extends FolderOptions {
   scope?: AgentsUnifyScope;
+  dryRun?: boolean;
 }
 
 interface ContainerCandidate {
@@ -461,6 +462,7 @@ async function importCategoryEntries(
   candidates: ContainerCandidate[],
   destinationDir: string,
   result: AgentsUnifyResult,
+  dryRun = false,
 ): Promise<boolean> {
   const sourceEntries: Array<{ candidate: ContainerCandidate; entries: SourceEntry[] }> = [];
   const destinationExists = await pathExistsOrSymlink(destinationDir);
@@ -508,10 +510,13 @@ async function importCategoryEntries(
     return false;
   }
 
-  await fs.ensureDir(destinationDir);
+  if (!dryRun) {
+    await fs.ensureDir(destinationDir);
+  }
 
   const knownHashes = new Map<string, string>();
   await addExistingDestinationHashes(destinationDir, knownHashes);
+  const knownNames = new Set(knownHashes.values());
 
   for (const { candidate, entries } of sourceEntries) {
     for (const entry of entries) {
@@ -532,8 +537,8 @@ async function importCategoryEntries(
       let targetName = entry.name;
       let targetPath = path.join(destinationDir, targetName);
 
-      if (await pathExistsOrSymlink(targetPath)) {
-        targetName = await findTargetName(destinationDir, entry.name, candidate.label);
+      if ((await pathExistsOrSymlink(targetPath)) || knownNames.has(targetName)) {
+        targetName = await findAvailableTargetName(destinationDir, entry.name, candidate.label, knownNames);
         targetPath = path.join(destinationDir, targetName);
         result.renamed.push({
           category,
@@ -544,12 +549,15 @@ async function importCategoryEntries(
         });
       }
 
-      await fs.copy(sourcePath, targetPath, {
-        dereference: false,
-        overwrite: false,
-      });
-      await normalizePortableContent(targetPath);
-      knownHashes.set(await hashPath(targetPath), targetName);
+      if (!dryRun) {
+        await fs.copy(sourcePath, targetPath, {
+          dereference: false,
+          overwrite: false,
+        });
+        await normalizePortableContent(targetPath);
+      }
+      knownNames.add(targetName);
+      knownHashes.set(dryRun ? sourceHash : await hashPath(targetPath), targetName);
       result.imported.push({
         category,
         name: entry.name,
@@ -560,6 +568,24 @@ async function importCategoryEntries(
   }
 
   return true;
+}
+
+async function findAvailableTargetName(
+  destinationDir: string,
+  originalName: string,
+  label: string,
+  knownNames: Set<string>,
+): Promise<string> {
+  const suffix = suffixFromLabel(label);
+  let index = 1;
+
+  while (true) {
+    const candidate = nameWithSuffix(originalName, suffix, index);
+    if (!knownNames.has(candidate) && !(await pathExistsOrSymlink(path.join(destinationDir, candidate)))) {
+      return candidate;
+    }
+    index++;
+  }
 }
 
 interface SourceEntry {
@@ -626,10 +652,12 @@ function createBackupPath(rootDir: string): string {
   );
 }
 
-async function ensureBackupPath(result: AgentsUnifyResult): Promise<string> {
+async function ensureBackupPath(result: AgentsUnifyResult, dryRun = false): Promise<string> {
   if (!result.backupPath) {
     result.backupPath = createBackupPath(result.rootDir);
-    await fs.ensureDir(result.backupPath);
+    if (!dryRun) {
+      await fs.ensureDir(result.backupPath);
+    }
   }
   return result.backupPath;
 }
@@ -662,6 +690,7 @@ async function linkContainer(
   candidate: ContainerCandidate,
   destinationDir: string,
   result: AgentsUnifyResult,
+  dryRun = false,
 ): Promise<void> {
   if (candidate.linkSource === false) {
     return;
@@ -676,7 +705,9 @@ async function linkContainer(
 
   if (!stat) {
     if (!(await shouldLinkMissingContainer(candidate))) return;
-    await createDirectorySymlink(destinationDir, candidate.path);
+    if (!dryRun) {
+      await createDirectorySymlink(destinationDir, candidate.path);
+    }
     result.linked.push({
       category: candidate.category,
       from: candidate.path,
@@ -700,8 +731,10 @@ async function linkContainer(
       return;
     }
 
-    await fs.remove(candidate.path);
-    await createDirectorySymlink(destinationDir, candidate.path);
+    if (!dryRun) {
+      await fs.remove(candidate.path);
+      await createDirectorySymlink(destinationDir, candidate.path);
+    }
     result.linked.push({
       category: candidate.category,
       from: candidate.path,
@@ -710,15 +743,17 @@ async function linkContainer(
     return;
   }
 
-  const backupRoot = await ensureBackupPath(result);
+  const backupRoot = await ensureBackupPath(result, dryRun);
   const backupTarget = path.join(
     backupRoot,
     safeRelativePath(result.rootDir, candidate.path),
   );
 
-  await fs.ensureDir(path.dirname(backupTarget));
-  await fs.move(candidate.path, backupTarget, { overwrite: false });
-  await createDirectorySymlink(destinationDir, candidate.path);
+  if (!dryRun) {
+    await fs.ensureDir(path.dirname(backupTarget));
+    await fs.move(candidate.path, backupTarget, { overwrite: false });
+    await createDirectorySymlink(destinationDir, candidate.path);
+  }
   result.linked.push({
     category: candidate.category,
     from: candidate.path,
@@ -731,6 +766,7 @@ async function importInstructionFiles(
   candidates: InstructionFileCandidate[],
   destinationPath: string,
   result: AgentsUnifyResult,
+  dryRun = false,
 ): Promise<boolean> {
   const destinationExists = await pathExistsOrSymlink(destinationPath);
   const destinationRealPath = destinationExists
@@ -760,20 +796,26 @@ async function importInstructionFiles(
     return false;
   }
 
-  await fs.ensureDir(path.dirname(destinationPath));
+  if (!dryRun) {
+    await fs.ensureDir(path.dirname(destinationPath));
+  }
   let destinationHash = destinationExists
     ? await hashPath(destinationPath)
     : null;
+  const plannedNames = new Set<string>();
 
   for (const candidate of sourceCandidates) {
     const sourceHash = await hashPath(candidate.path);
 
     if (!destinationHash) {
-      await fs.copy(candidate.path, destinationPath, {
-        dereference: false,
-        overwrite: false,
-      });
+      if (!dryRun) {
+        await fs.copy(candidate.path, destinationPath, {
+          dereference: false,
+          overwrite: false,
+        });
+      }
       destinationHash = sourceHash;
+      plannedNames.add(path.basename(destinationPath));
       result.imported.push({
         category: "instructions",
         name: path.basename(candidate.path),
@@ -793,16 +835,20 @@ async function importInstructionFiles(
       continue;
     }
 
-    const targetName = await findTargetName(
+    const targetName = await findAvailableTargetName(
       path.dirname(destinationPath),
       path.basename(destinationPath),
       candidate.label,
+      plannedNames,
     );
     const targetPath = path.join(path.dirname(destinationPath), targetName);
-    await fs.copy(candidate.path, targetPath, {
-      dereference: false,
-      overwrite: false,
-    });
+    if (!dryRun) {
+      await fs.copy(candidate.path, targetPath, {
+        dereference: false,
+        overwrite: false,
+      });
+    }
+    plannedNames.add(targetName);
     result.renamed.push({
       category: "instructions",
       name: path.basename(candidate.path),
@@ -824,6 +870,7 @@ async function linkInstructionFile(
   candidate: InstructionFileCandidate,
   destinationPath: string,
   result: AgentsUnifyResult,
+  dryRun = false,
 ): Promise<void> {
   if (candidate.isDestination || samePath(candidate.path, destinationPath)) {
     return;
@@ -838,7 +885,9 @@ async function linkInstructionFile(
 
   if (!stat) {
     if (!(await shouldLinkMissingInstruction(candidate))) return;
-    await createFileSymlink(destinationPath, candidate.path);
+    if (!dryRun) {
+      await createFileSymlink(destinationPath, candidate.path);
+    }
     result.linked.push({
       category: "instructions",
       from: candidate.path,
@@ -862,8 +911,10 @@ async function linkInstructionFile(
       return;
     }
 
-    await fs.remove(candidate.path);
-    await createFileSymlink(destinationPath, candidate.path);
+    if (!dryRun) {
+      await fs.remove(candidate.path);
+      await createFileSymlink(destinationPath, candidate.path);
+    }
     result.linked.push({
       category: "instructions",
       from: candidate.path,
@@ -872,15 +923,17 @@ async function linkInstructionFile(
     return;
   }
 
-  const backupRoot = await ensureBackupPath(result);
+  const backupRoot = await ensureBackupPath(result, dryRun);
   const backupTarget = path.join(
     backupRoot,
     safeRelativePath(result.rootDir, candidate.path),
   );
 
-  await fs.ensureDir(path.dirname(backupTarget));
-  await fs.move(candidate.path, backupTarget, { overwrite: false });
-  await createFileSymlink(destinationPath, candidate.path);
+  if (!dryRun) {
+    await fs.ensureDir(path.dirname(backupTarget));
+    await fs.move(candidate.path, backupTarget, { overwrite: false });
+    await createFileSymlink(destinationPath, candidate.path);
+  }
   result.linked.push({
     category: "instructions",
     from: candidate.path,
@@ -1010,6 +1063,17 @@ async function copyPathToBackup(result: AgentsUnifyResult, targetPath: string): 
   return backupTarget;
 }
 
+async function planPathBackup(result: AgentsUnifyResult, targetPath: string): Promise<string | null> {
+  const stat = await fs.lstat(targetPath).catch(() => null);
+  if (!stat) return null;
+
+  const backupRoot = await ensureBackupPath(result, true);
+  return path.join(
+    backupRoot,
+    safeRelativePath(result.rootDir, targetPath),
+  );
+}
+
 async function replaceWithFileSymlink(sourcePath: string, targetPath: string): Promise<void> {
   await fs.ensureDir(path.dirname(targetPath));
   const relativeSource = path.relative(path.dirname(targetPath), sourcePath) || path.basename(sourcePath);
@@ -1020,6 +1084,7 @@ async function ensureClaudeInstructionSymlink(
   result: AgentsUnifyResult,
   agentsPath: string,
   claudePath: string,
+  dryRun = false,
 ): Promise<void> {
   const agentsRealPath = await realPathIfPossible(agentsPath);
   const claudeStat = await fs.lstat(claudePath).catch(() => null);
@@ -1032,23 +1097,37 @@ async function ensureClaudeInstructionSymlink(
   }
 
   if (claudeStat) {
-    await copyPathToBackup(result, claudePath);
-    await fs.remove(claudePath);
+    if (dryRun) {
+      await planPathBackup(result, claudePath);
+    } else {
+      await copyPathToBackup(result, claudePath);
+      await fs.remove(claudePath);
+    }
   }
 
-  await replaceWithFileSymlink(agentsPath, claudePath);
+  if (!dryRun) {
+    await replaceWithFileSymlink(agentsPath, claudePath);
+  }
+  result.linked.push({
+    category: "instructions",
+    from: claudePath,
+    to: agentsPath,
+  });
 }
 
 async function writeRepositoryInstructionIndex(
   result: AgentsUnifyResult,
   folders: ResolvedFolders,
+  dryRun = false,
 ): Promise<void> {
   const rulesDir = path.join(folders.agentsDir, "rules");
-  if (!(await pathExistsOrSymlink(rulesDir))) {
+  if (!dryRun && !(await pathExistsOrSymlink(rulesDir))) {
     return;
   }
 
-  const rules = await collectRuleIndexEntries(rulesDir, folders.rootDir);
+  const rules = dryRun
+    ? await collectPlannedRuleIndexEntries(result, folders.rootDir)
+    : await collectRuleIndexEntries(rulesDir, folders.rootDir);
   if (rules.length === 0) {
     return;
   }
@@ -1060,14 +1139,20 @@ async function writeRepositoryInstructionIndex(
   const agentsStat = await fs.lstat(agentsPath).catch(() => null);
 
   if (agentsStat) {
-    await copyPathToBackup(result, agentsPath);
-    if (agentsStat.isSymbolicLink()) {
-      await fs.remove(agentsPath);
+    if (dryRun) {
+      await planPathBackup(result, agentsPath);
+    } else {
+      await copyPathToBackup(result, agentsPath);
+      if (agentsStat.isSymbolicLink()) {
+        await fs.remove(agentsPath);
+      }
     }
   }
 
-  await fs.writeFile(agentsPath, content, "utf-8");
-  await ensureClaudeInstructionSymlink(result, agentsPath, claudePath);
+  if (!dryRun) {
+    await fs.writeFile(agentsPath, content, "utf-8");
+  }
+  await ensureClaudeInstructionSymlink(result, agentsPath, claudePath, dryRun);
 
   result.instructionIndex = {
     agentsPath,
@@ -1076,10 +1161,42 @@ async function writeRepositoryInstructionIndex(
   };
 }
 
+async function collectPlannedRuleIndexEntries(
+  result: AgentsUnifyResult,
+  rootDir: string,
+): Promise<RuleIndexEntry[]> {
+  const rules: RuleIndexEntry[] = [];
+  const plannedRuleEntries = [
+    ...result.imported.filter((entry) => entry.category === "rules"),
+    ...result.renamed.filter((entry) => entry.category === "rules"),
+  ];
+
+  for (const entry of plannedRuleEntries) {
+    const ext = path.extname(entry.to).toLowerCase();
+    if (![".md", ".mdc"].includes(ext)) continue;
+    rules.push({
+      title: await readRuleTitle(entry.from),
+      relativePath: path.relative(rootDir, entry.to),
+    });
+  }
+
+  if (await pathExistsOrSymlink(path.join(rootDir, ".agents", "rules"))) {
+    rules.push(...await collectRuleIndexEntries(path.join(rootDir, ".agents", "rules"), rootDir));
+  }
+
+  const byPath = new Map<string, RuleIndexEntry>();
+  for (const rule of rules) {
+    byPath.set(rule.relativePath, rule);
+  }
+
+  return [...byPath.values()].sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+}
+
 export async function unifyAgentsConfiguration(
   options: AgentsUnifyOptions = {},
 ): Promise<AgentsUnifyResult> {
   const scope = options.scope ?? "global";
+  const dryRun = Boolean(options.dryRun);
   const folders = resolveFolders(options);
   const includeCodex = scope !== "repository";
   const instructionCandidates = getInstructionFileCandidates(options, includeCodex);
@@ -1111,6 +1228,7 @@ export async function unifyAgentsConfiguration(
     instructionCandidates,
     destinationByCategory.instructions,
     result,
+    dryRun,
   );
 
   const categories: Array<Exclude<UnifiedAgentCategory, "instructions">> = scope === "repository"
@@ -1124,6 +1242,7 @@ export async function unifyAgentsConfiguration(
       candidates,
       destinationByCategory[category],
       result,
+      dryRun,
     );
     if (isActive) {
       activeCategories.add(category);
@@ -1136,6 +1255,7 @@ export async function unifyAgentsConfiguration(
       candidate,
       destinationByCategory[candidate.category],
       result,
+      dryRun,
     );
   }
 
@@ -1144,12 +1264,19 @@ export async function unifyAgentsConfiguration(
       candidate,
       destinationByCategory.instructions,
       result,
+      dryRun,
     );
   }
 
   if (scope === "repository") {
-    await writeRepositoryInstructionIndex(result, folders);
+    await writeRepositoryInstructionIndex(result, folders, dryRun);
   }
 
   return result;
+}
+
+export async function previewAgentsConfiguration(
+  options: AgentsUnifyOptions = {},
+): Promise<AgentsUnifyResult> {
+  return unifyAgentsConfiguration({ ...options, dryRun: true });
 }

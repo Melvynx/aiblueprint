@@ -56,6 +56,10 @@ export interface SessionUnifyResult {
   conflicts: SessionConflictEntry[];
 }
 
+export interface SessionUnifyOptions extends FolderOptions {
+  dryRun?: boolean;
+}
+
 async function listSnapshotSources(parentDir: string, type: SnapshotType): Promise<SnapshotSource[]> {
   if (!(await fs.pathExists(parentDir))) return [];
 
@@ -171,6 +175,7 @@ async function mergeSessionPath(params: {
   snapshot: SnapshotSource;
   sourceTag: string;
   result: SessionUnifyResult;
+  dryRun: boolean;
 }): Promise<void> {
   const {
     sourcePath,
@@ -180,15 +185,18 @@ async function mergeSessionPath(params: {
     snapshot,
     sourceTag,
     result,
+    dryRun,
   } = params;
   const sourceStat = await fs.lstat(sourcePath).catch(() => null);
   if (!sourceStat) return;
 
   const destinationStat = await fs.lstat(destinationPath).catch(() => null);
 
-  if (sourceStat.isDirectory() && destinationStat?.isDirectory()) {
+  if (sourceStat.isDirectory() && (destinationStat?.isDirectory() || dryRun)) {
     const entries = await fs.readdir(sourcePath);
-    await fs.ensureDir(destinationPath);
+    if (!dryRun && destinationStat?.isDirectory()) {
+      await fs.ensureDir(destinationPath);
+    }
     for (const entry of entries) {
       await mergeSessionPath({
         sourcePath: path.join(sourcePath, entry),
@@ -198,17 +206,20 @@ async function mergeSessionPath(params: {
         snapshot,
         sourceTag,
         result,
+        dryRun,
       });
     }
     return;
   }
 
   if (!destinationStat) {
-    await fs.ensureDir(path.dirname(destinationPath));
-    await fs.copy(sourcePath, destinationPath, {
-      overwrite: false,
-      dereference: false,
-    });
+    if (!dryRun) {
+      await fs.ensureDir(path.dirname(destinationPath));
+      await fs.copy(sourcePath, destinationPath, {
+        overwrite: false,
+        dereference: false,
+      });
+    }
     result.imported.push({
       folder,
       sessionRoot,
@@ -231,11 +242,13 @@ async function mergeSessionPath(params: {
   }
 
   const conflictPath = await uniqueConflictPath(destinationPath, sourceTag);
-  await fs.ensureDir(path.dirname(conflictPath));
-  await fs.copy(sourcePath, conflictPath, {
-    overwrite: false,
-    dereference: false,
-  });
+  if (!dryRun) {
+    await fs.ensureDir(path.dirname(conflictPath));
+    await fs.copy(sourcePath, conflictPath, {
+      overwrite: false,
+      dereference: false,
+    });
+  }
   result.conflicts.push({
     folder,
     sessionRoot,
@@ -247,9 +260,10 @@ async function mergeSessionPath(params: {
 }
 
 export async function unifySessionsFromSnapshots(
-  options: FolderOptions = {},
+  options: SessionUnifyOptions = {},
 ): Promise<SessionUnifyResult> {
   const folders = resolveFolders(options);
+  const dryRun = Boolean(options.dryRun);
   const snapshots = await collectSnapshotSources(folders);
   const destinationByFolder: Record<ManagedFolderName, string> = {
     ".claude": folders.claudeDir,
@@ -283,10 +297,17 @@ export async function unifySessionsFromSnapshots(
           snapshot,
           sourceTag,
           result,
+          dryRun,
         });
       }
     }
   }
 
   return result;
+}
+
+export async function previewSessionsFromSnapshots(
+  options: SessionUnifyOptions = {},
+): Promise<SessionUnifyResult> {
+  return unifySessionsFromSnapshots({ ...options, dryRun: true });
 }

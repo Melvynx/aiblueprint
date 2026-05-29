@@ -1,6 +1,8 @@
+import * as p from "@clack/prompts";
 import chalk from "chalk";
 import { getVersion } from "../lib/version.js";
 import {
+  previewAgentsConfiguration,
   unifyAgentsConfiguration,
   type AgentsUnifyResult,
   type AgentsUnifyScope,
@@ -38,6 +40,73 @@ function printCategorySummary(result: AgentsUnifyResult, category: UnifiedAgentC
   );
 }
 
+function printPreviewList(title: string, entries: string[]) {
+  if (entries.length === 0) return;
+  console.log(chalk.gray(`\n${title}:`));
+  for (const entry of entries.slice(0, 12)) {
+    console.log(chalk.gray(`  - ${entry}`));
+  }
+  if (entries.length > 12) {
+    console.log(chalk.gray(`  ...and ${entries.length - 12} more`));
+  }
+}
+
+function printAgentsUnifyPreview(result: AgentsUnifyResult) {
+  console.log(chalk.yellow("\nPlanned changes"));
+  console.log(chalk.gray(`  Root: ${result.rootDir}`));
+  console.log(chalk.gray(`  Shared folder: ${result.agentsDir}`));
+  console.log(chalk.gray(`  Imports: ${result.imported.length}`));
+  console.log(chalk.gray(`  Renames: ${result.renamed.length}`));
+  console.log(chalk.gray(`  Symlinks/relinks: ${result.linked.length}`));
+  console.log(chalk.gray(`  Already linked: ${result.alreadyLinked.length}`));
+  console.log(chalk.gray(`  Duplicates skipped: ${result.duplicates.length}`));
+  if (result.backupPath) {
+    console.log(chalk.gray(`  Backups: ${result.backupPath}`));
+  }
+  if (result.instructionIndex) {
+    console.log(chalk.gray(`  AGENTS.md rules index: ${result.instructionIndex.indexedRules.length} rules`));
+    console.log(chalk.gray(`  CLAUDE.md symlink target: ${result.instructionIndex.agentsPath}`));
+  }
+
+  printPreviewList(
+    "Files/folders to import",
+    result.imported.map((entry) => `${entry.from} -> ${entry.to}`),
+  );
+  printPreviewList(
+    "Name conflicts to preserve",
+    result.renamed.map((entry) => `${entry.from} -> ${entry.to} (${entry.reason})`),
+  );
+  printPreviewList(
+    "Symlinks/relinks to create",
+    result.linked.map((entry) => (
+      entry.movedToBackup
+        ? `${entry.from} -> ${entry.to} (backup: ${entry.movedToBackup})`
+        : `${entry.from} -> ${entry.to}`
+    )),
+  );
+  printPreviewList(
+    "Skipped duplicates",
+    result.duplicates.map((entry) => `${entry.from} (kept: ${entry.keptAs})`),
+  );
+}
+
+async function confirmUnify(): Promise<boolean> {
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    return true;
+  }
+
+  const answer = await p.confirm({
+    message: "Continue with these unify changes?",
+    initialValue: false,
+  });
+
+  if (p.isCancel(answer)) {
+    return false;
+  }
+
+  return Boolean(answer);
+}
+
 export async function agentsUnifyCommand(params: AgentsUnifyCommandParams = {}) {
   try {
     console.log(chalk.blue.bold(`\nAIBlueprint agents unify ${chalk.gray(`v${getVersion()}`)}\n`));
@@ -47,6 +116,14 @@ export async function agentsUnifyCommand(params: AgentsUnifyCommandParams = {}) 
         ? "Centralizing project agent configuration into .agents"
         : "Centralizing reusable agent configuration into .agents, then rendering Codex agents",
     ));
+
+    const preview = await previewAgentsConfiguration(params);
+    printAgentsUnifyPreview(preview);
+
+    if (!(await confirmUnify())) {
+      console.log(chalk.gray("\nUnify cancelled"));
+      return;
+    }
 
     const result = await unifyAgentsConfiguration(params);
     const codexResult = params.scope === "repository"

@@ -2,7 +2,7 @@ import fs from "fs-extra";
 import os from "os";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { unifyAgentsConfiguration } from "../src/lib/agents-unifier";
+import { previewAgentsConfiguration, unifyAgentsConfiguration } from "../src/lib/agents-unifier";
 
 const TMP_ROOT = path.join(os.tmpdir(), "aiblueprint-agents-unifier-test");
 
@@ -145,6 +145,26 @@ describe("unifyAgentsConfiguration", () => {
     expect(result.backupPath).toBeTruthy();
     expect(result.backupPath!.startsWith(root)).toBe(false);
     expect(path.basename(result.backupPath!)).toContain("project-");
+  });
+
+  it("previews project unify changes without mutating files", async () => {
+    await fs.ensureDir(path.join(root, ".claude/rules"));
+    await fs.writeFile(path.join(root, ".claude/rules/testing.md"), "# Testing\n", "utf-8");
+
+    const result = await previewAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect(result.imported).toContainEqual(expect.objectContaining({
+      from: path.join(root, ".claude/rules/testing.md"),
+      to: path.join(root, ".agents/rules/testing.md"),
+    }));
+    expect(result.linked).toContainEqual(expect.objectContaining({
+      from: path.join(root, ".claude/rules"),
+      to: path.join(root, ".agents/rules"),
+    }));
+    expect(result.instructionIndex?.agentsPath).toBe(path.join(root, "AGENTS.md"));
+    expect(await fs.pathExists(path.join(root, ".agents"))).toBe(false);
+    expect(await fs.pathExists(path.join(root, "AGENTS.md"))).toBe(false);
+    expect(result.backupPath ? await fs.pathExists(result.backupPath) : false).toBe(false);
   });
 
   it("unifies repository rules and memories, indexes them in AGENTS.md, and symlinks CLAUDE.md", async () => {
