@@ -1,0 +1,14 @@
+{
+  "title": "Commands",
+  "pages": [
+    "agents-setup",
+    "setup-terminal",
+    "symlink",
+    "unify",
+    "codex-agents",
+    "pro",
+    "backup",
+    "configs",
+    "openclaw"
+  ]
+}

@@ -1,0 +1,57 @@
+---
+title: configs
+description: Save, load, list, and restore named configurations and automatic backups.
+keywords: ["configs", "save", "load", "undo", "backups"]
+---
+
+`configs` manages snapshots of your `.claude`, `.codex`, and `.agents` folders.
+Use it to keep multiple setups and switch between them safely.
+
+## Named configs
+
+| Command | Description |
+| ------- | ----------- |
+| `configs save <name>` | Save the current folders as a named config. |
+| `configs load <name>` | Load a named config (current folders are backed up first). |
+| `configs list` | List all saved named configs. |
+| `configs undo` | Undo the most recent `load` using the automatic backup. |
+
+### Save
+
+```bash
+# Save a snapshot
+aiblueprint configs save work
+
+# Overwrite an existing snapshot
+aiblueprint configs save work --force
+```
+
+### Load and undo
+
+```bash
+aiblueprint configs load work
+aiblueprint configs undo
+```
+
+Loading always backs up your current configuration first, so `configs undo`
+can roll back the change.
+
+## Automatic backups
+
+The CLI snapshots your configuration automatically before setup and sync. Manage
+those snapshots with the `backups` subcommands:
+
+| Command | Description |
+| ------- | ----------- |
+| `configs backups list` | List automatic backups with their reasons. |
+| `configs backups load <name>` | Load a backup (current folders are backed up first). |
+| `configs backups create [reason]` | Create a manual backup with an optional reason. |
+
+```bash
+aiblueprint configs backups list
+aiblueprint configs backups create "before experiment"
+aiblueprint configs backups load 2026-05-28-setup
+```
+
+Each entry shows its name, date, reason, trigger, the folders included, and its
+path on disk.

@@ -1,0 +1,35 @@
+---
+title: openclaw
+description: Configure OpenClaw and manage OpenClaw Pro.
+keywords: ["openclaw", "pro", "activate", "setup"]
+---
+
+`openclaw` configures the OpenClaw tool and manages its Pro tier. It mirrors the
+structure of the `agents pro` commands.
+
+```bash
+aiblueprint openclaw pro status
+```
+
+## Options
+
+| Option | Description |
+| ------ | ----------- |
+| `-f, --folder <path>` | Custom OpenClaw folder (default: `~/.openclaw`). |
+
+## Pro subcommands
+
+| Command | Description |
+| ------- | ----------- |
+| `openclaw pro activate [token]` | Activate OpenClaw Pro with an access token. |
+| `openclaw pro status` | Check the OpenClaw Pro token status. |
+| `openclaw pro setup` | Install OpenClaw Pro configurations (requires activation). |
+| `openclaw pro update` | Update OpenClaw Pro configurations. |
+
+## Example
+
+```bash
+aiblueprint openclaw pro activate YOUR_TOKEN
+aiblueprint openclaw pro setup
+aiblueprint openclaw pro update
+```

@@ -1,0 +1,45 @@
+---
+title: Security
+description: Safety hooks and permission defaults applied during setup.
+keywords: ["security", "hooks", "permissions", "deny", "command validation"]
+---
+
+AIBlueprint applies safety defaults so you can move fast without exposing
+yourself to destructive commands or leaked secrets.
+
+## Permission defaults
+
+Setup updates `~/.claude/settings.json` to set a default permission mode and add
+deny rules that block dangerous operations - even when permission prompts are
+skipped by the `cc` shortcut.
+
+## Deny rules
+
+| Pattern | Blocks |
+| ------- | ------ |
+| `Bash(rm -rf *)` | Destructive recursive deletion. |
+| `Bash(sudo *)` | Privilege escalation. |
+| `Bash(curl * \| bash)` | Piping remote scripts into a shell. |
+| `Bash(wget * \| bash)` | Piping remote downloads into a shell. |
+| `Read(./.env)` | Reading the `.env` file. |
+| `Read(./.env.*)` | Reading `.env` variants. |
+
+## Command validation hook
+
+For Codex, a `PreToolUse` hook runs before any Bash command and blocks dangerous
+ones via a deny list:
+
+```toml
+[[hooks.PreToolUse]]
+matcher = "^Bash$"
+type = "command"
+command = "/usr/bin/env node \"$HOME/.codex/hooks/command-deny-list.ts\""
+timeout = 5
+statusMessage = "Checking command safety"
+```
+
+## Backups
+
+Every configuration change is backed up automatically before it is applied, so
+you can always roll back with [configs undo](/commands/configs) or
+[agents backup](/commands/backup).

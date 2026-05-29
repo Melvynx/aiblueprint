@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@public-site/*": ["./src/public-site/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/vite-env.d.ts", "vite.config.ts"],
+  "exclude": ["node_modules", ".output", ".tanstack"]
+}

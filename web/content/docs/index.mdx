@@ -1,0 +1,63 @@
+---
+title: AIBlueprint CLI
+description: One command to set up Claude Code, Codex, and your whole AI coding workflow with sensible, battle-tested defaults.
+keywords: ["aiblueprint", "cli", "claude code", "codex", "ai coding"]
+---
+
+AIBlueprint is a command-line tool that configures your AI coding environment in
+seconds. It installs curated agents, skills, commands, a rich statusline, safety
+hooks, and shell shortcuts into `~/.claude`, `~/.codex`, and a shared `~/.agents`
+folder, so every tool you use stays in sync.
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+## What you get
+
+<DocCardWrapper>
+<DocSection title="Start here">
+<DocCardGrid>
+  <DocCard href="/getting-started/installation" icon="Play" title="Installation" description="Install the CLI and run your first setup." />
+  <DocCard href="/getting-started/quick-start" icon="Zap" title="Quick Start" description="Configure everything with a single command." />
+  <DocCard href="/concepts/security" icon="Shield" title="Security" description="Safety hooks and permission defaults applied for you." />
+</DocCardGrid>
+</DocSection>
+
+<DocSection title="Core commands">
+<DocCardGrid>
+  <DocCard href="/commands/agents-setup" icon="Settings" title="agents setup" description="Install agents, skills, statusline, and shortcuts." />
+  <DocCard href="/commands/setup-terminal" icon="Terminal" title="agents setup-terminal" description="Oh My Zsh, plugins, and a theme in one step." />
+  <DocCard href="/commands/symlink" icon="Link2" title="agents symlink" description="Share config across Claude Code, Codex, and more." />
+  <DocCard href="/commands/unify" icon="Layers" title="agents unify" description="Centralize skills and agents into ~/.agents." />
+  <DocCard href="/commands/configs" icon="Save" title="configs" description="Save, load, and restore named configurations." />
+  <DocCard href="/commands/pro" icon="Key" title="agents pro" description="Activate and install premium configurations." />
+</DocCardGrid>
+</DocSection>
+
+<DocSection title="Concepts">
+<DocCardGrid>
+  <DocCard href="/concepts/statusline" icon="Code2" title="Statusline" description="Git, tokens, and cost info in your prompt." />
+  <DocCard href="/concepts/agents" icon="Workflow" title="Agents" description="Specialized agents for exploration and research." />
+  <DocCard href="/concepts/skills" icon="Sparkles" title="Skills" description="Reusable workflows for commits, PRs, and more." />
+</DocCardGrid>
+</DocSection>
+</DocCardWrapper>
+
+## Main capabilities
+
+- **Unified config** - Manage Claude Code, Codex, OpenCode, and FactoryAI from a single shared `~/.agents` source of truth.
+- **Curated agents** - Ship with `explore-codebase`, `explore-docs`, `websearch`, and `action` agents tuned for real work.
+- **Productivity skills** - 14+ skills including `commit`, `create-pr`, `prompt-creator`, `skill-manager`, and `ultrathink`.
+- **Safety first** - Command-validation hooks block destructive commands and protect secret files by default.
+- **Rich statusline** - See git branch, token usage, and session cost without leaving your editor.
+- **Backups built in** - Every change is snapshotted, so you can undo or restore any configuration at any time.
+
+## Requirements
+
+| Requirement | Notes |
+| ----------- | ----- |
+| Node.js 16+ | Required to run the CLI via `npx`. |
+| Bun | Auto-installed when needed for the statusline. |
+| ccusage | Auto-installed for token and cost tracking. |
+| macOS / Linux | Full support. Windows has limited support (WSL recommended). |

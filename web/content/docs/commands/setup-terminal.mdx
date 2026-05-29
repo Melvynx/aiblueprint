@@ -1,0 +1,56 @@
+---
+title: agents setup-terminal
+description: Set up Oh My Zsh with plugins and a theme in one step.
+keywords: ["terminal", "zsh", "oh my zsh", "plugins", "theme"]
+---
+
+`agents setup-terminal` configures your shell with Oh My Zsh, useful plugins,
+and a theme. It targets macOS and Linux.
+
+```bash
+aiblueprint agents setup-terminal
+```
+
+## Options
+
+| Option | Description |
+| ------ | ----------- |
+| `-s, --skip` | Use defaults: the `robbyrussell` theme with the `git`, `zsh-autosuggestions`, and `zsh-syntax-highlighting` plugins. |
+
+## What it does
+
+- Installs **Oh My Zsh** in unattended mode.
+- Installs plugins:
+  - `zsh-autosuggestions` - command suggestions as you type.
+  - `zsh-syntax-highlighting` - highlights valid and invalid commands.
+  - Built-in plugins such as `git`.
+- Lets you choose a theme from a curated list, or enter a custom one:
+
+| Theme | Notes |
+| ----- | ----- |
+| `robbyrussell` | Default, clean and fast. |
+| `agnoster` | Requires Powerline fonts. |
+| `af-magic` | Minimal with a divider. |
+| `dst` | Compact. |
+| `simple` | Bare-bones. |
+| `bira` | Two-line prompt. |
+
+- Detects and installs missing prerequisites (`curl`, `git`, `zsh`) using your
+  package manager (`apt`, `brew`, `dnf`, `yum`, or `pacman`).
+- Creates a timestamped backup of `.zshrc` before making changes.
+
+## Platform notes
+
+- **macOS / Linux** - Fully supported.
+- **Windows** - Not supported directly. The command exits with instructions to
+  use WSL.
+
+## Example
+
+```bash
+# Guided setup
+aiblueprint agents setup-terminal
+
+# Accept defaults
+aiblueprint agents setup-terminal --skip
+```

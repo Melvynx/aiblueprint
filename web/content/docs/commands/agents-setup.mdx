@@ -1,0 +1,76 @@
+---
+title: agents setup
+description: Install AIBlueprint defaults - agents, skills, statusline, hooks, and shortcuts.
+keywords: ["setup", "agents", "install", "skip"]
+---
+
+`agents setup` is the primary command. It configures your AI coding environment
+with AIBlueprint defaults.
+
+```bash
+aiblueprint agents setup
+```
+
+## Options
+
+| Option | Description |
+| ------ | ----------- |
+| `-s, --skip` | Install all features without interactive prompts. |
+| `-f, --folder <path>` | Root folder for `.claude`, `.codex`, and `.agents` (default: `$HOME`). |
+| `--claudeCodeFolder <path>` | Override the Claude Code folder. |
+| `--codexFolder <path>` | Override the Codex folder. |
+| `--agentsFolder <path>` | Override the shared agents folder. |
+
+## Features installed
+
+### Shell shortcuts
+
+Adds aliases for launching Claude Code quickly:
+
+```bash
+alias cc="claude --dangerously-skip-permissions"
+alias ccc="claude --dangerously-skip-permissions -c"
+```
+
+See [Shell Shortcuts](/concepts/shell-shortcuts) for details.
+
+### Custom statusline
+
+Installs a Bun-powered statusline showing git status, token usage, and cost,
+and wires it into `~/.claude/settings.json`. See [Statusline](/concepts/statusline).
+
+### AIBlueprint agents
+
+Copies the curated agents into `~/.agents/agents`. See [Agents](/concepts/agents).
+
+### AIBlueprint skills
+
+Copies 14+ reusable skills into `~/.agents/skills`. See [Skills](/concepts/skills).
+
+### Codex setup
+
+Merges sensible defaults into `~/.codex/config.toml`, installs the safety hook,
+and renders shared agents into Codex TOML format.
+
+### Security settings
+
+Applies permission defaults and deny rules to `~/.claude/settings.json`. See
+[Security](/concepts/security).
+
+## Examples
+
+```bash
+# Interactive setup
+aiblueprint agents setup
+
+# Install everything without prompts
+aiblueprint agents setup --skip
+
+# Install into a custom location
+aiblueprint agents setup --folder ~/my-config
+```
+
+## Aliases
+
+`ai-coding setup` and `claude-code setup` are legacy aliases that behave
+identically to `agents setup`.
