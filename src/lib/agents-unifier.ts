@@ -1121,21 +1121,25 @@ async function writeRepositoryInstructionIndex(
   dryRun = false,
 ): Promise<void> {
   const rulesDir = path.join(folders.agentsDir, "rules");
-  if (!dryRun && !(await pathExistsOrSymlink(rulesDir))) {
-    return;
-  }
+  const agentsPath = path.join(folders.rootDir, "AGENTS.md");
+  const claudePath = path.join(folders.rootDir, "CLAUDE.md");
+  const rulesDirExists = await pathExistsOrSymlink(rulesDir);
+  const rules = dryRun || rulesDirExists
+    ? dryRun
+      ? await collectPlannedRuleIndexEntries(result, folders.rootDir)
+      : await collectRuleIndexEntries(rulesDir, folders.rootDir)
+    : [];
+  const agentsExists = await pathExistsOrSymlink(agentsPath);
+  const claudeExists = await pathExistsOrSymlink(claudePath);
 
-  const rules = dryRun
-    ? await collectPlannedRuleIndexEntries(result, folders.rootDir)
-    : await collectRuleIndexEntries(rulesDir, folders.rootDir);
-  if (rules.length === 0) {
+  if (rules.length === 0 && !agentsExists && !claudeExists) {
     return;
   }
 
   const existing = stripGeneratedRulesIndex(await readExistingInstructions(folders.rootDir));
-  const content = `${existing}\n\n${renderRulesIndexBlock(rules)}\n`;
-  const agentsPath = path.join(folders.rootDir, "AGENTS.md");
-  const claudePath = path.join(folders.rootDir, "CLAUDE.md");
+  const content = rules.length > 0
+    ? `${existing}\n\n${renderRulesIndexBlock(rules)}\n`
+    : `${existing.trimEnd()}\n`;
   const agentsStat = await fs.lstat(agentsPath).catch(() => null);
 
   if (agentsStat) {

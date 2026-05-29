@@ -147,6 +147,42 @@ describe("unifyAgentsConfiguration", () => {
     expect(path.basename(result.backupPath!)).toContain("project-");
   });
 
+  it("symlinks CLAUDE.md to existing AGENTS.md in project mode without creating empty folders", async () => {
+    await fs.writeFile(path.join(root, "AGENTS.md"), "# Project Agents\n", "utf-8");
+
+    const result = await unifyAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect((await fs.lstat(path.join(root, "CLAUDE.md"))).isSymbolicLink()).toBe(true);
+    expect(await fs.realpath(path.join(root, "CLAUDE.md"))).toBe(await fs.realpath(path.join(root, "AGENTS.md")));
+    expect(await fs.readFile(path.join(root, "AGENTS.md"), "utf-8")).toBe("# Project Agents\n");
+    expect(await fs.pathExists(path.join(root, ".agents/skills"))).toBe(false);
+    expect(await fs.pathExists(path.join(root, ".agents/agents"))).toBe(false);
+    expect(await fs.pathExists(path.join(root, ".agents/rules"))).toBe(false);
+    expect(await fs.pathExists(path.join(root, ".codex"))).toBe(false);
+    expect(result.instructionIndex?.indexedRules).toEqual([]);
+    expect(result.linked).toContainEqual(expect.objectContaining({
+      category: "instructions",
+      from: path.join(root, "CLAUDE.md"),
+      to: path.join(root, "AGENTS.md"),
+    }));
+  });
+
+  it("previews CLAUDE.md symlink for an existing project AGENTS.md without mutating files", async () => {
+    await fs.writeFile(path.join(root, "AGENTS.md"), "# Project Agents\n", "utf-8");
+
+    const result = await previewAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect(result.instructionIndex?.agentsPath).toBe(path.join(root, "AGENTS.md"));
+    expect(result.instructionIndex?.indexedRules).toEqual([]);
+    expect(result.linked).toContainEqual(expect.objectContaining({
+      category: "instructions",
+      from: path.join(root, "CLAUDE.md"),
+      to: path.join(root, "AGENTS.md"),
+    }));
+    expect(await fs.pathExists(path.join(root, "CLAUDE.md"))).toBe(false);
+    expect(await fs.pathExists(path.join(root, ".agents"))).toBe(false);
+  });
+
   it("previews project unify changes without mutating files", async () => {
     await fs.ensureDir(path.join(root, ".claude/rules"));
     await fs.writeFile(path.join(root, ".claude/rules/testing.md"), "# Testing\n", "utf-8");
