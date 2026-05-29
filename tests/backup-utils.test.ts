@@ -1,0 +1,52 @@
+import fs from "fs-extra";
+import os from "os";
+import path from "path";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { createBackup, loadBackup } from "../src/lib/backup-utils";
+
+describe("backup utils", () => {
+  let rootDir: string;
+  let restoreDir: string;
+
+  beforeEach(async () => {
+    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "aiblueprint-backup-"));
+    restoreDir = await fs.mkdtemp(path.join(os.tmpdir(), "aiblueprint-backup-restore-"));
+    process.env.AIBLUEPRINT_BACKUP_DIR = path.join(rootDir, "backups");
+  });
+
+  afterEach(async () => {
+    delete process.env.AIBLUEPRINT_BACKUP_DIR;
+    await fs.remove(rootDir);
+    await fs.remove(restoreDir);
+  });
+
+  it("backs up and restores complete Claude, Codex, and agents folders", async () => {
+    const claudeDir = path.join(rootDir, ".claude");
+    const codexDir = path.join(rootDir, ".codex");
+    const agentsDir = path.join(rootDir, ".agents");
+
+    await fs.outputFile(path.join(claudeDir, "projects", "project.jsonl"), "claude session");
+    await fs.outputFile(path.join(codexDir, "sessions", "session.jsonl"), "codex session");
+    await fs.outputFile(path.join(codexDir, "logs_2.sqlite"), "sqlite");
+    await fs.outputFile(path.join(agentsDir, "sessions", "agent-session.jsonl"), "agent session");
+
+    const backupPath = await createBackup(claudeDir, codexDir, agentsDir);
+
+    expect(backupPath).toBeTruthy();
+    expect(await fs.readFile(path.join(backupPath!, ".claude", "projects", "project.jsonl"), "utf-8")).toBe("claude session");
+    expect(await fs.readFile(path.join(backupPath!, ".codex", "sessions", "session.jsonl"), "utf-8")).toBe("codex session");
+    expect(await fs.readFile(path.join(backupPath!, ".codex", "logs_2.sqlite"), "utf-8")).toBe("sqlite");
+    expect(await fs.readFile(path.join(backupPath!, ".agents", "sessions", "agent-session.jsonl"), "utf-8")).toBe("agent session");
+
+    await loadBackup(
+      backupPath!,
+      path.join(restoreDir, ".claude"),
+      path.join(restoreDir, ".codex"),
+      path.join(restoreDir, ".agents"),
+    );
+
+    expect(await fs.readFile(path.join(restoreDir, ".claude", "projects", "project.jsonl"), "utf-8")).toBe("claude session");
+    expect(await fs.readFile(path.join(restoreDir, ".codex", "sessions", "session.jsonl"), "utf-8")).toBe("codex session");
+    expect(await fs.readFile(path.join(restoreDir, ".agents", "sessions", "agent-session.jsonl"), "utf-8")).toBe("agent session");
+  });
+});

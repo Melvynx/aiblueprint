@@ -2,16 +2,21 @@ import crypto from "crypto";
 import fs from "fs-extra";
 import os from "os";
 import path from "path";
-import type { Dirent } from "fs";
-import { resolveFolders, type FolderOptions } from "./folder-paths.js";
+import { resolveFolders, type FolderOptions, type ResolvedFolders } from "./folder-paths.js";
 
-export type UnifiedAgentCategory = "skills" | "agents" | "instructions";
+export type AgentsUnifyScope = "global" | "repository";
+export type UnifiedAgentCategory = "skills" | "agents" | "instructions" | "rules";
+
+export interface AgentsUnifyOptions extends FolderOptions {
+  scope?: AgentsUnifyScope;
+}
 
 interface ContainerCandidate {
   category: Exclude<UnifiedAgentCategory, "instructions">;
   label: string;
   path: string;
   isDestination?: boolean;
+  linkSource?: boolean;
   linkWhenParentExists?: boolean;
   linkWhenMissing?: boolean;
 }
@@ -55,6 +60,7 @@ interface LinkedContainer {
 export interface AgentsUnifyResult {
   rootDir: string;
   agentsDir: string;
+  scope: AgentsUnifyScope;
   backupPath: string | null;
   imported: ImportedEntry[];
   duplicates: DuplicateEntry[];
@@ -62,6 +68,11 @@ export interface AgentsUnifyResult {
   linked: LinkedContainer[];
   alreadyLinked: LinkedContainer[];
   skipped: { category: UnifiedAgentCategory; path: string; reason: string }[];
+  instructionIndex: {
+    agentsPath: string;
+    claudePath: string;
+    indexedRules: string[];
+  } | null;
 }
 
 const IGNORED_ENTRY_NAMES = new Set([
@@ -205,12 +216,91 @@ function getInstructionFileCandidates(options: FolderOptions): InstructionFileCa
   ]);
 }
 
-function shouldCollectEntry(category: UnifiedAgentCategory, entry: Dirent): boolean {
-  if (IGNORED_ENTRY_NAMES.has(entry.name)) return false;
-  if (category === "skills" && entry.name === ".cursor-managed-skills-manifest.json") {
-    return true;
-  }
-  return entry.isFile() || entry.isDirectory() || entry.isSymbolicLink();
+function getRepositoryContainerCandidates(options: FolderOptions): ContainerCandidate[] {
+  const folders = resolveFolders(options);
+  const cursorDir = path.join(folders.rootDir, ".cursor");
+
+  return uniqueByPath([
+    ...getContainerCandidates(options),
+    {
+      category: "rules",
+      label: "agents-rules",
+      path: path.join(folders.agentsDir, "rules"),
+      isDestination: true,
+    },
+    {
+      category: "rules",
+      label: "claude-rules",
+      path: path.join(folders.claudeDir, "rules"),
+      linkWhenMissing: true,
+    },
+    {
+      category: "rules",
+      label: "codex-rules",
+      path: path.join(folders.codexDir, "rules"),
+      linkWhenParentExists: true,
+    },
+    {
+      category: "rules",
+      label: "cursor-rules",
+      path: path.join(cursorDir, "rules"),
+      linkWhenParentExists: true,
+    },
+    {
+      category: "rules",
+      label: "claude-memories",
+      path: path.join(folders.claudeDir, "memories"),
+      linkSource: false,
+    },
+    {
+      category: "rules",
+      label: "codex-memories",
+      path: path.join(folders.codexDir, "memories"),
+      linkSource: false,
+    },
+    {
+      category: "rules",
+      label: "cursor-memories",
+      path: path.join(cursorDir, "memories"),
+      linkSource: false,
+    },
+    {
+      category: "rules",
+      label: "claude-memory",
+      path: path.join(folders.claudeDir, "memory.md"),
+      linkSource: false,
+    },
+    {
+      category: "rules",
+      label: "codex-memory",
+      path: path.join(folders.codexDir, "memory.md"),
+      linkSource: false,
+    },
+    {
+      category: "rules",
+      label: "cursor-memory",
+      path: path.join(cursorDir, "memory.md"),
+      linkSource: false,
+    },
+    {
+      category: "rules",
+      label: "claude-memory-uppercase",
+      path: path.join(folders.claudeDir, "MEMORY.md"),
+      linkSource: false,
+    },
+    {
+      category: "rules",
+      label: "codex-memory-uppercase",
+      path: path.join(folders.codexDir, "MEMORY.md"),
+      linkSource: false,
+    },
+    {
+      category: "rules",
+      label: "cursor-memory-uppercase",
+      path: path.join(cursorDir, "MEMORY.md"),
+      linkSource: false,
+    },
+  ]);
 }
 
 async function pathExistsOrSymlink(targetPath: string): Promise<boolean> {
@@ -267,6 +357,77 @@ async function hashPath(targetPath: string): Promise<string> {
   }
 
   return hashString(`other:${stat.mode}:${stat.size}`);
+}
+
+const TEXT_EXTENSIONS = new Set([
+  ".cjs",
+  ".js",
+  ".json",
+  ".jsonc",
+  ".md",
+  ".mdc",
+  ".mjs",
+  ".sh",
+  ".toml",
+  ".ts",
+  ".tsx",
+  ".txt",
+  ".yaml",
+  ".yml",
+]);
+
+const PORTABLE_PATH_REPLACEMENTS: Array<[RegExp, string]> = [
+  [/\.claude\/skills/g, ".agents/skills"],
+  [/\.codex\/skills/g, ".agents/skills"],
+  [/\.cursor\/skills-cursor/g, ".agents/skills"],
+  [/\.cursor\/skills/g, ".agents/skills"],
+  [/\.claude\/agents/g, ".agents/agents"],
+  [/\.codex\/agents/g, ".agents/agents"],
+  [/\.cursor\/agents/g, ".agents/agents"],
+  [/\.claude\/rules/g, ".agents/rules"],
+  [/\.codex\/rules/g, ".agents/rules"],
+  [/\.cursor\/rules/g, ".agents/rules"],
+  [/\.claude\/memories/g, ".agents/rules"],
+  [/\.codex\/memories/g, ".agents/rules"],
+  [/\.cursor\/memories/g, ".agents/rules"],
+];
+
+function normalizePortableText(content: string): string {
+  let normalized = content;
+  for (const [pattern, replacement] of PORTABLE_PATH_REPLACEMENTS) {
+    normalized = normalized.replace(pattern, replacement);
+  }
+  return normalized;
+}
+
+function isLikelyTextFile(filePath: string): boolean {
+  const ext = path.extname(filePath).toLowerCase();
+  if (TEXT_EXTENSIONS.has(ext)) return true;
+  return path.basename(filePath) === "SKILL.md";
+}
+
+async function normalizePortableContent(targetPath: string): Promise<void> {
+  const stat = await fs.lstat(targetPath).catch(() => null);
+  if (!stat || stat.isSymbolicLink()) return;
+
+  if (stat.isDirectory()) {
+    const entries = await fs.readdir(targetPath);
+    for (const entry of entries) {
+      if (IGNORED_ENTRY_NAMES.has(entry)) continue;
+      await normalizePortableContent(path.join(targetPath, entry));
+    }
+    return;
+  }
+
+  if (!stat.isFile() || !isLikelyTextFile(targetPath)) return;
+
+  const content = await fs.readFile(targetPath, "utf-8").catch(() => null);
+  if (content === null || content.includes("\0")) return;
+
+  const normalized = normalizePortableText(content);
+  if (normalized !== content) {
+    await fs.writeFile(targetPath, normalized, "utf-8");
+  }
 }
 
 function suffixFromLabel(label: string): string {
@@ -345,7 +506,7 @@ async function importCategoryEntries(
       continue;
     }
 
-    const entries = await fs.readdir(candidate.path, { withFileTypes: true }).catch(() => null);
+    const entries = await collectCandidateEntries(candidate).catch(() => null);
     if (!entries) {
       result.skipped.push({
         category,
@@ -356,9 +517,9 @@ async function importCategoryEntries(
     }
 
     for (const entry of entries) {
-      if (!shouldCollectEntry(category, entry)) continue;
+      if (!shouldCollectPath(category, entry.name, entry.path)) continue;
 
-      const sourcePath = path.join(candidate.path, entry.name);
+      const sourcePath = entry.path;
       const sourceHash = await hashPath(sourcePath);
       const existingName = knownHashes.get(sourceHash);
 
@@ -391,6 +552,7 @@ async function importCategoryEntries(
         dereference: false,
         overwrite: false,
       });
+      await normalizePortableContent(targetPath);
       knownHashes.set(sourceHash, targetName);
       result.imported.push({
         category,
@@ -400,6 +562,54 @@ async function importCategoryEntries(
       });
     }
   }
+}
+
+interface SourceEntry {
+  name: string;
+  path: string;
+}
+
+async function collectCandidateEntries(candidate: ContainerCandidate): Promise<SourceEntry[]> {
+  const stat = await fs.lstat(candidate.path);
+
+  if (stat.isDirectory()) {
+    const entries = await fs.readdir(candidate.path, { withFileTypes: true });
+    return entries.map((entry) => ({
+      name: entry.name,
+      path: path.join(candidate.path, entry.name),
+    }));
+  }
+
+  if (stat.isSymbolicLink()) {
+    const targetStat = await fs.stat(candidate.path).catch(() => null);
+    if (targetStat?.isDirectory()) {
+      const entries = await fs.readdir(candidate.path, { withFileTypes: true });
+      return entries.map((entry) => ({
+        name: entry.name,
+        path: path.join(candidate.path, entry.name),
+      }));
+    }
+  }
+
+  return [{
+    name: path.basename(candidate.path),
+    path: candidate.path,
+  }];
+}
+
+async function shouldCollectPath(
+  category: UnifiedAgentCategory,
+  name: string,
+  sourcePath: string,
+): Promise<boolean> {
+  if (IGNORED_ENTRY_NAMES.has(name)) return false;
+  if (category === "skills" && name === ".cursor-managed-skills-manifest.json") {
+    return true;
+  }
+
+  const stat = await fs.lstat(sourcePath).catch(() => null);
+  if (!stat) return false;
+  return stat.isFile() || stat.isDirectory() || stat.isSymbolicLink();
 }
 
 function timestamp(date = new Date()): string {
@@ -464,6 +674,10 @@ async function linkContainer(
   destinationDir: string,
   result: AgentsUnifyResult,
 ): Promise<void> {
+  if (candidate.linkSource === false) {
+    return;
+  }
+
   if (candidate.isDestination || samePath(candidate.path, destinationDir)) {
     return;
   }
@@ -672,15 +886,200 @@ async function linkInstructionFile(
   });
 }
 
+interface RuleIndexEntry {
+  title: string;
+  relativePath: string;
+}
+
+const RULES_INDEX_START = "<!-- AIBLUEPRINT:RULES:START -->";
+const RULES_INDEX_END = "<!-- AIBLUEPRINT:RULES:END -->";
+
+function titleFromRulePath(rulePath: string): string {
+  return path.basename(rulePath, path.extname(rulePath))
+    .replace(/[-_]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+async function readRuleTitle(rulePath: string): Promise<string> {
+  const content = await fs.readFile(rulePath, "utf-8").catch(() => "");
+  const heading = content.match(/^#\s+(.+)$/m)?.[1]?.trim();
+  return heading || titleFromRulePath(rulePath);
+}
+
+async function collectRuleIndexEntries(
+  rulesDir: string,
+  rootDir: string,
+  currentDir = rulesDir,
+): Promise<RuleIndexEntry[]> {
+  const entries = await fs.readdir(currentDir, { withFileTypes: true }).catch(() => []);
+  const rules: RuleIndexEntry[] = [];
+
+  for (const entry of entries) {
+    if (IGNORED_ENTRY_NAMES.has(entry.name)) continue;
+
+    const entryPath = path.join(currentDir, entry.name);
+    if (entry.isDirectory()) {
+      rules.push(...await collectRuleIndexEntries(rulesDir, rootDir, entryPath));
+      continue;
+    }
+
+    if (!entry.isFile() && !entry.isSymbolicLink()) continue;
+    if (![".md", ".mdc"].includes(path.extname(entry.name).toLowerCase())) continue;
+
+    rules.push({
+      title: await readRuleTitle(entryPath),
+      relativePath: path.relative(rootDir, entryPath),
+    });
+  }
+
+  return rules.sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+}
+
+function stripGeneratedRulesIndex(content: string): string {
+  const start = content.indexOf(RULES_INDEX_START);
+  const end = content.indexOf(RULES_INDEX_END);
+  if (start === -1 || end === -1 || end < start) {
+    return content.trimEnd();
+  }
+
+  const beforeStart = content.slice(0, start);
+  const headingIndex = beforeStart.lastIndexOf("\n## Rules");
+  const blockStart = headingIndex === -1
+    ? start
+    : headingIndex + 1;
+
+  return `${content.slice(0, blockStart).trimEnd()}\n${content.slice(end + RULES_INDEX_END.length).trimStart()}`.trimEnd();
+}
+
+function renderRulesIndexBlock(rules: RuleIndexEntry[]): string {
+  const lines = [
+    "## Rules",
+    "",
+    "Detailed focused rules live in `.agents/rules/`. Read the relevant file before acting:",
+    "",
+    RULES_INDEX_START,
+  ];
+
+  if (rules.length === 0) {
+    lines.push("- No repository rules found yet.");
+  } else {
+    for (const rule of rules) {
+      lines.push(`- **${rule.title}** - [${rule.relativePath}](${rule.relativePath})`);
+    }
+  }
+
+  lines.push(RULES_INDEX_END);
+  return lines.join("\n");
+}
+
+async function readExistingInstructions(rootDir: string): Promise<string> {
+  const agentsPath = path.join(rootDir, "AGENTS.md");
+  const claudePath = path.join(rootDir, "CLAUDE.md");
+
+  const agentsContent = await fs.readFile(agentsPath, "utf-8").catch(() => null);
+  const claudeContent = await fs.readFile(claudePath, "utf-8").catch(() => null);
+  if (agentsContent !== null && claudeContent !== null && agentsContent.trim() !== claudeContent.trim()) {
+    return `${agentsContent.trimEnd()}\n\n## Previous Claude Instructions\n\n${claudeContent.trimStart()}`;
+  }
+
+  if (agentsContent !== null) return agentsContent;
+  if (claudeContent !== null) return claudeContent;
+
+  return "# Repository Instructions\n";
+}
+
+async function copyPathToBackup(result: AgentsUnifyResult, targetPath: string): Promise<string | null> {
+  const stat = await fs.lstat(targetPath).catch(() => null);
+  if (!stat) return null;
+
+  const backupRoot = await ensureBackupPath(result);
+  const backupTarget = path.join(
+    backupRoot,
+    safeRelativePath(result.rootDir, targetPath),
+  );
+
+  await fs.ensureDir(path.dirname(backupTarget));
+  await fs.copy(targetPath, backupTarget, {
+    dereference: false,
+    overwrite: false,
+  });
+
+  return backupTarget;
+}
+
+async function replaceWithFileSymlink(sourcePath: string, targetPath: string): Promise<void> {
+  await fs.ensureDir(path.dirname(targetPath));
+  const relativeSource = path.relative(path.dirname(targetPath), sourcePath) || path.basename(sourcePath);
+  await fs.symlink(relativeSource, targetPath, "file");
+}
+
+async function ensureClaudeInstructionSymlink(
+  result: AgentsUnifyResult,
+  agentsPath: string,
+  claudePath: string,
+): Promise<void> {
+  const agentsRealPath = await realPathIfPossible(agentsPath);
+  const claudeStat = await fs.lstat(claudePath).catch(() => null);
+
+  if (claudeStat?.isSymbolicLink()) {
+    const claudeRealPath = await realPathIfPossible(claudePath);
+    if (agentsRealPath && claudeRealPath && samePath(agentsRealPath, claudeRealPath)) {
+      return;
+    }
+  }
+
+  if (claudeStat) {
+    await copyPathToBackup(result, claudePath);
+    await fs.remove(claudePath);
+  }
+
+  await replaceWithFileSymlink(agentsPath, claudePath);
+}
+
+async function writeRepositoryInstructionIndex(
+  result: AgentsUnifyResult,
+  folders: ResolvedFolders,
+): Promise<void> {
+  const rulesDir = path.join(folders.agentsDir, "rules");
+  await fs.ensureDir(rulesDir);
+
+  const rules = await collectRuleIndexEntries(rulesDir, folders.rootDir);
+  const existing = stripGeneratedRulesIndex(await readExistingInstructions(folders.rootDir));
+  const content = `${existing}\n\n${renderRulesIndexBlock(rules)}\n`;
+  const agentsPath = path.join(folders.rootDir, "AGENTS.md");
+  const claudePath = path.join(folders.rootDir, "CLAUDE.md");
+  const agentsStat = await fs.lstat(agentsPath).catch(() => null);
+
+  if (agentsStat) {
+    await copyPathToBackup(result, agentsPath);
+    if (agentsStat.isSymbolicLink()) {
+      await fs.remove(agentsPath);
+    }
+  }
+
+  await fs.writeFile(agentsPath, content, "utf-8");
+  await ensureClaudeInstructionSymlink(result, agentsPath, claudePath);
+
+  result.instructionIndex = {
+    agentsPath,
+    claudePath,
+    indexedRules: rules.map((rule) => rule.relativePath),
+  };
+}
+
 export async function unifyAgentsConfiguration(
-  options: FolderOptions = {},
+  options: AgentsUnifyOptions = {},
 ): Promise<AgentsUnifyResult> {
+  const scope = options.scope ?? "global";
   const folders = resolveFolders(options);
-  const candidates = getContainerCandidates(options);
   const instructionCandidates = getInstructionFileCandidates(options);
+  const candidates = scope === "repository"
+    ? getRepositoryContainerCandidates(options)
+    : getContainerCandidates(options);
   const result: AgentsUnifyResult = {
     rootDir: folders.rootDir,
     agentsDir: folders.agentsDir,
+    scope,
     backupPath: null,
     imported: [],
     duplicates: [],
@@ -688,12 +1087,14 @@ export async function unifyAgentsConfiguration(
     linked: [],
     alreadyLinked: [],
     skipped: [],
+    instructionIndex: null,
   };
 
   const destinationByCategory: Record<UnifiedAgentCategory, string> = {
     skills: path.join(folders.agentsDir, "skills"),
     agents: path.join(folders.agentsDir, "agents"),
     instructions: path.join(folders.agentsDir, "AGENTS.md"),
+    rules: path.join(folders.agentsDir, "rules"),
   };
 
   await fs.ensureDir(folders.agentsDir);
@@ -704,7 +1105,11 @@ export async function unifyAgentsConfiguration(
     result,
   );
 
-  for (const category of ["skills", "agents"] as const) {
+  const categories: Array<Exclude<UnifiedAgentCategory, "instructions">> = scope === "repository"
+    ? ["skills", "agents", "rules"]
+    : ["skills", "agents"];
+
+  for (const category of categories) {
     await importCategoryEntries(
       category,
       candidates,
@@ -727,6 +1132,10 @@ export async function unifyAgentsConfiguration(
       destinationByCategory.instructions,
       result,
     );
+  }
+
+  if (scope === "repository") {
+    await writeRepositoryInstructionIndex(result, folders);
   }
 
   return result;

@@ -5,6 +5,7 @@ import { setupTerminalCommand } from "./commands/setup-terminal.js";
 import { symlinkCommand } from "./commands/symlink.js";
 import { agentsUnifyCommand } from "./commands/agents-unify.js";
 import { codexAgentsCommand } from "./commands/codex-agents.js";
+import { sessionsUnifyCommand } from "./commands/session-unify.js";
 import {
   proActivateCommand,
   proStatusCommand,
@@ -107,15 +108,25 @@ function registerAgentsCommands(cmd: Command) {
     });
 
   cmd
-    .command("unify")
-    .description("Unify skills and agents into .agents, then render Codex TOML agents")
-    .action((options, command) => {
+    .command("unify [scope]")
+    .description("Unify agent configuration into .agents (scope: global or repository; default: global)")
+    .action((scope, options, command) => {
       const parentOptions = command.parent.opts();
+      const selectedScope = scope ?? "global";
+
+      if (selectedScope !== "global" && selectedScope !== "repository") {
+        console.error(chalk.red(`Invalid unify scope: ${selectedScope}`));
+        console.error(chalk.gray("Use `global` or `repository`."));
+        process.exitCode = 1;
+        return;
+      }
+
       return agentsUnifyCommand({
-        folder: parentOptions.folder,
+        folder: parentOptions.folder ?? (selectedScope === "repository" ? process.cwd() : undefined),
         claudeCodeFolder: parentOptions.claudeCodeFolder,
         codexFolder: parentOptions.codexFolder,
         agentsFolder: parentOptions.agentsFolder,
+        scope: selectedScope,
       });
     });
 
@@ -132,6 +143,22 @@ function registerAgentsCommands(cmd: Command) {
         agentsFolder: parentOptions.agentsFolder,
         overwrite: options.overwrite,
       });
+    });
+
+  const configCmd = cmd
+    .command("config")
+    .description("Manage cross-tool agent configuration data");
+
+  const configUnifyCmd = configCmd
+    .command("unify")
+    .description("Merge saved configuration data back into the current folders");
+
+  configUnifyCmd
+    .command("sessions")
+    .description("Import saved session history from configs and backups into current .claude/.codex/.agents folders")
+    .action((options, command) => {
+      const folderOptions = readConfigOptions(command, options);
+      return sessionsUnifyCommand(folderOptions);
     });
 
   const proCmd = cmd
@@ -203,6 +230,7 @@ function registerAgentsCommands(cmd: Command) {
       backupLoadCommand({
         folder: parentOptions.folder,
         claudeCodeFolder: parentOptions.claudeCodeFolder,
+        codexFolder: parentOptions.codexFolder,
         agentsFolder: parentOptions.agentsFolder,
       });
     });
@@ -229,14 +257,24 @@ function addConfigFolderOptions(cmd: Command): Command {
 }
 
 function readConfigOptions(command: Command, options: Record<string, unknown> = {}) {
-  const parentOptions = command.parent?.opts() ?? {};
-  const grandParentOptions = command.parent?.parent?.opts() ?? {};
+  const optionChain: Array<Record<string, unknown>> = [options];
+  let current: Command | null = command;
+
+  while (current) {
+    optionChain.push(current.opts());
+    current = current.parent ?? null;
+  }
+
+  const findOption = (name: string): string | undefined => {
+    const value = optionChain.find((opts) => opts[name] !== undefined)?.[name];
+    return typeof value === "string" ? value : undefined;
+  };
 
   return {
-    folder: options.folder ?? parentOptions.folder ?? grandParentOptions.folder,
-    claudeCodeFolder: options.claudeCodeFolder ?? parentOptions.claudeCodeFolder ?? grandParentOptions.claudeCodeFolder,
-    codexFolder: options.codexFolder ?? parentOptions.codexFolder ?? grandParentOptions.codexFolder,
-    agentsFolder: options.agentsFolder ?? parentOptions.agentsFolder ?? grandParentOptions.agentsFolder,
+    folder: findOption("folder"),
+    claudeCodeFolder: findOption("claudeCodeFolder"),
+    codexFolder: findOption("codexFolder"),
+    agentsFolder: findOption("agentsFolder"),
   };
 }
 

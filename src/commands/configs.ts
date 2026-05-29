@@ -44,7 +44,7 @@ function printSnapshots(title: string, snapshots: SnapshotInfo[]): void {
 
 export async function configsSaveCommand(name: string, options: ConfigCommandOptions = {}): Promise<void> {
   try {
-    console.log(chalk.gray("Saving .claude, .codex, and .agents config files..."));
+    console.log(chalk.gray("Saving full .claude, .codex, and .agents folders..."));
     const snapshotPath = await saveNamedConfig(name, options);
     console.log(chalk.green(`Saved config "${name}"`));
     console.log(chalk.gray(snapshotPath));

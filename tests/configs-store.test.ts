@@ -32,7 +32,7 @@ describe("configs store", () => {
     expect(await fs.readFile(path.join(snapshotPath, ".agents", "skills", "demo", "SKILL.md"), "utf-8")).toBe("one");
   });
 
-  it("skips runtime sessions, caches, logs, and package folders when saving", async () => {
+  it("saves runtime sessions, caches, logs, package folders, and git data", async () => {
     await fs.outputFile(path.join(rootDir, ".codex", "sessions", "session.jsonl"), "large session");
     await fs.outputFile(path.join(rootDir, ".codex", "plugins", "cache", "plugin.bin"), "cache");
     await fs.outputFile(path.join(rootDir, ".codex", "log", "codex-tui.log"), "log");
@@ -43,13 +43,13 @@ describe("configs store", () => {
 
     const snapshotPath = await saveNamedConfig("work-main", { folder: rootDir });
 
-    expect(await fs.pathExists(path.join(snapshotPath, ".codex", "sessions"))).toBe(false);
-    expect(await fs.pathExists(path.join(snapshotPath, ".codex", "plugins", "cache"))).toBe(false);
-    expect(await fs.pathExists(path.join(snapshotPath, ".codex", "log"))).toBe(false);
-    expect(await fs.pathExists(path.join(snapshotPath, ".claude", "projects"))).toBe(false);
-    expect(await fs.pathExists(path.join(snapshotPath, ".claude", "file-history"))).toBe(false);
-    expect(await fs.pathExists(path.join(snapshotPath, ".claude", "hooks", "node_modules"))).toBe(false);
-    expect(await fs.pathExists(path.join(snapshotPath, ".agents", ".git"))).toBe(false);
+    expect(await fs.pathExists(path.join(snapshotPath, ".codex", "sessions", "session.jsonl"))).toBe(true);
+    expect(await fs.pathExists(path.join(snapshotPath, ".codex", "plugins", "cache", "plugin.bin"))).toBe(true);
+    expect(await fs.pathExists(path.join(snapshotPath, ".codex", "log", "codex-tui.log"))).toBe(true);
+    expect(await fs.pathExists(path.join(snapshotPath, ".claude", "projects", "project.jsonl"))).toBe(true);
+    expect(await fs.pathExists(path.join(snapshotPath, ".claude", "file-history", "history.json"))).toBe(true);
+    expect(await fs.pathExists(path.join(snapshotPath, ".claude", "hooks", "node_modules", "pkg", "index.js"))).toBe(true);
+    expect(await fs.pathExists(path.join(snapshotPath, ".agents", ".git", "config"))).toBe(true);
     expect(await fs.pathExists(path.join(snapshotPath, ".codex", "config.toml"))).toBe(true);
     expect(await fs.pathExists(path.join(snapshotPath, ".agents", "skills", "demo", "SKILL.md"))).toBe(true);
   });

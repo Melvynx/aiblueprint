@@ -5,7 +5,7 @@ import os from "os";
 const BACKUP_BASE_DIR = path.join(os.homedir(), ".config", "aiblueprint", "backup");
 
 export function getBackupDir(): string {
-  return BACKUP_BASE_DIR;
+  return process.env.AIBLUEPRINT_BACKUP_DIR || BACKUP_BASE_DIR;
 }
 
 function formatDate(date: Date): string {
@@ -20,12 +20,13 @@ export interface BackupInfo {
 }
 
 export async function listBackups(): Promise<BackupInfo[]> {
-  const exists = await fs.pathExists(BACKUP_BASE_DIR);
+  const backupBaseDir = getBackupDir();
+  const exists = await fs.pathExists(backupBaseDir);
   if (!exists) {
     return [];
   }
 
-  const entries = await fs.readdir(BACKUP_BASE_DIR, { withFileTypes: true });
+  const entries = await fs.readdir(backupBaseDir, { withFileTypes: true });
   const backups: BackupInfo[] = [];
 
   for (const entry of entries) {
@@ -46,7 +47,7 @@ export async function listBackups(): Promise<BackupInfo[]> {
 
     backups.push({
       name: entry.name,
-      path: path.join(BACKUP_BASE_DIR, entry.name),
+      path: path.join(backupBaseDir, entry.name),
       date,
     });
   }
@@ -56,26 +57,15 @@ export async function listBackups(): Promise<BackupInfo[]> {
 
 const AGENTS_BACKUP_SUBDIR = ".agents";
 const CLAUDE_ITEMS = ["commands", "agents", "skills", "scripts", "settings.json"];
+const MANAGED_FOLDERS = [".claude", ".codex", ".agents"] as const;
 
 async function copyForBackup(
   sourcePath: string,
   destPath: string,
 ): Promise<void> {
-  // Skip symlinks: they reference paths that get backed up separately
-  // (e.g. ~/.claude/skills/* -> ~/.agents/skills/*). Recreating them in
-  // the backup folder is fragile (Windows EPERM without admin) and
-  // unnecessary because setup re-creates the links from .agents content.
   await fs.copy(sourcePath, destPath, {
     overwrite: true,
     dereference: false,
-    filter: async (src) => {
-      try {
-        const stat = await fs.lstat(src);
-        return !stat.isSymbolicLink();
-      } catch {
-        return true;
-      }
-    },
   });
 }
 
@@ -88,6 +78,7 @@ async function hasMeaningfulContent(dir: string): Promise<boolean> {
 export async function loadBackup(
   backupPath: string,
   claudeDir: string,
+  codexDir?: string,
   agentsDir?: string,
 ): Promise<void> {
   const exists = await fs.pathExists(backupPath);
@@ -95,53 +86,73 @@ export async function loadBackup(
     throw new Error(`Backup not found: ${backupPath}`);
   }
 
-  await fs.ensureDir(claudeDir);
+  const managedDestinations: Record<typeof MANAGED_FOLDERS[number], string | undefined> = {
+    ".claude": claudeDir,
+    ".codex": codexDir,
+    ".agents": agentsDir,
+  };
 
-  for (const item of CLAUDE_ITEMS) {
-    const sourcePath = path.join(backupPath, item);
-    const destPath = path.join(claudeDir, item);
+  let restoredManagedFolder = false;
+  for (const folderName of MANAGED_FOLDERS) {
+    const sourcePath = path.join(backupPath, folderName);
+    const destPath = managedDestinations[folderName];
+    if (!destPath || !(await fs.pathExists(sourcePath))) continue;
 
-    if (await fs.pathExists(sourcePath)) {
-      await copyForBackup(sourcePath, destPath);
-    }
+    await fs.ensureDir(destPath);
+    await copyForBackup(sourcePath, destPath);
+    restoredManagedFolder = true;
   }
 
-  if (agentsDir) {
-    const agentsBackupPath = path.join(backupPath, AGENTS_BACKUP_SUBDIR);
-    if (await fs.pathExists(agentsBackupPath)) {
-      await fs.ensureDir(agentsDir);
-      await copyForBackup(agentsBackupPath, agentsDir);
+  if (!restoredManagedFolder) {
+    await fs.ensureDir(claudeDir);
+
+    for (const item of CLAUDE_ITEMS) {
+      const sourcePath = path.join(backupPath, item);
+      const destPath = path.join(claudeDir, item);
+
+      if (await fs.pathExists(sourcePath)) {
+        await copyForBackup(sourcePath, destPath);
+      }
+    }
+
+    if (agentsDir) {
+      const agentsBackupPath = path.join(backupPath, AGENTS_BACKUP_SUBDIR);
+      if (await fs.pathExists(agentsBackupPath)) {
+        await fs.ensureDir(agentsDir);
+        await copyForBackup(agentsBackupPath, agentsDir);
+      }
     }
   }
 }
 
 export async function createBackup(
   claudeDir: string,
+  codexDir?: string,
   agentsDir?: string,
 ): Promise<string | null> {
   const claudeHasContent = await hasMeaningfulContent(claudeDir);
+  const codexHasContent = codexDir
+    ? await hasMeaningfulContent(codexDir)
+    : false;
   const agentsHasContent = agentsDir
     ? await hasMeaningfulContent(agentsDir)
     : false;
 
-  if (!claudeHasContent && !agentsHasContent) {
+  if (!claudeHasContent && !codexHasContent && !agentsHasContent) {
     return null;
   }
 
   const timestamp = formatDate(new Date());
-  const backupPath = path.join(BACKUP_BASE_DIR, timestamp);
+  const backupPath = path.join(getBackupDir(), timestamp);
 
   await fs.ensureDir(backupPath);
 
   if (claudeHasContent) {
-    for (const item of CLAUDE_ITEMS) {
-      const sourcePath = path.join(claudeDir, item);
-      const destPath = path.join(backupPath, item);
+    await copyForBackup(claudeDir, path.join(backupPath, ".claude"));
+  }
 
-      if (await fs.pathExists(sourcePath)) {
-        await copyForBackup(sourcePath, destPath);
-      }
-    }
+  if (codexHasContent && codexDir) {
+    await copyForBackup(codexDir, path.join(backupPath, ".codex"));
   }
 
   if (agentsHasContent && agentsDir) {

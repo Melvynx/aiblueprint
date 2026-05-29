@@ -126,4 +126,68 @@ describe("unifyAgentsConfiguration", () => {
     const stat = await fs.lstat(path.join(root, ".claude/skills"));
     expect(stat.isSymbolicLink()).toBe(true);
   });
+
+  it("unifies repository rules and memories, indexes them in AGENTS.md, and symlinks CLAUDE.md", async () => {
+    await writeSkill(
+      root,
+      ".claude/skills",
+      "uses-claude-paths",
+      "Read .claude/rules/testing.md before editing .codex/agents/reviewer.md",
+    );
+    await writeAgent(root, ".claude/agents", "reviewer.md", "Review with .claude/skills/uses-claude-paths");
+    await fs.ensureDir(path.join(root, ".claude/rules"));
+    await fs.writeFile(path.join(root, ".claude/rules/testing.md"), "# Testing\n\nRun the test suite.", "utf-8");
+    await fs.ensureDir(path.join(root, ".cursor/rules"));
+    await fs.writeFile(path.join(root, ".cursor/rules/ui.mdc"), "# UI\n\nUse accessible controls.", "utf-8");
+    await fs.ensureDir(path.join(root, ".codex/memories"));
+    await fs.writeFile(path.join(root, ".codex/memories/project.md"), "# Project Memory\n\nPrefer .codex/rules.", "utf-8");
+    await fs.writeFile(path.join(root, "CLAUDE.md"), "# Project Guide\n\nKeep this content.", "utf-8");
+
+    const result = await unifyAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect(await fs.readFile(path.join(root, ".agents/rules/testing.md"), "utf-8")).toContain("Run the test suite.");
+    expect(await fs.readFile(path.join(root, ".agents/rules/ui.mdc"), "utf-8")).toContain("Use accessible controls.");
+    expect(await fs.readFile(path.join(root, ".agents/rules/project.md"), "utf-8")).toContain("Prefer .agents/rules.");
+
+    expect(await fs.readFile(path.join(root, ".agents/skills/uses-claude-paths/SKILL.md"), "utf-8"))
+      .toBe("Read .agents/rules/testing.md before editing .agents/agents/reviewer.md");
+    expect(await fs.readFile(path.join(root, ".agents/agents/reviewer.md"), "utf-8"))
+      .toBe("Review with .agents/skills/uses-claude-paths");
+
+    expect((await fs.lstat(path.join(root, ".claude/rules"))).isSymbolicLink()).toBe(true);
+    expect((await fs.lstat(path.join(root, "CLAUDE.md"))).isSymbolicLink()).toBe(true);
+
+    const agentsIndex = await fs.readFile(path.join(root, "AGENTS.md"), "utf-8");
+    expect(agentsIndex).toContain("# Project Guide");
+    expect(agentsIndex).toContain("Keep this content.");
+    expect(agentsIndex).toContain("## Rules");
+    expect(agentsIndex).toContain("**Testing** - [.agents/rules/testing.md](.agents/rules/testing.md)");
+    expect(agentsIndex).toContain("**UI** - [.agents/rules/ui.mdc](.agents/rules/ui.mdc)");
+    expect(agentsIndex).toContain("**Project Memory** - [.agents/rules/project.md](.agents/rules/project.md)");
+
+    expect(result.instructionIndex?.indexedRules.sort()).toEqual([
+      ".agents/rules/project.md",
+      ".agents/rules/testing.md",
+      ".agents/rules/ui.mdc",
+    ]);
+    expect(result.backupPath).toBeTruthy();
+    expect(await fs.pathExists(path.join(result.backupPath!, "CLAUDE.md"))).toBe(true);
+  });
+
+  it("refreshes the repository rules index idempotently without dropping distinct Claude instructions", async () => {
+    await fs.ensureDir(path.join(root, ".agents/rules"));
+    await fs.writeFile(path.join(root, ".agents/rules/testing.md"), "# Testing\n", "utf-8");
+    await fs.writeFile(path.join(root, "AGENTS.md"), "# Agent Guide\n", "utf-8");
+    await fs.writeFile(path.join(root, "CLAUDE.md"), "# Claude Guide\n", "utf-8");
+
+    await unifyAgentsConfiguration({ folder: root, scope: "repository" });
+    await unifyAgentsConfiguration({ folder: root, scope: "repository" });
+
+    const agentsIndex = await fs.readFile(path.join(root, "AGENTS.md"), "utf-8");
+    expect(agentsIndex).toContain("# Agent Guide");
+    expect(agentsIndex).toContain("## Previous Claude Instructions");
+    expect(agentsIndex).toContain("# Claude Guide");
+    expect(agentsIndex.match(/## Rules/g)).toHaveLength(1);
+    expect(agentsIndex.match(/AIBLUEPRINT:RULES:START/g)).toHaveLength(1);
+  });
 });
