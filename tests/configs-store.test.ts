@@ -3,6 +3,7 @@ import os from "os";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+  cleanConfigBackups,
   createConfigBackup,
   listConfigBackups,
   loadNamedConfig,
@@ -23,6 +24,30 @@ describe("configs store", () => {
   afterEach(async () => {
     await fs.remove(rootDir);
   });
+
+  async function writeBackupFixture(
+    name: string,
+    createdAt: string | null,
+    trigger = "setup",
+  ): Promise<string> {
+    const backupPath = path.join(rootDir, ".aiblueprint", "backups", name);
+
+    if (!createdAt) {
+      await fs.ensureDir(backupPath);
+      return backupPath;
+    }
+
+    await fs.outputJson(path.join(backupPath, "metadata.json"), {
+      name,
+      type: "backup",
+      createdAt,
+      reason: `${name} backup`,
+      trigger,
+      folders: [".claude"],
+    });
+
+    return backupPath;
+  }
 
   it("saves the three managed folders as a named config", async () => {
     const snapshotPath = await saveNamedConfig("work-main", { folder: rootDir });
@@ -84,5 +109,98 @@ describe("configs store", () => {
     expect(backups[0].metadata.reason).toBe("Before test replacement");
     expect(backups[0].metadata.trigger).toBe("test");
     expect(backups[0].metadata.folders).toEqual([".claude", ".codex", ".agents"]);
+  });
+
+  it("deletes backups older than the retention window", async () => {
+    const oldBackupPath = await writeBackupFixture("old-backup", "2026-05-01T00:00:00.000Z");
+    const recentBackupPath = await writeBackupFixture("recent-backup", "2026-05-20T00:00:00.000Z");
+
+    const result = await cleanConfigBackups({
+      folder: rootDir,
+      days: 30,
+      now: new Date("2026-06-05T00:00:00.000Z"),
+    });
+
+    expect(result.deleted.map((backup) => backup.name)).toEqual(["old-backup"]);
+    expect(result.kept.map((backup) => backup.name)).toEqual(["recent-backup"]);
+    expect(await fs.pathExists(oldBackupPath)).toBe(false);
+    expect(await fs.pathExists(recentBackupPath)).toBe(true);
+  });
+
+  it("keeps old backups during dry run cleanup", async () => {
+    const oldBackupPath = await writeBackupFixture("old-backup", "2026-05-01T00:00:00.000Z");
+
+    const result = await cleanConfigBackups({
+      folder: rootDir,
+      days: 30,
+      dryRun: true,
+      now: new Date("2026-06-05T00:00:00.000Z"),
+    });
+
+    expect(result.deleted.map((backup) => backup.name)).toEqual(["old-backup"]);
+    expect(await fs.pathExists(oldBackupPath)).toBe(true);
+  });
+
+  it("keeps old manual backups unless explicitly included", async () => {
+    const manualBackupPath = await writeBackupFixture(
+      "manual-backup",
+      "2026-05-01T00:00:00.000Z",
+      "manual-backup",
+    );
+
+    const result = await cleanConfigBackups({
+      folder: rootDir,
+      days: 30,
+      now: new Date("2026-06-05T00:00:00.000Z"),
+    });
+
+    expect(result.deleted).toEqual([]);
+    expect(result.skipped.map((entry) => entry.snapshot.name)).toEqual(["manual-backup"]);
+    expect(await fs.pathExists(manualBackupPath)).toBe(true);
+  });
+
+  it("deletes old manual backups when explicitly included", async () => {
+    const manualBackupPath = await writeBackupFixture(
+      "manual-backup",
+      "2026-05-01T00:00:00.000Z",
+      "manual-backup",
+    );
+
+    const result = await cleanConfigBackups({
+      folder: rootDir,
+      days: 30,
+      includeManual: true,
+      now: new Date("2026-06-05T00:00:00.000Z"),
+    });
+
+    expect(result.deleted.map((backup) => backup.name)).toEqual(["manual-backup"]);
+    expect(await fs.pathExists(manualBackupPath)).toBe(false);
+  });
+
+  it("skips legacy backups without metadata", async () => {
+    const legacyBackupPath = await writeBackupFixture("2026-05-01-00-00-00-legacy", null);
+
+    const result = await cleanConfigBackups({
+      folder: rootDir,
+      days: 30,
+      now: new Date("2026-06-05T00:00:00.000Z"),
+    });
+
+    expect(result.deleted).toEqual([]);
+    expect(result.skipped.map((entry) => entry.snapshot.name)).toEqual(["2026-05-01-00-00-00-legacy"]);
+    expect(await fs.pathExists(legacyBackupPath)).toBe(true);
+  });
+
+  it("rejects cleanup when the backups directory is a symlink", async () => {
+    const backupsDir = path.join(rootDir, ".aiblueprint", "backups");
+    const outsideDir = await fs.mkdtemp(path.join(os.tmpdir(), "aiblueprint-outside-backups-"));
+
+    await fs.ensureDir(path.dirname(backupsDir));
+    await fs.symlink(outsideDir, backupsDir, "dir");
+
+    await expect(cleanConfigBackups({ folder: rootDir })).rejects.toThrow("Backup directory cannot be a symlink.");
+    expect(await fs.pathExists(outsideDir)).toBe(true);
+
+    await fs.remove(outsideDir);
   });
 });

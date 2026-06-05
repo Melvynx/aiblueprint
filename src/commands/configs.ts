@@ -1,6 +1,8 @@
 import chalk from "chalk";
 import {
+  cleanConfigBackups,
   createConfigBackup,
+  DEFAULT_BACKUP_RETENTION_DAYS,
   listConfigBackups,
   listSavedConfigs,
   loadBackupSnapshot,
@@ -13,6 +15,12 @@ import type { FolderOptions } from "../lib/folder-paths.js";
 
 export interface ConfigCommandOptions extends FolderOptions {
   force?: boolean;
+}
+
+export interface ConfigBackupsCleanCommandOptions extends ConfigCommandOptions {
+  days?: number;
+  dryRun?: boolean;
+  includeManual?: boolean;
 }
 
 function formatDate(iso: string): string {
@@ -124,6 +132,41 @@ export async function configsBackupsCreateCommand(reason: string | undefined, op
     }
     console.log(chalk.green("Backup created"));
     console.log(chalk.gray(backupPath));
+  } catch (error) {
+    console.error(chalk.red(error instanceof Error ? error.message : String(error)));
+    process.exit(1);
+  }
+}
+
+export async function configsBackupsCleanCommand(options: ConfigBackupsCleanCommandOptions = {}): Promise<void> {
+  try {
+    const days = options.days ?? DEFAULT_BACKUP_RETENTION_DAYS;
+    console.log(chalk.gray(`Cleaning config backups older than ${days} day${days !== 1 ? "s" : ""}...`));
+    const result = await cleanConfigBackups(options);
+
+    if (options.dryRun) {
+      console.log(chalk.yellow(`Dry run: ${result.deleted.length} backup${result.deleted.length !== 1 ? "s" : ""} would be deleted.`));
+    } else {
+      console.log(chalk.green(`Deleted ${result.deleted.length} old backup${result.deleted.length !== 1 ? "s" : ""}.`));
+    }
+
+    console.log(chalk.gray(`Cutoff: ${formatDate(result.cutoff)}`));
+
+    for (const backup of result.deleted) {
+      console.log(chalk.gray(`  ${backup.name}`));
+    }
+
+    if (result.skipped.length > 0) {
+      console.log(chalk.gray(`Skipped ${result.skipped.length} backup${result.skipped.length !== 1 ? "s" : ""}.`));
+    }
+
+    if (result.failed.length > 0) {
+      console.error(chalk.red(`Failed to delete ${result.failed.length} backup${result.failed.length !== 1 ? "s" : ""}.`));
+      for (const failure of result.failed) {
+        console.error(chalk.red(`  ${failure.snapshot.name}: ${failure.error}`));
+      }
+      process.exit(1);
+    }
   } catch (error) {
     console.error(chalk.red(error instanceof Error ? error.message : String(error)));
     process.exit(1);

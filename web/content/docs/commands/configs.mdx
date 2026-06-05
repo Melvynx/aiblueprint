@@ -48,15 +48,22 @@ those snapshots with the `backups` subcommands:
 | `configs backups list` | List automatic backups with their reasons. |
 | `configs backups load <name>` | Load a backup (current folders are backed up first). |
 | `configs backups create [reason]` | Create a manual backup with an optional reason. |
+| `configs backups clean` | Delete automatic backups older than the retention window. |
 
 ```bash
 aiblueprint configs backups list
 aiblueprint configs backups create "before experiment"
 aiblueprint configs backups load 2026-05-28-setup
+aiblueprint configs backups clean --days 30
+aiblueprint configs backups clean --days 30 --dry-run
+aiblueprint configs backups clean --days 90 --include-manual
 ```
 
 Each entry shows its name, date, reason, trigger, the folders included, and its
-path on disk.
+path on disk. `configs backups clean` deletes retention-managed backups older
+than 30 days by default. Manual backups created with `configs backups create`
+are kept unless you pass `--include-manual`. Use `--days` to change the
+retention window and `--dry-run` to preview what would be removed.
 
 ## Session recovery
 

@@ -222,7 +222,7 @@ describe("unifyAgentsConfiguration", () => {
     const result = await unifyAgentsConfiguration({ folder: root, scope: "repository" });
 
     expect(await fs.readFile(path.join(root, ".agents/rules/testing.md"), "utf-8")).toContain("Run the test suite.");
-    expect(await fs.readFile(path.join(root, ".agents/rules/ui.mdc"), "utf-8")).toContain("Use accessible controls.");
+    expect(await fs.readFile(path.join(root, ".agents/rules/ui.md"), "utf-8")).toContain("Use accessible controls.");
     expect(await fs.readFile(path.join(root, ".agents/rules/project.md"), "utf-8")).toContain("Prefer .agents/rules.");
 
     expect(await fs.readFile(path.join(root, ".agents/skills/uses-claude-paths/SKILL.md"), "utf-8"))
@@ -238,16 +238,171 @@ describe("unifyAgentsConfiguration", () => {
     expect(agentsIndex).toContain("Keep this content.");
     expect(agentsIndex).toContain("## Rules");
     expect(agentsIndex).toContain("**Testing** - [.agents/rules/testing.md](.agents/rules/testing.md)");
-    expect(agentsIndex).toContain("**UI** - [.agents/rules/ui.mdc](.agents/rules/ui.mdc)");
+    expect(agentsIndex).toContain("**UI** - [.agents/rules/ui.md](.agents/rules/ui.md)");
     expect(agentsIndex).toContain("**Project Memory** - [.agents/rules/project.md](.agents/rules/project.md)");
 
     expect(result.instructionIndex?.indexedRules.sort()).toEqual([
       ".agents/rules/project.md",
       ".agents/rules/testing.md",
-      ".agents/rules/ui.mdc",
+      ".agents/rules/ui.md",
     ]);
     expect(result.backupPath).toBeTruthy();
     expect(await fs.pathExists(path.join(result.backupPath!, "CLAUDE.md"))).toBe(true);
+  });
+
+  it("migrates existing repository rule .mdc files to .md when refreshing the index", async () => {
+    await fs.ensureDir(path.join(root, ".agents/rules"));
+    await fs.writeFile(path.join(root, ".agents/rules/ui.mdc"), "# UI\n\nUse accessible controls.", "utf-8");
+
+    const result = await unifyAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect(await fs.pathExists(path.join(root, ".agents/rules/ui.mdc"))).toBe(false);
+    expect(await fs.readFile(path.join(root, ".agents/rules/ui.md"), "utf-8")).toContain("Use accessible controls.");
+
+    const agentsIndex = await fs.readFile(path.join(root, "AGENTS.md"), "utf-8");
+    expect(agentsIndex).toContain("**UI** - [.agents/rules/ui.md](.agents/rules/ui.md)");
+    expect(result.renamed).toContainEqual(expect.objectContaining({
+      category: "rules",
+      from: path.join(root, ".agents/rules/ui.mdc"),
+      to: path.join(root, ".agents/rules/ui.md"),
+      reason: "Rule file extension normalized from .mdc to .md",
+    }));
+  });
+
+  it("previews existing repository rule .mdc migration without indexing stale .mdc paths", async () => {
+    await fs.ensureDir(path.join(root, ".agents/rules"));
+    await fs.writeFile(path.join(root, ".agents/rules/ui.mdc"), "# UI\n\nUse accessible controls.", "utf-8");
+
+    const result = await previewAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect(result.instructionIndex?.indexedRules).toEqual([".agents/rules/ui.md"]);
+    expect(await fs.pathExists(path.join(root, ".agents/rules/ui.mdc"))).toBe(true);
+    expect(await fs.pathExists(path.join(root, ".agents/rules/ui.md"))).toBe(false);
+  });
+
+  it("previews nested imported cursor rules as final .md paths", async () => {
+    await fs.ensureDir(path.join(root, ".cursor/rules/nested"));
+    await fs.writeFile(path.join(root, ".cursor/rules/nested/ui.mdc"), "# Nested UI\n", "utf-8");
+
+    const result = await previewAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect(result.instructionIndex?.indexedRules).toEqual([".agents/rules/nested/ui.md"]);
+  });
+
+  it("previews nested .md and .mdc source collisions with suffixed final paths", async () => {
+    await fs.ensureDir(path.join(root, ".cursor/rules/nested"));
+    await fs.writeFile(path.join(root, ".cursor/rules/nested/ui.md"), "# Nested MD\n", "utf-8");
+    await fs.writeFile(path.join(root, ".cursor/rules/nested/ui.mdc"), "# Nested MDC\n", "utf-8");
+
+    const result = await previewAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect(result.instructionIndex?.indexedRules.sort()).toEqual([
+      ".agents/rules/nested/ui--agents-rules.md",
+      ".agents/rules/nested/ui.md",
+    ]);
+  });
+
+  it("previews duplicate imports against planned suffixed .mdc migrations", async () => {
+    await fs.ensureDir(path.join(root, ".agents/rules"));
+    await fs.writeFile(path.join(root, ".agents/rules/ui.md"), "# Existing MD\n", "utf-8");
+    await fs.writeFile(path.join(root, ".agents/rules/ui.mdc"), "# Existing MDC\n", "utf-8");
+    await fs.ensureDir(path.join(root, ".cursor/rules"));
+    await fs.writeFile(path.join(root, ".cursor/rules/ui.mdc"), "# Existing MDC\n", "utf-8");
+
+    const result = await previewAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect(result.duplicates).toContainEqual(expect.objectContaining({
+      category: "rules",
+      from: path.join(root, ".cursor/rules/ui.mdc"),
+      keptAs: path.join(root, ".agents/rules/ui--agents-rules.md"),
+    }));
+    expect(result.instructionIndex?.indexedRules.sort()).toEqual([
+      ".agents/rules/ui--agents-rules.md",
+      ".agents/rules/ui.md",
+    ]);
+  });
+
+  it("keeps existing .agents rule content at the canonical .md path when cursor imports conflict", async () => {
+    await fs.ensureDir(path.join(root, ".agents/rules"));
+    await fs.writeFile(path.join(root, ".agents/rules/ui.mdc"), "# Existing UI\n", "utf-8");
+    await fs.ensureDir(path.join(root, ".cursor/rules"));
+    await fs.writeFile(path.join(root, ".cursor/rules/ui.mdc"), "# Cursor UI\n", "utf-8");
+
+    const result = await unifyAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect(await fs.readFile(path.join(root, ".agents/rules/ui.md"), "utf-8")).toBe("# Existing UI\n");
+    expect(await fs.readFile(path.join(root, ".agents/rules/ui--cursor-rules.md"), "utf-8")).toBe("# Cursor UI\n");
+    expect(result.instructionIndex?.indexedRules.sort()).toEqual([
+      ".agents/rules/ui--cursor-rules.md",
+      ".agents/rules/ui.md",
+    ]);
+  });
+
+  it("skips duplicate nested rule directories after normalizing .mdc names", async () => {
+    await fs.ensureDir(path.join(root, ".agents/rules/nested"));
+    await fs.writeFile(path.join(root, ".agents/rules/nested/ui.mdc"), "# Nested UI\n", "utf-8");
+    await fs.ensureDir(path.join(root, ".cursor/rules/nested"));
+    await fs.writeFile(path.join(root, ".cursor/rules/nested/ui.mdc"), "# Nested UI\n", "utf-8");
+
+    const result = await unifyAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect(await fs.readFile(path.join(root, ".agents/rules/nested/ui.md"), "utf-8")).toBe("# Nested UI\n");
+    expect(await fs.pathExists(path.join(root, ".agents/rules/nested--cursor-rules"))).toBe(false);
+    expect(result.duplicates).toContainEqual(expect.objectContaining({
+      category: "rules",
+      from: path.join(root, ".cursor/rules/nested"),
+      keptAs: path.join(root, ".agents/rules/nested"),
+    }));
+  });
+
+  it("skips duplicate nested directories with canonical suffixed rule collisions", async () => {
+    await fs.ensureDir(path.join(root, ".agents/rules/nested"));
+    await fs.writeFile(path.join(root, ".agents/rules/nested/ui.md"), "# Nested MD\n", "utf-8");
+    await fs.writeFile(path.join(root, ".agents/rules/nested/ui--agents-rules.md"), "# Nested MDC\n", "utf-8");
+    await fs.ensureDir(path.join(root, ".cursor/rules/nested"));
+    await fs.writeFile(path.join(root, ".cursor/rules/nested/ui.md"), "# Nested MD\n", "utf-8");
+    await fs.writeFile(path.join(root, ".cursor/rules/nested/ui.mdc"), "# Nested MDC\n", "utf-8");
+
+    const result = await unifyAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect(await fs.pathExists(path.join(root, ".agents/rules/nested--cursor-rules"))).toBe(false);
+    expect(result.duplicates).toContainEqual(expect.objectContaining({
+      category: "rules",
+      from: path.join(root, ".cursor/rules/nested"),
+      keptAs: path.join(root, ".agents/rules/nested"),
+    }));
+  });
+
+  it("skips duplicate nested directories when .md and .mdc collapse to identical final rules", async () => {
+    await fs.ensureDir(path.join(root, ".agents/rules/nested"));
+    await fs.writeFile(path.join(root, ".agents/rules/nested/ui.md"), "# Nested UI\n", "utf-8");
+    await fs.ensureDir(path.join(root, ".cursor/rules/nested"));
+    await fs.writeFile(path.join(root, ".cursor/rules/nested/ui.md"), "# Nested UI\n", "utf-8");
+    await fs.writeFile(path.join(root, ".cursor/rules/nested/ui.mdc"), "# Nested UI\n", "utf-8");
+
+    const result = await unifyAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect(await fs.pathExists(path.join(root, ".agents/rules/nested--cursor-rules"))).toBe(false);
+    expect(result.duplicates).toContainEqual(expect.objectContaining({
+      category: "rules",
+      from: path.join(root, ".cursor/rules/nested"),
+      keptAs: path.join(root, ".agents/rules/nested"),
+    }));
+  });
+
+  it("uses .md as the canonical rule when a source contains matching .md and .mdc names", async () => {
+    await fs.ensureDir(path.join(root, ".cursor/rules"));
+    await fs.writeFile(path.join(root, ".cursor/rules/ui.mdc"), "# Cursor MDC\n", "utf-8");
+    await fs.writeFile(path.join(root, ".cursor/rules/ui.md"), "# Cursor MD\n", "utf-8");
+
+    const result = await unifyAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect(await fs.readFile(path.join(root, ".agents/rules/ui.md"), "utf-8")).toBe("# Cursor MD\n");
+    expect(await fs.readFile(path.join(root, ".agents/rules/ui--cursor-rules.md"), "utf-8")).toBe("# Cursor MDC\n");
+    expect(result.instructionIndex?.indexedRules.sort()).toEqual([
+      ".agents/rules/ui--cursor-rules.md",
+      ".agents/rules/ui.md",
+    ]);
   });
 
   it("refreshes the repository rules index idempotently without dropping distinct Claude instructions", async () => {

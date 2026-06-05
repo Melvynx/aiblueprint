@@ -4,6 +4,8 @@ import { resolveFolders, type FolderOptions, type ResolvedFolders } from "./fold
 
 const MANAGED_FOLDER_NAMES = [".claude", ".codex", ".agents"] as const;
 type ManagedFolderName = typeof MANAGED_FOLDER_NAMES[number];
+const RETENTION_MANAGED_BACKUP_TRIGGERS = new Set(["setup", "sync", "load", "backup-load"]);
+export const DEFAULT_BACKUP_RETENTION_DAYS = 30;
 
 export interface ConfigStorePaths {
   baseDir: string;
@@ -30,6 +32,31 @@ export interface SnapshotInfo {
 
 export interface ConfigStoreOptions extends FolderOptions {
   force?: boolean;
+}
+
+export interface CleanConfigBackupsOptions extends FolderOptions {
+  days?: number;
+  dryRun?: boolean;
+  includeManual?: boolean;
+  now?: Date;
+}
+
+export interface SkippedConfigBackup {
+  snapshot: SnapshotInfo;
+  reason: string;
+}
+
+export interface FailedConfigBackupClean {
+  snapshot: SnapshotInfo;
+  error: string;
+}
+
+export interface CleanConfigBackupsResult {
+  cutoff: string;
+  deleted: SnapshotInfo[];
+  failed: FailedConfigBackupClean[];
+  kept: SnapshotInfo[];
+  skipped: SkippedConfigBackup[];
 }
 
 export function getConfigStorePaths(rootDir: string): ConfigStorePaths {
@@ -344,4 +371,135 @@ export async function listConfigBackups(options: FolderOptions = {}): Promise<Sn
   const folders = resolveConfigStoreFolders(options);
   const paths = getConfigStorePaths(folders.rootDir);
   return listSnapshots(paths.backupsDir, "backup");
+}
+
+export function normalizeBackupRetentionDays(value = DEFAULT_BACKUP_RETENTION_DAYS): number {
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error("Backup retention days must be a positive integer.");
+  }
+
+  return value;
+}
+
+function isRetentionManagedBackup(metadata: SnapshotMetadata, includeManual = false): boolean {
+  return RETENTION_MANAGED_BACKUP_TRIGGERS.has(metadata.trigger)
+    || (includeManual && metadata.trigger === "manual-backup");
+}
+
+function isPathInside(childPath: string, parentPath: string): boolean {
+  const relativePath = path.relative(parentPath, childPath);
+  return relativePath !== "" && !relativePath.startsWith("..") && !path.isAbsolute(relativePath);
+}
+
+async function realBackupStorePath(backupsDir: string): Promise<string | null> {
+  if (!(await fs.pathExists(backupsDir))) return null;
+
+  const stats = await fs.lstat(backupsDir);
+  if (stats.isSymbolicLink()) {
+    throw new Error("Backup directory cannot be a symlink.");
+  }
+
+  if (!stats.isDirectory()) {
+    throw new Error("Backup path is not a directory.");
+  }
+
+  return fs.realpath(backupsDir);
+}
+
+function cleanupDateForSnapshot(snapshot: SnapshotInfo): Date | null {
+  if (snapshot.metadata.type !== "backup") return null;
+
+  const createdAt = new Date(snapshot.metadata.createdAt);
+  if (Number.isNaN(createdAt.getTime())) return null;
+
+  return createdAt;
+}
+
+async function removeBackupSnapshot(snapshot: SnapshotInfo, backupsRealPath: string): Promise<void> {
+  const snapshotRealPath = await fs.realpath(snapshot.path);
+  if (!isPathInside(snapshotRealPath, backupsRealPath)) {
+    throw new Error(`Refusing to delete backup outside store: ${snapshot.name}`);
+  }
+
+  await fs.remove(snapshot.path);
+}
+
+export async function cleanConfigBackups(options: CleanConfigBackupsOptions = {}): Promise<CleanConfigBackupsResult> {
+  const days = normalizeBackupRetentionDays(options.days);
+  const folders = resolveConfigStoreFolders(options);
+  const paths = getConfigStorePaths(folders.rootDir);
+  const backupsRealPath = await realBackupStorePath(paths.backupsDir);
+  const now = options.now ?? new Date();
+  const cutoffDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+
+  if (!backupsRealPath) {
+    return {
+      cutoff: cutoffDate.toISOString(),
+      deleted: [],
+      failed: [],
+      kept: [],
+      skipped: [],
+    };
+  }
+
+  const backups = await listSnapshots(paths.backupsDir, "backup");
+  const deleted: SnapshotInfo[] = [];
+  const failed: FailedConfigBackupClean[] = [];
+  const kept: SnapshotInfo[] = [];
+  const skipped: SkippedConfigBackup[] = [];
+  const deletionCandidates: SnapshotInfo[] = [];
+
+  for (const backup of backups) {
+    if (!isRetentionManagedBackup(backup.metadata, options.includeManual)) {
+      skipped.push({ snapshot: backup, reason: "not retention-managed" });
+      continue;
+    }
+
+    const cleanupDate = cleanupDateForSnapshot(backup);
+    if (!cleanupDate) {
+      skipped.push({ snapshot: backup, reason: "missing valid backup metadata date" });
+      continue;
+    }
+
+    if (cleanupDate < cutoffDate) {
+      deletionCandidates.push(backup);
+    } else {
+      kept.push(backup);
+    }
+  }
+
+  if (options.dryRun) {
+    deleted.push(...deletionCandidates);
+  } else {
+    for (const backup of deletionCandidates) {
+      try {
+        await removeBackupSnapshot(backup, backupsRealPath);
+        deleted.push(backup);
+      } catch (error) {
+        failed.push({
+          snapshot: backup,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    if (deleted.length > 0 || failed.length > 0) {
+      await appendHistory(paths, {
+        action: "backup-clean",
+        days,
+        cutoff: cutoffDate.toISOString(),
+        deleted: deleted.map((backup) => backup.name),
+        failed: failed.map((entry) => ({ name: entry.snapshot.name, error: entry.error })),
+        skipped: skipped.map((entry) => ({ name: entry.snapshot.name, reason: entry.reason })),
+      });
+    }
+  }
+
+  return {
+    cutoff: cutoffDate.toISOString(),
+    deleted,
+    failed,
+    kept,
+    skipped,
+  };
 }

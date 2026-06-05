@@ -83,6 +83,8 @@ const IGNORED_ENTRY_NAMES = new Set([
   "node_modules",
 ]);
 
+const RULE_EXTENSION_RENAME_REASON = "Rule file extension normalized from .mdc to .md";
+
 function uniqueByPath<T extends { path: string }>(candidates: T[]): T[] {
   const seen = new Set<string>();
   const unique: T[] = [];
@@ -337,6 +339,74 @@ async function hashPath(targetPath: string): Promise<string> {
   return hashString(`other:${stat.mode}:${stat.size}`);
 }
 
+async function hashRulePath(targetPath: string): Promise<string> {
+  const stat = await fs.lstat(targetPath);
+
+  if (stat.isSymbolicLink()) {
+    const linkTarget = await fs.readlink(targetPath);
+    return hashString(`symlink:${linkTarget}`);
+  }
+
+  if (stat.isFile()) {
+    const fileHash = crypto.createHash("sha256");
+    fileHash.update("file:");
+    fileHash.update(await fs.readFile(targetPath));
+    return fileHash.digest("hex");
+  }
+
+  if (stat.isDirectory()) {
+    const entries = (await fs.readdir(targetPath, { withFileTypes: true }))
+      .filter((entry) => !IGNORED_ENTRY_NAMES.has(entry.name))
+      .sort(compareRuleEntryNames);
+    const canonicalEntries: Array<{ name: string; hash: string }> = [];
+    const usedNames = new Set<string>();
+    const hashesByName = new Map<string, string>();
+    const dirHash = crypto.createHash("sha256");
+    dirHash.update("dir:");
+
+    for (const entry of entries) {
+      const entryHash = await hashRulePath(path.join(targetPath, entry.name));
+      let entryName = entry.isDirectory() ? entry.name : normalizeRuleFileName(entry.name);
+      const existingHash = hashesByName.get(entryName);
+      if (existingHash) {
+        if (existingHash === entryHash) continue;
+        entryName = findAvailableRuleName(entryName, usedNames);
+      }
+      usedNames.add(entryName);
+      hashesByName.set(entryName, entryHash);
+      canonicalEntries.push({ name: entryName, hash: entryHash });
+    }
+
+    for (const entry of canonicalEntries.sort((a, b) => a.name.localeCompare(b.name))) {
+      dirHash.update(entry.name);
+      dirHash.update("\0");
+      dirHash.update(entry.hash);
+      dirHash.update("\0");
+    }
+
+    return dirHash.digest("hex");
+  }
+
+  return hashString(`other:${stat.mode}:${stat.size}`);
+}
+
+async function hashPathForCategory(
+  category: UnifiedAgentCategory,
+  targetPath: string,
+): Promise<string> {
+  return category === "rules" ? hashRulePath(targetPath) : hashPath(targetPath);
+}
+
+function findAvailableRuleName(originalName: string, usedNames: Set<string>): string {
+  let index = 1;
+
+  while (true) {
+    const candidate = nameWithSuffix(originalName, "agents-rules", index);
+    if (!usedNames.has(candidate)) return candidate;
+    index++;
+  }
+}
+
 const TEXT_EXTENSIONS = new Set([
   ".cjs",
   ".js",
@@ -426,6 +496,27 @@ function nameWithSuffix(name: string, suffix: string, index: number): string {
   return `${name}--${numberedSuffix}`;
 }
 
+function normalizeRuleFileName(name: string): string {
+  return path.extname(name).toLowerCase() === ".mdc"
+    ? `${path.basename(name, path.extname(name))}.md`
+    : name;
+}
+
+function ruleExtensionPriority(name: string): number {
+  const ext = path.extname(name).toLowerCase();
+  if (ext === ".md") return 0;
+  if (ext === ".mdc") return 1;
+  return 2;
+}
+
+function compareRuleEntryNames(a: { name: string }, b: { name: string }): number {
+  const normalizedCompare = normalizeRuleFileName(a.name).localeCompare(normalizeRuleFileName(b.name));
+  if (normalizedCompare !== 0) return normalizedCompare;
+  const priorityCompare = ruleExtensionPriority(a.name) - ruleExtensionPriority(b.name);
+  if (priorityCompare !== 0) return priorityCompare;
+  return a.name.localeCompare(b.name);
+}
+
 async function findTargetName(
   destinationDir: string,
   originalName: string,
@@ -444,16 +535,33 @@ async function findTargetName(
 }
 
 async function addExistingDestinationHashes(
+  category: UnifiedAgentCategory,
   destinationDir: string,
   knownHashes: Map<string, string>,
+  result: AgentsUnifyResult,
 ): Promise<void> {
   if (!(await fs.pathExists(destinationDir))) return;
+
+  const plannedRuleNames = new Map(
+    result.renamed
+      .filter((entry) => entry.category === "rules")
+      .map((entry) => [path.resolve(entry.from), path.basename(entry.to)]),
+  );
+  const removedRulePaths = new Set(
+    result.duplicates
+      .filter((entry) => entry.category === "rules")
+      .map((entry) => path.resolve(entry.from)),
+  );
 
   const entries = await fs.readdir(destinationDir, { withFileTypes: true });
   for (const entry of entries) {
     if (IGNORED_ENTRY_NAMES.has(entry.name)) continue;
     const entryPath = path.join(destinationDir, entry.name);
-    knownHashes.set(await hashPath(entryPath), entry.name);
+    if (category === "rules" && removedRulePaths.has(path.resolve(entryPath))) continue;
+    const entryName = category === "rules"
+      ? plannedRuleNames.get(path.resolve(entryPath)) ?? normalizeRuleFileName(entry.name)
+      : entry.name;
+    knownHashes.set(await hashPathForCategory(category, entryPath), entryName);
   }
 }
 
@@ -485,7 +593,7 @@ async function importCategoryEntries(
       continue;
     }
 
-    const entries = await collectCandidateEntries(candidate).catch(() => null);
+    const entries = await collectCandidateEntries(candidate, category).catch(() => null);
     if (!entries) {
       result.skipped.push({
         category,
@@ -515,13 +623,13 @@ async function importCategoryEntries(
   }
 
   const knownHashes = new Map<string, string>();
-  await addExistingDestinationHashes(destinationDir, knownHashes);
+  await addExistingDestinationHashes(category, destinationDir, knownHashes, result);
   const knownNames = new Set(knownHashes.values());
 
   for (const { candidate, entries } of sourceEntries) {
     for (const entry of entries) {
       const sourcePath = entry.path;
-      const sourceHash = await hashPath(sourcePath);
+      const sourceHash = await hashPathForCategory(category, sourcePath);
       const existingName = knownHashes.get(sourceHash);
 
       if (existingName) {
@@ -534,11 +642,11 @@ async function importCategoryEntries(
         continue;
       }
 
-      let targetName = entry.name;
+      let targetName = category === "rules" ? normalizeRuleFileName(entry.name) : entry.name;
       let targetPath = path.join(destinationDir, targetName);
 
       if ((await pathExistsOrSymlink(targetPath)) || knownNames.has(targetName)) {
-        targetName = await findAvailableTargetName(destinationDir, entry.name, candidate.label, knownNames);
+        targetName = await findAvailableTargetName(destinationDir, targetName, candidate.label, knownNames);
         targetPath = path.join(destinationDir, targetName);
         result.renamed.push({
           category,
@@ -557,7 +665,7 @@ async function importCategoryEntries(
         await normalizePortableContent(targetPath);
       }
       knownNames.add(targetName);
-      knownHashes.set(dryRun ? sourceHash : await hashPath(targetPath), targetName);
+      knownHashes.set(dryRun ? sourceHash : await hashPathForCategory(category, targetPath), targetName);
       result.imported.push({
         category,
         name: entry.name,
@@ -568,6 +676,113 @@ async function importCategoryEntries(
   }
 
   return true;
+}
+
+function recordRuleExtensionRename(
+  result: AgentsUnifyResult,
+  from: string,
+  to: string,
+): void {
+  result.renamed.push({
+    category: "rules",
+    name: path.basename(from),
+    from,
+    to,
+    reason: RULE_EXTENSION_RENAME_REASON,
+  });
+}
+
+async function migrateExistingRuleExtensions(
+  rulesDir: string,
+  result: AgentsUnifyResult,
+  dryRun = false,
+): Promise<void> {
+  const usedNamesByDir = new Map<string, Set<string>>();
+
+  async function usedNamesForDir(currentDir: string): Promise<Set<string>> {
+    const existing = usedNamesByDir.get(currentDir);
+    if (existing) return existing;
+    const names = new Set(await fs.readdir(currentDir).catch(() => []));
+    usedNamesByDir.set(currentDir, names);
+    return names;
+  }
+
+  async function walk(currentDir: string): Promise<void> {
+    const entries = sortSourceEntries(
+      await fs.readdir(currentDir, { withFileTypes: true }).catch(() => []),
+      "rules",
+    );
+
+    for (const entry of entries) {
+      if (IGNORED_ENTRY_NAMES.has(entry.name)) continue;
+
+      const sourcePath = path.join(currentDir, entry.name);
+      if (entry.isDirectory()) {
+        await walk(sourcePath);
+        continue;
+      }
+
+      if (!entry.isFile() && !entry.isSymbolicLink()) continue;
+      if (path.extname(entry.name).toLowerCase() !== ".mdc") continue;
+
+      const targetPath = path.join(currentDir, normalizeRuleFileName(entry.name));
+      if (samePath(sourcePath, targetPath)) continue;
+
+      if (await pathExistsOrSymlink(targetPath)) {
+        const sourceHash = await hashPath(sourcePath);
+        const targetHash = await hashPath(targetPath);
+
+        if (sourceHash === targetHash) {
+          const backupRoot = await ensureBackupPath(result, dryRun);
+          const backupTarget = path.join(
+            backupRoot,
+            safeRelativePath(result.rootDir, sourcePath),
+          );
+
+          if (!dryRun) {
+            await fs.ensureDir(path.dirname(backupTarget));
+            await fs.move(sourcePath, backupTarget, { overwrite: false });
+          }
+          result.duplicates.push({
+            category: "rules",
+            name: entry.name,
+            from: sourcePath,
+            keptAs: targetPath,
+          });
+          const usedNames = await usedNamesForDir(currentDir);
+          usedNames.delete(entry.name);
+          continue;
+        }
+
+        const usedNames = await usedNamesForDir(currentDir);
+        const targetName = await findAvailableTargetName(
+          currentDir,
+          path.basename(targetPath),
+          "agents-rules",
+          usedNames,
+        );
+        const renamedTargetPath = path.join(currentDir, targetName);
+
+        if (!dryRun) {
+          await fs.move(sourcePath, renamedTargetPath, { overwrite: false });
+        }
+        usedNames.delete(entry.name);
+        usedNames.add(targetName);
+        recordRuleExtensionRename(result, sourcePath, renamedTargetPath);
+        continue;
+      }
+
+      const usedNames = await usedNamesForDir(currentDir);
+      if (!dryRun) {
+        await fs.move(sourcePath, targetPath, { overwrite: false });
+      }
+      usedNames.delete(entry.name);
+      usedNames.add(path.basename(targetPath));
+      recordRuleExtensionRename(result, sourcePath, targetPath);
+    }
+  }
+
+  await walk(rulesDir);
 }
 
 async function findAvailableTargetName(
@@ -593,12 +808,25 @@ interface SourceEntry {
   path: string;
 }
 
-async function collectCandidateEntries(candidate: ContainerCandidate): Promise<SourceEntry[]> {
+function sortSourceEntries<T extends { name: string }>(
+  entries: T[],
+  category: Exclude<UnifiedAgentCategory, "instructions">,
+): T[] {
+  return [...entries].sort((a, b) => {
+    if (category === "rules") return compareRuleEntryNames(a, b);
+    return a.name.localeCompare(b.name);
+  });
+}
+
+async function collectCandidateEntries(
+  candidate: ContainerCandidate,
+  category: Exclude<UnifiedAgentCategory, "instructions">,
+): Promise<SourceEntry[]> {
   const stat = await fs.lstat(candidate.path);
 
   if (stat.isDirectory()) {
     const entries = await fs.readdir(candidate.path, { withFileTypes: true });
-    return entries.map((entry) => ({
+    return sortSourceEntries(entries, category).map((entry) => ({
       name: entry.name,
       path: path.join(candidate.path, entry.name),
     }));
@@ -608,7 +836,7 @@ async function collectCandidateEntries(candidate: ContainerCandidate): Promise<S
     const targetStat = await fs.stat(candidate.path).catch(() => null);
     if (targetStat?.isDirectory()) {
       const entries = await fs.readdir(candidate.path, { withFileTypes: true });
-      return entries.map((entry) => ({
+      return sortSourceEntries(entries, category).map((entry) => ({
         name: entry.name,
         path: path.join(candidate.path, entry.name),
       }));
@@ -980,7 +1208,7 @@ async function collectRuleIndexEntries(
     }
 
     if (!entry.isFile() && !entry.isSymbolicLink()) continue;
-    if (![".md", ".mdc"].includes(path.extname(entry.name).toLowerCase())) continue;
+    if (path.extname(entry.name).toLowerCase() !== ".md") continue;
 
     rules.push({
       title: await readRuleTitle(entryPath),
@@ -1170,22 +1398,24 @@ async function collectPlannedRuleIndexEntries(
   rootDir: string,
 ): Promise<RuleIndexEntry[]> {
   const rules: RuleIndexEntry[] = [];
+  const removedRulePaths = new Set(
+    [
+      ...result.renamed.filter((entry) => entry.category === "rules").map((entry) => path.relative(rootDir, entry.from)),
+      ...result.duplicates.filter((entry) => entry.category === "rules").map((entry) => path.relative(rootDir, entry.from)),
+    ],
+  );
   const plannedRuleEntries = [
     ...result.imported.filter((entry) => entry.category === "rules"),
     ...result.renamed.filter((entry) => entry.category === "rules"),
   ];
 
   for (const entry of plannedRuleEntries) {
-    const ext = path.extname(entry.to).toLowerCase();
-    if (![".md", ".mdc"].includes(ext)) continue;
-    rules.push({
-      title: await readRuleTitle(entry.from),
-      relativePath: path.relative(rootDir, entry.to),
-    });
+    rules.push(...await collectPlannedRuleEntryFiles(entry, rootDir));
   }
 
   if (await pathExistsOrSymlink(path.join(rootDir, ".agents", "rules"))) {
-    rules.push(...await collectRuleIndexEntries(path.join(rootDir, ".agents", "rules"), rootDir));
+    const existingRules = await collectRuleIndexEntries(path.join(rootDir, ".agents", "rules"), rootDir);
+    rules.push(...existingRules.filter((rule) => !removedRulePaths.has(rule.relativePath)));
   }
 
   const byPath = new Map<string, RuleIndexEntry>();
@@ -1194,6 +1424,72 @@ async function collectPlannedRuleIndexEntries(
   }
 
   return [...byPath.values()].sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+}
+
+async function collectPlannedRuleEntryFiles(
+  entry: ImportedEntry | RenamedEntry,
+  rootDir: string,
+): Promise<RuleIndexEntry[]> {
+  const sourceStat = await fs.lstat(entry.from).catch(() => null);
+  if (!sourceStat?.isDirectory()) {
+    const ext = path.extname(entry.to).toLowerCase();
+    if (ext !== ".md") return [];
+    return [{
+      title: await readRuleTitle(entry.from),
+      relativePath: path.relative(rootDir, entry.to),
+    }];
+  }
+
+  return collectPlannedRuleDirectoryFiles(entry.from, entry.to, rootDir);
+}
+
+async function collectPlannedRuleDirectoryFiles(
+  sourceDir: string,
+  targetDir: string,
+  rootDir: string,
+): Promise<RuleIndexEntry[]> {
+  const entries = sortSourceEntries(
+    await fs.readdir(sourceDir, { withFileTypes: true }).catch(() => []),
+    "rules",
+  );
+  const rules: RuleIndexEntry[] = [];
+  const usedNames = new Set<string>();
+  const plannedSourcesByName = new Map<string, string>();
+
+  for (const entry of entries) {
+    if (IGNORED_ENTRY_NAMES.has(entry.name)) continue;
+
+    const sourcePath = path.join(sourceDir, entry.name);
+    if (entry.isDirectory()) {
+      const targetPath = path.join(targetDir, entry.name);
+      usedNames.add(entry.name);
+      rules.push(...await collectPlannedRuleDirectoryFiles(sourcePath, targetPath, rootDir));
+      continue;
+    }
+
+    if (!entry.isFile() && !entry.isSymbolicLink()) continue;
+    const ext = path.extname(entry.name).toLowerCase();
+    if (![".md", ".mdc"].includes(ext)) continue;
+
+    let targetName = normalizeRuleFileName(entry.name);
+    const existingSourcePath = plannedSourcesByName.get(targetName);
+    if (existingSourcePath) {
+      const sourceHash = await hashRulePath(sourcePath);
+      const existingHash = await hashRulePath(existingSourcePath);
+      if (sourceHash === existingHash) continue;
+      targetName = await findAvailableTargetName(targetDir, targetName, "agents-rules", usedNames);
+    }
+    usedNames.add(targetName);
+    plannedSourcesByName.set(targetName, sourcePath);
+
+    const targetPath = path.join(targetDir, targetName);
+    rules.push({
+      title: await readRuleTitle(sourcePath),
+      relativePath: path.relative(rootDir, targetPath),
+    });
+  }
+
+  return rules;
 }
 
 export async function unifyAgentsConfiguration(
@@ -1239,6 +1535,10 @@ export async function unifyAgentsConfiguration(
     ? ["skills", "agents", "rules"]
     : ["skills", "agents"];
 
+  if (scope === "repository" && await pathExistsOrSymlink(destinationByCategory.rules)) {
+    await migrateExistingRuleExtensions(destinationByCategory.rules, result, dryRun);
+  }
+
   const activeCategories = new Set<Exclude<UnifiedAgentCategory, "instructions">>();
   for (const category of categories) {
     const isActive = await importCategoryEntries(
@@ -1273,6 +1573,9 @@ export async function unifyAgentsConfiguration(
   }
 
   if (scope === "repository") {
+    if (!dryRun && await pathExistsOrSymlink(destinationByCategory.rules)) {
+      await migrateExistingRuleExtensions(destinationByCategory.rules, result, dryRun);
+    }
     await writeRepositoryInstructionIndex(result, folders, dryRun);
   }
 

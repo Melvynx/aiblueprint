@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { Command } from "commander";
+import { Command, InvalidArgumentError } from "commander";
 import { setupCommand } from "./commands/setup.js";
 import { setupTerminalCommand } from "./commands/setup-terminal.js";
 import { symlinkCommand } from "./commands/symlink.js";
@@ -16,6 +16,7 @@ import { proSyncCommand } from "./commands/sync.js";
 import { backupLoadCommand } from "./commands/backup.js";
 import {
   configsBackupsCreateCommand,
+  configsBackupsCleanCommand,
   configsBackupsListCommand,
   configsBackupsLoadCommand,
   configsListCommand,
@@ -30,6 +31,7 @@ import {
   openclawProUpdateCommand,
 } from "./commands/openclaw-pro.js";
 import { registerDynamicScriptCommands } from "./commands/dynamic-scripts.js";
+import { DEFAULT_BACKUP_RETENTION_DAYS, normalizeBackupRetentionDays } from "./lib/configs-store.js";
 import chalk from "chalk";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
@@ -281,6 +283,14 @@ function readConfigOptions(command: Command, options: Record<string, unknown> = 
   };
 }
 
+function parseRetentionDays(value: string): number {
+  try {
+    return normalizeBackupRetentionDays(Number(value));
+  } catch (error) {
+    throw new InvalidArgumentError(error instanceof Error ? error.message : String(error));
+  }
+}
+
 const agentsCmd = program
   .command("agents")
   .description("AI coding configuration commands");
@@ -378,6 +388,22 @@ addConfigFolderOptions(configsBackupsCmd
     const folderOptions = readConfigOptions(command, options);
     configsBackupsCreateCommand(reason, {
       ...folderOptions,
+    });
+  });
+
+addConfigFolderOptions(configsBackupsCmd
+  .command("clean")
+  .description("Delete old config backups managed by retention")
+  .option("-d, --days <days>", "Delete backups older than this many days", parseRetentionDays, DEFAULT_BACKUP_RETENTION_DAYS)
+  .option("--dry-run", "Show backups that would be deleted without removing them")
+  .option("--include-manual", "Also delete manual backups created with configs backups create"))
+  .action((options, command) => {
+    const folderOptions = readConfigOptions(command, options);
+    configsBackupsCleanCommand({
+      ...folderOptions,
+      days: options.days,
+      dryRun: options.dryRun,
+      includeManual: options.includeManual,
     });
   });
 
