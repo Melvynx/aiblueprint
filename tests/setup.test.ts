@@ -56,6 +56,9 @@ describe("Setup Command with Inquirer.js", () => {
     });
     vi.mocked(fs.copy).mockResolvedValue();
     vi.mocked(fs.remove).mockResolvedValue();
+    vi.mocked(fs.lstat).mockRejectedValue(new Error("not found"));
+    vi.mocked(fs.stat).mockRejectedValue(new Error("not found"));
+    vi.mocked(fs.realpath).mockImplementation(async (path: any) => path);
     // @ts-expect-error Not important
     vi.mocked(fs.readdir).mockResolvedValue([]);
 
@@ -101,6 +104,44 @@ describe("Setup Command with Inquirer.js", () => {
     expect(consoleSpy.log).toHaveBeenCalledWith(
       expect.stringContaining("Settings updated"),
     );
+  });
+
+  it("should install scripts through an existing scripts directory symlink", async () => {
+    const tempDir = "/tmp/test-claude";
+    const linkedScriptsDir = "/tmp/linked-claude-scripts";
+
+    vi.mocked(fs.lstat).mockImplementation(async (targetPath: any) => {
+      if (targetPath === `${tempDir}/scripts`) {
+        return { isSymbolicLink: () => true } as any;
+      }
+      throw new Error("not found");
+    });
+    vi.mocked(fs.stat).mockImplementation(async (targetPath: any) => {
+      if (targetPath === `${tempDir}/scripts`) {
+        return { isDirectory: () => true } as any;
+      }
+      throw new Error("not found");
+    });
+    vi.mocked(fs.realpath).mockImplementation(async (targetPath: any) => {
+      if (targetPath === `${tempDir}/scripts`) {
+        return linkedScriptsDir;
+      }
+      return targetPath;
+    });
+
+    await expect(
+      setupCommand({
+        claudeCodeFolder: tempDir,
+        skipInteractive: true,
+      }),
+    ).resolves.not.toThrow();
+
+    expect(fs.copy).toHaveBeenCalledWith(
+      expect.stringContaining("/agents-config/claude-config/scripts"),
+      linkedScriptsDir,
+      { overwrite: true },
+    );
+    expect(fs.remove).not.toHaveBeenCalledWith(`${tempDir}/scripts`);
   });
 
   it("should run interactive setup with inquirer prompts", async () => {

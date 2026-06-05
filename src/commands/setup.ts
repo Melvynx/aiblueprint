@@ -56,6 +56,21 @@ async function resolveClaudeAssetPath(
   return null;
 }
 
+export async function resolveDirectoryCopyDestination(
+  destination: string,
+): Promise<string> {
+  const stat = await fs.lstat(destination).catch(() => null);
+  if (!stat?.isSymbolicLink()) return destination;
+
+  const targetStat = await fs.stat(destination).catch(() => null);
+  if (targetStat?.isDirectory()) {
+    return fs.realpath(destination);
+  }
+
+  await fs.remove(destination);
+  return destination;
+}
+
 export async function setupCommand(params: SetupCommandParams = {}) {
   const {
     folder,
@@ -194,11 +209,14 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       s.start("Setting up scripts");
       const scriptsSource = await resolveClaudeAssetPath(sourceDir, "scripts");
       if (scriptsSource) {
-        await fs.copy(scriptsSource, path.join(claudeDir, "scripts"), {
-          overwrite: true,
-        });
-        await replacePathPlaceholdersInDir(path.join(claudeDir, "scripts"), claudeDir);
-        await fs.ensureDir(path.join(claudeDir, "scripts/statusline/data"));
+        const scriptsDestination = path.join(claudeDir, "scripts");
+        await fs.copy(
+          scriptsSource,
+          await resolveDirectoryCopyDestination(scriptsDestination),
+          { overwrite: true },
+        );
+        await replacePathPlaceholdersInDir(scriptsDestination, claudeDir);
+        await fs.ensureDir(path.join(scriptsDestination, "statusline/data"));
         s.stop("Scripts installed");
       } else {
         s.stop("Scripts not available in repository");
