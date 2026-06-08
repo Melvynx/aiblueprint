@@ -1,13 +1,13 @@
 ---
 name: use-style
-description: Apply named visual style guides to landing pages and UI. Use for $use-style, /useskill, list styles, or styles like grid, vercel-simple, stripe, linear, raycast, gumroad, dusk, or split-auth.
+description: Apply named visual style guides to landing pages and UI. Use for $use-style, /usestyle, list styles, or styles like grid, vercel-simple, stripe, linear, raycast, gumroad, dusk, or split-auth.
 ---
 
 Load and apply a named style before designing or implementing any UI.
 
 ## Invocation
 
-- Explicit: `$use-style grid`, `/useskill split-auth`, `/useskill list`, or "use the grid style"
+- Explicit: `$use-style grid`, `/usestyle split-auth`, `/usestyle list`, or "use the grid style"
 - Implicit: user references `/aiblueprint`, `/agents`, `/aibuilder`, "grid theme", Vercel, Geist, a minimalist dark tool UI, Stripe / fintech / checkout / dashboard UI, Linear / issue tracker / app-shell sidebar UI, NYT / newspaper / editorial / broadsheet / magazine layouts, Anthropic / Claude / warm cream AI-lab pages, Gumroad / neo-brutalist / loud commerce / bold yellow-pink pages, Raycast / glossy dark / glow gradients / floating glass nav / premium product marketing, or Dusk / Attio / dark CRM dashboard floating on a twilight backdrop / blue data viz / colorful category pills
 
 Parse the style name from `$ARGUMENTS` or the message. Treat `split-auth`, `signin 2pages`, `signin-2pages`, `sign-in 2 pages`, `auth split`, and `two-column auth` as `split-auth`. Treat `list`, `styles`, `available styles`, and missing style names with no implicit match as a request to list available styles and ask the user to choose before designing. Default to `grid` for Codelynx product landings. Default to `vercel-simple` when the user references Vercel, Geist, or minimalist dark developer tools. Default to `linear` when the user references Linear, an issue tracker, or a dense sidebar + list + detail app shell. Default to `new-york-times` when the user references a newspaper, broadsheet, magazine, or serif editorial layout. Default to `anthropic` when the user references Anthropic, Claude, or a warm cream + serif AI-lab aesthetic. Default to `gumroad` when the user references Gumroad, neo-brutalism, hard offset shadows, or a loud yellow/pink bordered look. Default to `raycast` when the user references Raycast, a glossy dark page with glow gradients, a floating glass nav, or premium dark product marketing. Default to `dusk` when the user references Attio, a dark CRM/data dashboard floating on a twilight/aurora backdrop, vivid-blue charts, or colorful category pills. Default to `split-auth` when the user asks for a polished login, sign-in, signup, OAuth, magic-code, or password-reset page with a two-panel visual layout.
