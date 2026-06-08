@@ -11,6 +11,7 @@ export type UnifiedAgentCategory = "skills" | "agents" | "instructions" | "rules
 export interface AgentsUnifyOptions extends FolderOptions {
   scope?: AgentsUnifyScope;
   dryRun?: boolean;
+  categories?: UnifiedAgentCategory[];
 }
 
 interface ContainerCandidate {
@@ -28,6 +29,7 @@ interface InstructionFileCandidate {
   path: string;
   isDestination?: boolean;
   linkWhenMissing?: boolean;
+  linkWhenParentExists?: boolean;
 }
 
 interface ImportedEntry {
@@ -198,8 +200,10 @@ function getContainerCandidates(options: FolderOptions, includeCodex = true): Co
   ]);
 }
 
-function getInstructionFileCandidates(options: FolderOptions, includeCodex = true): InstructionFileCandidate[] {
+function getInstructionFileCandidates(options: FolderOptions, scope: AgentsUnifyScope): InstructionFileCandidate[] {
   const folders = resolveFolders(options);
+  const cursorDir = path.join(folders.rootDir, ".cursor");
+  const linkToolInstructionsWhenMissing = scope === "global";
 
   return uniqueByPath([
     {
@@ -212,11 +216,17 @@ function getInstructionFileCandidates(options: FolderOptions, includeCodex = tru
       path: path.join(folders.claudeDir, "CLAUDE.md"),
       linkWhenMissing: true,
     },
-    ...(includeCodex ? [{
+    {
       label: "codex-instructions",
       path: path.join(folders.codexDir, "AGENTS.md"),
-      linkWhenMissing: true,
-    } satisfies InstructionFileCandidate] : []),
+      linkWhenMissing: linkToolInstructionsWhenMissing,
+      linkWhenParentExists: true,
+    },
+    {
+      label: "cursor-instructions",
+      path: path.join(cursorDir, "AGENTS.md"),
+      linkWhenParentExists: true,
+    },
   ]);
 }
 
@@ -1091,6 +1101,7 @@ async function importInstructionFiles(
 
 async function shouldLinkMissingInstruction(candidate: InstructionFileCandidate): Promise<boolean> {
   if (candidate.linkWhenMissing) return true;
+  if (candidate.linkWhenParentExists) return fs.pathExists(path.dirname(candidate.path));
   return false;
 }
 
@@ -1347,12 +1358,13 @@ async function writeRepositoryInstructionIndex(
   result: AgentsUnifyResult,
   folders: ResolvedFolders,
   dryRun = false,
+  includeRules = true,
 ): Promise<void> {
   const rulesDir = path.join(folders.agentsDir, "rules");
   const agentsPath = path.join(folders.rootDir, "AGENTS.md");
   const claudePath = path.join(folders.rootDir, "CLAUDE.md");
   const rulesDirExists = await pathExistsOrSymlink(rulesDir);
-  const rules = dryRun || rulesDirExists
+  const rules = includeRules && (dryRun || rulesDirExists)
     ? dryRun
       ? await collectPlannedRuleIndexEntries(result, folders.rootDir)
       : await collectRuleIndexEntries(rulesDir, folders.rootDir)
@@ -1499,7 +1511,13 @@ export async function unifyAgentsConfiguration(
   const dryRun = Boolean(options.dryRun);
   const folders = resolveFolders(options);
   const includeCodex = scope !== "repository";
-  const instructionCandidates = getInstructionFileCandidates(options, includeCodex);
+  const defaultCategories: UnifiedAgentCategory[] = scope === "repository"
+    ? ["instructions", "skills", "agents", "rules"]
+    : ["instructions", "skills", "agents"];
+  const selectedCategories = new Set(
+    (options.categories ?? defaultCategories).filter((category) => defaultCategories.includes(category)),
+  );
+  const instructionCandidates = getInstructionFileCandidates(options, scope);
   const candidates = scope === "repository"
     ? getRepositoryContainerCandidates(options)
     : getContainerCandidates(options);
@@ -1524,23 +1542,26 @@ export async function unifyAgentsConfiguration(
     rules: path.join(folders.agentsDir, "rules"),
   };
 
-  await importInstructionFiles(
-    instructionCandidates,
-    destinationByCategory.instructions,
-    result,
-    dryRun,
-  );
+  if (selectedCategories.has("instructions")) {
+    await importInstructionFiles(
+      instructionCandidates,
+      destinationByCategory.instructions,
+      result,
+      dryRun,
+    );
+  }
 
   const categories: Array<Exclude<UnifiedAgentCategory, "instructions">> = scope === "repository"
     ? ["skills", "agents", "rules"]
     : ["skills", "agents"];
 
-  if (scope === "repository" && await pathExistsOrSymlink(destinationByCategory.rules)) {
+  if (scope === "repository" && selectedCategories.has("rules") && await pathExistsOrSymlink(destinationByCategory.rules)) {
     await migrateExistingRuleExtensions(destinationByCategory.rules, result, dryRun);
   }
 
   const activeCategories = new Set<Exclude<UnifiedAgentCategory, "instructions">>();
   for (const category of categories) {
+    if (!selectedCategories.has(category)) continue;
     const isActive = await importCategoryEntries(
       category,
       candidates,
@@ -1563,20 +1584,22 @@ export async function unifyAgentsConfiguration(
     );
   }
 
-  for (const candidate of instructionCandidates) {
-    await linkInstructionFile(
-      candidate,
-      destinationByCategory.instructions,
-      result,
-      dryRun,
-    );
+  if (selectedCategories.has("instructions")) {
+    for (const candidate of instructionCandidates) {
+      await linkInstructionFile(
+        candidate,
+        destinationByCategory.instructions,
+        result,
+        dryRun,
+      );
+    }
   }
 
-  if (scope === "repository") {
-    if (!dryRun && await pathExistsOrSymlink(destinationByCategory.rules)) {
+  if (scope === "repository" && (selectedCategories.has("instructions") || selectedCategories.has("rules"))) {
+    if (!dryRun && selectedCategories.has("rules") && await pathExistsOrSymlink(destinationByCategory.rules)) {
       await migrateExistingRuleExtensions(destinationByCategory.rules, result, dryRun);
     }
-    await writeRepositoryInstructionIndex(result, folders, dryRun);
+    await writeRepositoryInstructionIndex(result, folders, dryRun, selectedCategories.has("rules"));
   }
 
   return result;

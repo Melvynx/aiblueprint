@@ -5,7 +5,7 @@ keywords: ["skills", "commit", "create-pr", "prompt-creator", "ultrathink"]
 ---
 
 Skills are reusable workflows that Claude Code and Codex can invoke. AIBlueprint
-installs 14+ skills into the shared `~/.agents/skills` folder.
+installs 15+ skills into the shared `~/.agents/skills` folder.
 
 ## Bundled skills
 
@@ -17,6 +17,7 @@ installs 14+ skills into the shared `~/.agents/skills` folder.
 | `merge` | Context-aware branch merging. |
 | `prompt-creator` | Expert prompt engineering with best-practice references. |
 | `skill-manager` | Create and edit skills across Claude, Codex, and Cursor. |
+| `use-style` | Apply named visual style guides before designing or implementing UI. |
 | `rules-manager` | Maintain `AGENTS.md` and modular rule files. |
 | `agents-managers` | Manage agents and Task-tool orchestration. |
 | `environments-manager` | Per-worktree agent environments. |
@@ -37,3 +38,6 @@ Skills are installed by [agents setup](/commands/agents-setup). Use
 [agents unify](/commands/unify) to centralize global skills you already have
 into `~/.agents`, or `agents unify projects` to move project-local skills into
 that repository's `.agents/skills` folder.
+
+See [use-style](/concepts/use-style) for the bundled UI style skill and
+[Examples](/examples) for a visual picker showing each available style.

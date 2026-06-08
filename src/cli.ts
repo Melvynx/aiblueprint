@@ -37,6 +37,7 @@ import { readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { homedir } from "os";
+import type { UnifiedAgentCategory } from "./lib/agents-unifier.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const packageJson = JSON.parse(
@@ -49,6 +50,20 @@ program
   .name("aiblueprint")
   .description("AIBlueprint CLI for setting up AI coding configurations")
   .version(packageJson.version);
+
+function readUnifyCategories(options: {
+  agentsMd?: boolean;
+  skills?: boolean;
+  agents?: boolean;
+  rules?: boolean;
+}): UnifiedAgentCategory[] | undefined {
+  const categories: UnifiedAgentCategory[] = [];
+  if (options.agentsMd) categories.push("instructions");
+  if (options.skills) categories.push("skills");
+  if (options.agents) categories.push("agents");
+  if (options.rules) categories.push("rules");
+  return categories.length > 0 ? categories : undefined;
+}
 
 function registerAgentsCommands(cmd: Command) {
   cmd
@@ -112,6 +127,11 @@ function registerAgentsCommands(cmd: Command) {
   cmd
     .command("unify [scope]")
     .description("Unify agent configuration into .agents (scope: global or projects/repository; default: global)")
+    .option("-i, --interactive", "Choose which categories to unify")
+    .option("--agents-md", "Unify instruction files into .agents/AGENTS.md")
+    .option("--skills", "Unify skills")
+    .option("--agents", "Unify Markdown agents")
+    .option("--rules", "Unify repository rules and memories")
     .action((scope, options, command) => {
       const parentOptions = command.parent.opts();
       const requestedScope = scope ?? "global";
@@ -132,6 +152,8 @@ function registerAgentsCommands(cmd: Command) {
         codexFolder: parentOptions.codexFolder,
         agentsFolder: parentOptions.agentsFolder,
         scope: selectedScope,
+        categories: readUnifyCategories(options),
+        interactive: options.interactive,
       });
     });
 

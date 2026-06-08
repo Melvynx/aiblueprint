@@ -10,8 +10,10 @@ uses global mode and consolidates your home-level skills and agents into
 
 ```bash
 aiblueprint agents unify
+aiblueprint agents unify -i
 aiblueprint agents unify global
 aiblueprint agents unify projects
+aiblueprint agents unify projects --agents-md --skills --rules
 aiblueprint agents unify repository
 npx aiblueprint-cli@latest agents config unify sessions
 ```
@@ -20,16 +22,37 @@ npx aiblueprint-cli@latest agents config unify sessions
 
 | Mode | Default folder | What it does |
 | ---- | -------------- | ------------ |
-| `global` | `$HOME` | Imports global skills and agents from Claude, Codex, Cursor, OpenCode, and Factory paths into `~/.agents`, then links tool folders back to the shared source. |
-| `projects` | Current working directory | Alias for repository mode. Imports project-local skills, agents, rules, and memories into `.agents`, creates only the needed category folders, links `.claude/rules` back to `.agents/rules`, creates `AGENTS.md`, and symlinks `CLAUDE.md` to it. |
+| `global` | `$HOME` | Imports global instruction files, skills, and agents from Claude, Codex, Cursor, OpenCode, and Factory paths into `~/.agents`, then links tool paths back to the shared source. |
+| `projects` | Current working directory | Alias for repository mode. Imports project-local instruction files, skills, agents, rules, and memories into `.agents`, creates only the needed category folders, links `.claude/rules` back to `.agents/rules`, creates `AGENTS.md`, and symlinks `CLAUDE.md` to it. |
 | `repository` | Current working directory | Same behavior as `projects`. Kept as the explicit technical name for repo-local configuration. |
 
 Use `--folder <path>` with any mode to target a specific root.
 
+## Category Selection
+
+By default, `agents unify` runs every category supported by the selected mode.
+Use `-i` or `--interactive` to choose categories from a prompt:
+
+```bash
+npx aiblueprint-cli@latest agents unify projects -i
+```
+
+Use flags for non-interactive runs:
+
+| Flag | Category |
+| ---- | -------- |
+| `--agents-md` | Instruction files like `.claude/CLAUDE.md`, `.codex/AGENTS.md`, and `.cursor/AGENTS.md` |
+| `--skills` | Skills folders |
+| `--agents` | Markdown agents |
+| `--rules` | Repository rules and memories |
+
+When one or more category flags are provided, only those categories run. The
+`--rules` category applies to `projects` and `repository` mode.
+
 ## Projects Mode
 
 Projects mode is designed for repositories that already have tool-specific
-configuration in `.claude`, `.cursor`, or `.agents`.
+configuration in `.claude`, `.codex`, `.cursor`, or `.agents`.
 
 ```bash
 npx aiblueprint-cli@latest agents unify projects
@@ -37,18 +60,21 @@ npx aiblueprint-cli@latest agents unify projects
 
 It will:
 
-1. Move reusable skills into `.agents/skills`.
-2. Move Markdown agents into `.agents/agents`.
-3. Move rules and memory notes into `.agents/rules`.
-4. Rewrite copied text references from tool-specific paths like
+1. Move `.claude/CLAUDE.md`, `.codex/AGENTS.md`, and `.cursor/AGENTS.md`
+   into `.agents/AGENTS.md`, preserving conflicts with a suffixed copy.
+2. Move reusable skills into `.agents/skills`.
+3. Move Markdown agents into `.agents/agents`.
+4. Move rules and memory notes into `.agents/rules`.
+5. Rewrite copied text references from tool-specific paths like
    `.claude/rules` or `.cursor/agents` to `.agents/rules` and `.agents/agents`.
-5. Create compatibility symlinks so existing tools keep reading the shared
+6. Create compatibility symlinks so existing tools keep reading the shared
    folders.
-6. Generate an `AGENTS.md` rules index and make `CLAUDE.md` point to it.
+7. Generate an `AGENTS.md` rules index and make `CLAUDE.md` point to it.
 
 If a project has no skills, agents, or rules, the command does not create empty
 `.agents/skills`, `.agents/agents`, or `.agents/rules` folders. Project mode
-also does not create `.codex`; Codex reads the shared `.agents` project context.
+also does not create `.codex` from scratch; Codex reads the shared `.agents`
+project context.
 
 ## Global Mode
 
@@ -60,7 +86,7 @@ npx aiblueprint-cli@latest agents unify global
 
 It will:
 
-1. Import global skills and agents into `~/.agents`.
+1. Import `.claude/CLAUDE.md`, `.codex/AGENTS.md`, `.cursor/AGENTS.md`, skills, and agents into `~/.agents`.
 2. Skip duplicates and rename files when there is a conflict.
 3. Create symlinks back so existing tools keep working.
 4. Back up the source before moving anything.

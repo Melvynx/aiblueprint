@@ -16,6 +16,61 @@ export interface AgentsUnifyCommandParams {
   codexFolder?: string;
   agentsFolder?: string;
   scope?: AgentsUnifyScope;
+  categories?: UnifiedAgentCategory[];
+  interactive?: boolean;
+}
+
+const CATEGORY_LABELS: Record<UnifiedAgentCategory, string> = {
+  instructions: "AGENTS.md",
+  skills: "Skills",
+  agents: "Agents",
+  rules: "Rules and memories",
+};
+
+function defaultCategoriesForScope(scope: AgentsUnifyScope): UnifiedAgentCategory[] {
+  return scope === "repository"
+    ? ["instructions", "skills", "agents", "rules"]
+    : ["instructions", "skills", "agents"];
+}
+
+function selectableCategoriesForScope(scope: AgentsUnifyScope): UnifiedAgentCategory[] {
+  return defaultCategoriesForScope(scope);
+}
+
+async function resolveSelectedCategories(
+  params: AgentsUnifyCommandParams,
+): Promise<UnifiedAgentCategory[] | undefined | null> {
+  const scope = params.scope ?? "global";
+  const selectableCategories = selectableCategoriesForScope(scope);
+  const requestedCategories = params.categories?.filter((category) => selectableCategories.includes(category));
+  const initialValues = requestedCategories ?? selectableCategories;
+
+  if (!params.interactive) {
+    if (params.categories && initialValues.length === 0) {
+      throw new Error(`Selected categories do not apply to ${scope} scope`);
+    }
+    return requestedCategories;
+  }
+
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    throw new Error("Interactive category selection requires a TTY");
+  }
+
+  const selected = await p.multiselect<UnifiedAgentCategory>({
+    message: "What do you want to unify?",
+    options: selectableCategories.map((category) => ({
+      value: category,
+      label: CATEGORY_LABELS[category],
+    })),
+    initialValues,
+    required: true,
+  });
+
+  if (p.isCancel(selected)) {
+    return null;
+  }
+
+  return selected;
 }
 
 function countByCategory(
@@ -117,7 +172,18 @@ export async function agentsUnifyCommand(params: AgentsUnifyCommandParams = {}) 
         : "Centralizing reusable agent configuration into .agents, then rendering Codex agents",
     ));
 
-    const preview = await previewAgentsConfiguration(params);
+    const selectedCategories = await resolveSelectedCategories(params);
+    if (selectedCategories === null) {
+      console.log(chalk.gray("\nUnify cancelled"));
+      return;
+    }
+
+    const commandParams = { ...params, categories: selectedCategories };
+    const effectiveCategories = selectedCategories ?? defaultCategoriesForScope(params.scope ?? "global");
+
+    console.log(chalk.gray(`Categories: ${effectiveCategories.map((category) => CATEGORY_LABELS[category]).join(", ")}`));
+
+    const preview = await previewAgentsConfiguration(commandParams);
     printAgentsUnifyPreview(preview);
 
     if (!(await confirmUnify())) {
@@ -125,10 +191,10 @@ export async function agentsUnifyCommand(params: AgentsUnifyCommandParams = {}) 
       return;
     }
 
-    const result = await unifyAgentsConfiguration(params);
-    const codexResult = params.scope === "repository"
+    const result = await unifyAgentsConfiguration(commandParams);
+    const codexResult = params.scope === "repository" || !effectiveCategories.includes("agents")
       ? null
-      : await renderCodexAgentsFromMarkdown(params);
+      : await renderCodexAgentsFromMarkdown(commandParams);
 
     console.log(chalk.green("\nUnify complete"));
     console.log(chalk.gray(`  Shared folder: ${result.agentsDir}`));

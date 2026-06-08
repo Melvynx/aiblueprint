@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Real Analysis · Is the $200 comparison honest?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:#fff; --wash:#f7f7f7; --fg:#121212; --slate:#363636; --muted:#666; --faint:#999;
+    --rule:#121212; --rule-light:#e2e2e2;
+    --link:#326891; --blue:#567b95; --red:#d0021b;
+    --serif:'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --sans:'Libre Franklin', Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+  body { font-family:var(--serif); background:var(--bg); color:var(--fg); line-height:1.5; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:1100px; margin:0 auto; padding:0 24px; }
+  .mono, .num { font-variant-numeric:tabular-nums; }
+  .sans { font-family:var(--sans); }
+  .kicker { font-family:var(--sans); font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+  .meta { font-family:var(--sans); font-size:11.5px; font-weight:500; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
+
+  /* Masthead */
+  .topbar { display:flex; justify-content:space-between; align-items:center; padding:12px 0; font-family:var(--sans); font-size:12px; }
+  .topbar .date { color:var(--fg); }
+  .topbar .mkt { color:var(--muted); } .topbar .mkt b { color:var(--red); font-weight:600; }
+  .masthead { font-family:'UnifrakturCook', serif; font-weight:700; text-align:center; font-size:clamp(34px,7vw,62px); line-height:1.1; padding:8px 0 14px; letter-spacing:.01em; }
+  .topnav { display:flex; justify-content:center; flex-wrap:wrap; gap:6px 26px; border-top:2px solid var(--rule); border-bottom:2px solid var(--rule); padding:12px 0; }
+  .topnav a { font-family:var(--serif); font-size:16px; color:var(--fg); text-decoration:none; }
+  .topnav a:hover { color:var(--link); text-decoration:underline; }
+  .topnav a.active { font-weight:700; }
+  .livestrip { display:flex; flex-wrap:wrap; align-items:center; gap:8px 22px; padding:12px 0; border-bottom:1px solid var(--rule); font-family:var(--sans); font-size:13px; }
+  .livestrip .live { color:var(--red); font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+  .livestrip .sep { color:var(--rule-light); }
+  .livestrip a { color:var(--fg); text-decoration:none; } .livestrip a:hover { text-decoration:underline; }
+  .livestrip .ago { color:var(--muted); }
+
+  /* Headline block */
+  .lead { padding:34px 0 30px; border-bottom:2px solid var(--rule); }
+  .lead .tagline { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .lead .tagline .dot { width:7px; height:7px; border-radius:50%; background:var(--red); }
+  h1 { font-family:var(--serif); font-size:clamp(34px,6vw,58px); font-weight:700; letter-spacing:-0.01em; line-height:1.04; max-width:18ch; }
+  h1 .muted2 { font-style:italic; color:var(--slate); }
+  .byline { font-family:var(--sans); font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin-top:18px; }
+  .lede { font-size:20px; line-height:1.45; margin-top:18px; max-width:62ch; color:var(--slate); }
+
+  /* Stats row */
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); border-bottom:2px solid var(--rule); }
+  .stat { padding:24px 22px 26px; border-right:1px solid var(--rule); }
+  .stat:last-child { border-right:none; }
+  .stat .k { font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
+  .stat .v { font-family:var(--serif); font-size:40px; font-weight:700; letter-spacing:-0.02em; margin-top:12px; line-height:1; }
+  .stat .d { font-size:14px; color:var(--slate); margin-top:11px; }
+
+  /* Sections */
+  section { padding:48px 0; border-bottom:1px solid var(--rule); }
+  .sec-head { margin-bottom:30px; max-width:74ch; }
+  .sec-head .step { font-family:var(--sans); font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--red); }
+  .sec-head h2 { font-family:var(--serif); font-size:clamp(24px,3.4vw,34px); font-weight:700; letter-spacing:-0.015em; margin-top:10px; line-height:1.1; }
+  .sec-head p { font-size:17px; line-height:1.55; color:var(--slate); margin-top:14px; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:0; border-top:1px solid var(--rule); }
+  .grid-2 .panel:first-child { border-right:1px solid var(--rule); }
+  .panel { padding:24px 24px 8px; }
+  .grid-2 .panel:first-child { padding-left:0; } .grid-2 .panel:last-child { padding-right:0; }
+  .panel .ptitle { font-family:var(--serif); font-size:18px; font-weight:700; }
+  .panel .psub { font-family:var(--sans); font-size:11.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-top:4px; }
+  .chart-box { position:relative; height:300px; margin-top:18px; }
+  .chart-box.tall { height:240px; }
+
+  .single .panel { padding:0; }
+
+  .legend { display:flex; gap:22px; flex-wrap:wrap; margin-top:18px; }
+  .legend span { font-family:var(--sans); display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--slate); }
+  .legend i { width:11px; height:11px; display:inline-block; }
+
+  .note { margin-top:20px; padding-top:18px; border-top:1px solid var(--rule-light); font-size:15.5px; line-height:1.55; color:var(--slate); max-width:80ch; }
+  .note b { color:var(--fg); font-weight:700; }
+
+  /* Pull quote / big callout */
+  .big-callout { border-top:3px solid var(--rule); border-bottom:3px solid var(--rule); padding:32px 0; margin-top:8px; }
+  .big-callout .lbl { font-family:var(--sans); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+  .big-callout .row { display:flex; flex-wrap:wrap; align-items:baseline; gap:14px 46px; margin-top:18px; }
+  .big-callout .row .v { font-family:var(--serif); font-size:54px; font-weight:700; letter-spacing:-0.02em; }
+  .big-callout .row .eq { font-family:var(--serif); font-size:34px; color:var(--faint); }
+  .big-callout .cap { font-size:16px; line-height:1.5; margin-top:18px; color:var(--slate); max-width:62ch; }
+
+  .three { display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--rule); }
+  .mini { padding:22px 22px 8px; border-right:1px solid var(--rule); }
+  .mini:last-child { border-right:none; padding-right:0; } .three .mini:first-child { padding-left:0; }
+  .mini .mt { font-family:var(--serif); font-size:17px; font-weight:700; } .mini .ms { font-family:var(--sans); font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-top:3px; }
+  .mini .cwrap { position:relative; height:150px; margin-top:14px; }
+
+  .verdict-table { width:100%; border-collapse:collapse; border-top:2px solid var(--rule); }
+  .verdict-table td { padding:20px 4px; font-size:17px; line-height:1.5; border-bottom:1px solid var(--rule-light); vertical-align:top; }
+  .verdict-table td:first-child { font-family:var(--serif); font-weight:700; color:var(--fg); width:42%; padding-right:28px; }
+  .verdict-table td:last-child { color:var(--slate); }
+  .tag { font-family:var(--sans); font-size:10px; font-weight:700; padding:2px 7px; vertical-align:middle; margin-right:8px; letter-spacing:.04em; text-transform:uppercase; }
+  .tag.no { background:var(--red); color:#fff; } .tag.tie { background:var(--fg); color:#fff; }
+
+  footer { padding:44px 0 90px; }
+  footer .eyebrow { font-family:var(--sans); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:20px; display:block; border-top:2px solid var(--rule); padding-top:20px; }
+  footer ul { list-style:none; display:grid; gap:14px; max-width:84ch; }
+  footer li { font-size:15px; line-height:1.55; color:var(--slate); padding-left:20px; position:relative; }
+  footer li::before { content:""; position:absolute; left:0; top:9px; width:6px; height:6px; background:var(--fg); }
+  footer li b { color:var(--fg); }
+  footer a { color:var(--link); text-decoration:none; } footer a:hover { text-decoration:underline; }
+  footer .sig { font-family:var(--sans); margin-top:28px; font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--faint); }
+
+  @media (max-width:860px){
+    .stats{grid-template-columns:1fr 1fr;} .stat:nth-child(2n){border-right:none;}
+    .grid-2{grid-template-columns:1fr;} .grid-2 .panel:first-child{border-right:none;border-bottom:1px solid var(--rule);padding:24px 0 24px;}
+    .grid-2 .panel:last-child{padding:24px 0 8px;}
+    .three{grid-template-columns:1fr;} .mini{border-right:none;border-bottom:1px solid var(--rule);padding:22px 0 22px;}
+  }
+  @media (max-width:480px){ .stats{grid-template-columns:1fr;} .stat{border-right:none;border-bottom:1px solid var(--rule);} }
+
+  /* === responsive hardening (auto) === */
+  html, body { max-width:100%; overflow-x:hidden; }
+  img, canvas, svg, table { max-width:100%; }
+  .note, .mono, .lede, .big-callout .cap, .sec-head p, .stat .d, footer li { overflow-wrap:anywhere; word-break:break-word; }
+  @media (max-width:760px){
+    .grid-2, .three { grid-template-columns:1fr !important; }
+    .stats { grid-template-columns:1fr 1fr; }
+    .topnav, .nav, .topband .inner, .navpills, .hero { flex-wrap:wrap; }
+    .chart-box { height:260px; }
+    .chart-box.tall { height:240px; }
+    section { padding-top:40px; padding-bottom:40px; }
+  }
+  @media (max-width:560px){
+    .wrap { padding-left:16px; padding-right:16px; }
+    .stats { grid-template-columns:1fr; }
+    .big-callout { padding:24px 20px; }
+    .big-callout .row { gap:10px 22px; }
+    .big-callout .row .v { font-size:40px; }
+    .big-callout .row .eq { font-size:24px; }
+    .verdict-table, .verdict-table tbody, .verdict-table tr, .verdict-table td { display:block; width:100% !important; }
+    .verdict-table td { padding:14px 18px !important; }
+    .verdict-table td:first-child { padding-bottom:4px; }
+    .verdict-table td:last-child { padding-top:0; border-top:none !important; }
+    .chart-box { height:230px; }
+    .stat .v { font-size:32px; }
+    h1 { max-width:100% !important; }
+  }
+
+
+  /* === chart responsive fix (auto) === */
+  .grid-2, .three { min-width:0; }
+  .grid-2 > *, .three > *, .panel, .mini, .stat { min-width:0; }
+  .chart-box, .cwrap { position:relative; width:100%; }
+  .chart-box canvas, .cwrap canvas { max-width:100% !important; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="date">Friday, June 5, 2026</span>
+    <span class="mkt">Output value tie · <b>Claude −7% ↓</b></span>
+  </div>
+  <div class="masthead">The Agent Times</div>
+  <nav class="topnav">
+    <a href="index.html">All reports</a>
+    <a href="codex-max20/Codex-Max20-report.html">Codex $200</a>
+    <a href="claude-max20/Claude-Max20-report.html">Claude Max 20x</a>
+    <a class="active" href="#">Real Analysis</a>
+  </nav>
+  <div class="livestrip">
+    <span class="live">● Methodology audit</span>
+    <span class="sep">|</span>
+    <a href="#">Is the comparison honest?</a>
+    <span class="ago">updated 2m ago</span>
+  </div>
+
+  <div class="lead">
+    <div class="tagline"><span class="dot"></span><span class="kicker" style="color:var(--red)">Methodology Audit</span></div>
+    <h1>Most of the "value" is <span class="muted2">cache, not work.</span></h1>
+    <div class="byline">By agents-analysis · Token Value Desk</div>
+    <p class="lede">The reports say Codex $200 is worth ~$8,600/mo and Claude $200 ~$18,900/mo. Here is the proof that comparing those two numbers as "Claude is worth 2× more" is misleading - and what is actually true.</p>
+  </div>
+
+  <div class="stats num">
+    <div class="stat"><div class="k">Your tokens today</div><div class="v">92.7%</div><div class="d">are cache reads, not new work</div></div>
+    <div class="stat"><div class="k">That are output</div><div class="v">0.6%</div><div class="d">the only real "work" line</div></div>
+    <div class="stat"><div class="k">Real output value</div><div class="v">≈ tie</div><div class="d">$977 vs $911 / mo</div></div>
+    <div class="stat"><div class="k">The 2× gap</div><div class="v">artifact</div><div class="d">cache pricing + extrapolation</div></div>
+  </div>
+
+  <!-- 1 -->
+  <section>
+    <div class="sec-head">
+      <div class="step">01 / The Symptom</div>
+      <h2>Your tokens today: where they go vs where the dollars go</h2>
+      <p>Measured from your own logs (<span class="sans" style="font-size:14px">~/.claude/projects</span>, deduped by request, 2026-05-30). Almost everything is cache. Output - the actual work - is a sliver of the count and a small share of the dollars.</p>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="ptitle">Token count</div>
+        <div class="psub">89.8M tokens today</div>
+        <div class="chart-box"><canvas id="countD"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="ptitle">API-equivalent dollars</div>
+        <div class="psub">$113 today, at Opus list</div>
+        <div class="chart-box"><canvas id="dollarD"></canvas></div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--s3)"></i> Cache read</span>
+      <span><i style="background:var(--s2)"></i> Cache write</span>
+      <span><i style="background:var(--s1)"></i> Output (real work)</span>
+      <span><i style="background:var(--s4)"></i> Fresh input</span>
+    </div>
+    <p class="note"><b>~87% of the dollars are caching overhead; ~12% is output.</b> Caching does not stop the model re-reading the whole context on every call - it just makes the re-read cheap. The token count stays huge because it equals context size × number of calls (~110K re-read × 758 calls today).</p>
+  </section>
+
+  <!-- 2 -->
+  <section>
+    <div class="sec-head">
+      <div class="step">02 / The Core Proof</div>
+      <h2>Both $200 plans, decomposed to the same monthly basis</h2>
+      <p>Each plan's value split into output vs cache, priced at its own provider's API list, scaled to 100% of monthly quota. The output slivers (black) are nearly identical. The entire headline gap is the gray cache bars.</p>
+    </div>
+    <div class="single">
+      <div class="panel">
+        <div class="chart-box tall"><canvas id="decomp"></canvas></div>
+        <div class="legend">
+          <span><i style="background:var(--s1)"></i> Output (real work)</span>
+          <span><i style="background:var(--s3)"></i> Cache re-read ($0.50/1M)</span>
+          <span><i style="background:var(--s2)"></i> First read (input / cache-write)</span>
+        </div>
+        <p class="note">Codex total <b>$8,589</b> · Claude total <b>$18,891</b>. Output: <b>$977 vs $911</b>. Input/cache side: <b>$7,612 vs $17,980 (2.4×)</b> - that is where 100% of the gap lives.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section>
+    <div class="sec-head">
+      <div class="step">03 / The Punchline</div>
+      <h2>Strip away cache: the real work is a tie</h2>
+      <p>Output is the least gameable metric - the tokens the model actually generated for you. On a monthly, full-quota basis the two $200 plans are within ~7% of each other.</p>
+    </div>
+    <div class="big-callout">
+      <div class="lbl">Output value per month (real work)</div>
+      <div class="row num">
+        <div><div class="v">$977</div><div class="lbl" style="margin-top:8px">Codex $200</div></div>
+        <div class="eq">≈</div>
+        <div><div class="v">$911</div><div class="lbl" style="margin-top:8px">Claude $200</div></div>
+      </div>
+      <p class="cap">In raw output tokens: ~32.6M/mo (Codex) vs ~36.4M/mo (Claude) - a 1.12× edge, nowhere near the 2× the headline implies.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section>
+    <div class="sec-head">
+      <div class="step">04 / Why The Headline Looks 2×</div>
+      <h2>Three calculation asymmetries inflate Claude's number</h2>
+      <p>None of these reflect more work delivered. They reflect how the number was built.</p>
+    </div>
+    <div class="three">
+      <div class="mini">
+        <div class="mt">Extrapolation multiplier</div>
+        <div class="ms">lower = more reliable</div>
+        <div class="cwrap"><canvas id="aExtrap"></canvas></div>
+        <p class="note" style="margin-top:14px;padding-top:14px">Codex was measured at 99% quota. Claude was one day at 10%, multiplied ×10 - any error amplified 10×.</p>
+      </div>
+      <div class="mini">
+        <div class="mt">Price to cache context</div>
+        <div class="ms">first read, per 1M</div>
+        <div class="cwrap"><canvas id="aPrice"></canvas></div>
+        <p class="note" style="margin-top:14px;padding-top:14px">Anthropic charges 2× for a "cache write" vs OpenAI's normal input. Same behavior, pricier meter.</p>
+      </div>
+      <div class="mini">
+        <div class="mt">Context re-reads</div>
+        <div class="ms">per output token</div>
+        <div class="cwrap"><canvas id="aReread"></canvas></div>
+        <p class="note" style="margin-top:14px;padding-top:14px">Claude re-reads ~2× more context per unit of output, bloating the cache-read line.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section>
+    <div class="sec-head">
+      <div class="step">05 / Watch The Gap Melt</div>
+      <h2>Remove the artifacts and $18.9k slides toward $8.6k</h2>
+      <p>Starting from Claude's headline, undo each calculation artifact in turn. The gap to Codex's measured number shrinks at every step.</p>
+    </div>
+    <div class="single">
+      <div class="panel">
+        <div class="chart-box tall"><canvas id="bridge"></canvas></div>
+        <p class="note">Re-pricing cache writes at Codex's rate: $18,891 → <b>$15,562</b>. Adjusting the one-day ×10 extrapolation for a plausibly heavy sample day (÷1.5): → <b>~$12,600</b>. Codex, essentially measured: <b>$8,589</b>. The residual is genuine extra context churn, not extra work.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section>
+    <div class="sec-head">
+      <div class="step">06 / The Honest Answer</div>
+      <h2>What is actually true</h2>
+    </div>
+    <table class="verdict-table">
+      <tr>
+        <td>Which $200 plan does more real work?</td>
+        <td><span class="tag tie">tie</span>Roughly equal - output ~$977 vs ~$911 / mo.</td>
+      </tr>
+      <tr>
+        <td>Which API would bill more for this usage at full quota?</td>
+        <td>Claude - but because it charges more for the same caching and the figure is a ×10 extrapolation, not because you get more done.</td>
+      </tr>
+      <tr>
+        <td>Is "$9k vs $20k = Claude worth 2×" a fair comparison?</td>
+        <td><span class="tag no">no</span>It compares a measurement to a one-day ×10 guess, across two pricing models that treat caching differently, on a metric dominated by context overhead.</td>
+      </tr>
+    </table>
+    <p class="note">The deeper trap is the word <b>"value."</b> API-equivalent value measures what the provider's meter would charge, so it rewards verbose context, heavy cache re-reads, and a pricier cache-write rate. A plan can score "2× more valuable" while delivering identical output. That is exactly what happened here.</p>
+  </section>
+
+  <footer>
+    <span class="eyebrow">Confidence &amp; Sources</span>
+    <ul>
+      <li><b>Proven from data</b> (high): your usage is 92.7% cache / 0.6% output; output value is ~equal; 100% of the gap is cache; first-read price is $5 (Codex) vs $10 (Claude); scale factors ×4.38 vs ×43.33.</li>
+      <li><b>Inferred from the math</b> (high): normalizing cache-write price drops Claude to ~$15.6k; the ×10 extrapolation makes the headline unreliable.</li>
+      <li><b>External reporting</b> (medium): exact subscription-limit weighting, Opus-vs-Sonnet ratio, and the 2026 cache-TTL change are documented by press, not by this repo's data.</li>
+      <li>Data: <span class="sans" style="font-size:13px">result/melvynx/codex/2026-05-30T09-13-16Z</span>, <span class="sans" style="font-size:13px">result/taka-foo/claude</span>. Full write-up: <a href="real-analysis.md">real-analysis.md</a>.</li>
+      <li>Sources: <a href="https://support.claude.com/en/articles/14552983-models-usage-and-limits-in-claude-code">Anthropic limits</a> · <a href="https://www.theregister.com/2026/03/31/anthropic_claude_code_limits/">The Register</a> · <a href="https://www.xda-developers.com/anthropic-quietly-nerfed-claude-code-hour-cache-token-budget/">XDA cache nerf</a>.</li>
+    </ul>
+    <div class="sig">Real Analysis · generated from agents-analysis data · API-equivalent value is not the provider's real cost.</div>
+  </footer>
+
+</div>
+
+<script>
+  // grayscale palette + single red accent (NYT data viz)
+  const FG="#121212", S2="#666666", S3="#bbbbbb", S4="#e2e2e2", RED="#d0021b", GRID="#e2e2e2";
+  document.documentElement.style.setProperty('--s1', FG);
+  document.documentElement.style.setProperty('--s2', S2);
+  document.documentElement.style.setProperty('--s3', S3);
+  document.documentElement.style.setProperty('--s4', S4);
+
+  Chart.defaults.font.family = "Libre Franklin, Helvetica, Arial, sans-serif";
+  Chart.defaults.color = "#999";
+  Chart.defaults.font.size = 12;
+  const usd = (v) => "$" + v.toLocaleString("en-US",{maximumFractionDigits:0});
+  const tip = { backgroundColor:"#121212", padding:10, cornerRadius:0, titleFont:{family:"Libre Franklin"}, bodyFont:{family:"Libre Franklin"} };
+
+  function dough(id, data, fmt){
+    new Chart(document.getElementById(id), {
+      type:"doughnut",
+      data:{ labels:["Cache read","Cache write","Output","Fresh input"],
+        datasets:[{ data, backgroundColor:[S3,S2,FG,S4], borderColor:"#fff", borderWidth:3, hoverOffset:6 }] },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:"60%",
+        plugins:{ legend:{display:false}, tooltip:{...tip, callbacks:{ label:(c)=>c.label+": "+fmt(c.parsed) }} } }
+    });
+  }
+  dough("countD", [83.3,5.7,0.5,0.3], (v)=>v+"M tokens");
+  dough("dollarD", [41.64,56.93,13.23,1.48], (v)=>"$"+v.toFixed(2));
+
+  new Chart(document.getElementById("decomp"), {
+    type:"bar",
+    data:{ labels:["Codex $200","Claude $200"],
+      datasets:[
+        { label:"Output (real work)", data:[977,911], backgroundColor:FG },
+        { label:"Cache re-read", data:[5303,11319], backgroundColor:S3 },
+        { label:"First read (input/cache-write)", data:[2309,6661], backgroundColor:S2 }
+      ] },
+    options:{ indexAxis:"y", responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{...tip, callbacks:{ label:(c)=>c.dataset.label+": "+usd(c.parsed.x) }} },
+      scales:{ x:{ stacked:true, grid:{color:GRID}, border:{display:false}, ticks:{ callback:(v)=>"$"+(v/1000)+"k" } },
+               y:{ stacked:true, grid:{display:false}, border:{color:FG}, ticks:{ font:{family:"Source Serif 4",size:15,weight:700}, color:FG } } } }
+  });
+
+  function mini(id, vals, fmt, max){
+    new Chart(document.getElementById(id), {
+      type:"bar",
+      data:{ labels:["Codex","Claude"], datasets:[{ data:vals, backgroundColor:[S2,FG], barPercentage:0.6 }] },
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false}, tooltip:{...tip, callbacks:{ label:(c)=>fmt(c.parsed.y) }} },
+        scales:{ x:{ grid:{display:false}, border:{color:FG}, ticks:{font:{family:"Libre Franklin",size:12}} },
+                 y:{ grid:{color:GRID}, border:{display:false}, max, ticks:{ callback:fmt } } } }
+    });
+  }
+  mini("aExtrap", [4.38,43.33], (v)=>"×"+(typeof v==="number"?v.toFixed(v<10?1:0):v), 48);
+  mini("aPrice", [5,10], (v)=>"$"+v, 12);
+  mini("aReread", [326,621], (v)=>v.toFixed(0), 700);
+
+  new Chart(document.getElementById("bridge"), {
+    type:"bar",
+    data:{ labels:["Claude headline","− cache-write premium","− 1-day extrapolation","Codex (measured)"],
+      datasets:[{ data:[18891,15562,12600,8589], backgroundColor:[RED,S2,S3,FG], barPercentage:0.62 }] },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{...tip, callbacks:{ label:(c)=>usd(c.parsed.y)+" / mo" }} },
+      scales:{ x:{ grid:{display:false}, border:{color:FG}, ticks:{font:{family:"Libre Franklin",size:11}} },
+               y:{ grid:{color:GRID}, border:{display:false}, ticks:{ callback:(v)=>"$"+(v/1000)+"k" } } } }
+  });
+</script>
+
+<script>
+  // force Chart.js to reflow on viewport changes (belt-and-suspenders)
+  (function(){
+    function resizeAll(){ if(window.Chart && Chart.instances){ Object.values(Chart.instances).forEach(function(c){ try{c.resize();}catch(e){} }); } }
+    var t; window.addEventListener('resize', function(){ clearTimeout(t); t=setTimeout(resizeAll,120); });
+    window.addEventListener('orientationchange', function(){ setTimeout(resizeAll,200); });
+  })();
+</script>
+
+</body>
+</html>

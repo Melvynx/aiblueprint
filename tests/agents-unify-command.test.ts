@@ -74,4 +74,27 @@ Review the assigned code carefully.
     expect(await fs.pathExists(path.join(root, ".codex"))).toBe(false);
     expect(logSpy.mock.calls.flat().join("\n")).toContain("rules index: 1 rules indexed");
   });
+
+  it("does not render Codex agents when the agents category is not selected", async () => {
+    await fs.ensureDir(path.join(root, ".claude/skills/alpha"));
+    await fs.writeFile(path.join(root, ".claude/skills/alpha/SKILL.md"), "alpha skill", "utf-8");
+    await fs.ensureDir(path.join(root, ".claude/agents"));
+    await fs.writeFile(
+      path.join(root, ".claude/agents/reviewer.md"),
+      `---
+name: reviewer
+description: Review changed code
+---
+
+Review the assigned code carefully.
+`,
+      "utf-8",
+    );
+
+    await agentsUnifyCommand({ folder: root, categories: ["skills"] });
+
+    expect(await fs.pathExists(path.join(root, ".agents/skills/alpha/SKILL.md"))).toBe(true);
+    expect(await fs.pathExists(path.join(root, ".agents/agents/reviewer.md"))).toBe(false);
+    expect(await fs.pathExists(path.join(root, ".codex/agents/reviewer.toml"))).toBe(false);
+  });
 });

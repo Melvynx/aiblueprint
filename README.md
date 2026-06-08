@@ -77,8 +77,14 @@ npx aiblueprint-cli@latest agents symlink
 # Centralize global skills and agents in ~/.agents
 npx aiblueprint-cli@latest agents unify
 
+# Choose what to centralize interactively
+npx aiblueprint-cli@latest agents unify -i
+
 # Unify project-local .claude/.cursor config into .agents
 npx aiblueprint-cli@latest agents unify projects
+
+# Unify only selected project categories
+npx aiblueprint-cli@latest agents unify projects --agents-md --skills --rules
 
 # Recover sessions from saved configs and backups
 npx aiblueprint-cli@latest agents config unify sessions
@@ -150,6 +156,7 @@ npx skills add Melvynx/aiblueprint --skill skill-manager
 | `merge` | Context-aware branch merging |
 | `prompt-creator` | Expert prompt engineering |
 | `skill-manager` | Manage skills and rules across Claude Code, Codex, and Cursor |
+| `use-style` | Apply named UI style guides before implementation |
 | `rules-manager` | Create and maintain AGENTS.md and agent rule files |
 | `agents-managers` | Manage Claude Code agents and Task-tool orchestration |
 | `environments-manager` | Set up per-worktree agent environments |

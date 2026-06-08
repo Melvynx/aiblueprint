@@ -2,10 +2,12 @@ import Link from "@/compat/link";
 import {
   BookOpen,
   Code2,
+  Eye,
   FileText,
   Key,
   Layers,
   Link2,
+  Palette,
   type LucideIcon,
   Play,
   RefreshCw,
@@ -35,6 +37,8 @@ const ICONS: Record<string, LucideIcon> = {
   Zap,
   Layers,
   Link2,
+  Palette,
+  Eye,
   RefreshCw,
   Save,
 };

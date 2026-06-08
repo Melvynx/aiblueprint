@@ -58,6 +58,7 @@ describe("unifyAgentsConfiguration", () => {
     expect(await fs.readFile(path.join(root, ".agents/AGENTS.md"), "utf-8")).toBe("shared instructions");
     expect((await fs.lstat(path.join(root, ".claude/CLAUDE.md"))).isSymbolicLink()).toBe(true);
     expect((await fs.lstat(path.join(root, ".codex/AGENTS.md"))).isSymbolicLink()).toBe(true);
+    expect((await fs.lstat(path.join(root, ".cursor/AGENTS.md"))).isSymbolicLink()).toBe(true);
 
     expect(await fs.readFile(path.join(root, ".agents/skills/alpha/SKILL.md"), "utf-8")).toBe("alpha skill");
     expect(await fs.readFile(path.join(root, ".agents/skills/cursor-only/SKILL.md"), "utf-8")).toBe("cursor skill");
@@ -118,6 +119,22 @@ describe("unifyAgentsConfiguration", () => {
     expect(result.renamed[0].reason).toBe("Same name with different content");
   });
 
+  it("only unifies selected categories when categories are provided", async () => {
+    await fs.outputFile(path.join(root, ".claude/CLAUDE.md"), "shared instructions");
+    await writeSkill(root, ".claude/skills", "alpha", "alpha skill");
+    await writeAgent(root, ".claude/agents", "helper.md", "helper agent");
+
+    const result = await unifyAgentsConfiguration({ folder: root, categories: ["skills"] });
+
+    expect(await fs.readFile(path.join(root, ".agents/skills/alpha/SKILL.md"), "utf-8")).toBe("alpha skill");
+    expect(await fs.pathExists(path.join(root, ".agents/AGENTS.md"))).toBe(false);
+    expect(await fs.pathExists(path.join(root, ".agents/agents"))).toBe(false);
+    expect((await fs.lstat(path.join(root, ".claude/skills"))).isSymbolicLink()).toBe(true);
+    expect((await fs.lstat(path.join(root, ".claude/CLAUDE.md"))).isSymbolicLink()).toBe(false);
+    expect((await fs.lstat(path.join(root, ".claude/agents"))).isSymbolicLink()).toBe(false);
+    expect(result.imported.map((entry) => entry.category)).toEqual(["skills"]);
+  });
+
   it("is idempotent after source folders already point at .agents", async () => {
     await writeSkill(root, ".claude/skills", "alpha", "alpha skill");
 
@@ -142,9 +159,37 @@ describe("unifyAgentsConfiguration", () => {
     expect(await fs.pathExists(path.join(root, ".agents/skills"))).toBe(false);
     expect(await fs.pathExists(path.join(root, ".agents/agents"))).toBe(false);
     expect(await fs.pathExists(path.join(root, ".codex"))).toBe(false);
+    expect(await fs.pathExists(path.join(root, ".cursor"))).toBe(false);
     expect(result.backupPath).toBeTruthy();
     expect(result.backupPath!.startsWith(root)).toBe(false);
     expect(path.basename(result.backupPath!)).toContain("project-");
+  });
+
+  it("imports repository tool instruction files into .agents and links tool paths back", async () => {
+    await fs.outputFile(path.join(root, ".claude/CLAUDE.md"), "shared instructions");
+    await fs.outputFile(path.join(root, ".codex/AGENTS.md"), "shared instructions");
+    await fs.outputFile(path.join(root, ".cursor/AGENTS.md"), "cursor instructions");
+
+    const result = await unifyAgentsConfiguration({ folder: root, scope: "repository" });
+
+    expect(await fs.readFile(path.join(root, ".agents/AGENTS.md"), "utf-8")).toBe("shared instructions");
+    expect(await fs.readFile(path.join(root, ".agents/AGENTS--cursor-instructions.md"), "utf-8")).toBe("cursor instructions");
+    expect((await fs.lstat(path.join(root, ".claude/CLAUDE.md"))).isSymbolicLink()).toBe(true);
+    expect((await fs.lstat(path.join(root, ".codex/AGENTS.md"))).isSymbolicLink()).toBe(true);
+    expect((await fs.lstat(path.join(root, ".cursor/AGENTS.md"))).isSymbolicLink()).toBe(true);
+    expect(await fs.realpath(path.join(root, ".claude/CLAUDE.md"))).toBe(await fs.realpath(path.join(root, ".agents/AGENTS.md")));
+    expect(await fs.realpath(path.join(root, ".codex/AGENTS.md"))).toBe(await fs.realpath(path.join(root, ".agents/AGENTS.md")));
+    expect(await fs.realpath(path.join(root, ".cursor/AGENTS.md"))).toBe(await fs.realpath(path.join(root, ".agents/AGENTS.md")));
+    expect(result.duplicates).toContainEqual(expect.objectContaining({
+      category: "instructions",
+      from: path.join(root, ".codex/AGENTS.md"),
+      keptAs: path.join(root, ".agents/AGENTS.md"),
+    }));
+    expect(result.renamed).toContainEqual(expect.objectContaining({
+      category: "instructions",
+      from: path.join(root, ".cursor/AGENTS.md"),
+      to: path.join(root, ".agents/AGENTS--cursor-instructions.md"),
+    }));
   });
 
   it("symlinks CLAUDE.md to existing AGENTS.md in project mode without creating empty folders", async () => {

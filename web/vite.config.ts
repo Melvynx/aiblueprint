@@ -42,7 +42,7 @@ function getDocsPaths() {
   return Array.from(new Set(["/", ...docs]));
 }
 
-const publicPages = getDocsPaths().map((path) => ({
+const publicPages = Array.from(new Set(["/examples", ...getDocsPaths()])).map((path) => ({
   path,
   prerender: { enabled: true },
 }));

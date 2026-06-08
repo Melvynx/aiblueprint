@@ -1,0 +1,50 @@
+---
+title: use-style
+description: Apply named visual style guides to UI work before implementation.
+keywords: ["use-style", "styles", "ui", "frontend", "design"]
+---
+
+`use-style` is a bundled skill that loads a concrete visual style spec before an
+agent designs or implements UI. It keeps layout, color, typography, border,
+motion, and component choices aligned to a named aesthetic instead of generic
+SaaS defaults.
+
+## How to invoke it
+
+Use the skill explicitly when you already know the direction:
+
+```bash
+$use-style grid
+/useskill split-auth
+/useskill list
+```
+
+You can also reference the style in plain language, such as "use the Linear
+style", "make this Gumroad-like", or "use a polished two-column auth page".
+
+## Bundled styles
+
+| Style | Best for | Visual direction |
+| ----- | -------- | ---------------- |
+| `grid` | Blueprint product landings | Square geometry, 1px borders, mono data, condensed display type. |
+| `vercel-simple` | Minimal developer tools | Black canvas, Geist-like type, quiet borders, minimal accent. |
+| `stripe` | Fintech, checkout, dashboards | Pale canvas, white surfaces, blurple accent, green CTA, rounded geometry. |
+| `linear` | Issue trackers and dense app shells | Near-black panes, sidebar/list/detail layout, indigo accent, tight chrome. |
+| `new-york-times` | Editorial and magazine layouts | Paper canvas, serif headlines, hairline rules, multi-column rhythm. |
+| `anthropic` | AI lab and research pages | Warm cream, reading serif, clay-coral accent, soft dark panels. |
+| `gumroad` | Creator commerce | Yellow and pink fills, thick black borders, hard offset shadows. |
+| `raycast` | Premium product marketing | Glossy dark surfaces, red glow, floating glass navigation. |
+| `dusk` | CRM and data dashboards | Twilight backdrop, floating dark window, vivid blue charts, category pills. |
+| `split-auth` | Login, signup, reset, OAuth | Left visual brand panel, right clean form panel, compact auth controls. |
+
+## In the free config
+
+`agents setup` now installs `use-style` into `~/.agents/skills/use-style` with
+its `styles/` specs and included HTML references. Because the free config uses
+the shared `~/.agents` folder, Claude Code and Codex can both invoke it after
+setup.
+
+## Try the picker
+
+Open [Examples](/examples) to switch between every bundled style and see how the
+same product screen changes when a different style guide is loaded.
