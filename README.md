@@ -132,6 +132,8 @@ npx aiblueprint-cli@latest agents config unify sessions
 
 - `cc` - Claude Code with permissions skipped
 - `ccc` - Claude Code with continue mode
+- `cx` - Codex
+- `cxc` - Codex continue mode for the current directory
 
 ### Skills
 

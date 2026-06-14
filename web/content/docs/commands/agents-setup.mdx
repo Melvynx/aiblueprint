@@ -25,12 +25,16 @@ aiblueprint agents setup
 
 ### Shell shortcuts
 
-Adds aliases for launching Claude Code quickly:
+Adds aliases for launching Claude Code and Codex quickly:
 
 ```bash
 alias cc="claude --dangerously-skip-permissions"
 alias ccc="claude --dangerously-skip-permissions -c"
+alias cx="codex"
+alias cxc="codex resume --last"
 ```
+
+`cxc` resumes the latest Codex session for the current directory.
 
 See [Shell Shortcuts](/concepts/shell-shortcuts) for details.
 

@@ -16,6 +16,7 @@ describe("Windows Platform Support", () => {
     vi.clearAllMocks();
     vi.mocked(fs.ensureDir).mockResolvedValue();
     vi.mocked(fs.appendFile).mockResolvedValue();
+    vi.mocked(fs.writeFile).mockResolvedValue();
     vi.mocked(fs.readFile).mockRejectedValue(new Error("File not found"));
     vi.mocked(fs.pathExists).mockResolvedValue(false as any);
     vi.mocked(fs.symlink).mockResolvedValue();
@@ -37,14 +38,24 @@ describe("Windows Platform Support", () => {
         path.join("C:\\Users\\TestUser", "Documents", "PowerShell")
       );
 
-      expect(fs.appendFile).toHaveBeenCalledWith(
+      expect(fs.writeFile).toHaveBeenCalledWith(
         path.join("C:\\Users\\TestUser", "Documents", "PowerShell", "Profile.ps1"),
         expect.stringContaining("function cc { claude --dangerously-skip-permissions $args }")
       );
 
-      expect(fs.appendFile).toHaveBeenCalledWith(
+      expect(fs.writeFile).toHaveBeenCalledWith(
         expect.any(String),
         expect.stringContaining("function ccc { claude --dangerously-skip-permissions -c $args }")
+      );
+
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.stringContaining("function cx { codex $args }")
+      );
+
+      expect(fs.writeFile).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.stringContaining("function cxc { codex resume --last $args }")
       );
 
       vi.restoreAllMocks();
@@ -64,7 +75,7 @@ describe("Windows Platform Support", () => {
 
       await setupShellShortcuts();
 
-      expect(fs.appendFile).toHaveBeenCalledWith(
+      expect(fs.writeFile).toHaveBeenCalledWith(
         path.join("C:\\Users\\TestUser", "Documents", "WindowsPowerShell", "Profile.ps1"),
         expect.any(String)
       );
@@ -159,6 +170,7 @@ describe("macOS Platform (unchanged behavior)", () => {
     vi.clearAllMocks();
     vi.mocked(fs.ensureDir).mockResolvedValue();
     vi.mocked(fs.appendFile).mockResolvedValue();
+    vi.mocked(fs.writeFile).mockResolvedValue();
     vi.mocked(fs.readFile).mockRejectedValue(new Error("File not found"));
     vi.mocked(fs.pathExists).mockResolvedValue(false as any);
   });
@@ -173,10 +185,78 @@ describe("macOS Platform (unchanged behavior)", () => {
 
     await setupShellShortcuts();
 
-    expect(fs.appendFile).toHaveBeenCalledWith(
+    expect(fs.writeFile).toHaveBeenCalledWith(
       path.join("/Users/TestUser", ".zshenv"),
       expect.stringContaining('alias cc="claude --dangerously-skip-permissions"')
     );
+
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      path.join("/Users/TestUser", ".zshenv"),
+      expect.stringContaining('alias cx="codex"')
+    );
+
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      path.join("/Users/TestUser", ".zshenv"),
+      expect.stringContaining('alias cxc="codex resume --last"')
+    );
+
+    vi.restoreAllMocks();
+  });
+
+  it("should add missing Codex aliases when Claude aliases already exist", async () => {
+    vi.spyOn(os, "platform").mockReturnValue("darwin");
+    vi.spyOn(os, "homedir").mockReturnValue("/Users/TestUser");
+    vi.mocked(fs.readFile).mockResolvedValue(
+      [
+        "# AIBlueprint Claude Code aliases",
+        'alias cc="claude --dangerously-skip-permissions"',
+        'alias ccc="claude --dangerously-skip-permissions -c"',
+      ].join("\n") as any,
+    );
+
+    const { setupShellShortcuts } = await import(
+      "../src/commands/setup/shell-shortcuts"
+    );
+
+    await setupShellShortcuts();
+
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      path.join("/Users/TestUser", ".zshenv"),
+      expect.stringContaining('alias cx="codex"')
+    );
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      path.join("/Users/TestUser", ".zshenv"),
+      expect.stringContaining('alias cxc="codex resume --last"')
+    );
+    const nextContent = vi.mocked(fs.writeFile).mock.calls[0]?.[1] as string;
+    expect(nextContent).not.toContain("# AIBlueprint Claude Code aliases");
+    expect(nextContent).toContain("# BEGIN AIBlueprint shell shortcuts");
+    expect(nextContent).toContain("# END AIBlueprint shell shortcuts");
+
+    vi.restoreAllMocks();
+  });
+
+  it("should not treat commented aliases as installed", async () => {
+    vi.spyOn(os, "platform").mockReturnValue("darwin");
+    vi.spyOn(os, "homedir").mockReturnValue("/Users/TestUser");
+    vi.mocked(fs.readFile).mockResolvedValue(
+      [
+        "# alias cx=\"codex\"",
+        "# alias cxc=\"codex resume --last\"",
+      ].join("\n") as any,
+    );
+
+    const { setupShellShortcuts } = await import(
+      "../src/commands/setup/shell-shortcuts"
+    );
+
+    await setupShellShortcuts();
+
+    const nextContent = vi.mocked(fs.writeFile).mock.calls[0]?.[1] as string;
+    expect(nextContent).toContain('# alias cx="codex"');
+    expect(nextContent).toContain('# alias cxc="codex resume --last"');
+    expect(nextContent).toContain('\nalias cx="codex"\n');
+    expect(nextContent).toContain('\nalias cxc="codex resume --last"\n');
 
     vi.restoreAllMocks();
   });
@@ -187,6 +267,7 @@ describe("Linux Platform (unchanged behavior)", () => {
     vi.clearAllMocks();
     vi.mocked(fs.ensureDir).mockResolvedValue();
     vi.mocked(fs.appendFile).mockResolvedValue();
+    vi.mocked(fs.writeFile).mockResolvedValue();
     vi.mocked(fs.readFile).mockRejectedValue(new Error("File not found"));
     vi.mocked(fs.pathExists).mockResolvedValue(false as any);
   });
@@ -204,9 +285,19 @@ describe("Linux Platform (unchanged behavior)", () => {
 
     await setupShellShortcuts();
 
-    expect(fs.appendFile).toHaveBeenCalledWith(
+    expect(fs.writeFile).toHaveBeenCalledWith(
       path.join("/home/testuser", ".bashrc"),
       expect.stringContaining('alias cc="claude --dangerously-skip-permissions"')
+    );
+
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      path.join("/home/testuser", ".bashrc"),
+      expect.stringContaining('alias cx="codex"')
+    );
+
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      path.join("/home/testuser", ".bashrc"),
+      expect.stringContaining('alias cxc="codex resume --last"')
     );
 
     process.env.SHELL = originalEnv;
@@ -226,9 +317,19 @@ describe("Linux Platform (unchanged behavior)", () => {
 
     await setupShellShortcuts();
 
-    expect(fs.appendFile).toHaveBeenCalledWith(
+    expect(fs.writeFile).toHaveBeenCalledWith(
       path.join("/home/testuser", ".zshrc"),
       expect.stringContaining('alias cc="claude --dangerously-skip-permissions"')
+    );
+
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      path.join("/home/testuser", ".zshrc"),
+      expect.stringContaining('alias cx="codex"')
+    );
+
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      path.join("/home/testuser", ".zshrc"),
+      expect.stringContaining('alias cxc="codex resume --last"')
     );
 
     process.env.SHELL = originalEnv;

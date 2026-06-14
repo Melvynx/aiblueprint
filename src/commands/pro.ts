@@ -272,7 +272,7 @@ export async function proSetupCommand(
     await installScriptsDependencies(claudeDir);
     spinner.stop("Scripts dependencies installed");
 
-    // Setup shell shortcuts (cc, ccc)
+    // Setup shell shortcuts (cc, ccc, cx, cxc)
     spinner.start("Setting up shell shortcuts...");
     await setupShellShortcuts();
     spinner.stop("Shell shortcuts configured");
@@ -304,7 +304,7 @@ export async function proSetupCommand(
     p.log.info(`  • Agents (${counts.agents})`);
     p.log.info(`  • Premium Skills (${counts.skills})`);
     p.log.info("  • Premium statusline (advanced)");
-    p.log.info("  • Shell shortcuts (cc, ccc)");
+    p.log.info("  • Shell shortcuts (cc, ccc, cx, cxc)");
     p.log.info("  • Settings.json with statusline");
 
     p.outro(chalk.green("🚀 Ready to use!"));

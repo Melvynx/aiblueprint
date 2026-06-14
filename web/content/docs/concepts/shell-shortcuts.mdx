@@ -1,11 +1,11 @@
 ---
 title: Shell Shortcuts
-description: Quick aliases for launching Claude Code.
-keywords: ["shell", "alias", "cc", "ccc", "zsh"]
+description: Quick aliases for launching Claude Code and Codex.
+keywords: ["shell", "alias", "cc", "ccc", "cx", "cxc", "zsh", "codex"]
 ---
 
-Setup can add two aliases that launch Claude Code with permission prompts
-skipped, so you can start working immediately.
+Setup can add aliases that launch Claude Code and Codex quickly, so you can
+start working immediately.
 
 ## Aliases
 
@@ -13,8 +13,11 @@ skipped, so you can start working immediately.
 | ----- | ---------- |
 | `cc` | `claude --dangerously-skip-permissions` |
 | `ccc` | `claude --dangerously-skip-permissions -c` |
+| `cx` | `codex` |
+| `cxc` | `codex resume --last` |
 
-`ccc` adds `-c` to continue the previous conversation.
+`ccc` adds `-c` to continue the previous Claude Code conversation. `cxc`
+resumes the most recent Codex session for the current directory.
 
 ## Where they are written
 
@@ -30,8 +33,9 @@ After setup, reload your shell or open a new terminal, then run:
 
 ```bash
 cc
+cx
 ```
 
-> These aliases skip Claude Code permission prompts. Pair them with the
+> The Claude Code aliases skip permission prompts. Pair them with the
 > [security](/concepts/security) deny rules, which block dangerous commands even
 > when permissions are skipped.

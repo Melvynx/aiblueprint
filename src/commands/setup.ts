@@ -106,7 +106,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
           choices: [
             {
               value: "shellShortcuts",
-              name: "Shell shortcuts (cc, ccc aliases) - Quick access to Claude Code",
+              name: "Shell shortcuts (cc, ccc, cx, cxc aliases) - Quick access to Claude Code and Codex",
               checked: true,
             },
             {
@@ -374,6 +374,14 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       console.log(
         chalk.gray(
           '  • Use "ccc" for Claude Code with permissions skipped and continue mode',
+        ),
+      );
+      console.log(
+        chalk.gray('  • Use "cx" to launch Codex'),
+      );
+      console.log(
+        chalk.gray(
+          '  • Use "cxc" to continue the latest Codex session for this directory',
         ),
       );
     }
