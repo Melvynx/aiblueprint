@@ -37,12 +37,15 @@ style", "make this Gumroad-like", or "use a polished two-column auth page".
 | `dusk` | CRM and data dashboards | Twilight backdrop, floating dark window, vivid blue charts, category pills. |
 | `split-auth` | Login, signup, reset, OAuth | Left visual brand panel, right clean form panel, compact auth controls. |
 
-## In the free config
+## In the configs
 
 `agents setup` now installs `use-style` into `~/.agents/skills/use-style` with
-its `styles/` specs and included HTML references. Because the free config uses
-the shared `~/.agents` folder, Claude Code and Codex can both invoke it after
-setup.
+its `styles/` specs and included HTML references. Premium installs the same
+style inventory through `agents pro setup`, `agents pro update`, and
+`agents pro sync`.
+
+Because both configs use the shared `~/.agents` folder, Claude Code and Codex
+can invoke the installed style specs after setup.
 
 ## Try the picker
 
