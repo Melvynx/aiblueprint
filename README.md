@@ -169,11 +169,11 @@ npx skills add Melvynx/aiblueprint --skill skill-manager
 Unlock advanced features at [mlv.sh/claude-cli](https://mlv.sh/claude-cli)
 
 ```bash
-# Activate premium
-npx aiblueprint-cli@latest agents pro activate YOUR_TOKEN
-
-# Setup premium configs
+# Setup premium configs (prompts for your token if needed)
 npx aiblueprint-cli@latest agents pro setup
+
+# Or activate first if you prefer
+npx aiblueprint-cli@latest agents pro activate YOUR_TOKEN
 ```
 
 ## 🛠️ Development

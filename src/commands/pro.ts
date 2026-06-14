@@ -9,7 +9,6 @@ export type ProCommandOptions = FolderOptions;
 import {
   saveToken,
   getToken,
-  hasToken,
   getTokenInfo,
 } from "../lib/token-storage.js";
 import { setupShellShortcuts } from "./setup/shell-shortcuts.js";
@@ -20,6 +19,117 @@ import { trackEvent, trackError, flushTelemetry } from "../lib/telemetry.js";
 
 const API_URL = "https://codeline.app/api/products";
 const PRODUCT_IDS = ["prd_XJVgxVPbGG", "prd_NKabAkdOkw"];
+
+type PremiumActivationData = {
+  hasAccess?: boolean;
+  user?: {
+    name?: string;
+    email?: string;
+  };
+  product?: {
+    title?: string;
+    metadata?: Record<string, string | undefined>;
+  };
+};
+
+type PremiumActivationResult = {
+  githubToken: string;
+  data: PremiumActivationData;
+};
+
+class PremiumActivationError extends Error {
+  constructor(
+    public readonly code: "invalid-token" | "missing-github-token",
+    message: string,
+  ) {
+    super(message);
+    this.name = "PremiumActivationError";
+  }
+}
+
+function isPremiumActivationError(error: unknown): error is PremiumActivationError {
+  return error instanceof PremiumActivationError;
+}
+
+function logPremiumActivationError(error: PremiumActivationError) {
+  p.log.error(error.message);
+  if (error.code === "invalid-token") {
+    p.log.info("💎 Get AIBlueprint CLI Premium at: https://mlv.sh/claude-cli");
+  }
+}
+
+async function promptForPremiumToken(): Promise<string> {
+  const result = await p.text({
+    message: "Enter your Premium access token:",
+    placeholder: "Your ProductsOnUsers ID from codeline.app",
+    validate: (value) => {
+      if (!value) return "Token is required";
+      if (value.length < 5) return "Token seems invalid";
+      return;
+    },
+  });
+
+  if (p.isCancel(result)) {
+    p.cancel("Premium activation cancelled");
+    process.exit(0);
+  }
+
+  return result as string;
+}
+
+async function fetchPremiumActivationData(
+  userToken: string,
+): Promise<PremiumActivationData | null> {
+  const encodedToken = encodeURIComponent(userToken);
+
+  for (const productId of PRODUCT_IDS) {
+    const response = await fetch(
+      `${API_URL}/${productId}/have-access?token=${encodedToken}`,
+    );
+
+    if (response.ok) {
+      const responseData = (await response.json()) as PremiumActivationData;
+      if (responseData.hasAccess) {
+        return responseData;
+      }
+    }
+  }
+
+  return null;
+}
+
+async function activatePremiumToken(userToken?: string): Promise<PremiumActivationResult> {
+  const premiumToken = userToken ?? await promptForPremiumToken();
+
+  const spinner = p.spinner();
+  spinner.start("Validating token against premium products...");
+
+  const data = await fetchPremiumActivationData(premiumToken);
+
+  if (!data) {
+    spinner.stop("Token validation failed");
+    throw new PremiumActivationError(
+      "invalid-token",
+      "Invalid token or no access to premium products",
+    );
+  }
+
+  spinner.stop("Token validated");
+
+  const githubToken = data.product?.metadata?.["cli-github-token"];
+  if (!githubToken) {
+    throw new PremiumActivationError(
+      "missing-github-token",
+      "No GitHub token found in product metadata. Please contact support.",
+    );
+  }
+
+  spinner.start("Saving token...");
+  await saveToken(githubToken);
+  spinner.stop("Token saved");
+
+  return { githubToken, data };
+}
 
 async function countInstalledItems(claudeDir: string) {
   const counts = {
@@ -60,76 +170,12 @@ export async function proActivateCommand(userToken?: string) {
   p.intro(chalk.blue(`🔑 Activate AIBlueprint CLI Premium ${chalk.gray(`v${getVersion()}`)}`));
 
   try {
-    // If token not provided as argument, ask for it
-    if (!userToken) {
-      const result = await p.text({
-        message: "Enter your Premium access token:",
-        placeholder: "Your ProductsOnUsers ID from codeline.app",
-        validate: (value) => {
-          if (!value) return "Token is required";
-          if (value.length < 5) return "Token seems invalid";
-          return;
-        },
-      });
-
-      if (p.isCancel(result)) {
-        p.cancel("Activation cancelled");
-        process.exit(0);
-      }
-
-      userToken = result as string;
-    }
-
-    const spinner = p.spinner();
-    spinner.start("Validating token against premium products...");
-
-    let validationSuccess = false;
-    let data: any = null;
-
-    for (const productId of PRODUCT_IDS) {
-      const response = await fetch(
-        `${API_URL}/${productId}/have-access?token=${userToken}`,
-      );
-
-      if (response.ok) {
-        const responseData = await response.json();
-        if (responseData.hasAccess) {
-          data = responseData;
-          validationSuccess = true;
-          break;
-        }
-      }
-    }
-
-    if (!validationSuccess || !data) {
-      spinner.stop("Token validation failed");
-      p.log.error("Invalid token or no access to premium products");
-      p.log.info("💎 Get AIBlueprint CLI Premium at: https://mlv.sh/claude-cli");
-      p.outro(chalk.red("❌ Activation failed"));
-      process.exit(1);
-    }
-
-    spinner.stop("Token validated");
-
-    // Check if GitHub token exists in metadata
-    const githubToken = data.product.metadata?.["cli-github-token"];
-    if (!githubToken) {
-      p.log.error(
-        "No GitHub token found in product metadata. Please contact support.",
-      );
-      p.outro(chalk.red("❌ Activation failed"));
-      process.exit(1);
-    }
-
-    // Save GitHub token to config file
-    spinner.start("Saving token...");
-    await saveToken(githubToken);
-    spinner.stop("Token saved");
+    const { data } = await activatePremiumToken(userToken);
 
     const tokenInfo = getTokenInfo();
     p.log.success("✅ Token activated!");
-    p.log.info(`User: ${data.user.name} (${data.user.email})`);
-    p.log.info(`Product: ${data.product.title}`);
+    p.log.info(`User: ${data.user?.name ?? "Unknown"} (${data.user?.email ?? "unknown email"})`);
+    p.log.info(`Product: ${data.product?.title ?? "Premium"}`);
     p.log.info(`Token saved to: ${tokenInfo.path}`);
 
     p.log.info(
@@ -144,7 +190,9 @@ export async function proActivateCommand(userToken?: string) {
   } catch (error) {
     trackError(error, { command: "pro-activate" });
     await flushTelemetry();
-    if (error instanceof Error) {
+    if (isPremiumActivationError(error)) {
+      logPremiumActivationError(error);
+    } else if (error instanceof Error) {
       p.log.error(error.message);
     }
     p.outro(chalk.red("❌ Activation failed"));
@@ -187,13 +235,14 @@ export async function proSetupCommand(
   p.intro(chalk.blue(`⚙️  Setup AIBlueprint CLI Premium ${chalk.gray(`v${getVersion()}`)}`));
 
   try {
-    const githubToken = await getToken();
+    let githubToken = await getToken();
 
     if (!githubToken) {
-      p.log.error("No token found");
-      p.log.info("Run: npx aiblueprint-cli@latest agents pro activate <token>");
-      p.outro(chalk.red("❌ Not activated"));
-      process.exit(1);
+      p.log.warn("No token found");
+      p.log.info("Enter your Premium access token to activate and continue setup.");
+      const activation = await activatePremiumToken();
+      githubToken = activation.githubToken;
+      p.log.success("✅ Token activated. Continuing setup...");
     }
 
     const { claudeDir } = resolveFolders(options);
@@ -262,7 +311,9 @@ export async function proSetupCommand(
   } catch (error) {
     trackError(error, { command: "pro-setup" });
     await flushTelemetry();
-    if (error instanceof Error) {
+    if (isPremiumActivationError(error)) {
+      logPremiumActivationError(error);
+    } else if (error instanceof Error) {
       p.log.error(error.message);
     }
     p.outro(chalk.red("❌ Setup failed"));

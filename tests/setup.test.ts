@@ -1,7 +1,10 @@
 import fs from "fs-extra";
 import inquirer from "inquirer";
+import * as clack from "@clack/prompts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { setupCommand } from "../src/commands/setup";
+import { proSetupCommand } from "../src/commands/pro";
+import { installProConfigs } from "../src/lib/pro-installer.js";
 import { promisify } from "util";
 import { exec } from "child_process";
 
@@ -10,6 +13,27 @@ const execAsync = promisify(exec);
 // Mock dependencies
 vi.mock("inquirer");
 vi.mock("fs-extra");
+vi.mock("@clack/prompts", () => ({
+  intro: vi.fn(),
+  outro: vi.fn(),
+  text: vi.fn(),
+  isCancel: vi.fn(() => false),
+  cancel: vi.fn(),
+  spinner: vi.fn(() => ({
+    start: vi.fn(),
+    stop: vi.fn(),
+    message: vi.fn(),
+  })),
+  log: {
+    error: vi.fn(),
+    info: vi.fn(),
+    success: vi.fn(),
+    warn: vi.fn(),
+  },
+}));
+vi.mock("../src/lib/pro-installer.js", () => ({
+  installProConfigs: vi.fn(),
+}));
 vi.mock("child_process", () => ({
   exec: vi.fn(),
   execSync: vi.fn(),
@@ -46,7 +70,6 @@ describe("Setup Command with Inquirer.js", () => {
     vi.mocked(fs.writeJson).mockResolvedValue();
     // @ts-expect-error Not important
     vi.mocked(fs.readFile).mockResolvedValue("{}");
-    // @ts-expect-error Not important
     vi.mocked(fs.pathExists).mockImplementation((path: string) => {
       // Mock the source directory to exist
       if (path.includes("agents-config")) {
@@ -179,5 +202,80 @@ describe("Setup Command with Inquirer.js", () => {
     expect(consoleSpy.log).toHaveBeenCalledWith(
       expect.stringContaining("Settings updated"),
     );
+  });
+});
+
+describe("Premium setup", () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    vi.mocked(fs.ensureDir).mockResolvedValue();
+    vi.mocked(fs.writeFile).mockResolvedValue();
+    vi.mocked(fs.writeJson).mockResolvedValue();
+    // @ts-expect-error Not important
+    vi.mocked(fs.readFile).mockResolvedValue("{}");
+    // @ts-expect-error Not important
+    vi.mocked(fs.pathExists).mockResolvedValue(false);
+    vi.mocked(fs.appendFile).mockResolvedValue();
+    // @ts-expect-error Not important
+    vi.mocked(fs.readdir).mockResolvedValue([]);
+    vi.mocked(installProConfigs).mockResolvedValue();
+    vi.mocked(clack.text).mockResolvedValue("premium user token");
+
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            hasAccess: true,
+            user: { name: "Melvyn", email: "melvyn@example.com" },
+            product: {
+              title: "AIBlueprint Premium",
+              metadata: { "cli-github-token": "github-token" },
+            },
+          }),
+      }),
+    ) as any;
+
+    const { execSync } = await import("child_process");
+    vi.mocked(execSync).mockReturnValue(Buffer.from(""));
+
+    mockExit.mockClear();
+  });
+
+  it("asks for a Premium token during setup when no token is saved", async () => {
+    await expect(
+      proSetupCommand({
+        claudeCodeFolder: "/tmp/test-claude",
+        codexFolder: "/tmp/test-codex",
+        agentsFolder: "/tmp/test-agents",
+      }),
+    ).resolves.not.toThrow();
+
+    expect(clack.text).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Enter your Premium access token:",
+      }),
+    );
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining("token=premium%20user%20token"),
+    );
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      expect.stringContaining("token.txt"),
+      "github-token",
+      { mode: 0o600 },
+    );
+    expect(installProConfigs).toHaveBeenCalledWith(
+      expect.objectContaining({
+        githubToken: "github-token",
+        claudeCodeFolder: "/tmp/test-claude",
+        codexFolder: "/tmp/test-codex",
+        agentsFolder: "/tmp/test-agents",
+      }),
+    );
+    expect(clack.log.success).toHaveBeenCalledWith(
+      "✅ Token activated. Continuing setup...",
+    );
+    expect(mockExit).not.toHaveBeenCalled();
   });
 });

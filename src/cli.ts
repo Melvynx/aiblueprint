@@ -208,7 +208,7 @@ function registerAgentsCommands(cmd: Command) {
 
   proCmd
     .command("setup")
-    .description("Install premium configurations (requires activation)")
+    .description("Install premium configurations, prompting for activation if needed")
     .action((options, command) => {
       const parentOptions = command.parent.parent.opts();
       proSetupCommand({
