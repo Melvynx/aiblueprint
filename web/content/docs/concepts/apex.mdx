@@ -1,0 +1,82 @@
+---
+title: APEX
+description: Systematic implementation with the Analyze-Plan-Execute-eXamine workflow.
+keywords: ["apex", "skill", "workflow", "agents", "implementation"]
+---
+
+`/apex` is a Premium skill that drives feature work through a structured
+methodology: **Analyze, Plan, Execute, eXamine**. It loads one step at a time,
+uses parallel agents for exploration, validates its own output, and can run an
+adversarial review before finishing.
+
+Use it when implementing a feature, fixing a bug, or making any change that
+benefits from a repeatable workflow instead of an ad-hoc edit.
+
+## Quick start
+
+```bash
+/apex add authentication middleware        # Basic run
+/apex -a -s implement user registration    # Autonomous + save outputs
+/apex -a -x -s fix login bug               # With adversarial review
+/apex -a -v implement user dashboard       # With feature verification
+/apex -a -m implement full auth system     # Agent Teams (parallel)
+/apex -a -pr add auth middleware           # Create a PR at the end
+/apex -r 01-auth-middleware                # Resume a previous task
+```
+
+A run is `/apex [flags] <task description>`. Flags override the defaults, and the
+remaining text becomes the task description.
+
+## Flags
+
+Lowercase turns a flag **on**, uppercase turns it **off**.
+
+| On | Off | Long | Description |
+| --- | --- | --- | --- |
+| `-a` | `-A` | `--auto` | Skip confirmations, auto-approve recommended options. |
+| `-x` | `-X` | `--examine` | Run an adversarial code review. |
+| `-s` | `-S` | `--save` | Save outputs to `.claude/output/apex/`. |
+| `-t` | `-T` | `--test` | Include test creation and a test runner. |
+| `-v` | `-V` | `--verify` | Launch the app and verify the feature works. |
+| `-e` | `-E` | `--economy` | No subagents, save tokens (for limited plans). |
+| `-b` | `-B` | `--branch` | Verify you are not on main, create a branch. |
+| `-pr` | `-PR` | `--pull-request` | Create a pull request at the end (enables `-b`). |
+| `-i` | | `--interactive` | Configure flags through a menu. |
+| `-k` | `-K` | `--tasks` | Break work into tasks with dependencies. |
+| `-m` | `-M` | `--teams` | Agent Teams parallel execution (enables `-k`). |
+| `-r` | | `--resume` | Resume from a previous task ID. |
+
+### Presets
+
+- **Budget-friendly:** `-e`
+- **Full quality:** `-x -s -t`
+- **Autonomous:** `-a -x -s -t`
+
+## Workflow
+
+APEX moves through these phases, skipping the optional ones unless their flag is
+set:
+
+1. **Init** - Parse flags and set up state.
+2. **Analyze** - Gather context with 1-10 parallel agents.
+3. **Plan** - Build a file-by-file strategy and a task list.
+4. **Tasks** - Break work into dependencies (with `-k` or `-m`).
+5. **Execute** - Implement the change (standard, or Agent Teams with `-m`).
+6. **Validate** - Run typecheck, lint, and tests.
+7. **Tests** - Create and run tests (with `-t`).
+8. **Examine** - Adversarial review in parallel: security, logic, clean code, and
+   a maintainability audit (with `-x`).
+9. **Resolve** - Fix anything the review found.
+10. **Verify** - Launch the app and test the feature (with `-v`).
+11. **Finish** - Create a pull request (with `-pr`).
+
+## Saved outputs
+
+With `-s`, each step appends to a numbered task folder under
+`.claude/output/apex/` (for example `01-add-auth-middleware`). That folder is
+what `-r` reads from to resume a run later.
+
+## Related
+
+APEX is one of the bundled Premium [skills](/concepts/skills) and is installed
+through [agents setup](/commands/agents-setup).

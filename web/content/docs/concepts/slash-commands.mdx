@@ -1,0 +1,76 @@
+---
+title: Slash Commands
+description: Reusable command prompts you trigger with a slash in Claude Code, OpenCode, and Factory AI.
+keywords: ["slash commands", "commands", "prompts", "saas", "prd"]
+---
+
+A slash command is a saved prompt you trigger by typing `/name` in your agent.
+Instead of rewriting the same instructions every time, you keep them in a
+markdown file and run them on demand. AIBlueprint bundles a set of these command
+prompts focused on shipping SaaS products: creating a PRD, designing an
+architecture, finding a domain name, and more.
+
+## Where they live
+
+[agents setup](/commands/agents-setup) installs the bundled command prompts into
+each tool's commands folder:
+
+| Tool | Folder |
+| --- | --- |
+| Claude Code | `~/.claude/commands` |
+| OpenCode | `~/.config/opencode/command` |
+| Factory AI | `~/.factory/commands` |
+
+Each markdown file becomes one slash command named after the file, so
+`saas-create-prd.md` is available as `/saas-create-prd`.
+
+## Bundled command prompts
+
+| Command | Description |
+| --- | --- |
+| `/prompt` | Generate minimalist SVG logo variations for an app. |
+| `/tools` | Reference list of recommended tools and libraries for the stack. |
+| `/setup-tmux` | Install and configure tmux with Ghostty on macOS. |
+| `/nextjs-setup-project` | Scaffold a new Next.js project with the preferred setup. |
+| `/nextjs-add-prisma-db` | Add Prisma and a database to a Next.js project. |
+| `/nextjs-setup-better-auth` | Wire up Better Auth in a Next.js project. |
+| `/create-vitejs-app` | Create a Vite app with Tailwind and shadcn/ui. |
+| `/saas-challenge-idea` | Pressure-test a SaaS idea before building. |
+| `/saas-create-prd` | Build a lean Product Requirements Document through a discovery conversation. |
+| `/saas-create-architecture` | Design the technical architecture from the PRD. |
+| `/saas-create-tasks` | Turn the plan into an actionable task list. |
+| `/saas-define-pricing` | Define a data-driven pricing strategy. |
+| `/saas-find-domain-name` | Generate and validate domain name options. |
+| `/saas-create-headline` | Write conversion-focused headlines. |
+| `/saas-create-landing-copywritting` | Generate landing page copy from the PRD and context. |
+| `/saas-implement-landing-page` | Implement a landing page from a specification. |
+| `/saas-create-logos` | Generate abstract SVG logo variations with a showcase. |
+| `/saas-create-legals-docs` | Draft legal documents for a SaaS product. |
+
+These chain together: most SaaS commands assume you start with
+`/saas-create-prd`, then move to architecture, pricing, and landing copy.
+
+## Create your own
+
+A command prompt is just a markdown file in the commands folder. The file name
+becomes the command name.
+
+```markdown
+---
+description: One line that explains what the command does.
+---
+
+Write the prompt here as instructions to the agent. Describe the goal,
+the questions to ask first, and the format of the output.
+```
+
+The frontmatter is optional. The simplest command is a plain markdown file with
+no frontmatter at all, just the prompt body. Keep the body imperative and
+specific: state the objective, list any questions to ask before starting, and
+describe the exact output you want.
+
+## Related
+
+- [agents setup](/commands/agents-setup) installs these command prompts.
+- [Skills](/concepts/skills) are the multi-step, reusable workflows that go
+  beyond a single prompt.
