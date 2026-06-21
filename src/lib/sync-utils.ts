@@ -328,7 +328,7 @@ export async function analyzeSyncChanges(
 }
 
 function translateRemotePath(relativePath: string): string {
-  // Local category names stay flat (commands/, agents/, skills/, scripts/) but
+  // Local category names stay flat (agents/, skills/, scripts/) but
   // their remote locations may live under claude-config/. Reroute as needed.
   const [first, ...rest] = relativePath.split("/");
   const remoteFirst = getRemoteCategoryPath(first);

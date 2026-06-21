@@ -1,7 +1,7 @@
 <key_insight>
 Agent prompts should be task-specific, not generic. They define a specialized role with clear focus areas, workflows, and constraints.
 
-**Critical**: Agent.md files use pure XML structure (no markdown headings). Like skills and slash commands, this improves parsing and token efficiency.
+**Critical**: Agent.md files use pure XML structure (no markdown headings). Like skills, this improves parsing and token efficiency.
 </key_insight>
 
 <xml_structure_rule>

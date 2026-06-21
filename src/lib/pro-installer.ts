@@ -42,7 +42,7 @@ type Route =
  * Maps a path inside the source config tree (relative to the config root) to
  * its install destination. Supports the new layout (claude-config/, codex-config/,
  * skills/, agents/) and the legacy flat layout (scripts/, settings.json,
- * commands/, .claude/...).
+ * .claude/...). Legacy commands/ folders are intentionally skipped.
  */
 function routePath(relativePath: string): Route {
   const segments = relativePath.split(path.sep);
@@ -58,11 +58,14 @@ function routePath(relativePath: string): Route {
   if (isAgentCategory(first)) {
     return { kind: "agents-category", category: first, relativePath };
   }
+  if (first === "commands") {
+    return { kind: "skip" };
+  }
   // Legacy: .claude/<stuff> means it goes into claudeDir/<stuff>
   if (first === ".claude") {
     return { kind: "claude", relativePath: rest };
   }
-  // Legacy flat: scripts/, settings.json, commands/ at root → claudeDir
+  // Legacy flat: scripts/ and settings.json at root → claudeDir
   return { kind: "claude", relativePath };
 }
 

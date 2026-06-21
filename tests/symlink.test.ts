@@ -33,7 +33,6 @@ describe("getToolPaths", () => {
     const homeDir = os.homedir();
 
     expect(paths.baseDir).toBe(path.join(homeDir, ".claude"));
-    expect(paths.commandsPath).toBe(path.join(homeDir, ".claude", "commands"));
     expect(paths.agentsPath).toBe(path.join(homeDir, ".claude", "agents"));
   });
 
@@ -42,19 +41,7 @@ describe("getToolPaths", () => {
     const homeDir = os.homedir();
 
     expect(paths.baseDir).toBe(path.join(homeDir, ".codex"));
-    expect(paths.commandsPath).toBeUndefined();
     expect(paths.agentsPath).toBe(path.join(homeDir, ".codex", "agents"));
-  });
-
-  it("should return correct paths for opencode", async () => {
-    const paths = await getToolPaths("opencode");
-    const homeDir = os.homedir();
-
-    expect(paths.baseDir).toBe(path.join(homeDir, ".config", "opencode"));
-    expect(paths.commandsPath).toBe(
-      path.join(homeDir, ".config", "opencode", "command"),
-    );
-    expect(paths.agentsPath).toBeUndefined();
   });
 
   it("should return correct paths for factoryai", async () => {
@@ -62,7 +49,6 @@ describe("getToolPaths", () => {
     const homeDir = os.homedir();
 
     expect(paths.baseDir).toBe(path.join(homeDir, ".factory"));
-    expect(paths.commandsPath).toBe(path.join(homeDir, ".factory", "commands"));
     expect(paths.agentsPath).toBe(path.join(homeDir, ".factory", "droids"));
   });
 
@@ -211,7 +197,6 @@ describe("symlinkCommand", () => {
   it("should create agents symlink from Claude Code to FactoryAI", async () => {
     vi.mocked(inquirer.prompt)
       .mockResolvedValueOnce({ source: "claude-code" })
-      .mockResolvedValueOnce({ contentType: "agents" })
       .mockResolvedValueOnce({ destinations: ["factoryai-agents"] });
 
     vi.mocked(fs.pathExists)
@@ -220,7 +205,7 @@ describe("symlinkCommand", () => {
 
     await symlinkCommand();
 
-    expect(inquirer.prompt).toHaveBeenCalledTimes(3);
+    expect(inquirer.prompt).toHaveBeenCalledTimes(2);
     expect(fs.symlink).toHaveBeenCalled();
     expect(consoleSpy.log).toHaveBeenCalledWith(
       expect.stringContaining("Symlink Manager"),
@@ -233,7 +218,6 @@ describe("symlinkCommand", () => {
 
     vi.mocked(inquirer.prompt)
       .mockResolvedValueOnce({ source: "claude-code" })
-      .mockResolvedValueOnce({ contentType: "agents" })
       .mockResolvedValueOnce({ destinations: ["codex-agents"] });
 
     vi.mocked(fs.pathExists)
@@ -254,13 +238,12 @@ describe("symlinkCommand", () => {
   it("should filter out source tool from destination choices", async () => {
     vi.mocked(inquirer.prompt)
       .mockResolvedValueOnce({ source: "claude-code" })
-      .mockResolvedValueOnce({ contentType: "agents" })
       .mockResolvedValueOnce({ destinations: ["factoryai-agents"] });
 
     await symlinkCommand();
 
-    const thirdPromptCall = vi.mocked(inquirer.prompt).mock.calls[2][0];
-    const choices = (thirdPromptCall as any)[0].choices;
+    const destinationPromptCall = vi.mocked(inquirer.prompt).mock.calls[1][0];
+    const choices = (destinationPromptCall as any)[0].choices;
 
     const claudeChoice = choices.find(
       (c: any) => c.value === "claude-code-agents",
@@ -271,13 +254,12 @@ describe("symlinkCommand", () => {
   it("should validate that at least one destination is selected", async () => {
     vi.mocked(inquirer.prompt)
       .mockResolvedValueOnce({ source: "claude-code" })
-      .mockResolvedValueOnce({ contentType: "agents" })
       .mockResolvedValueOnce({ destinations: ["factoryai-agents"] });
 
     await symlinkCommand();
 
-    const thirdPromptCall = vi.mocked(inquirer.prompt).mock.calls[2][0];
-    const validateFn = (thirdPromptCall as any)[0].validate;
+    const destinationPromptCall = vi.mocked(inquirer.prompt).mock.calls[1][0];
+    const validateFn = (destinationPromptCall as any)[0].validate;
 
     expect(validateFn([])).toBe("Please select at least one destination");
     expect(validateFn(["factoryai-agents"])).toBe(true);
@@ -296,13 +278,4 @@ describe("symlinkCommand", () => {
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
-  it("should exit when source tool has no syncable content", async () => {
-    vi.mocked(inquirer.prompt).mockResolvedValueOnce({ source: "opencode" });
-
-    await symlinkCommand();
-
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining("doesn't support any syncable content"),
-    );
-  });
 });

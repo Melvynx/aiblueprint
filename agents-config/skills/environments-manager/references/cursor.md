@@ -14,7 +14,7 @@ Three setup keys are supported (Cursor picks the first one that matches the host
 
 Cursor does **not** support a cleanup script. Cleanup is timer-based via global settings (`cursor.worktreeCleanupIntervalHours`, `cursor.worktreeMaxCount`). To get a real cleanup hook, expose `scripts/worktree-down.sh` as a project command the user runs manually before `/delete-worktree`.
 
-Built-in worktree slash commands the user already has: `/worktree`, `/best-of-n`, `/apply-worktree`, `/delete-worktree`.
+Cursor includes built-in worktree actions for creating, comparing, applying, and deleting worktrees.
 
 ## Environment Variables
 
@@ -72,7 +72,7 @@ Inline is fine for two-line setups. For anything more, use a script - the worktr
 
 - Do not put fragile multi-line setup inline. If it does not fit in two clean array entries, call the script.
 - Do not put `.cursor/worktrees.json` only in a worktree - it must be on the source checkout / main branch so future worktrees pick it up.
-- Do not rely on a cleanup hook - Cursor does not have one. Tell the user to run `scripts/worktree-down.sh` before `/delete-worktree`, or document it in the project README.
+- Do not rely on a cleanup hook - Cursor does not have one. Tell the user to run `scripts/worktree-down.sh` before deleting a worktree, or document it in the project README.
 - Do not use `$CURSOR_WORKTREE_PATH` - that variable is not documented and not guaranteed. Use `pwd` inside the worktree.
 
 ## Verification

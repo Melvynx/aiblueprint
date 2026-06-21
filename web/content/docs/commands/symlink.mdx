@@ -1,11 +1,11 @@
 ---
 title: agents symlink
-description: Share commands and agents across Claude Code, Codex, OpenCode, and FactoryAI.
-keywords: ["symlink", "share", "codex", "opencode", "factoryai"]
+description: Share agents across Claude Code, Codex, and FactoryAI.
+keywords: ["symlink", "share", "codex", "factoryai", "agents"]
 ---
 
 `agents symlink` creates symlinks so multiple AI coding tools share the same
-commands and agents. Edit once, and every linked tool stays in sync.
+agents. Edit once, and every linked tool stays in sync.
 
 ```bash
 aiblueprint agents symlink
@@ -15,10 +15,9 @@ aiblueprint agents symlink
 
 The command is interactive:
 
-1. Choose a **source** tool (Claude Code, Codex, OpenCode, or FactoryAI).
-2. Choose the **content type** to share - commands, agents, or both.
-3. Select one or more **destination** tools.
-4. The CLI creates the symlinks, skipping any target that already exists as a
+1. Choose a **source** tool (Claude Code, Codex, or FactoryAI).
+2. Select one or more **destination** tools.
+3. The CLI creates the symlinks, skipping any target that already exists as a
    real file.
 
 ## Supported tools
@@ -27,7 +26,6 @@ The command is interactive:
 | ---- | ------ |
 | Claude Code | Yes |
 | Codex | Yes |
-| OpenCode | - |
 | FactoryAI | Yes |
 
 ## When to use it

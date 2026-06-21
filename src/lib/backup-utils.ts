@@ -71,7 +71,7 @@ export async function listBackups(): Promise<BackupInfo[]> {
 }
 
 const AGENTS_BACKUP_SUBDIR = ".agents";
-const CLAUDE_ITEMS = ["commands", "agents", "skills", "scripts", "settings.json"];
+const CLAUDE_ITEMS = ["agents", "skills", "scripts", "settings.json"];
 const MANAGED_FOLDERS = [".claude", ".codex", ".agents"] as const;
 
 async function copyForBackup(

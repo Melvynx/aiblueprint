@@ -8,7 +8,7 @@ A Claude Code plugin follows this structure:
 your-plugin/
 ├── .claude-plugin/
 │   └── plugin.json          # Required manifest file
-├── commands/                # Slash commands (.md files)
+├── skills/                  # Skills (SKILL.md files)
 ├── agents/                  # Specialized agents (.md files)
 ├── hooks/                   # Hook configurations (.json)
 ├── .mcp.json               # MCP server definitions
@@ -33,7 +33,7 @@ your-plugin/
   "repository": "https://github.com/user/repo",
   "license": "MIT",
   "keywords": ["cli", "tools"],
-  "commands": ["./additional-commands"],
+  "skills": ["./additional-skills"],
   "agents": ["./additional-agents"],
   "hooks": "./hooks/config.json",
   "mcpServers": "./.mcp.json"

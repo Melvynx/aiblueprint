@@ -235,7 +235,7 @@ python3 -c "import json; json.load(open('.claude/settings.json'))"
 
 After the shared scripts are written, for each IDE selected in Step 2, load the matching reference file and apply only its linking config:
 
-- **Claude Code** → [references/claude.md](references/claude.md) - `.claude/settings.json` SessionStart hook + custom slash commands as actions.
+- **Claude Code** → [references/claude.md](references/claude.md) - `.claude/settings.json` worktree hooks + optional project action skills.
 - **Cursor** → [references/cursor.md](references/cursor.md) - `.cursor/worktrees.json` setup keys.
 - **Codex** → [references/codex.md](references/codex.md) - `.codex/environments/environment.toml` setup, cleanup, and actions.
 
@@ -256,11 +256,11 @@ examples/
 ├── claude/
 │   ├── .worktreeinclude           # native env-file copy list
 │   ├── settings.json              # WorktreeCreate + WorktreeRemove hooks
-│   └── commands/                  # optional slash-command actions
-│       ├── dev.md
-│       ├── typecheck.md
-│       ├── test.md
-│       └── lint.md
+├── skills/                        # optional project action skills
+│   ├── dev/SKILL.md
+│   ├── typecheck/SKILL.md
+│   ├── test/SKILL.md
+│   └── lint/SKILL.md
 ├── cursor/
 │   └── worktrees.json             # setup-worktree-unix -> scripts/worktree-up.sh
 └── codex/

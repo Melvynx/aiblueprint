@@ -179,7 +179,7 @@ Tailor instructions to the specific task domain. Don't create generic "helper" a
 </system_prompt_guidelines>
 
 <agent_xml_structure>
-Agent.md files are system prompts consumed only by Claude. Like skills and slash commands, they should use pure XML structure for optimal parsing and token efficiency.
+Agent.md files are system prompts consumed only by Claude. Like skills, they should use pure XML structure for optimal parsing and token efficiency.
 
 <recommended_tags>
 Common tags for agent structure:

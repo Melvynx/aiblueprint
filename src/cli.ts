@@ -113,7 +113,7 @@ function registerAgentsCommands(cmd: Command) {
   cmd
     .command("symlink")
     .description(
-      "Create symlinks between different AI coding tools (Claude Code, Codex, OpenCode, FactoryAI)",
+      "Create agent symlinks between AI coding tools (Claude Code, Codex, FactoryAI)",
     )
     .action((options, command) => {
       const parentOptions = command.parent.opts();

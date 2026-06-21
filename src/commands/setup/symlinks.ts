@@ -3,13 +3,11 @@ import path from "path";
 import os from "os";
 import chalk from "chalk";
 
-export type ToolType = "claude-code" | "codex" | "opencode" | "factoryai";
-export type ContentType = "commands" | "agents";
+export type ToolType = "claude-code" | "codex" | "factoryai";
 
 export interface ToolPaths {
   baseDir: string;
-  commandsPath?: string;
-  agentsPath?: string;
+  agentsPath: string;
 }
 
 export async function getToolPaths(
@@ -25,7 +23,6 @@ export async function getToolPaths(
         : path.join(os.homedir(), ".claude");
       return {
         baseDir,
-        commandsPath: path.join(baseDir, "commands"),
         agentsPath: path.join(baseDir, "agents"),
       };
 
@@ -38,22 +35,12 @@ export async function getToolPaths(
         agentsPath: path.join(baseDir, "agents"),
       };
 
-    case "opencode":
-      baseDir = customFolder
-        ? path.resolve(customFolder)
-        : path.join(os.homedir(), ".config", "opencode");
-      return {
-        baseDir,
-        commandsPath: path.join(baseDir, "command"),
-      };
-
     case "factoryai":
       baseDir = customFolder
         ? path.resolve(customFolder)
         : path.join(os.homedir(), ".factory");
       return {
         baseDir,
-        commandsPath: path.join(baseDir, "commands"),
         agentsPath: path.join(baseDir, "droids"),
       };
 
@@ -112,4 +99,3 @@ export async function createSymlink(
     throw error;
   }
 }
-

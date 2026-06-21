@@ -25,12 +25,13 @@ There is no separate `PostWorktreeCreate` hook (feature request #27744 is open).
 ```text
 .worktreeinclude                  # gitignore-syntax list of files to auto-copy
 .claude/
-├── settings.json                 # WorktreeCreate + WorktreeRemove hooks
-└── commands/                     # optional: per-action slash commands
-    ├── dev.md
-    ├── typecheck.md
-    ├── test.md
-    └── lint.md
+└── settings.json                 # WorktreeCreate + WorktreeRemove hooks
+.agents/
+└── skills/                       # optional: per-action project skills
+    ├── dev/SKILL.md
+    ├── typecheck/SKILL.md
+    ├── test/SKILL.md
+    └── lint/SKILL.md
 scripts/
 ├── claude-worktree-create.sh     # WorktreeCreate hook wrapper
 ├── claude-worktree-remove.sh     # WorktreeRemove hook wrapper
@@ -123,11 +124,14 @@ The `WorktreeCreate` hook **only fires for `claude --worktree` from the CLI**. T
 
 Also: **`.claude/settings.json` changes only take effect after restarting Claude.** A running session keeps the old hook config. Tell the user to restart before testing.
 
-## Custom Slash Commands as Actions (optional)
+## Project Action Skills (optional)
 
-Claude Code does not have a top-bar action menu. To expose the standard actions, write one file per action under `.claude/commands/`. Each is a tiny prompt that tells Claude to run the matching shared script or package-manager command.
+To expose standard project actions consistently, write one skill per action
+under `.agents/skills/<name>/SKILL.md`. Each skill tells the agent to run the
+matching shared script or package-manager command.
 
-See `examples/claude/commands/` for the four standard ones (`dev.md`, `typecheck.md`, `test.md`, `lint.md`).
+See `examples/skills/` for the four standard ones (`dev`, `typecheck`, `test`,
+`lint`).
 
 ## Guardrails
 

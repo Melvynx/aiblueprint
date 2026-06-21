@@ -4,7 +4,6 @@ import {
   getToolPaths,
   createSymlink,
   type ToolType,
-  type ContentType,
 } from "./setup/symlinks.js";
 import { resolveFolders } from "../lib/folder-paths.js";
 import { getVersion } from "../lib/version.js";
@@ -18,34 +17,20 @@ export interface SymlinkCommandParams {
 interface ToolConfig {
   name: string;
   value: ToolType;
-  supportsCommands: boolean;
-  supportsAgents: boolean;
 }
 
 const TOOLS: ToolConfig[] = [
   {
     name: "Claude Code",
     value: "claude-code",
-    supportsCommands: false,
-    supportsAgents: true,
   },
   {
     name: "Codex",
     value: "codex",
-    supportsCommands: false,
-    supportsAgents: true,
-  },
-  {
-    name: "OpenCode",
-    value: "opencode",
-    supportsCommands: false,
-    supportsAgents: false,
   },
   {
     name: "FactoryAI",
     value: "factoryai",
-    supportsCommands: false,
-    supportsAgents: true,
   },
 ];
 
@@ -53,7 +38,6 @@ interface DestinationChoice {
   name: string;
   value: string;
   tool: ToolType;
-  contentType: ContentType;
 }
 
 export async function symlinkCommand(params: SymlinkCommandParams = {}) {
@@ -76,73 +60,23 @@ export async function symlinkCommand(params: SymlinkCommandParams = {}) {
     ]);
 
     const sourceTool = sourceAnswer.source as ToolType;
-    const sourceConfig = TOOLS.find((t) => t.value === sourceTool)!;
-
-    const contentTypeChoices: Array<{ name: string; value: string }> = [];
-    if (sourceConfig.supportsCommands) {
-      contentTypeChoices.push({ name: "Commands only", value: "commands" });
-    }
-    if (sourceConfig.supportsAgents) {
-      contentTypeChoices.push({ name: "Agents only", value: "agents" });
-    }
-    if (sourceConfig.supportsCommands && sourceConfig.supportsAgents) {
-      contentTypeChoices.push({ name: "Both", value: "both" });
-    }
-
-    if (contentTypeChoices.length === 0) {
-      console.log(
-        chalk.red(
-          `\n❌ Error: ${sourceConfig.name} doesn't support any syncable content`,
-        ),
-      );
-      process.exit(1);
-    }
-
-    const contentAnswer = await inquirer.prompt([
-      {
-        type: "list",
-        name: "contentType",
-        message: "What would you like to sync?",
-        choices: contentTypeChoices,
-      },
-    ]);
-
-    const syncType = contentAnswer.contentType as "commands" | "agents" | "both";
-    const syncCommands = syncType === "commands" || syncType === "both";
-    const syncAgents = syncType === "agents" || syncType === "both";
 
     const destinationChoices: DestinationChoice[] = [];
 
     for (const tool of TOOLS) {
       if (tool.value === sourceTool) continue;
 
-      if (syncCommands && tool.supportsCommands) {
-        destinationChoices.push({
-          name: syncAgents
-            ? `${tool.name} (commands)`
-            : tool.name,
-          value: `${tool.value}-commands`,
-          tool: tool.value,
-          contentType: "commands",
-        });
-      }
-
-      if (syncAgents && tool.supportsAgents) {
-        destinationChoices.push({
-          name: syncCommands
-            ? `${tool.name} (agents)`
-            : tool.name,
-          value: `${tool.value}-agents`,
-          tool: tool.value,
-          contentType: "agents",
-        });
-      }
+      destinationChoices.push({
+        name: tool.name,
+        value: `${tool.value}-agents`,
+        tool: tool.value,
+      });
     }
 
     if (destinationChoices.length === 0) {
       console.log(
         chalk.yellow(
-          "\n⚠️  No compatible destination tools found for the selected sync type",
+          "\n⚠️  No compatible destination tools found for agent syncing",
         ),
       );
       process.exit(0);
@@ -178,7 +112,6 @@ export async function symlinkCommand(params: SymlinkCommandParams = {}) {
     const customFolders: Record<ToolType, string | undefined> = {
       "claude-code": claudeDir,
       codex: codexDir,
-      opencode: undefined,
       factoryai: undefined,
     };
 
@@ -201,21 +134,12 @@ export async function symlinkCommand(params: SymlinkCommandParams = {}) {
         customFolders[destChoice.tool],
       );
 
-      let sourcePath: string;
-      let targetPath: string;
-
-      if (destChoice.contentType === "commands") {
-        sourcePath = sourcePaths.commandsPath!;
-        targetPath = destPaths.commandsPath!;
-      } else {
-        sourcePath = sourcePaths.agentsPath!;
-        targetPath = destPaths.agentsPath!;
-      }
+      const sourcePath = sourcePaths.agentsPath;
+      const targetPath = destPaths.agentsPath;
 
       const toolName =
         TOOLS.find((t) => t.value === destChoice.tool)?.name || destChoice.tool;
-      const contentLabel =
-        destChoice.contentType === "commands" ? "commands" : "agents";
+      const contentLabel = "agents";
 
       try {
         const success = await createSymlink(sourcePath, targetPath, {

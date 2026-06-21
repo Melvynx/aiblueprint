@@ -1,6 +1,6 @@
 # AIBlueprint CLI
 
-Supercharge Claude Code with security hooks, custom commands, a lightweight statusline, and workflow automation.
+Supercharge Claude Code and Codex with security hooks, reusable skills, a lightweight statusline, and workflow automation.
 
 📚 **[Full Documentation](https://codelynx.dev/docs)** | 🎯 [Premium Features](https://mlv.sh/claude-cli)
 
@@ -15,7 +15,7 @@ npx aiblueprint-cli@latest agents setup
 
 - **🛡️ Security** - Command validation hooks blocking dangerous operations
 - **📊 Statusline** - Git status and session context display
-- **🤖 Commands** - 16 pre-configured workflow automation commands
+- **🤖 Skills** - 30+ reusable workflow skills
 - **🎭 Agents** - 3 specialized AI agents for codebase exploration
 - **⚡ Scripts** - Built-in statusline utilities
 
@@ -67,10 +67,6 @@ npx aiblueprint-cli@latest agents setup
 # Add specific hooks
 npx aiblueprint-cli@latest agents add hook post-edit-typescript
 
-# Manage commands
-npx aiblueprint-cli@latest agents add commands
-npx aiblueprint-cli@latest agents add commands commit
-
 # Create symlinks between tools
 npx aiblueprint-cli@latest agents symlink
 
@@ -104,23 +100,26 @@ npx aiblueprint-cli@latest agents config unify sessions
 - Session context and duration
 - Colored visual indicators
 
-### Commands (16 Available)
+### Workflow Skills
 
 **Development:**
 - `commit` - Fast conventional commits
-- `create-pull-request` - Auto-generated PRs
+- `create-pr` - Auto-generated PRs
 - `fix-pr-comments` - Resolve PR comments
-- `run-tasks` - Execute GitHub issues
+- `merge` - Context-aware branch merging
 
-**Analysis:**
-- `deep-code-analysis` - Comprehensive codebase investigation
-- `explain-architecture` - Pattern analysis with diagrams
-- `cleanup-context` - Memory optimization
+**Project setup:**
+- `nextjs-setup-project` - Scaffold the preferred Next.js stack
+- `nextjs-add-prisma-db` - Add Prisma and PostgreSQL
+- `nextjs-setup-better-auth` - Wire Better Auth with email OTP
+- `create-vitejs-app` - Create a Vite app with Tailwind and shadcn/ui
 
-**Utilities:**
-- `rules-manager` - AGENTS.md and `.agents/rules/` management
-- `watch-ci` - Automated CI monitoring
-- `epct` - Explore-Plan-Code-Test methodology
+**SaaS planning:**
+- `saas-create-prd` - Build a lean Product Requirements Document
+- `saas-create-architecture` - Design technical architecture
+- `saas-create-tasks` - Generate implementation tasks
+- `saas-define-pricing` - Create pricing strategy
+- `saas-find-domain-name` - Generate and validate domains
 
 ### Agents (3 Specialized)
 
@@ -158,6 +157,11 @@ npx skills add Melvynx/aiblueprint --skill skill-manager
 | `merge` | Context-aware branch merging |
 | `prompt-creator` | Expert prompt engineering |
 | `skill-manager` | Manage skills and rules across Claude Code, Codex, and Cursor |
+| `saas-create-prd` | Build a lean SaaS PRD |
+| `saas-create-architecture` | Design SaaS technical architecture |
+| `saas-create-tasks` | Generate implementation task files |
+| `nextjs-setup-project` | Set up a production-ready Next.js project |
+| `create-vitejs-app` | Create a Vite app with Tailwind and shadcn/ui |
 | `use-style` | Apply named UI style guides before implementation |
 | `rules-manager` | Create and maintain AGENTS.md and agent rule files |
 | `agents-managers` | Manage Claude Code agents and Task-tool orchestration |

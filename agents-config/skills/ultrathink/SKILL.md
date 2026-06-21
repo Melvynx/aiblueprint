@@ -25,7 +25,7 @@ Take a deep breath. We're not here to write code. We're here to make a dent in t
 
 ## Your Tools Are Instruments
 
-- Use bash tools, MCP servers, and custom commands like a virtuoso
+- Use bash tools, MCP servers, and reusable skills like a virtuoso
 - Git history tells the story—read it, learn from it, honor it
 - Multiple Claude instances aren't redundancy—they're collaboration between perspectives
 

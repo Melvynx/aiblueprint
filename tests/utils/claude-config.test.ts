@@ -79,12 +79,12 @@ Body content`;
   });
 
   describe("getLocalConfigPaths", () => {
-    it("should return correct paths for commands", () => {
-      const paths = getLocalConfigPaths("commands");
+    it("should return correct paths for skills", () => {
+      const paths = getLocalConfigPaths("skills");
 
       expect(paths).toHaveLength(2);
-      expect(paths[0]).toMatch(/agents-config\/commands$/);
-      expect(paths[1]).toMatch(/agents-config\/commands$/);
+      expect(paths[0]).toMatch(/agents-config\/skills$/);
+      expect(paths[1]).toMatch(/agents-config\/skills$/);
     });
 
     it("should return correct paths for different subdirs", () => {
@@ -106,17 +106,17 @@ Body content`;
         return Promise.resolve(callCount === 1);
       });
 
-      const result = await findLocalConfigDir("commands");
+      const result = await findLocalConfigDir("skills");
 
       expect(result).toBeTruthy();
-      expect(result).toContain('agents-config/commands');
+      expect(result).toContain('agents-config/skills');
     });
 
     it("should return null when no paths exist", async () => {
       const mockPathExists = fs.pathExists as any;
       mockPathExists.mockResolvedValue(false);
 
-      const result = await findLocalConfigDir("commands");
+      const result = await findLocalConfigDir("skills");
 
       expect(result).toBe(null);
     });

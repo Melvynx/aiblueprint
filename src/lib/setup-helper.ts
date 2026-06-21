@@ -9,7 +9,7 @@ export interface BasicSetupOptions {
 }
 
 /**
- * Install basic free configurations (commands, agents, statusline)
+ * Install basic free configurations (agents, statusline)
  * This is used by both regular setup and pro setup
  */
 export async function installBasicConfigs(
@@ -39,17 +39,6 @@ export async function installBasicConfigs(
   }
 
   try {
-    // Install commands
-    const commandsSourcePath = path.join(sourceDir, "commands");
-    if (await fs.pathExists(commandsSourcePath)) {
-      console.log(chalk.gray("  • Commands..."));
-      await fs.copy(
-        commandsSourcePath,
-        path.join(claudeDir, "commands"),
-        { overwrite: true },
-      );
-    }
-
     // Install agents
     console.log(chalk.gray("  • Agents..."));
     await fs.copy(
