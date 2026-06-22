@@ -2,7 +2,11 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { defaultConfig, type StatuslineConfig } from "../lib/config";
+import {
+	defaultConfig,
+	loadConfig as loadStatuslineConfig,
+	type StatuslineConfig,
+} from "../lib/config";
 import { colors } from "../lib/formatters";
 import {
 	cycle,
@@ -161,6 +165,7 @@ const tabs: Tab[] = [
 		id: "session",
 		label: "SESSION",
 		options: [
+			toggle("session.cost.enabled", "Cost display"),
 			toggle("session.duration.enabled", "Duration"),
 			toggle("session.tokens.enabled", "Token count"),
 			toggle("session.tokens.showMax", "  Show max", {
@@ -198,6 +203,116 @@ const tabs: Tab[] = [
 				},
 			),
 			toggle("context.useUsableContextOnly", "45k buffer"),
+		],
+	},
+	{
+		id: "limits",
+		label: "5-HOUR",
+		options: [
+			{
+				path: "limits.enabled",
+				label: "5-hour limit",
+				type: "cycle" as const,
+				choices: ["Enabled", "Disabled"],
+				getValue: (c) => (c.limits.enabled ? "Enabled" : "Disabled"),
+				cycle: (c) => {
+					c.limits.enabled = !c.limits.enabled;
+				},
+			},
+			toggle("limits.showTimeLeft", "  Time remaining", {
+				hidden: (c) => !c.limits.enabled,
+			}),
+			toggle("limits.showPacingDelta", "  Pacing delta", {
+				hidden: (c) => !c.limits.enabled,
+			}),
+			toggle("limits.cost.enabled", "  Period cost", {
+				hidden: (c) => !c.limits.enabled,
+			}),
+			toggle("limits.percentage.showValue", "  Show % value", {
+				hidden: (c) => !c.limits.enabled,
+			}),
+			progressStyleCycle("limits.percentage", (c) => !c.limits.enabled),
+			cycle(
+				"limits.percentage.progressBar.length",
+				"    Length",
+				PROGRESS_BAR_LENGTHS,
+				{
+					hidden: (c) =>
+						!c.limits.enabled || !c.limits.percentage.progressBar.enabled,
+				},
+			),
+			cycle(
+				"limits.percentage.progressBar.color",
+				"    Color",
+				PROGRESS_BAR_COLORS,
+				{
+					hidden: (c) =>
+						!c.limits.enabled || !c.limits.percentage.progressBar.enabled,
+				},
+			),
+		],
+	},
+	{
+		id: "weekly",
+		label: "WEEKLY",
+		options: [
+			{
+				path: "weeklyUsage.enabled",
+				label: "Weekly limit",
+				type: "cycle" as const,
+				choices: ["Always", "At 90%", "Never"],
+				getValue: (c) => {
+					if (c.weeklyUsage.enabled === true) return "Always";
+					if (c.weeklyUsage.enabled === "90%") return "At 90%";
+					return "Never";
+				},
+				cycle: (c, dir) => {
+					const modes = [true, "90%", false] as const;
+					const idx =
+						c.weeklyUsage.enabled === true
+							? 0
+							: c.weeklyUsage.enabled === "90%"
+								? 1
+								: 2;
+					c.weeklyUsage.enabled = modes[(idx + dir + 3) % 3];
+				},
+			},
+			toggle("weeklyUsage.showTimeLeft", "  Time remaining", {
+				hidden: (c) => c.weeklyUsage.enabled === false,
+			}),
+			toggle("weeklyUsage.showPacingDelta", "  Pacing delta", {
+				hidden: (c) => c.weeklyUsage.enabled === false,
+			}),
+			toggle("weeklyUsage.cost.enabled", "  Cost", {
+				hidden: (c) => c.weeklyUsage.enabled === false,
+			}),
+			toggle("weeklyUsage.percentage.showValue", "  Show % value", {
+				hidden: (c) => c.weeklyUsage.enabled === false,
+			}),
+			progressStyleCycle(
+				"weeklyUsage.percentage",
+				(c) => c.weeklyUsage.enabled === false,
+			),
+			cycle(
+				"weeklyUsage.percentage.progressBar.length",
+				"    Length",
+				PROGRESS_BAR_LENGTHS,
+				{
+					hidden: (c) =>
+						c.weeklyUsage.enabled === false ||
+						!c.weeklyUsage.percentage.progressBar.enabled,
+				},
+			),
+			cycle(
+				"weeklyUsage.percentage.progressBar.color",
+				"    Color",
+				PROGRESS_BAR_COLORS,
+				{
+					hidden: (c) =>
+						c.weeklyUsage.enabled === false ||
+						!c.weeklyUsage.percentage.progressBar.enabled,
+				},
+			),
 		],
 	},
 	{
@@ -239,6 +354,7 @@ const tabs: Tab[] = [
 			cycle("pathDisplayMode", "Path display", PATH_DISPLAY_MODES),
 			toggle("showSonnetModel", "Show Sonnet model"),
 			toggle("oneLine", "Single line mode"),
+			toggle("dailySpend.cost.enabled", "Daily spend"),
 		],
 	},
 ];
@@ -248,11 +364,7 @@ const tabs: Tab[] = [
 // ─────────────────────────────────────────────────────────────
 
 function loadConfig(): StatuslineConfig {
-	try {
-		return JSON.parse(readFileSync(CONFIG_FILE_PATH, "utf-8"));
-	} catch {
-		return JSON.parse(JSON.stringify(defaultConfig));
-	}
+	return loadStatuslineConfig();
 }
 
 function saveConfig(config: StatuslineConfig): void {

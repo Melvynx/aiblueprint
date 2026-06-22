@@ -17,7 +17,7 @@
 	"separator": "•",
 	"session": {
 		"infoSeparator": null,
-		"cost": { "enabled": false, "format": "decimal1" },
+		"cost": { "enabled": true, "format": "decimal1" },
 		"duration": { "enabled": true },
 		"tokens": { "enabled": true, "showMax": false, "showDecimals": false },
 		"percentage": {
@@ -75,5 +75,8 @@
 	},
 	"dailySpend": {
 		"cost": { "enabled": false, "format": "decimal1" }
+	},
+	"thinking": {
+		"showDisabledWarning": true
 	}
 }

@@ -1,7 +1,7 @@
 {
 	"features": {
-		"usageLimits": false,
-		"spendTracking": false
+		"usageLimits": true,
+		"spendTracking": true
 	},
 	"oneLine": true,
 	"showSonnetModel": false,
@@ -17,7 +17,7 @@
 	"separator": "•",
 	"session": {
 		"infoSeparator": null,
-		"cost": { "enabled": false, "format": "decimal1" },
+		"cost": { "enabled": true, "format": "decimal1" },
 		"duration": { "enabled": true },
 		"tokens": { "enabled": true, "showMax": false, "showDecimals": false },
 		"percentage": {
@@ -40,9 +40,9 @@
 		"overheadTokens": 0
 	},
 	"limits": {
-		"enabled": false,
-		"showTimeLeft": false,
-		"showPacingDelta": false,
+		"enabled": true,
+		"showTimeLeft": true,
+		"showPacingDelta": true,
 		"cost": { "enabled": false, "format": "decimal1" },
 		"percentage": {
 			"enabled": true,
@@ -57,9 +57,9 @@
 		}
 	},
 	"weeklyUsage": {
-		"enabled": false,
-		"showTimeLeft": false,
-		"showPacingDelta": false,
+		"enabled": "90%",
+		"showTimeLeft": true,
+		"showPacingDelta": true,
 		"cost": { "enabled": false, "format": "decimal1" },
 		"percentage": {
 			"enabled": true,
@@ -74,7 +74,7 @@
 		}
 	},
 	"dailySpend": {
-		"cost": { "enabled": false, "format": "decimal1" }
+		"cost": { "enabled": true, "format": "decimal1" }
 	},
 	"thinking": {
 		"showDisabledWarning": true

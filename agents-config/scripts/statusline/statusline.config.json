@@ -1,7 +1,7 @@
 {
 	"features": {
-		"usageLimits": false,
-		"spendTracking": false
+		"usageLimits": true,
+		"spendTracking": true
 	},
 	"oneLine": true,
 	"showSonnetModel": false,
@@ -11,22 +11,31 @@
 		"showBranch": true,
 		"showDirtyIndicator": true,
 		"showChanges": false,
-		"showStaged": true,
+		"showStaged": false,
 		"showUnstaged": true
 	},
 	"separator": "•",
 	"session": {
 		"infoSeparator": null,
-		"cost": { "enabled": false, "format": "decimal1" },
-		"duration": { "enabled": true },
-		"tokens": { "enabled": true, "showMax": false, "showDecimals": false },
+		"cost": {
+			"enabled": true,
+			"format": "decimal1"
+		},
+		"duration": {
+			"enabled": false
+		},
+		"tokens": {
+			"enabled": false,
+			"showMax": false,
+			"showDecimals": false
+		},
 		"percentage": {
 			"enabled": true,
 			"showValue": true,
 			"progressBar": {
 				"enabled": true,
-				"length": 10,
-				"style": "braille",
+				"length": 5,
+				"style": "filled",
 				"color": "progressive",
 				"background": "none"
 			}
@@ -41,29 +50,35 @@
 	},
 	"limits": {
 		"enabled": false,
-		"showTimeLeft": false,
-		"showPacingDelta": false,
-		"cost": { "enabled": false, "format": "decimal1" },
+		"showTimeLeft": true,
+		"showPacingDelta": true,
+		"cost": {
+			"enabled": true,
+			"format": "decimal1"
+		},
 		"percentage": {
-			"enabled": false,
-			"showValue": false,
+			"enabled": true,
+			"showValue": true,
 			"progressBar": {
-				"enabled": false,
-				"length": 10,
-				"style": "braille",
+				"enabled": true,
+				"length": 5,
+				"style": "filled",
 				"color": "progressive",
 				"background": "none"
 			}
 		}
 	},
 	"weeklyUsage": {
-		"enabled": false,
-		"showTimeLeft": false,
-		"showPacingDelta": false,
-		"cost": { "enabled": false, "format": "decimal1" },
-		"percentage": {
+		"enabled": true,
+		"showTimeLeft": true,
+		"showPacingDelta": true,
+		"cost": {
 			"enabled": false,
-			"showValue": false,
+			"format": "decimal1"
+		},
+		"percentage": {
+			"enabled": true,
+			"showValue": true,
 			"progressBar": {
 				"enabled": false,
 				"length": 10,
@@ -74,6 +89,12 @@
 		}
 	},
 	"dailySpend": {
-		"cost": { "enabled": false, "format": "decimal1" }
+		"cost": {
+			"enabled": false,
+			"format": "decimal1"
+		}
+	},
+	"thinking": {
+		"showDisabledWarning": true
 	}
 }

@@ -21,7 +21,7 @@ const minimalConfig: StatuslineConfig = {
 	},
 	session: {
 		infoSeparator: null,
-		cost: { enabled: false, format: "decimal1" },
+		cost: { enabled: true, format: "decimal1" },
 		duration: { enabled: false },
 		tokens: { enabled: false, showMax: false, showDecimals: false },
 		percentage: {
@@ -37,7 +37,7 @@ const minimalConfig: StatuslineConfig = {
 		},
 	},
 	limits: {
-		enabled: false,
+		enabled: true,
 		showTimeLeft: false,
 		showPacingDelta: false,
 		cost: { enabled: false, format: "decimal1" },
@@ -93,7 +93,7 @@ const fullConfig: StatuslineConfig = {
 	},
 	session: {
 		infoSeparator: null,
-		cost: { enabled: false, format: "decimal2" },
+		cost: { enabled: true, format: "decimal2" },
 		duration: { enabled: true },
 		tokens: { enabled: true, showMax: true, showDecimals: true },
 		percentage: {
@@ -109,10 +109,10 @@ const fullConfig: StatuslineConfig = {
 		},
 	},
 	limits: {
-		enabled: false,
-		showTimeLeft: false,
-		showPacingDelta: false,
-		cost: { enabled: false, format: "decimal1" },
+		enabled: true,
+		showTimeLeft: true,
+		showPacingDelta: true,
+		cost: { enabled: true, format: "decimal1" },
 		percentage: {
 			enabled: true,
 			showValue: true,
@@ -126,10 +126,10 @@ const fullConfig: StatuslineConfig = {
 		},
 	},
 	weeklyUsage: {
-		enabled: false,
-		showTimeLeft: false,
-		showPacingDelta: false,
-		cost: { enabled: false, format: "decimal1" },
+		enabled: true,
+		showTimeLeft: true,
+		showPacingDelta: true,
+		cost: { enabled: true, format: "decimal1" },
 		percentage: {
 			enabled: true,
 			showValue: true,
@@ -143,7 +143,7 @@ const fullConfig: StatuslineConfig = {
 		},
 	},
 	dailySpend: {
-		cost: { enabled: false, format: "decimal1" },
+		cost: { enabled: true, format: "decimal1" },
 	},
 	context: {
 		...defaultConfig.context,
@@ -153,7 +153,7 @@ const fullConfig: StatuslineConfig = {
 export const PRESETS: Preset[] = [
 	{
 		name: "Minimal",
-		description: "Essential info only: percentage and branch",
+		description: "Essential info only: cost, percentage, branch",
 		config: minimalConfig,
 	},
 	{
