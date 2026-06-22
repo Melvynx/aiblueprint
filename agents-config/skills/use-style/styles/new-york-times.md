@@ -127,7 +127,7 @@ A wide left region and a rule-divided right rail. The vertical rule between them
   </div>
   <figure>
     <img className="w-full" />
-    <figcaption className="mt-1 text-right font-sans text-xs text-[#999]">Jade Gao/AFP - Getty</figcaption>
+    <figcaption className="mt-1 text-right font-sans text-xs text-[#999]">Jade Gao/AFP — Getty</figcaption>
   </figure>
 </article>
 ```

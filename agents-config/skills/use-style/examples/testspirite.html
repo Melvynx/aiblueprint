@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TestSpirite · App shell</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:#f7f7f3; --surface:#fff; --sunken:#f0f1ec;
+    --fg:#1a1c19; --slate:#494c46; --muted:#8a8d84; --subtle:#a8aaa0;
+    --border:#e8e9e3; --border-strong:#d8dad2;
+    --primary:#3d7c4e; --primary-hover:#336b42; --primary-surface:#eaf3ea; --primary-border:#d3e6d5;
+    --status:#2f9e54; --warning:#c98a28; --error:#cf4a3e;
+    --shadow-card:0 1px 2px rgba(26,28,25,0.04), 0 1px 3px rgba(26,28,25,0.03);
+    --sans:'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono:'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { -webkit-text-size-adjust:100%; }
+  body { font-family:var(--sans); background:var(--bg); color:var(--fg); line-height:1.5; -webkit-font-smoothing:antialiased; }
+  .num { font-variant-numeric:tabular-nums; }
+  a { text-decoration:none; color:inherit; }
+  .shell { display:flex; min-height:100vh; }
+
+  /* ---- Sidebar ---- */
+  .sidebar { display:flex; flex-direction:column; width:240px; flex-shrink:0; border-right:1px solid var(--border); background:var(--bg); }
+  .ws { display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--border); cursor:pointer; }
+  .ws:hover { background:var(--sunken); }
+  .ws .mark { display:grid; place-items:center; width:28px; height:28px; border-radius:6px; background:var(--primary); color:#fff; font-size:12px; font-weight:600; }
+  .ws .name { flex:1; font-size:14px; font-weight:500; }
+  .ws .chev { color:var(--muted); }
+  nav { flex:1; padding:16px 12px; display:flex; flex-direction:column; gap:20px; overflow:auto; }
+  .grp-label { padding:0 10px 6px; font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  .navitem { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; font-size:14px; color:var(--slate); transition:background .15s, color .15s; cursor:pointer; }
+  .navitem svg { color:var(--muted); flex-shrink:0; }
+  .navitem:hover { background:var(--sunken); }
+  .navitem.active { background:var(--sunken); color:var(--fg); font-weight:500; }
+  .navitem.active svg { color:var(--fg); }
+  .navitem .lbl { flex:1; }
+  .navitem.sub { padding-left:34px; font-size:13px; }
+  .pill-new { border-radius:999px; background:var(--primary-surface); color:var(--primary); font-size:11px; font-weight:500; padding:1px 8px; }
+  .trial { margin:12px; padding:16px; border-radius:12px; border:1px solid var(--primary-border); background:var(--primary-surface); }
+  .trial .h { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; }
+  .trial .s { margin-top:4px; font-size:12px; color:var(--slate); }
+  .trial .btn { margin-top:12px; }
+
+  /* ---- Main ---- */
+  .main { flex:1; min-width:0; display:flex; flex-direction:column; }
+  .topbar { display:flex; align-items:center; height:56px; padding:0 24px; border-bottom:1px solid var(--border); font-size:14px; color:var(--slate); }
+  .content { flex:1; }
+  .layout { max-width:1200px; margin:0 auto; padding:28px 24px; display:flex; gap:24px; align-items:flex-start; }
+  .stream { flex:1; min-width:0; display:flex; flex-direction:column; gap:28px; }
+  .rail { width:320px; flex-shrink:0; display:flex; flex-direction:column; gap:16px; }
+
+  .card { border-radius:12px; border:1px solid var(--border); background:var(--surface); padding:20px; }
+  .card.soft { box-shadow:var(--shadow-card); }
+  .billboard { display:grid; grid-template-columns:1fr 300px; gap:20px; border-radius:16px; align-items:center; box-shadow:var(--shadow-card); }
+  .billboard h2 { font-size:20px; font-weight:600; letter-spacing:-0.01em; }
+  .billboard p { margin-top:8px; font-size:14px; color:var(--slate); max-width:46ch; }
+  .billboard .cta { margin-top:16px; display:flex; gap:10px; }
+  .billboard .art { height:150px; border-radius:12px; background:
+      radial-gradient(120% 120% at 80% 20%, #eaf3ea 0%, #f0f1ec 50%, #e8e9e3 100%);
+      display:grid; place-items:center; border:1px solid var(--border); }
+
+  .btn { display:inline-flex; align-items:center; gap:7px; border-radius:8px; padding:8px 16px; font-size:14px; font-weight:500; cursor:pointer; border:1px solid transparent; transition:background .15s, color .15s, border-color .15s; }
+  .btn-primary { background:var(--primary); color:#fff; }
+  .btn-primary:hover { background:var(--primary-hover); }
+  .btn-secondary { background:var(--surface); color:var(--fg); border-color:var(--border); }
+  .btn-secondary:hover { background:var(--sunken); }
+  .btn-ghost { color:var(--muted); padding:7px; }
+  .btn-ghost:hover { background:var(--sunken); color:var(--fg); }
+  .btn-full { width:100%; justify-content:center; }
+  .btn-sm { padding:6px 12px; font-size:13px; }
+  .link { font-size:13px; font-weight:500; color:var(--primary); cursor:pointer; }
+  .link:hover { color:var(--primary-hover); }
+
+  .feat { display:inline-flex; align-items:center; gap:6px; border-radius:999px; background:var(--primary-surface); color:var(--primary); font-size:12px; font-weight:500; padding:5px 10px; }
+  .pills { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+
+  .sec-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .sec-head h3 { font-size:14px; font-weight:600; }
+  .sec-actions { display:flex; gap:8px; }
+
+  .empty { display:flex; flex-direction:column; align-items:center; gap:16px; border-radius:12px; border:1px solid var(--border); background:var(--surface); padding:56px 20px; }
+  .empty .iso { color:#cfd1c8; }
+  .empty .t { font-size:14px; color:var(--muted); }
+
+  .rail .h { display:flex; align-items:center; justify-content:space-between; }
+  .rail .h .t { font-size:14px; font-weight:600; }
+  .meter { margin-top:14px; height:6px; border-radius:999px; background:var(--sunken); overflow:hidden; }
+  .meter > i { display:block; height:100%; border-radius:999px; background:var(--primary); }
+  .meter-row { margin-top:10px; display:flex; align-items:center; justify-content:space-between; font-size:12px; color:var(--slate); }
+  .meter-row b { color:var(--fg); }
+
+  .chg { padding:14px 0; border-top:1px solid var(--border); }
+  .chg:first-of-type { border-top:0; padding-top:6px; }
+  .chg .tag { display:inline-block; border-radius:999px; background:var(--primary-surface); color:var(--primary); font-size:11px; font-weight:500; padding:2px 8px; }
+  .chg .ti { margin-top:8px; font-size:14px; font-weight:500; }
+  .chg .de { margin-top:4px; font-size:12px; line-height:1.5; color:var(--slate); }
+  .chg .dt { margin-top:8px; font-size:12px; color:var(--subtle); }
+
+  .banner { display:grid; grid-template-columns:1fr 280px; gap:20px; align-items:center; border-radius:12px; border:1px solid var(--border); background:var(--surface); padding:24px; }
+  .banner h3 { font-size:17px; font-weight:600; }
+  .banner p { margin-top:6px; font-size:13px; color:var(--slate); }
+  .banner .preview { height:96px; border-radius:10px; background:var(--sunken); border:1px solid var(--border); display:flex; flex-direction:column; justify-content:center; gap:8px; padding:14px; opacity:.7; }
+  .dots { display:flex; gap:5px; }
+  .dots i { width:7px; height:7px; border-radius:50%; background:var(--border-strong); }
+  .dots i.on { background:var(--primary); }
+  .dots i.warn { background:var(--warning); }
+
+  .chartcard .h { display:flex; align-items:center; justify-content:space-between; }
+  .chartcard .v { margin-top:6px; font-size:24px; font-weight:600; }
+  .chartcard .d { margin-top:2px; font-size:12px; color:var(--slate); }
+  .chartcard .wrap { margin-top:12px; height:120px; }
+  .delta { color:var(--primary); font-weight:500; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="ws">
+      <span class="mark">MW</span>
+      <span class="name">My Workspace</span>
+      <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></svg>
+    </div>
+
+    <nav>
+      <div>
+        <p class="grp-label">Dashboard</p>
+        <a class="navitem active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="lbl">Home</span></a>
+      </div>
+
+      <div>
+        <p class="grp-label">All Tests</p>
+        <a class="navitem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><span class="lbl">Overview</span></a>
+        <a class="navitem sub"><span class="lbl">MCP Tests</span></a>
+        <a class="navitem sub"><span class="lbl">Web Tests</span></a>
+      </div>
+
+      <div>
+        <p class="grp-label">Testing</p>
+        <a class="navitem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v6l-4 9a2 2 0 0 0 2 3h8a2 2 0 0 0 2-3l-4-9V3"/></svg><span class="lbl">Create Tests</span><span class="pill-new">New</span></a>
+        <a class="navitem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="lbl">Test Lists</span></a>
+        <a class="navitem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg><span class="lbl">Monitoring</span></a>
+        <a class="navitem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="lbl">Documentation</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--subtle)" stroke-width="2"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+      </div>
+
+      <div>
+        <p class="grp-label">Settings</p>
+        <a class="navitem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg><span class="lbl">Profile</span></a>
+        <a class="navitem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span class="lbl">Plan &amp; Billing</span></a>
+        <a class="navitem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-1-2.6c3-.3 6-1.5 6-6.5a5 5 0 0 0-1.4-3.5 4.6 4.6 0 0 0-.1-3.5s-1.1-.3-3.5 1.3a12 12 0 0 0-6 0C6.6 1.7 5.5 2 5.5 2a4.6 4.6 0 0 0-.1 3.5A5 5 0 0 0 4 9c0 5 3 6.2 6 6.5a3.4 3.4 0 0 0-1 2.6V22"/></svg><span class="lbl">GitHub App</span></a>
+        <a class="navitem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></svg><span class="lbl">API Keys</span></a>
+      </div>
+    </nav>
+
+    <div class="trial">
+      <p class="h"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="m12 3 1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg> 1 Month Free Trial</p>
+      <p class="s">Unlock all features free for 1 month.</p>
+      <button class="btn btn-primary btn-full btn-sm trial-btn" style="margin-top:12px;">Try for Free</button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <header class="topbar">Home</header>
+    <div class="content">
+      <div class="layout">
+
+        <!-- STREAM -->
+        <div class="stream">
+
+          <!-- billboard -->
+          <section class="card billboard" style="padding:24px;">
+            <div>
+              <h2>Get Started with TestSpirite</h2>
+              <p>10x your AI-native dev speed with our autonomous AI testing agent handling verification end to end.</p>
+              <div class="cta">
+                <button class="btn btn-primary">Create Tests</button>
+                <button class="btn btn-secondary">View Docs</button>
+              </div>
+            </div>
+            <div class="art">
+              <svg width="80" height="80" viewBox="0 0 64 64" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linejoin="round">
+                <path d="M32 6 56 20v24L32 58 8 44V20z"/>
+                <path d="M32 6v52M8 20l24 14 24-14M20 13v24M44 13v24"/>
+              </svg>
+            </div>
+          </section>
+
+          <!-- recent created tests -->
+          <section>
+            <div class="sec-head">
+              <h3>Recent Created Tests</h3>
+              <div class="sec-actions">
+                <button class="btn btn-secondary btn-sm">Last 7 Days ▾</button>
+                <button class="btn btn-secondary btn-ghost"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+              </div>
+            </div>
+            <div class="empty">
+              <svg class="iso" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+                <path d="M20 14 32 8l12 6-12 6z"/>
+                <path d="M20 26l12-6 12 6-12 6z"/>
+                <path d="M20 38l12-6 12 6-12 6z"/>
+                <path d="M20 14v24l12 6 12-6V14"/>
+              </svg>
+              <p class="t">No tests</p>
+              <button class="btn btn-secondary btn-sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Create Tests</button>
+            </div>
+          </section>
+
+          <!-- my test lists -->
+          <section>
+            <div class="sec-head"><h3>My Test Lists</h3></div>
+            <div class="empty">
+              <svg class="iso" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+                <path d="M12 20 32 10l20 10-20 10z"/>
+                <path d="M12 32 32 22l20 10-20 10z"/>
+                <path d="M12 44 32 34l20 10-20 10z"/>
+              </svg>
+              <p class="t">No test lists</p>
+              <button class="btn btn-secondary btn-sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Create Test Lists</button>
+            </div>
+          </section>
+
+          <!-- automated monitoring banner -->
+          <section class="banner">
+            <div>
+              <h3>Stay Ahead with Automated Monitoring</h3>
+              <p>Get real-time visibility into your product's health.</p>
+              <button class="btn btn-primary" style="margin-top:16px;">Upgrade Now</button>
+            </div>
+            <div class="preview">
+              <div class="dots"><i class="on"></i><i class="on"></i><i class="warn"></i><i class="on"></i><i></i></div>
+              <div class="dots"><i class="on"></i><i class="warn"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>
+              <div class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i class="on"></i></div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- RAIL -->
+        <aside class="rail">
+
+          <!-- free trial promo -->
+          <div class="card" style="border-color:var(--primary-border); background:var(--primary-surface);">
+            <p style="display:flex; align-items:center; gap:6px; font-size:14px; font-weight:600;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="m12 3 1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg>
+              1 Month Free Trial
+            </p>
+            <p style="margin-top:4px; font-size:12px; color:var(--slate);">Unlock all features free for 1 month.</p>
+            <div class="pills">
+              <span class="feat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> More Credits</span>
+              <span class="feat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Better Models</span>
+              <span class="feat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Monitoring</span>
+              <span class="feat"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Better Coverage</span>
+            </div>
+            <button class="btn btn-primary btn-full" style="margin-top:14px;">Try For Free</button>
+          </div>
+
+          <!-- my plan / credits -->
+          <div class="card">
+            <div class="h"><span class="t">My Plan</span><span class="link">Manage Plan</span></div>
+            <div class="meter"><i style="width:30%"></i></div>
+            <div class="meter-row"><span>Free</span><span class="num"><b>150</b> Credits Remaining</span></div>
+          </div>
+
+          <!-- monitoring mini chart -->
+          <div class="card chartcard">
+            <div class="h"><span class="t" style="font-size:14px; font-weight:600;">Test Runs</span><span style="font-size:12px; color:var(--muted);">Last 7 Days</span></div>
+            <p class="v num">1,284</p>
+            <p class="d"><span class="delta">+12.5%</span> vs previous week</p>
+            <div class="wrap"><canvas id="runs"></canvas></div>
+          </div>
+
+          <!-- recent updates / changelog -->
+          <div class="card">
+            <div class="h" style="margin-bottom:8px;"><span class="t">Recent Updates</span><span class="link">View Changelog ↗</span></div>
+            <div class="chg">
+              <span class="tag">New Feature</span>
+              <p class="ti">Backend Testing</p>
+              <p class="de">Auto-chained integration flows, a visual data flow of every API call, and post-run auto-cleanup.</p>
+              <p class="dt num">Apr 24, 2026</p>
+            </div>
+            <div class="chg">
+              <span class="tag">New Feature</span>
+              <p class="ti">Frontend Testing Agent</p>
+              <p class="de">Autonomous site exploration, replayable agent actions, and a visual test-steps view with screenshots.</p>
+              <p class="dt num">Apr 24, 2026</p>
+            </div>
+            <div class="chg">
+              <span class="tag">New Feature</span>
+              <p class="ti">GitHub Integration</p>
+              <p class="de">Connect your repositories to streamline your testing workflow.</p>
+              <p class="dt num">Feb 17, 2026</p>
+            </div>
+          </div>
+
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const PRIMARY="#3d7c4e", S3="#a9cdb1", GRID="#e8e9e3";
+  Chart.defaults.font.family = "Inter, system-ui, sans-serif";
+  Chart.defaults.color = "#8a8d84";
+  const ctx = document.getElementById('runs');
+  if (ctx) new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets: [{
+        data: [142, 168, 131, 204, 188, 96, 155],
+        backgroundColor: [S3, S3, S3, PRIMARY, S3, S3, S3],
+        borderRadius: 6, borderSkipped: false, maxBarThickness: 22,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor:"#fff", borderColor:"#e8e9e3", borderWidth:1, titleColor:"#1a1c19", bodyColor:"#494c46", cornerRadius:8, padding:10, displayColors:false }
+      },
+      scales: {
+        x: { grid: { display:false }, border:{ display:false }, ticks:{ font:{ size:11 } } },
+        y: { grid: { color:GRID }, border:{ display:false }, ticks:{ display:false }, beginAtZero:true }
+      }
+    }
+  });
+</script>
+</body>
+</html>

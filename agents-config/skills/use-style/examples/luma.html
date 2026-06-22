@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Events · Luma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#0a0a0b; --surface:#161618; --raised:#202024; --high:#2a2a2e;
+    --fg:#f7f7f8; --body:#c6c6cb; --muted:#8c8c93; --subtle:#5e5e65;
+    --border:rgba(255,255,255,0.08); --border-soft:rgba(255,255,255,0.05);
+    --white:#fff; --white-fg:#0a0a0a;
+    --blue:#2f6bff; --gold:#f5b13d; --pos:#3ecf8e;
+    --sans:'Inter', -apple-system, system-ui, sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { -webkit-text-size-adjust:100%; }
+  body {
+    font-family:var(--sans); color:var(--fg); line-height:1.5; -webkit-font-smoothing:antialiased;
+    min-height:100vh; padding-bottom:80px;
+    background:
+      radial-gradient(90% 32% at 50% 0%, rgba(40,82,96,.55) 0%, rgba(22,44,54,.18) 45%, transparent 72%),
+      var(--bg);
+    background-attachment:fixed;
+  }
+  .num { font-variant-numeric:tabular-nums; }
+  .wrap { max-width:860px; margin:0 auto; padding:0 20px; }
+
+  /* nav */
+  nav.top { display:flex; align-items:center; gap:26px; padding:18px 0; font-size:14px; }
+  nav.top a { display:flex; align-items:center; gap:7px; color:var(--muted); text-decoration:none; transition:color .15s; }
+  nav.top a:hover { color:var(--fg); }
+  nav.top a.active { color:var(--fg); font-weight:500; }
+  nav.top svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.8; }
+  nav.top .spacer { flex:1; }
+  .pill-btn { border-radius:999px; padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer; border:none; }
+  .pill-btn.white { background:var(--white); color:var(--white-fg); }
+  .pill-btn.white:hover { opacity:.9; }
+
+  /* header */
+  .head { display:flex; align-items:center; justify-content:space-between; margin:24px 0 36px; }
+  h1 { font-size:clamp(30px,5vw,40px); font-weight:700; letter-spacing:-0.025em; }
+  .toggle { display:inline-flex; border-radius:999px; background:var(--raised); padding:3px; font-size:14px; }
+  .toggle button { border:none; cursor:pointer; border-radius:999px; padding:7px 18px; color:var(--muted); background:transparent; font-family:inherit; font-size:14px; transition:color .15s; }
+  .toggle button.on { background:var(--high); color:var(--fg); font-weight:500; }
+
+  /* timeline */
+  .day { display:grid; grid-template-columns:104px 1fr; gap:18px; }
+  .day + .day { margin-top:36px; }
+  .rail { position:relative; padding-top:4px; }
+  .rail .date { font-size:17px; font-weight:600; letter-spacing:-0.01em; }
+  .rail .wd { font-size:14px; color:var(--muted); margin-top:1px; }
+  .rail .dot { position:absolute; right:-9px; top:8px; width:9px; height:9px; border-radius:999px; background:var(--blue); box-shadow:0 0 0 4px var(--bg); }
+  .rail .line { position:absolute; right:-5px; top:22px; bottom:-44px; border-left:1.5px dashed rgba(255,255,255,.14); }
+  .day:last-child .rail .line { display:none; }
+  .stack { display:flex; flex-direction:column; gap:12px; }
+
+  /* card */
+  .card { border:1px solid var(--border); background:var(--surface); border-radius:18px; padding:18px; transition:background .15s; }
+  .card:hover { background:#19191c; }
+  .card .row { display:flex; gap:16px; }
+  .card .info { min-width:0; flex:1; }
+  .time { font-size:14px; color:var(--muted); }
+  .time .g { color:var(--gold); font-weight:500; margin-left:4px; }
+  .card h3 { font-size:19px; font-weight:600; letter-spacing:-0.015em; margin-top:6px; line-height:1.25; }
+  .by { display:flex; align-items:center; gap:8px; font-size:14px; color:var(--body); margin-top:10px; }
+  .loc { display:flex; align-items:center; gap:6px; font-size:14px; color:var(--muted); margin-top:5px; }
+  .loc svg, .by svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.8; }
+  .foot { display:flex; align-items:center; gap:10px; margin-top:14px; }
+
+  /* pills + avatars */
+  .pill { border-radius:999px; padding:4px 11px; font-size:12px; font-weight:500; }
+  .pill.invited { background:var(--blue); color:#fff; }
+  .pill.going { background:rgba(62,207,142,.15); color:var(--pos); }
+  .pill.pending { background:var(--raised); color:var(--muted); }
+  .avs { display:flex; align-items:center; }
+  .avs .a { width:24px; height:24px; border-radius:999px; box-shadow:0 0 0 2px var(--bg); margin-left:-7px; }
+  .avs .a:first-child { margin-left:0; }
+  .avs .more { margin-left:9px; border-radius:999px; background:var(--raised); color:var(--muted); font-size:12px; padding:2px 9px; }
+
+  /* cover thumb */
+  .cover { width:104px; height:104px; border-radius:14px; flex-shrink:0; position:relative; overflow:hidden; display:grid; place-items:center; }
+  .cover span { font-size:13px; font-weight:700; color:#fff; text-align:center; padding:8px; line-height:1.15; letter-spacing:-0.01em; text-shadow:0 1px 6px rgba(0,0,0,.35); }
+  @media (max-width:560px){ .cover{ width:84px; height:84px; } .day{ grid-template-columns:80px 1fr; } }
+
+  /* avatar gradients */
+  .g1{background:linear-gradient(135deg,#f0883e,#d65a5a);} .g2{background:linear-gradient(135deg,#3ecf8e,#2f9e6b);}
+  .g3{background:linear-gradient(135deg,#6b8cff,#2f6bff);} .g4{background:linear-gradient(135deg,#b07cf0,#7c4fd6);}
+  .g5{background:linear-gradient(135deg,#f5b13d,#e08a1e);} .g6{background:linear-gradient(135deg,#2dd4bf,#0d9488);}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- nav -->
+    <nav class="top">
+      <a class="active" href="#"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 11h18"/></svg> Events</a>
+      <a href="#"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 9h16M8 3v4M16 3v4"/></svg> Calendars</a>
+      <a href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 5-4 1 2-5z"/></svg> Discover</a>
+      <span class="spacer"></span>
+      <button class="pill-btn white">Create Event</button>
+    </nav>
+
+    <!-- header -->
+    <div class="head">
+      <h1>Events</h1>
+      <div class="toggle">
+        <button class="on">Upcoming</button>
+        <button>Past</button>
+      </div>
+    </div>
+
+    <!-- timeline -->
+    <!-- day -->
+    <div class="day">
+      <div class="rail">
+        <div class="date">Jun 22</div><div class="wd">Monday</div>
+        <span class="dot"></span><span class="line"></span>
+      </div>
+      <div class="stack">
+        <div class="card"><div class="row">
+          <div class="info">
+            <div class="time">3:30 AM<span class="g">· Jun 21, 6:30 PM PDT</span></div>
+            <h3>Founder DJ Party</h3>
+            <div class="by"><span class="a g1" style="width:20px;height:20px;border-radius:999px;display:inline-block"></span> By Founders on Tap &amp; Lyvia Chapman</div>
+            <div class="loc"><svg viewBox="0 0 24 24"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> San Francisco, United States</div>
+            <div class="foot">
+              <span class="pill invited">Invited</span>
+              <div class="avs"><span class="a g2"></span><span class="a g3"></span><span class="a g4"></span><span class="more num">+132</span></div>
+            </div>
+          </div>
+          <div class="cover g1"><span>Founder<br>DJ Party</span></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- day -->
+    <div class="day">
+      <div class="rail">
+        <div class="date">Jun 24</div><div class="wd">Wednesday</div>
+        <span class="dot"></span><span class="line"></span>
+      </div>
+      <div class="stack">
+        <div class="card"><div class="row">
+          <div class="info">
+            <div class="time">3:00 AM<span class="g">· Jun 23, 6:00 PM PDT</span></div>
+            <h3>Agents After Hours ft. Harvey, Reducto, and Browserbase</h3>
+            <div class="by"><span class="a g3" style="width:20px;height:20px;border-radius:999px;display:inline-block"></span> By Shrey Pandya, Browserbase, Yash Gupta &amp; Palak A…</div>
+            <div class="loc"><svg viewBox="0 0 24 24"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> 1 Post St</div>
+            <div class="foot"><span class="pill invited">Invited</span></div>
+          </div>
+          <div class="cover g2"><span>Agents<br>After Hours</span></div>
+        </div></div>
+
+        <div class="card"><div class="row">
+          <div class="info">
+            <div class="time">9:00 PM<span class="g">· 12:00 PM PDT</span></div>
+            <h3>STAK Ventures: Speaker Series - VIP Lunch &amp; Learn</h3>
+            <div class="by"><span class="a g5" style="width:20px;height:20px;border-radius:999px;display:inline-block"></span> By Brian Sparkes</div>
+            <div class="loc"><svg viewBox="0 0 24 24"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> STAK Space - 1920 Broadway</div>
+            <div class="foot">
+              <span class="pill going">Going</span>
+              <div class="avs"><span class="a g6"></span><span class="a g1"></span><span class="a g4"></span><span class="more num">+379</span></div>
+            </div>
+          </div>
+          <div class="cover g5"><span>STAK<br>Ventures</span></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- day -->
+    <div class="day">
+      <div class="rail">
+        <div class="date">Jun 27</div><div class="wd">Saturday</div>
+        <span class="dot"></span><span class="line"></span>
+      </div>
+      <div class="stack">
+        <div class="card"><div class="row">
+          <div class="info">
+            <div class="time">5:30 PM<span class="g">· 8:30 AM PDT</span></div>
+            <h3>ExecuTorch with Meta &amp; Qualcomm @ The Web Data Loft</h3>
+            <div class="by"><span class="a g4" style="width:20px;height:20px;border-radius:999px;display:inline-block"></span> By Bright Data, lablab, Lauren Lunde &amp; Aaishika</div>
+            <div class="loc"><svg viewBox="0 0 24 24"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> 625 2nd St</div>
+            <div class="foot">
+              <span class="pill invited">Invited</span>
+              <div class="avs"><span class="a g3"></span><span class="a g2"></span><span class="more num">+181</span></div>
+            </div>
+          </div>
+          <div class="cover g3"><span>ExecuTorch</span></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- day -->
+    <div class="day">
+      <div class="rail">
+        <div class="date">Jun 30</div><div class="wd">Tuesday</div>
+        <span class="dot"></span><span class="line"></span>
+      </div>
+      <div class="stack">
+        <div class="card"><div class="row">
+          <div class="info">
+            <div class="time">3:00 AM<span class="g">· Jun 29, 6:00 PM PDT</span></div>
+            <h3>Model Independence Day</h3>
+            <div class="by"><span class="a g6" style="width:20px;height:20px;border-radius:999px;display:inline-block"></span> By Tereza Tížková</div>
+            <div class="loc"><svg viewBox="0 0 24 24"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> San Francisco, United States</div>
+            <div class="foot">
+              <span class="pill pending">Going · Maybe</span>
+              <div class="avs"><span class="a g4"></span><span class="a g5"></span><span class="a g2"></span><span class="more num">+108</span></div>
+            </div>
+          </div>
+          <div class="cover g4"><span>Model<br>Independence</span></div>
+        </div></div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

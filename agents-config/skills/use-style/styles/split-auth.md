@@ -21,10 +21,10 @@ Two-column authentication style for sign-in, signup, OAuth, magic-code, password
 
 Use this style when the user says:
 
-- `/usestyle split-auth`
+- `/useskill split-auth`
 - `$use-style split-auth`
 - `use split-auth`
-- `/usestyle signin 2pages`
+- `/useskill signin 2pages`
 - `two-column auth`
 - `auth split`
 - `make the sign in page like the example`
