@@ -34,7 +34,7 @@ The key insight: interactive `eas build` credential setup requires Apple ID 2FA 
 The user must have (ask once, as a group — these cannot be created by the agent):
 
 1. **Apple Developer Program membership** (paid, enrolled).
-2. **App Store Connect API key**: the `AuthKey_<KEY_ID>.p8` file, its key ID, and the team issuer ID. If unknown, run the `appstore-connect-setup` skill, or point the user to App Store Connect > Users and Access > Integrations > App Store Connect API (key must have Admin or App Manager role).
+2. **App Store Connect API key**: the `AuthKey_<KEY_ID>.p8` file, its key ID, and the team issuer ID. If unknown, follow the `appstore-connect` skill's setup workflow (`references/setup.md`), or point the user to App Store Connect > Users and Access > Integrations > App Store Connect API (key must have Admin or App Manager role).
 3. **Expo account** logged in: `npx eas-cli@latest whoami` (else `npx eas-cli@latest login`).
 4. **App record in App Store Connect** for the bundle ID. The public API cannot create app records — if missing, the user creates it once at appstoreconnect.apple.com (My Apps > + > New App, selecting the bundle ID). Verify with Phase D step 1 and stop with clear instructions if absent.
 5. `asc` CLI installed (`brew install asc`) — used only for the final upload; everything else goes through `scripts/asc-api.mjs`.
@@ -47,7 +47,7 @@ The user must have (ask once, as a group — these cannot be created by the agen
 | `{bundle_id}` | `SiteConfig.bundleId` |
 | `{apple_team_id}` | `SiteConfig.appleTeamId` |
 | `{eas_project_id}` | output of `eas project:init`, then written to `site-config.ts` |
-| `{asc_key_id}` / `{asc_issuer_id}` / `{asc_p8_path}` | from the user / `appstore-connect-setup`. Never commit, never print. |
+| `{asc_key_id}` / `{asc_issuer_id}` / `{asc_p8_path}` | from the user / the `appstore-connect` skill's `references/setup.md`. Never commit, never print. |
 | `{convex_prod_url}` / `{convex_prod_site_url}` | from `npx convex deploy` output / Convex dashboard |
 | `{asc_app_id}` | numeric app ID resolved from the bundle ID (Phase D) |
 | `{build_mode}` | default `local`; `expo` only when the user passes `--expo` |

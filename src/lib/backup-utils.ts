@@ -80,7 +80,7 @@ async function copyForBackup(
 ): Promise<void> {
   await fs.copy(sourcePath, destPath, {
     overwrite: true,
-    dereference: false,
+    dereference: os.platform() === "win32",
   });
 }
 

@@ -136,9 +136,12 @@ npx aiblueprint-cli@latest agents config unify sessions
 
 ### Skills
 
-Install individual skills directly into `~/.claude/skills/`:
+Install skills directly into `~/.claude/skills/`:
 
 ```bash
+# Install all skills
+npx skills@latest add melvynx/aiblueprint
+
 # Install a single skill
 npx skills add Melvynx/aiblueprint --skill ultrathink
 

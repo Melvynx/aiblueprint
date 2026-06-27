@@ -1,12 +1,9 @@
----
-name: appstore-connect-setup
-description: Find and configure App Store Connect API credentials for asc auth. Use when asc auth is missing, credentials are unknown, the user says login to App Store Connect, or before TestFlight/App Store release work.
----
+# App Store Connect Setup (asc auth)
 
-# App Store Connect Setup
+Read this when `asc` is **not yet authenticated** — `asc auth status --validate` reports no working credential, the user asks to "log in to App Store Connect", or credentials are unknown before TestFlight/App Store release work.
 
 <objective>
-`asc auth login` needs three things: a **key ID**, an **issuer ID**, and a **.p8 private key file**. Users rarely remember where these are. This skill is a battle-tested workflow for finding all three without asking the user to dig through App Store Connect manually.
+`asc auth login` needs three things: a **key ID**, an **issuer ID**, and a **.p8 private key file**. Users rarely remember where these are. This is a battle-tested workflow for finding all three without asking the user to dig through App Store Connect manually.
 
 Key insight from a real session: the `.p8` files and key IDs live on disk, but the **issuer ID is almost never stored locally** — it only exists in the App Store Connect web UI. The trick is to read it from the user's already-signed-in browser session via CDP, since Apple login requires 2FA and cannot be automated.
 </objective>

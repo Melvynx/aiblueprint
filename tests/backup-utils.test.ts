@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import os from "os";
 import path from "path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createBackup, createTimestampedBackupName, listBackups, loadBackup } from "../src/lib/backup-utils";
 
 describe("backup utils", () => {
@@ -15,6 +15,7 @@ describe("backup utils", () => {
   });
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     delete process.env.AIBLUEPRINT_BACKUP_DIR;
     await fs.remove(rootDir);
     await fs.remove(restoreDir);
@@ -48,6 +49,24 @@ describe("backup utils", () => {
     expect(await fs.readFile(path.join(restoreDir, ".claude", "projects", "project.jsonl"), "utf-8")).toBe("claude session");
     expect(await fs.readFile(path.join(restoreDir, ".codex", "sessions", "session.jsonl"), "utf-8")).toBe("codex session");
     expect(await fs.readFile(path.join(restoreDir, ".agents", "sessions", "agent-session.jsonl"), "utf-8")).toBe("agent session");
+  });
+
+  it("dereferences symlinks in legacy backups on Windows", async () => {
+    vi.spyOn(os, "platform").mockReturnValue("win32");
+    const claudeDir = path.join(rootDir, ".claude");
+    const agentsDir = path.join(rootDir, ".agents");
+    const skillSource = path.join(agentsDir, "skills", "demo");
+    const skillLink = path.join(claudeDir, "skills", "demo");
+
+    await fs.outputFile(path.join(skillSource, "SKILL.md"), "linked skill");
+    await fs.ensureDir(path.dirname(skillLink));
+    await fs.symlink(skillSource, skillLink, "dir");
+
+    const backupPath = await createBackup(claudeDir, undefined, agentsDir);
+    const backedUpSkill = path.join(backupPath!, ".claude", "skills", "demo");
+
+    expect((await fs.lstat(backedUpSkill)).isSymbolicLink()).toBe(false);
+    expect(await fs.readFile(path.join(backedUpSkill, "SKILL.md"), "utf-8")).toBe("linked skill");
   });
 
   it("lists project-suffixed backup folders by their timestamp prefix", async () => {

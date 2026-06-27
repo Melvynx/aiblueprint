@@ -8,7 +8,7 @@ description: Interact with App Store Connect via the asc CLI - apps, builds, Tes
 Read, manage, and ship any of the user's App Store apps through the **`asc`** CLI (App Store Connect CLI by Rork). `asc` covers nearly the entire ASC surface; reach for the raw API only for the rare gap.
 
 <auth>
-`asc` is already authenticated on this machine (a default keychain profile). Verify before doing real work:
+`asc` is usually already authenticated on this machine (a default keychain profile). Verify before doing real work:
 
 ```bash
 asc auth status            # shows stored credential profiles + which is default
@@ -17,7 +17,7 @@ asc doctor                 # diagnose auth/config issues
 ```
 
 - Multiple accounts/teams: `asc --profile <name> <command>` selects a profile.
-- A NEW account with no stored key: run the `appstore-connect-setup` skill (locates the `.p8`, key id, and issuer id, then `asc auth login`). Never print or commit `.p8` keys, key ids, or issuer ids.
+- **Not authenticated / no working credential / a NEW account with no stored key:** read [references/setup.md](references/setup.md) and follow it — a battle-tested workflow to locate the `.p8`, key id, and issuer id, then `asc auth login`. Never print or commit `.p8` keys, key ids, or issuer ids.
 </auth>
 
 <how_to_drive>

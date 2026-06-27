@@ -1,4 +1,5 @@
 import fs from "fs-extra";
+import os from "os";
 import path from "path";
 import { resolveFolders, type FolderOptions, type ResolvedFolders } from "./folder-paths.js";
 
@@ -120,7 +121,7 @@ async function hasContent(folderPath: string): Promise<boolean> {
 async function copyManagedFolder(source: string, destination: string): Promise<void> {
   await fs.copy(source, destination, {
     overwrite: true,
-    dereference: false,
+    dereference: os.platform() === "win32",
   });
 }
 

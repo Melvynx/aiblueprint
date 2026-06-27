@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import os from "os";
 import path from "path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   cleanConfigBackups,
   createConfigBackup,
@@ -22,6 +22,7 @@ describe("configs store", () => {
   });
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     await fs.remove(rootDir);
   });
 
@@ -109,6 +110,51 @@ describe("configs store", () => {
     expect(backups[0].metadata.reason).toBe("Before test replacement");
     expect(backups[0].metadata.trigger).toBe("test");
     expect(backups[0].metadata.folders).toEqual([".claude", ".codex", ".agents"]);
+  });
+
+  it("dereferences symlinks in config backups on Windows", async () => {
+    vi.spyOn(os, "platform").mockReturnValue("win32");
+
+    const pluginSource = path.join(
+      rootDir,
+      ".codex",
+      ".tmp",
+      "bundled-marketplaces",
+      "openai-bundled",
+      "plugins",
+      "chrome",
+    );
+    const pluginLink = path.join(
+      rootDir,
+      ".codex",
+      "plugins",
+      "cache",
+      "openai-bundled",
+      "chrome",
+      "latest",
+    );
+    await fs.outputFile(path.join(pluginSource, "manifest.json"), '{"name":"chrome"}');
+    await fs.ensureDir(path.dirname(pluginLink));
+    await fs.symlink(pluginSource, pluginLink, "dir");
+
+    const backupPath = await createConfigBackup(
+      { folder: rootDir },
+      "Before Windows setup",
+      "setup",
+      "windows-fixture",
+    );
+
+    const backedUpPlugin = path.join(
+      backupPath!,
+      ".codex",
+      "plugins",
+      "cache",
+      "openai-bundled",
+      "chrome",
+      "latest",
+    );
+    expect((await fs.lstat(backedUpPlugin)).isSymbolicLink()).toBe(false);
+    expect(await fs.readFile(path.join(backedUpPlugin, "manifest.json"), "utf-8")).toBe('{"name":"chrome"}');
   });
 
   it("deletes backups older than the retention window", async () => {
