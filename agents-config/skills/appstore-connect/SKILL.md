@@ -1,11 +1,16 @@
 ---
 name: appstore-connect
-description: Interact with App Store Connect via the asc CLI - apps, builds, TestFlight, beta testers, reviews, sales/analytics, metadata, IAP, signing, submissions. Use for "check my app", "App Store Connect", "TestFlight status", "app review", "my app sales", or "asc".
+description: Interact with App Store Connect via the asc CLI - apps, builds, TestFlight, beta testers, reviews, sales/analytics, metadata, IAP, signing, submissions. Also builds an Expo/React Native iOS app and ships it to TestFlight via "appstore-connect testflight". Use for "check my app", "App Store Connect", "TestFlight status", "ship to TestFlight", "app review", "my app sales", or "asc".
+argument-hint: "[testflight [--expo] [setup]] | <natural-language ASC request>"
 ---
 
 # App Store Connect (asc)
 
 Read, manage, and ship any of the user's App Store apps through the **`asc`** CLI (App Store Connect CLI by Rork). `asc` covers nearly the entire ASC surface; reach for the raw API only for the rare gap.
+
+<testflight_mode>
+**If invoked as `appstore-connect testflight` (or "build and ship to TestFlight"):** this is a full build-and-upload workflow, not a single `asc` call. Read [references/testflight.md](references/testflight.md) and follow it end to end — it takes an Expo / React Native iOS app from local dev to an installable TestFlight build (ASC API-key signing to avoid Apple ID 2FA, `eas build --local` by default, `--expo` for a cloud build, then `asc publish testflight`). Pass `--expo` for a cloud build, or `testflight setup` to stop after credentials are ready. Everything below is the general `asc` surface for everyday read/manage tasks.
+</testflight_mode>
 
 <auth>
 `asc` is usually already authenticated on this machine (a default keychain profile). Verify before doing real work:
@@ -40,6 +45,7 @@ asc docs list              # embedded guides; `asc docs <topic>` to read one
 | List/inspect apps, app id | `asc apps`, `asc status --app <id>` |
 | Builds (processing, ids) | `asc builds` |
 | TestFlight: beta groups, testers, distribute a build | `asc testflight` |
+| **Build an iOS app + ship to TestFlight (end to end)** | `appstore-connect testflight` → [references/testflight.md](references/testflight.md) |
 | Versions / release state | `asc versions`, `asc release`, `asc status` |
 | Metadata, localizations, keywords | `asc metadata`, `asc localizations` |
 | Screenshots / previews | `asc screenshots`, `asc video-previews` |

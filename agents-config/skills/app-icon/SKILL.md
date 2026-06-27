@@ -1,6 +1,6 @@
 ---
 name: app-icon
-description: Generate a polished iOS + Android app icon for an Expo / React Native app with AI image generation, then post-process it to App Store / Play specs. Use for "create my app icon", "generate the iOS icon", "redo the app logo", "make the launcher icon". Requires an image-generation tool (Codex imagegen / gpt-image); without one it builds the prompt for you to run, then resumes at post-processing.
+description: Generate a premium, vibrant, dimensional iOS + Android app icon for an Expo / React Native app with AI image generation, then post-process it to App Store / Play specs. Use for "create my app icon", "generate the iOS icon", "redo the app logo", "make the launcher icon". Works with ANY image-generation tool (Codex `image_gen`, `gemini-cli` Nano Banana, gpt-image, …).
 argument-hint: "[app concept or brand]"
 ---
 
@@ -8,11 +8,25 @@ argument-hint: "[app concept or brand]"
 
 Generate a store-quality launcher icon (iOS App Store icon + Android adaptive icon + web favicon) for an Expo / React Native app, then post-process it to meet store requirements.
 
-<capability_gate>
-**This workflow requires an image-generation tool** (Codex's `imagegen` skill backed by gpt-image, or any model/agent that can generate raster images).
+<aesthetic_target>
+The target is a **premium, vibrant, dimensional** icon like top App Store featured apps — NOT a flat pictogram. See `references/` for the north star:
 
-- **Codex**: invoke the `imagegen` skill with the prompt below. Generated files land in `~/.codex/generated_images/<session-id>/ig_*.png` — copy them into the repo.
-- **Agent WITHOUT image generation (e.g. Claude Code without an image tool)**: do NOT fake it (no SVG-to-PNG pipelines — that produces flat, amateur results). Instead: build the final prompt from the recipe below, give it to the user to run in their image tool of choice, then resume at the Post-Processing phase with the file they provide.
+- `references/example-character-mascot.webp` — what this recipe produces for a character app (glossy 3D mascot + heart, full-bleed warm gradient).
+- `references/example-symbol-object.webp` — what it produces for a symbol / monochrome brand (glossy 3D spark on a deep ink background — proof a one-color brand still gets a dimensional icon, not a flat glyph).
+- `references/inspiration-premium-icons.webp` — external inspiration (soft glossy blob mascot on a vivid gradient tile).
+
+The look every time: **one dimensional hero** (a soft glossy 3D character/mascot, or a bold symbolic object/abstract form) with smooth gradients, soft studio lighting, gentle rim light and a subtle glow, **centered on a full-bleed vivid branded background** that reaches all four edges. Saturated, high-contrast, polished, delightful.
+
+**The #1 failure to avoid:** a flat monochrome pictogram / black-on-white glyph / line icon on a plain white background. If the output looks like an SVG symbol, it is wrong — regenerate.
+</aesthetic_target>
+
+<capability_gate>
+**Use ANY image-generation tool you have.** Generate the icon yourself; do not just hand the prompt back if you can run a tool.
+
+- **Codex** → the built-in **`image_gen`** tool. Generate, then copy the file into the repo.
+- **`gemini-cli` available** (the api2cli CLI — `gemini-cli image generate`) → use it directly; it is excellent for icons (exact command in `<generation_loop>`). One-time auth: `gemini-cli auth set <GOOGLE_API_KEY>`. (Install: `npx api2cli bundle gemini && npx api2cli link gemini`.)
+- **Any other raster image tool** (gpt-image, an MCP image tool, Imagen, etc.) → use it with the prompt from `<icon_recipe>`.
+- **Truly no image tool reachable** → do NOT fake it (no SVG-to-PNG pipelines — that produces flat, amateur results). Build the final prompt from `<icon_recipe>`, give it to the user to run, then resume at `<post_processing>` with the file they provide.
 </capability_gate>
 
 <locate_assets>
@@ -23,9 +37,7 @@ Find where this app's icon actually lives before writing anything. Read the Expo
 - Android adaptive background color → `expo.android.adaptiveIcon.backgroundColor`
 - Web favicon → `expo.web.favicon` (commonly `./assets/favicon.png`)
 
-In a monorepo the app may live under `mobile-app/` or `apps/<name>/` — resolve paths relative to the Expo project root, not the repo root. Below, `<ASSETS>` means that app's resolved assets directory.
-
-Pull the **brand colors** and **app concept/name** from the project (a brand/site config, the README, or just ask the user). Use color *names* in the prompt, never hex.
+In a monorepo the app may live under `mobile-app/` or `apps/<name>/` — resolve paths relative to the Expo project root. Below, `<ASSETS>` means that app's resolved assets directory. Pull **brand colors** and **app concept/name** from the project (a brand/site config, the README, or ask the user). Use color *names* in the prompt, never hex.
 </locate_assets>
 
 <objective>
@@ -37,125 +49,92 @@ Pull the **brand colors** and **app concept/name** from the project (a brand/sit
 </objective>
 
 <icon_recipe>
-A layered prompt that avoids the common app-icon failure modes (baked rounded tiles, logo plates, accidental text, drop-shadow "floating card" look, unwanted mascots). Fill the two project blanks — **Subject** (the product's core concept/mascot/symbol) and the **Color palette** (named brand colors, never hex) — then send the entire block as one prompt to the image model.
-
-Counter-intuitive but critical: tell the model it is **NOT** making an app-icon tile. Models bake in rounded-square plates, outer margins, and drop shadows the moment they hear "app icon". You want a full-bleed square subject filling 92-98% of the canvas; iOS applies its own mask afterward.
+Fill the two project blanks — **Subject** (the product's concept/mascot/symbol) and the **Color palette** (named brand colors, never hex) — then send the whole block as ONE prompt to your image tool.
 
 ```
-Create a 1024x1024 square symbol illustration.
+Create a 1024x1024 square app icon — premium, vibrant and dimensional, in the style of top App Store featured apps.
 
-Subject: <single centered mark for <AppName> — the product's core concept/mascot/symbol, highly readable at small sizes>
+Subject: <single hero for <AppName> — a friendly soft 3D character/mascot with simple dot eyes, OR a bold symbolic object/abstract form; instantly readable at small sizes>
 
-Context: standalone symbol/illustration for general use, not an app launcher icon or UI mockup.
-Do not design or imply an app icon, logo plate, badge, or rounded-square container, even if the words "app icon" or "logo" appear.
-Do not draw an icon inside a larger canvas. No outer margins, padding, or separate card background.
-Do not draw any rounded-square tile, card, or container behind the subject.
-The canvas itself is a perfect square with sharp 90° corners; do not simulate rounded-corner app icon masks or device-rounded corners.
-No global drop shadows, long cast shadows, outer glows, or halos around the subject or canvas.
-No UI mockups. No borders, frames, stickers, app plates, or device chrome.
-No text/typography (letters, numbers, monograms). No watermark.
-Not a full photo/portrait/real-world scene. No realistic human faces as the main subject.
-Do not copy or imitate real brand logos, trademarked shapes, or recognizable brand marks.
+The look (north star): one dimensional hero rendered in soft glossy 3D (or rich 2.5D) — smooth color gradients, soft studio lighting, gentle rim light, a subtle soft glow, rounded volumes and real depth — centered on a FULL-BLEED vivid branded background (solid color or smooth gradient) that reaches all four edges. Saturated, high-contrast, polished, delightful. Like a soft glossy jelly/clay form with tasteful highlights.
 
-Archetype (internal decision, do not mention in the output):
-Choose exactly ONE archetype: object_icon, abstract_form_icon, hybrid_icon, or character_icon. Characters are optional and must only be used when clearly appropriate; never the default.
-- object_icon: a single physical/symbolic object without a face (finance, productivity, utilities, dev tools, dashboards, system apps).
-- abstract_form_icon: pure form/metaphor without literal objects or faces (AI tools, design tools, analytics, experimental products).
-- hybrid_icon: an object with subtle life cues (no face), friendly but restrained (health, lifestyle).
-- character_icon: a friendly expressive character with a face (kids, games, beginner education, wellness, fun social).
+Background: fill the ENTIRE square edge-to-edge with a bold branded color or smooth gradient (e.g. a vivid blue gradient, or a deep dark backdrop for high contrast). Never plain white, never empty. The background is part of the icon.
 
-Concept:
-Design a single, intentional visual element that represents the app. Avoid generic logos and the most literal/obvious metaphor; choose a clear but slightly unexpected metaphor.
-Creativity means unusual material choices, unexpected-but-clear metaphors, expressive lighting, playful proportions, premium texture decisions. It does NOT mean always adding eyes/faces or always making it cute.
+Subject treatment: dimensional and glossy — soft rounded 3D forms, smooth gradients, gentle highlights and rim light, a subtle inner glow, clear depth and volume. Rich saturated color. One strong, simple silhouette.
 
-Material:
-Default to an illustration-friendly matte finish (painted polymer, ceramic, paper, or flat vector). Avoid glass/chrome/neon unless explicitly requested. Material choice should communicate the product category.
+Composition: the hero centered, filling ~60-80% of the canvas with comfortable breathing room; the branded background fills the rest to the edges. One focal point, no clutter.
 
-Composition:
-Main subject fills 92-98% of the canvas. Strong silhouette. No unnecessary elements.
+If the brand is monochrome (one ink + one accent), STILL make it fully dimensional and premium — glossy 3D form, tonal gradients within the brand color, soft lighting, a bold full-bleed background. Never a flat single-color glyph.
 
-Lighting:
-Soft, controlled lighting. Minimal specular highlights. No bloom/glow/lens flares. No "3D glass icon" look.
+Do NOT: flat monochrome pictogram, black-on-white glyph, single-color line/silhouette icon, plain SVG/vector symbol, sticker or clip-art; plain white or empty background; a smaller rounded card/icon floating inside the canvas (no icon-in-icon, no outer margins); baked rounded app-icon corners or device-rounded corners (keep a full square with sharp 90 degree corners — iOS applies its own mask); any text, letters, numbers, monograms or watermark; realistic human faces or photos as the main subject; real or trademarked brand logos; mirror chrome, garish neon, or lens flares.
 
-Overall feel:
-Modern, bold, subject-first illustration (not an app icon layout). Creative without being childish. Readable at small sizes. Clean illustration / 2D or 2.5D, matte finish, subtle shading only.
+Color palette: <brand colors as names — e.g. "vivid blue gradient background, soft white-to-sky-blue glossy character with subtle highlights">. High saturation, strong contrast on the home screen.
 
-Color palette: <brand colors as names — e.g. "warm peach background, deep ink subject">. Clean contrast on both light and dark backgrounds.
-
-Technical constraints:
-Square 1:1 aspect ratio.
-Main subject fills 92-98% of the canvas (zoom in; avoid excessive empty space).
-Center/balance the silhouette. Keep critical details within ~5-8% safe area.
-Android-safe: keep critical details within the central ~70% (silhouette may extend).
-Background extends to all four edges of the square canvas with straight (non-rounded) corners; keep it clean (low-detail, low-noise).
-Default-look guardrail: avoid inflated glass/chrome/neon/glow/sparkles/lens flare/exaggerated shine unless explicitly requested.
-
-Quality filters (internal):
-Reject if: it reads like a photo/portrait/full scene; it becomes a mascot by default; too many elements hurt clarity; a face appears without choosing character_icon; any rounded-square/card/tile background or app-icon container appears behind the subject.
-Accept if: instant read at small size; strong silhouette; intentional material; clean contrast on both light and dark backgrounds.
-
-Icon QA (internal): blur test (~64px), small-size readability, wallpaper contrast, one focal point.
+Technical: square 1:1; background bleeds to all four edges with sharp corners; keep critical details within the central ~70% so an Android circular/rounded mask never clips them; punchy and readable at 60px (blur test).
 ```
 
-**Optional style preset.** Lock a look as a HARD constraint (it wins any conflict) by appending a dominant style block before the technical constraints. Useful named looks: `minimalism`, `glassy`, `geometric`, `gradient`, `flat`, `material`, `clay`, `kawaii`. Example for `minimalism`:
-
-```
-STYLE SYSTEM: MINIMALISM (dominant — if anything conflicts, the style wins)
-Cultural DNA: Swiss design, Apple, Braun, Dieter Rams, Functionalism.
-Visual traits: max 3 colors; simple primary silhouettes; large negative space; no textures; no effects.
-Mandatory: readable at very small sizes; works in monochrome; single dominant symbol.
-Forbidden: gradients, shadows, 3D effects, decorative details, textures.
-```
-
-Non-negotiable for iOS (enforced in Post-Processing, not the prompt): the saved `icon.png` must have **no baked rounded corners** (iOS applies the mask), **no transparency** (App Store rejects alpha in the marketing icon), and stay **readable at 60px**.
+**Archetype** (pick one, internal): a friendly **character/mascot** (simple dot eyes) is a strong default for consumer / social / wellness / AI apps; a **symbolic object or abstract form** fits finance, productivity, dev tools, utilities. Don't force a face onto a utility, and don't flatten a playful app into a glyph.
 </icon_recipe>
 
 <generation_loop>
-1. Generate the icon (1-3 candidates if the concept is open).
-2. **Visually inspect every output** (open/read the images): strong silhouette? readable at small size? no baked rounded-square tile / no drop-shadow card? no accidental text or watermark? no transparency artifacts?
-3. Reject and regenerate what fails — refine the prompt, don't accept "almost".
-4. **Safety-filter gotcha**: a prompt can be rejected for ambiguous wording with harmless content. Reword to simple, neutral, single-paragraph phrasing and retry.
-5. **Blur test:** shrink to ~64px — if the mark turns to mush, the concept is too detailed; simplify the silhouette.
+1. **Generate** with your tool. With `gemini-cli` the validated command (Nano Banana Pro) is:
+   ```bash
+   PROMPT="$(cat <<'EOF'
+   <paste the filled icon_recipe prompt here>
+   EOF
+   )"
+   gemini-cli image generate --prompt "$PROMPT" \
+     --model gemini-3-pro-image-preview --aspect-ratio 1:1 --image-size 2K \
+     --out ./icon-raw.png --images-only --json
+   ```
+   (`gemini-3-pro-image-preview` = Nano Banana Pro, best for icons; `gemini-2.5-flash-image` is the cheaper fallback. Codex: use the `image_gen` tool with the same prompt.)
+2. **Visually inspect** every output: premium and dimensional (glossy 3D, depth)? full-bleed branded background (NOT white)? strong simple silhouette? readable at small size? NO flat-glyph look, NO accidental text/watermark?
+3. **Reject and regenerate** anything that drifts flat/monochrome/SVG-like or lands on a white background — tighten the prompt, don't accept "almost".
+4. **Safety-filter gotcha:** reword ambiguous prompts to a plain neutral paragraph and retry.
+5. **Blur test:** shrink to ~64px — if the mark turns to mush, simplify the silhouette.
 </generation_loop>
 
 <post_processing>
-macOS uses `sips` (built in) + ImageMagick (`magick`, `brew install imagemagick`). Replace `<ASSETS>` and `<brand-bg-color>` with the values from `<locate_assets>`.
+Models often **bake rounded corners or a light border** around the tile. Scale up slightly and center-crop so the rounded ring falls off-canvas, leaving a true full-bleed square. `sips` is built into macOS; ImageMagick (`magick`, `brew install imagemagick`) is only needed for Android padding. Replace `<ASSETS>` and `<brand-bg-color>` with the values from `<locate_assets>`.
 
 ```bash
-# 1. iOS icon: enforce 1024x1024 and strip alpha (App Store requirement)
-sips -z 1024 1024 icon-raw.png --out /tmp/icon-1024.png
-magick /tmp/icon-1024.png -background "<brand-bg-color>" -alpha remove -alpha off <ASSETS>/icon.png
-# (no ImageMagick? `sips -s format jpeg /tmp/icon-1024.png --out /tmp/icon.jpg` then back to png also strips alpha)
+# 1. Full-bleed fix: push any baked rounded corners / border off-canvas, then normalize to 1024.
+sips -z 1126 1126 icon-raw.png --out /tmp/icon-up.png             # scale up ~10%
+sips -c 1024 1024 /tmp/icon-up.png --out /tmp/icon-fullbleed.png  # center-crop to 1024 square
+#    (skip step 1 if the generated background already bleeds to sharp corners.)
 
-# 2. Android adaptive icon: pad the subject into the central ~66% safe circle on a brand background.
-#    Scaling the full-bleed icon to ~66% places the SUBJECT inside the safe zone; the brand-bg extent fills the rest.
+# 2. iOS icon: enforce 1024 and guarantee NO transparency (App Store rejects alpha).
+sips -s format png /tmp/icon-fullbleed.png --out <ASSETS>/icon.png
+sips -g hasAlpha <ASSETS>/icon.png   # must say: hasAlpha no
+#    If it reports alpha, flatten: magick in.png -background "<brand-bg-color>" -alpha remove -alpha off <ASSETS>/icon.png
+
+# 3. Android adaptive icon: pad the subject into the central ~66% safe circle on a brand background.
 magick <ASSETS>/icon.png -resize 66% -background "<brand-bg-color>" -gravity center -extent 1024x1024 <ASSETS>/adaptive-icon.png
-#    Then make sure app config matches: expo.android.adaptiveIcon.backgroundColor == <brand-bg-color>.
-#    (For a cleaner result you can instead re-run the recipe with "leave ~20% padding for Android adaptive safe zone".)
+#    Make app config match: expo.android.adaptiveIcon.backgroundColor == <brand-bg-color>.
+#    No magick? Re-run the recipe adding "leave ~20% padding for the Android adaptive safe zone".
 
-# 3. Favicon + verification
+# 4. Favicon + final verification
 sips -z 192 192 <ASSETS>/icon.png --out <ASSETS>/favicon.png
 sips -g pixelWidth -g pixelHeight -g hasAlpha <ASSETS>/icon.png <ASSETS>/adaptive-icon.png <ASSETS>/favicon.png
-# icon.png MUST report hasAlpha: no
 ```
 
 Remember: **icon and adaptive-icon changes require a native rebuild** (`npx expo run:ios` / `npx expo run:android`, or a new EAS build) — they will NOT appear on hot reload. The favicon is a web asset and reloads normally.
 </post_processing>
 
 <render_verification>
-File inspection is not enough for the launcher icon — confirm it on a device/simulator after a native rebuild.
+File inspection is not enough — confirm the icon on a device/simulator after a native rebuild.
 
-1. Rebuild the dev client so the new icon is bundled (`npx expo run:ios` or `npx expo run:android`).
-2. On the home screen, confirm: the icon shows the new art (not the old/default), iOS applies a clean rounded mask with no double-rounding or visible alpha edge, and the mark is readable at home-screen size.
-3. Fail the run if the icon still shows the previous art or a transparent/white corner halo. Fix before reporting completion.
+1. Rebuild the dev client (`npx expo run:ios` or `npx expo run:android`).
+2. On the home screen confirm: the new art shows (not the old/default), iOS applies a clean rounded mask with **no double-rounding and no white/transparent corner halo**, and the mark is readable at home-screen size.
+3. Fail the run if the icon still shows the previous art, a flat glyph, or a corner halo. Fix before reporting completion.
 </render_verification>
 
 <failure_modes>
-- Generated icon has transparency or baked rounded corners → App Store rejection; strip alpha (`-alpha remove`), regenerate without any tile/mask.
-- iOS shows a white/transparent corner halo → alpha was not stripped; re-run the `magick ... -alpha remove -alpha off` step and rebuild.
-- Android adaptive icon looks cropped at the edges → subject sat outside the central 66% safe circle; increase padding (lower the `-resize` percentage) or regenerate with explicit padding.
+- **Flat monochrome glyph / black-on-white pictogram** (the most common, worst failure) → the prompt leaned minimal/matte; re-emphasize "premium vibrant dimensional, glossy 3D, full-bleed branded background, NOT a flat SVG symbol", and regenerate.
+- White/transparent corner halo after the iOS mask → baked rounded corners; run the step-1 scale-up + center-crop, verify `hasAlpha no`, rebuild.
+- Generated icon has transparency → App Store rejection; flatten onto the brand bg (`magick ... -alpha remove -alpha off`).
+- Android adaptive icon looks cropped at the edges → subject sat outside the central 66% safe circle; increase padding or regenerate with explicit padding.
 - Icon unchanged after editing the PNG → no native rebuild; hot reload never updates the launcher icon.
-- Flat/amateur output → prompt missed the "subject-first illustration, not an app icon layout" + matte/material anchors, or fell back to a generic logo.
-- Prompt rejected by safety filter → reword neutrally, simplify to one plain paragraph; content was almost certainly fine.
+- Prompt rejected by safety filter → reword neutrally, simplify to one plain paragraph.
 - Mark turns to mush at small size → too detailed; simplify to a single strong silhouette (blur/64px test).
 </failure_modes>
