@@ -1,7 +1,7 @@
 ---
 name: rules-manager
-description: Create and maintain agent rules in AGENTS.md and .agents/rules/. Use for project rules, conventions, constraints, rule indexes, or requests to add or optimize agent rules.
-argument-hint: "[init | add <rule-name> | optimize | task description]"
+description: Create, edit, and maintain AGENTS.md and .agents/rules/ — tech stack, commands, universal rules, rule index, and rule files. Use to add, modify, restructure, or optimize project rules, conventions, and constraints.
+argument-hint: "[init | add <rule-name> | edit | optimize | task description]"
 ---
 
 <core_principle>
@@ -146,6 +146,17 @@ When the argument starts with `add`:
 
 **CRITICAL:** Step 5 is non-negotiable. A rule file without an index entry is invisible.
 
+## `/rules-manager edit` - Modify AGENTS.md directly
+
+When the user wants to change AGENTS.md itself rather than add a rule file — update the tech stack, commands, universal rules, project description, or restructure sections:
+
+1. **Read AGENTS.md** - Load current content.
+2. **Make the targeted edit in place** - Change only the relevant section; leave unrelated sections untouched.
+3. **Preserve the index** - If touching `## Rules`, keep every `.agents/rules/*.md` link intact.
+4. **Stay minimal** - Apply `<writing_rules>`: specific, prohibitions over guidance, no bloat.
+
+This is the default when the user references AGENTS.md content (not a rule file) — e.g. "add a command to AGENTS.md", "update the tech stack", "tighten the universal rules".
+
 ## `/rules-manager optimize` - Audit and clean up
 
 When the argument contains `optimize`:
@@ -177,11 +188,13 @@ When the argument is a free-form task (e.g., "add a rule about how we tag releas
 
 <rules_for_this_skill>
 
+- This skill manages ALL of AGENTS.md (tech stack, commands, universal rules, index, description) and `.agents/rules/` — not just creating new rule files. Editing existing AGENTS.md content is fully in scope.
 - ALWAYS update AGENTS.md `## Rules` index when creating a file in `.agents/rules/`
 - NEVER create a rule file without confirming with the user what it should contain
 - NEVER overwrite existing AGENTS.md or rule files without asking
 - Default to short rule files (20-60 lines). Split if larger.
 - When user asks "create a rule", default to creating a file in `.agents/rules/` (not inline in AGENTS.md), unless the rule is 1-2 lines and fits the universal section.
+- When the user references AGENTS.md content directly (a command, the stack, a universal rule), edit AGENTS.md in place via the `edit` workflow — don't spin up a new rule file.
   </rules_for_this_skill>
 
 <reference_guides>

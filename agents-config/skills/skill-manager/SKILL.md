@@ -44,6 +44,17 @@ Three loading levels:
 
 Keep references one level deep. Reference them by name in SKILL.md so the agent knows when to open them.
 
+### Online research routing
+
+When a skill or agent needs online research, name the exact research skill to use instead of relying on vague web-search language:
+
+- Use `/Users/melvynx/.agents/skills/find-docs/SKILL.md` for current technical documentation, API references, config options, SDKs, CLIs, cloud services, and code examples.
+- Use `/Users/melvynx/.agents/skills/exa-search/SKILL.md` for broader online research, recent information, source discovery, similar pages, URL extraction, or cited web answers.
+- Mention default harness tools for local code, file, git, shell, and browser inspection.
+- Keep built-in `WebSearch` and `WebFetch` as fallback tools unless the user explicitly asks for them.
+- For restricted agents, include `Skill` and `Bash` in the tool list when these skills need to run local CLIs.
+- Never put secrets, tokens, credentials, personal data, or proprietary code in external queries.
+
 ### Skill anatomy
 
 ```
@@ -94,8 +105,25 @@ For researched guidance and examples, see [references/description-recommandation
 
 ## Where each platform stores skills
 
+**Canonical personal skills:** `~/.agents/skills/` is the single source of truth (git repo `Melvynx/agents-config`). It is an official user-level root for both Cursor and Codex, so they read it directly. Write new personal skills only under `~/.agents/skills/<name>/`.
+
+Per the official Cursor docs ([cursor.com/docs/skills](https://cursor.com/docs/skills)), user-level roots are `~/.agents/skills/` and `~/.cursor/skills/`, plus compat dirs `~/.claude/skills/` and `~/.codex/skills/`. `~/.cursor/skills-cursor/` is NOT a documented path; do not use it.
+
+Because `~/.agents/skills/` is read directly, the only symlinks needed are the compat dirs for agents that do not read `~/.agents/skills/` themselves:
+
+```bash
+~/.claude/skills -> ~/.agents/skills   # Claude Code reads ~/.claude/skills
+~/.codex/skills  -> ~/.agents/skills   # Codex compat (optional; Codex also reads ~/.agents/skills)
+```
+
+Do NOT symlink `~/.cursor/skills` or `~/.cursor/skills-cursor` to `~/.agents/skills/`; that makes Cursor scan the same skills two or three times. To repair the compat symlinks if missing:
+
+```bash
+ln -s ~/.agents/skills ~/.claude/skills
+```
+
 See the per-platform reference files. Quick reminders:
 
-- **Claude Code**: `~/.claude/skills/` (personal) or `.claude/skills/` (project). Higher scope wins on name collision.
+- **Cursor**: reads `~/.agents/skills/` and `~/.cursor/skills/` (user-level), `.agents/skills/` and `.cursor/skills/` (project). Use `~/.agents/skills/` as the single root; skip the `~/.cursor/skills*` symlinks.
+- **Claude Code**: `~/.claude/skills/` (symlink → `~/.agents/skills/`) or `.claude/skills/` (project). Higher scope wins on name collision.
 - **Codex**: `.agents/skills/` walks up from CWD to repo root, then `~/.agents/skills/`, then `/etc/codex/skills`, then system bundled.
-- **Cursor**: `.cursor/rules/` (project, version-controlled) or `AGENTS.md` files in project subdirectories.

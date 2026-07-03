@@ -1,19 +1,14 @@
 ---
 name: appstore-connect
-description: Interact with App Store Connect via the asc CLI - apps, builds, TestFlight, beta testers, reviews, sales/analytics, metadata, IAP, signing, submissions. Also builds an Expo/React Native iOS app and ships it to TestFlight via "appstore-connect testflight". Use for "check my app", "App Store Connect", "TestFlight status", "ship to TestFlight", "app review", "my app sales", or "asc".
-argument-hint: "[testflight [--expo] [setup]] | <natural-language ASC request>"
+description: Interact with App Store Connect via the asc CLI - apps, builds, TestFlight, beta testers, reviews, sales/analytics, metadata, IAP, signing, submissions. Use for "check my app", "App Store Connect", "TestFlight status", "app review", "my app sales", or "asc".
 ---
 
 # App Store Connect (asc)
 
 Read, manage, and ship any of the user's App Store apps through the **`asc`** CLI (App Store Connect CLI by Rork). `asc` covers nearly the entire ASC surface; reach for the raw API only for the rare gap.
 
-<testflight_mode>
-**If invoked as `appstore-connect testflight` (or "build and ship to TestFlight"):** this is a full build-and-upload workflow, not a single `asc` call. Read [references/testflight.md](references/testflight.md) and follow it end to end — it takes an Expo / React Native iOS app from local dev to an installable TestFlight build (ASC API-key signing to avoid Apple ID 2FA, `eas build --local` by default, `--expo` for a cloud build, then `asc publish testflight`). Pass `--expo` for a cloud build, or `testflight setup` to stop after credentials are ready. Everything below is the general `asc` surface for everyday read/manage tasks.
-</testflight_mode>
-
 <auth>
-`asc` is usually already authenticated on this machine (a default keychain profile). Verify before doing real work:
+`asc` is already authenticated on this machine (a default keychain profile). Verify before doing real work:
 
 ```bash
 asc auth status            # shows stored credential profiles + which is default
@@ -22,7 +17,7 @@ asc doctor                 # diagnose auth/config issues
 ```
 
 - Multiple accounts/teams: `asc --profile <name> <command>` selects a profile.
-- **Not authenticated / no working credential / a NEW account with no stored key:** read [references/setup.md](references/setup.md) and follow it — a battle-tested workflow to locate the `.p8`, key id, and issuer id, then `asc auth login`. Never print or commit `.p8` keys, key ids, or issuer ids.
+- A NEW account with no stored key: run the `find-asc-credentials` skill (locates the `.p8`, key id, and issuer id, then `asc auth login`). Never print or commit `.p8` keys, key ids, or issuer ids.
 </auth>
 
 <how_to_drive>
@@ -45,7 +40,6 @@ asc docs list              # embedded guides; `asc docs <topic>` to read one
 | List/inspect apps, app id | `asc apps`, `asc status --app <id>` |
 | Builds (processing, ids) | `asc builds` |
 | TestFlight: beta groups, testers, distribute a build | `asc testflight` |
-| **Build an iOS app + ship to TestFlight (end to end)** | `appstore-connect testflight` → [references/testflight.md](references/testflight.md) |
 | Versions / release state | `asc versions`, `asc release`, `asc status` |
 | Metadata, localizations, keywords | `asc metadata`, `asc localizations` |
 | Screenshots / previews | `asc screenshots`, `asc video-previews` |
