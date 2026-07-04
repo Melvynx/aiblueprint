@@ -41,7 +41,9 @@ export function DocsSidebar({ tree }: { tree: DocTree }) {
             </h4>
             <ul className="flex flex-col">
               {folder.docs
-                .filter((doc) => doc.slug !== folder.slug)
+                .filter(
+                  (doc) => folder.docs.length === 1 || doc.slug !== folder.slug,
+                )
                 .map((doc) => {
                   const isActive = doc.url === pathname;
                   return (
