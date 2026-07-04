@@ -4,6 +4,7 @@ import {
   DocCardWrapper,
   DocSection,
 } from "@public-site/docs/_components/doc-card";
+import { LandingReferenceGrid } from "@public-site/docs/_components/landing-reference-grid";
 import { cn } from "@/lib/utils";
 import Markdown, { type MarkdownToJSX } from "markdown-to-jsx";
 
@@ -17,6 +18,7 @@ const MdxComponent = {
   DocCardGrid,
   DocSection,
   DocCardWrapper,
+  LandingReferenceGrid,
 } satisfies MarkdownToJSX.Overrides;
 
 export const ServerMdx = (props: ServerMdxProps) => {
