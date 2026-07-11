@@ -57,7 +57,8 @@ Review the assigned code carefully.
     const output = await fs.readFile(codexAgent, "utf-8");
     expect(output).toContain('name = "reviewer"');
     expect(output).toContain('description = "Review changed code"');
-    expect(output).toContain('model = "gpt-5.5"');
+    expect(output).toContain('model = "gpt-5.6-terra"');
+    expect(output).toContain('model_reasoning_effort = "high"');
     expect(output).toContain("Review the assigned code carefully.");
   });
 

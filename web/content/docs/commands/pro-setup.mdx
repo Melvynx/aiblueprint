@@ -1,0 +1,48 @@
+---
+title: agents pro setup
+description: Activate Premium if needed and install the complete Premium configuration.
+keywords: ["pro", "premium", "setup", "install"]
+---
+
+`agents pro setup` performs the complete first-time Premium installation. If no
+token is saved, it asks for your Premium access token, activates it, and
+continues in the same run.
+
+## Usage
+
+```bash
+aiblueprint agents pro setup
+```
+
+## What it installs
+
+- Premium agents and skills.
+- Premium scripts and their dependencies.
+- The advanced statusline and its `settings.json` configuration.
+- Shell shortcuts such as `cc`, `ccc`, `cx`, and `cxc`.
+- Required global dependencies.
+
+## Folder options
+
+These options belong to the parent `agents` command, so place them before
+`pro setup`.
+
+| Option | Description |
+| ------ | ----------- |
+| `-f, --folder <path>` | Root containing `.claude`, `.codex`, and `.agents` (default: `$HOME`). |
+| `--claudeCodeFolder <path>` | Override the Claude Code folder. |
+| `--codexFolder <path>` | Override the Codex folder. |
+| `--agentsFolder <path>` | Override the shared agents folder. |
+
+## Examples
+
+```bash
+# Standard installation
+aiblueprint agents pro setup
+
+# Install into a custom configuration root
+aiblueprint agents --folder ~/my-config pro setup
+```
+
+To review individual changes during later updates, use
+[`agents pro sync`](/commands/sync).

@@ -1,0 +1,41 @@
+---
+title: agents pro update
+description: Install the latest complete AIBlueprint Premium configuration.
+keywords: ["pro", "premium", "update"]
+---
+
+`agents pro update` fetches and installs the latest complete Premium
+configuration. It requires Premium to be activated already.
+
+## Usage
+
+```bash
+aiblueprint agents pro update
+```
+
+Unlike [`agents pro sync`](/commands/sync), `update` does not offer a file
+selection step. Use it when you want all current Premium configuration files.
+
+## Folder options
+
+Place inherited folder options before `pro update`.
+
+| Option | Description |
+| ------ | ----------- |
+| `-f, --folder <path>` | Root containing `.claude`, `.codex`, and `.agents` (default: `$HOME`). |
+| `--claudeCodeFolder <path>` | Override the Claude Code folder. |
+| `--codexFolder <path>` | Override the Codex folder. |
+| `--agentsFolder <path>` | Override the shared agents folder. |
+
+## Examples
+
+```bash
+# Update the default installation
+aiblueprint agents pro update
+
+# Update a custom configuration root
+aiblueprint agents --folder ~/my-config pro update
+```
+
+If the CLI reports that no token is present, run
+[`agents pro activate`](/commands/pro-activate) first.

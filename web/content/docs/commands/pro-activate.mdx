@@ -1,0 +1,37 @@
+---
+title: agents pro activate
+description: Activate AIBlueprint Premium with your access token.
+keywords: ["pro", "premium", "activate", "token"]
+---
+
+`agents pro activate` validates your Premium access and saves the credential
+used by the CLI to fetch Premium content.
+
+## Usage
+
+```bash
+aiblueprint agents pro activate [token]
+```
+
+| Argument | Required | Description |
+| -------- | -------- | ----------- |
+| `token` | No | Your Premium access token. When omitted, the CLI asks for it interactively. |
+
+The command checks your access against the supported Premium products, reads
+the repository credential attached to the product, and saves that credential
+in the platform-specific AIBlueprint token file.
+
+## Examples
+
+```bash
+# Pass the token directly
+aiblueprint agents pro activate YOUR_TOKEN
+
+# Enter the token without putting it in shell history
+aiblueprint agents pro activate
+```
+
+After activation, run [`agents pro setup`](/commands/pro-setup) to install the
+Premium configuration.
+
+Get a Premium token at [mlv.sh/claude-cli](https://mlv.sh/claude-cli).

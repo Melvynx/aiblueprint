@@ -47,7 +47,8 @@ You are fast.
     const output = await fs.readFile(path.join(root, ".codex/agents/snipper.toml"), "utf-8");
     expect(output).toContain('name = "snipper"');
     expect(output).toContain('description = "Fast code modification agent"');
-    expect(output).toContain('model = "gpt-5.4-mini"');
+    expect(output).toContain('model = "gpt-5.6-terra"');
+    expect(output).toContain('model_reasoning_effort = "medium"');
     expect(output).toContain("developer_instructions = '''");
     expect(output).toContain("Original display color metadata: blue.");
     expect(output).toContain("You are fast.");
@@ -70,6 +71,9 @@ Help with bounded tasks.
     const stat = await fs.lstat(path.join(root, ".codex/agents"));
     expect(stat.isSymbolicLink()).toBe(false);
     expect(await fs.pathExists(path.join(root, ".codex/agents/helper.toml"))).toBe(true);
+    const output = await fs.readFile(path.join(root, ".codex/agents/helper.toml"), "utf-8");
+    expect(output).toContain('model = "gpt-5.6-terra"');
+    expect(output).toContain('model_reasoning_effort = "medium"');
   });
 
   it("keeps existing user-authored Codex agents unless overwrite is requested", async () => {
@@ -100,6 +104,8 @@ Review carefully.
     });
 
     expect(overwriteResult.rendered).toHaveLength(1);
-    expect(await fs.readFile(path.join(root, ".codex/agents/reviewer.toml"), "utf-8")).toContain('model = "gpt-5.5"');
+    const output = await fs.readFile(path.join(root, ".codex/agents/reviewer.toml"), "utf-8");
+    expect(output).toContain('model = "gpt-5.6-terra"');
+    expect(output).toContain('model_reasoning_effort = "high"');
   });
 });

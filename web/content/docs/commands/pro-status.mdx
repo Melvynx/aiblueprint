@@ -1,0 +1,25 @@
+---
+title: agents pro status
+description: Check whether an AIBlueprint Premium token is saved.
+keywords: ["pro", "premium", "status", "token"]
+---
+
+`agents pro status` reports whether the Premium repository credential is saved
+locally and shows the token file path and current platform.
+
+## Usage
+
+```bash
+aiblueprint agents pro status
+```
+
+This command checks local token storage. It does not reinstall or update any
+Premium configuration.
+
+If no token is present, activate Premium first:
+
+```bash
+aiblueprint agents pro activate YOUR_TOKEN
+```
+
+Get a Premium token at [mlv.sh/claude-cli](https://mlv.sh/claude-cli).

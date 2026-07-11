@@ -1,61 +1,44 @@
 ---
 title: agents pro
-description: Activate and install AIBlueprint Premium configurations.
+description: Overview of the AIBlueprint Premium commands.
 keywords: ["pro", "premium", "activate", "token", "sync"]
 ---
 
-`agents pro` manages AIBlueprint Premium. Premium adds extra configurations on
-top of the free defaults. You need an access token; `agents pro setup` prompts
-for it when no token is saved yet.
+`agents pro` manages AIBlueprint Premium. Premium adds extra agents, skills,
+scripts, settings, and tooling on top of the free defaults.
 
-## Subcommands
-
-| Command | Description |
-| ------- | ----------- |
-| `agents pro activate [token]` | Activate Premium with an access token. |
-| `agents pro status` | Check the status of your Premium token. |
-| `agents pro setup` | Install Premium configurations, prompting for activation if needed. |
-| `agents pro update` | Update Premium configurations. |
-| `agents pro sync` | Selectively update individual Premium items. |
-
-## Activate
-
-```bash
-aiblueprint agents pro activate YOUR_TOKEN
-```
-
-This validates the token, stores it, and saves any GitHub token attached to the
-product so the CLI can fetch Premium content. An internet connection is
-required.
-
-## Install Premium
-
-Install the Premium configuration:
+Start with `setup` for a first installation. It asks for your access token when
+none is saved yet.
 
 ```bash
 aiblueprint agents pro setup
 ```
 
-If no Premium token is saved yet, the command asks for your access token,
-activates Premium, then continues the setup in the same run.
+## Subcommands
 
-Premium includes the bundled `use-style` skill with its current style specs,
-including `dusk` and `split-auth`.
+| Command | Description |
+| ------- | ----------- |
+| [`agents pro activate [token]`](/commands/pro-activate) | Activate Premium with an access token. |
+| [`agents pro status`](/commands/pro-status) | Check whether a Premium token is saved. |
+| [`agents pro setup`](/commands/pro-setup) | Install Premium and its required tooling. |
+| [`agents pro update`](/commands/pro-update) | Replace the local Premium configuration with the latest complete version. |
+| [`agents pro sync`](/commands/sync) | Review changes and selectively import Premium updates. |
 
-## Keep Premium up to date
+## Update or sync?
+
+Use [`update`](/commands/pro-update) when you want the complete latest Premium
+configuration. Use [`sync`](/commands/sync) when you want to inspect the diff,
+choose which additions or modifications to import, and create a backup first.
+
+## Custom folders
+
+Commands that read or install configuration inherit the folder options from
+`agents`. Place these options before `pro`:
 
 ```bash
-# Update everything
-aiblueprint agents pro update
-
-# Choose which items to update
-aiblueprint agents pro sync
+aiblueprint agents --folder ~/my-config pro setup
 ```
 
-## Check status
-
-```bash
-aiblueprint agents pro status
-```
+See each command page for its exact behavior and examples.
 
 Get a Premium token at [mlv.sh/claude-cli](https://mlv.sh/claude-cli).

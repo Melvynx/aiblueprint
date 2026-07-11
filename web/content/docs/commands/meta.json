@@ -7,6 +7,11 @@
     "unify",
     "codex-agents",
     "pro",
+    "pro-activate",
+    "pro-status",
+    "pro-setup",
+    "pro-update",
+    "sync",
     "backup",
     "configs",
     "openclaw"

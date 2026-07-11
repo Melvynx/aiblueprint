@@ -1,0 +1,56 @@
+---
+title: agents pro sync
+description: Review Premium changes, choose what to import, and back up your current configuration.
+keywords: ["pro", "premium", "sync", "backup", "selective update"]
+---
+
+`agents pro sync` compares your installed configuration with the latest Premium
+version, then lets you import all available updates or choose specific items.
+It requires Premium to be activated already.
+
+## Usage
+
+```bash
+aiblueprint agents pro sync
+```
+
+## How sync works
+
+1. Fetches the latest Premium configuration and analyzes local differences.
+2. Groups new, modified, and migration items by category. Skills and scripts
+   are summarized by their top-level folder.
+3. Lets you import all updates or make a custom selection.
+4. Shows the planned additions, updates, and `.claude` to `.agents`
+   migrations, then asks for confirmation.
+5. Creates a configuration backup in `~/.aiblueprint/backups/` before writing.
+6. Applies the selected changes and installs script dependencies when scripts
+   were included.
+
+Items that are unchanged are not selectable. The default custom selection
+includes every available change. If everything is current, the command exits
+without writing anything.
+
+## Folder options
+
+These options belong to the parent `agents` command, so place them before
+`pro sync`.
+
+| Option | Description |
+| ------ | ----------- |
+| `-f, --folder <path>` | Root containing `.claude`, `.codex`, and `.agents` (default: `$HOME`). |
+| `--claudeCodeFolder <path>` | Override the Claude Code folder. |
+| `--codexFolder <path>` | Override the Codex folder. |
+| `--agentsFolder <path>` | Override the shared agents folder. |
+
+## Examples
+
+```bash
+# Review and sync the default Premium installation
+aiblueprint agents pro sync
+
+# Sync a custom configuration root
+aiblueprint agents --folder ~/my-config pro sync
+```
+
+Use [`agents pro update`](/commands/pro-update) instead when you want to install
+the complete latest Premium configuration without selecting individual items.
