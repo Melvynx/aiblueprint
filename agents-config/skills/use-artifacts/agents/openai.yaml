@@ -1,0 +1,7 @@
+interface:
+  display_name: "Use Artifacts"
+  short_description: "Create local HTML artifact workspaces"
+  default_prompt: "Use $use-artifacts to create a polished local HTML artifact for this idea."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#54C5C2"
