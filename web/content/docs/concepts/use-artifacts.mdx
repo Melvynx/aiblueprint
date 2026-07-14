@@ -1,0 +1,138 @@
+---
+title: Use Artifacts
+description: Turn plans, explorations, prototypes, and substantial answers into polished local HTML artifacts.
+keywords:
+  ["use-artifacts", "artifacts", "html", "prototype", "visualization", "plan"]
+---
+
+`use-artifacts` gives Claude Code and Codex an artifact workspace that feels
+native to the way you think. Instead of burying a substantial plan, comparison,
+or prototype inside chat, it creates a polished, reusable HTML experience under
+`~/.agents/artifacts/<id>/`.
+
+<DocCardWrapper>
+  <DocSection title="Choose the right artifact">
+    <DocCardGrid>
+      <DocCard
+        href="#thinking-documents"
+        icon="FileText"
+        title="Thinking documents"
+        description="Plans, reviews, architecture, strategy, and decision-ready explanations."
+      />
+      <DocCard
+        href="#croquis-and-variations"
+        icon="Palette"
+        title="Croquis and variations"
+        description="Three to six clearly different directions arranged for fast comparison."
+      />
+      <DocCard
+        href="#interactive-artifacts"
+        icon="Code2"
+        title="Interactive artifacts"
+        description="Prototypes, calculators, dashboards, diagrams, simulations, and visualizations."
+      />
+    </DocCardGrid>
+  </DocSection>
+  <DocSection title="Designed as a pair">
+    <DocCardGrid>
+      <DocCard
+        href="/concepts/use-style"
+        icon="Palette"
+        title="Use Style first"
+        description="Match the product’s real visual language or load the closest named style."
+      />
+      <DocCard
+        href="/examples"
+        icon="Eye"
+        title="Explore visual systems"
+        description="Preview every bundled style before choosing a direction."
+      />
+      <DocCard
+        href="/concepts/skills"
+        icon="Workflow"
+        title="Browse every skill"
+        description="See how artifacts fit into the complete workflow collection."
+      />
+    </DocCardGrid>
+  </DocSection>
+</DocCardWrapper>
+
+## When to use it
+
+Create an artifact when the result is substantial, standalone, visual,
+interactive, document-like, or likely to be revisited. Strong fits include
+feature plans, security reviews, product briefs, architecture explanations,
+options boards, dashboards, diagrams, and prototypes.
+
+Keep tiny answers and short snippets in chat. If the change belongs directly in
+an existing product, implement it there unless a separate prototype was
+requested.
+
+## Thinking documents
+
+The default mode turns public reasoning into a modern, scan-friendly page: a
+clear thesis, the strongest recommendation near the top, and structured sections
+for evidence, flows, tradeoffs, edge cases, rollout, and validation.
+
+Plan artifacts always include two views of the idea:
+
+- a content draft describing what the page or feature says and does
+- croquis showing how hierarchy and content could be arranged
+
+## Croquis and variations
+
+When the request asks for options, the artifact becomes a comparison board. It
+shows three to six directions in one vertical sequence, gives each direction the
+full available width, and keeps fidelity low enough to compare concepts without
+pretending implementation is complete.
+
+## Interactive artifacts
+
+Calculators, dashboards, simulations, mini apps, diagrams, and visualizations
+use the interactive mode. The preferred output is one responsive,
+self-contained `index.html` with semantic markup, accessible controls, and local
+state. External dependencies are avoided unless the idea genuinely needs them.
+
+## Style follows the product
+
+Every artifact starts with `use-style`. For an existing app, its real tokens,
+components, typography, spacing, color, radius, shadow, and interaction patterns
+are the source of truth. A named style can support that language, but does not
+replace it.
+
+If no product context exists, the skill chooses the closest restrained preset;
+`black-grid` is the minimal technical fallback. An explicit visual direction
+from the user always wins.
+
+## Workspace contract
+
+Each artifact lives outside the current repository:
+
+```text
+~/.agents/artifacts/<id>/
+├── index.html      # the viewable artifact
+├── HIGHLOGIC.md    # concise design logic and iteration state
+├── manifest.json   # title, kind, style, entrypoint, and files
+└── versions/       # optional snapshots before major rewrites
+```
+
+The global location keeps artifacts available across projects without polluting
+product repositories.
+
+## Create one
+
+Invoke the skill directly:
+
+```bash
+$use-artifacts Create three modern onboarding directions
+```
+
+Or install only the skill:
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill use-artifacts
+```
+
+The included scaffold script creates the workspace metadata and starter files;
+the agent then implements, opens, and verifies the final HTML before linking it
+back in chat.

@@ -10,7 +10,7 @@ Clean fintech product UI. Light, airy, trust-driven. Soft elevation over hard li
 
 - **Trust-first fintech.** Polished, premium, calm. Feels like money software, not a marketing funnel.
 - **Light canvas.** Off-white / pale blue background, white cards, dark navy ink.
-- **Soft elevation.** Subtle layered shadows define cards, NOT 1px borders. This is the key contrast with `grid` / `vercel-simple`.
+- **Soft elevation.** Subtle layered shadows define cards, NOT 1px borders. This is the key contrast with `grid` / `black-grid`.
 - **Rounded geometry.** `8px` cards, `6px` inputs/buttons, `radius-full` pills and avatars.
 - **Blurple accent.** `#635BFF` for primary actions, active states, links. Green (`#24B47E`) for success/confirm CTAs.
 - **Sans everywhere.** Clean grotesk (Inter / system / sohne). Mono only for card numbers, IDs, code.
@@ -331,7 +331,7 @@ Chart.defaults.color = "#697386";
 
 ## Motion & effects
 
-- Soft shadow IS the depth language - keep it; do not strip it like in `grid`/`vercel-simple`.
+- Soft shadow IS the depth language - keep it; do not strip it like in `grid`/`black-grid`.
 - Hover: slight bg shift (`#f7fafc`), darker fill on primary buttons, never scale-jump.
 - Focus: 3px blurple ring (`rgba(99,91,255,0.25)`) on inputs and focusable controls. Always visible.
 - `transition-colors duration-150` on interactive elements; `transition-shadow` on inputs.

@@ -166,6 +166,7 @@ npx skills add Melvynx/aiblueprint --skill skill-manager
 | `nextjs-setup-project` | Set up a production-ready Next.js project |
 | `create-vitejs-app` | Create a Vite app with Tailwind and shadcn/ui |
 | `use-style` | Apply named UI style guides before implementation |
+| `use-artifacts` | Create polished local HTML plans, prototypes, and visualizations |
 | `rules-manager` | Create and maintain AGENTS.md and agent rule files |
 | `agents-managers` | Manage Claude Code agents and Task-tool orchestration |
 | `environments-manager` | Set up per-worktree agent environments |

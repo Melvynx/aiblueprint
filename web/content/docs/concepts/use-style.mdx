@@ -1,53 +1,97 @@
 ---
-title: use-style
-description: Apply named visual style guides to UI work before implementation.
-keywords: ["use-style", "styles", "ui", "frontend", "design"]
+title: Use Style
+description: Give every interface a deliberate visual system before implementation starts.
+keywords: ["use-style", "styles", "ui", "frontend", "design system"]
 ---
 
-`use-style` is a bundled skill that loads a concrete visual style spec before an
-agent designs or implements UI. It keeps layout, color, typography, border,
-motion, and component choices aligned to a named aesthetic instead of generic
-SaaS defaults.
+`use-style` turns a visual direction into implementation constraints. The agent
+loads one named system before touching the UI, then follows its typography,
+palette, spacing, geometry, motion, and anti-patterns instead of falling back to
+a generic SaaS look.
 
-## How to invoke it
+<DocCardWrapper>
+  <DocSection title="Start with a direction">
+    <DocCardGrid>
+      <DocCard
+        href="/examples"
+        icon="Eye"
+        title="Explore all 13 styles"
+        description="Compare every bundled visual system in the interactive picker."
+      />
+      <DocCard
+        href="/concepts/use-artifacts"
+        icon="Sparkles"
+        title="Pair with Use Artifacts"
+        description="Turn a plan, prototype, or exploration into a polished local HTML artifact."
+      />
+      <DocCard
+        href="/concepts/skills"
+        icon="Workflow"
+        title="Browse every skill"
+        description="See the complete AIBlueprint workflow collection."
+      />
+    </DocCardGrid>
+  </DocSection>
+</DocCardWrapper>
 
-Use the skill explicitly when you already know the direction:
+## Invoke the skill
+
+Name a direction explicitly when you know what you want:
 
 ```bash
-$use-style grid
-/usestyle split-auth
-/usestyle list
+$use-style ios-app
+$use-style vercel
+$use-style black-grid
+$use-style list
 ```
 
-You can also reference the style in plain language, such as "use the Linear
-style", "make this Gumroad-like", or "use a polished two-column auth page".
+Plain language works too: “use the Linear style”, “make this feel like Luma”,
+or “show the available styles”. If the name is missing or ambiguous, the skill
+shows the full picker and waits for a choice.
 
-## Bundled styles
+## The current collection
 
-| Style | Best for | Visual direction |
-| ----- | -------- | ---------------- |
-| `grid` | Blueprint product landings | Square geometry, 1px borders, mono data, condensed display type. |
-| `vercel-simple` | Minimal developer tools | Black canvas, Geist-like type, quiet borders, minimal accent. |
-| `stripe` | Fintech, checkout, dashboards | Pale canvas, white surfaces, blurple accent, green CTA, rounded geometry. |
-| `linear` | Issue trackers and dense app shells | Near-black panes, sidebar/list/detail layout, indigo accent, tight chrome. |
-| `new-york-times` | Editorial and magazine layouts | Paper canvas, serif headlines, hairline rules, multi-column rhythm. |
-| `anthropic` | AI lab and research pages | Warm cream, reading serif, clay-coral accent, soft dark panels. |
-| `gumroad` | Creator commerce | Yellow and pink fills, thick black borders, hard offset shadows. |
-| `raycast` | Premium product marketing | Glossy dark surfaces, red glow, floating glass navigation. |
-| `dusk` | CRM and data dashboards | Twilight backdrop, floating dark window, vivid blue charts, category pills. |
-| `split-auth` | Login, signup, reset, OAuth | Left visual brand panel, right clean form panel, compact auth controls. |
+| Style            | Built for                                     | Visual language                                                                            |
+| ---------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `ios-app`        | Expo and native mobile apps                   | Monochrome ink and paper, one yellow spark, OS-native tabs, flat hairline cards.           |
+| `grid`           | Product landings and structured specs         | Square geometry, 1px borders, mono data, condensed display type.                           |
+| `vercel`         | Infrastructure dashboards and marketing       | Exact black canvas, quiet hairlines, dense deployment data, vast editorial whitespace.     |
+| `black-grid`     | Technical tools, calculators, and indexes     | Austere monochrome surfaces, Geist plus mono, sharp line-defined structure, no decoration. |
+| `stripe`         | Billing, checkout, fintech, and account flows | Pale canvas, white surfaces, blurple actions, green success, soft elevation.               |
+| `linear`         | Issue trackers and dense app shells           | Near-black aligned panes, indigo accent, compact operational chrome.                       |
+| `new-york-times` | Editorial and long-form experiences           | Paper canvas, serif headlines, hairline rules, multi-column rhythm.                        |
+| `anthropic`      | AI products, research, and reading surfaces   | Warm cream, grotesque plus serif typography, clay-coral accent, soft dark panels.          |
+| `gumroad`        | Creator commerce and expressive launches      | Yellow and pink fills, thick black borders, hard offset shadows.                           |
+| `raycast`        | Premium dark marketing and command products   | Glossy near-black surfaces, red glow, floating glass navigation, oversized type.           |
+| `dusk`           | CRM, analytics, and data workspaces           | Twilight backdrop, floating dark window, vivid blue charts, colorful category pills.       |
+| `luma`           | Events, calendars, discovery, and RSVP flows  | Dark photo-led cards, teal aurora, white pill actions, blue and gold status accents.       |
+| `testspirite`    | Calm developer-tool dashboards                | Warm paper canvas, forest-green actions, grouped sidebar, quiet cards and status pills.    |
 
-## In the configs
+## How selection works
 
-`agents setup` now installs `use-style` into `~/.agents/skills/use-style` with
-its `styles/` specs and included HTML references. Premium installs the same
-style inventory through `agents pro setup`, `agents pro update`, and
-`agents pro sync`.
+The skill resolves familiar aliases such as `vercel-simple` → `black-grid` and
+`testsprite` → `testspirite`. It can also infer a direction from product language:
+Vercel deployment UI selects `vercel`, a lu.ma-inspired event feed selects
+`luma`, and an Expo app with native tabs selects `ios-app`.
 
-Because both configs use the shared `~/.agents` folder, Claude Code and Codex
-can invoke the installed style specs after setup.
+Once selected, the agent reads `styles/<name>.md`, checks the project for a
+local override under `.agents/styles/`, and treats the resulting spec as a hard
+constraint. Reusable feature patterns such as split authentication live in
+`use-feature`; they are intentionally separate from visual styles.
 
-## Try the picker
+## Install or refresh
 
-Open [Examples](/examples) to switch between every bundled style and see how the
-same product screen changes when a different style guide is loaded.
+The standard setup keeps the shared skill current for Claude Code and Codex:
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Install only this skill with the public skill registry:
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill use-style
+```
+
+Both routes place it in `~/.agents/skills/use-style`, including the portable
+style specifications, HTML references, and Codex profile metadata.

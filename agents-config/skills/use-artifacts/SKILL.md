@@ -67,12 +67,27 @@ Do not expose private chain-of-thought. Show public reasoning: conclusions, evid
 
 Always use `$use-style` before designing the artifact UI.
 
-Choose the style from the request. When the request has no visual direction,
-default to `black-grid`:
+When the artifact is for an existing application, the default style is that
+application's actual visual language. Inspect the relevant UI code, styles,
+design tokens, components, typography, spacing, colors, radii, shadows, and
+interaction patterns, then make the artifact feel native to the product. Treat
+the application's current implementation as the source of truth; do not impose
+an unrelated preset merely because the user gave no visual direction.
+
+Use the closest `$use-style` guide as supporting design guidance when useful,
+but adapt it to the application rather than replacing the application's style.
+Record the project-derived style in `HIGHLOGIC.md` and in `manifest.json` with a
+clear value such as `project:<app-name>`.
+
+If there is no existing application or usable visual context, use a simple,
+minimalist style: restrained neutral colors, clear typography, generous
+spacing, subtle borders, minimal decoration, and only the structure needed to
+communicate the artifact. In that case, use the closest preset below when it
+fits; otherwise use `black-grid` as the minimal technical fallback:
 
 - `anthropic`: Claude-like artifacts, writing/research surfaces, calm AI tools
 - `linear`: dense dashboards, admin tools, issue trackers, list/detail workflows
-- `black-grid`: default; developer utilities, technical plans, calculators, indexes, CLI-like tools
+- `black-grid`: minimal technical fallback for developer utilities, plans, calculators, indexes, and CLI-like tools
 - `grid`: blueprint/product landing pages, structured spec pages, Codelynx-flavored pages
 - `ios-app`: mobile app concepts, iPhone flows, Expo/React Native previews
 - `stripe`: billing, checkout, finance, pricing, account flows
@@ -83,18 +98,21 @@ default to `black-grid`:
 - `new-york-times`: editorial, newspaper, magazine, long-form reading
 - `testspirite`: calm light dev-tool dashboards with onboarding or empty states
 
-If no style is inferable and the user did not ask you to choose, use
-`black-grid` and state that choice briefly.
+If the user explicitly requests a visual direction, follow it even when it
+differs from the application. State briefly whether the artifact uses the
+application style, a requested style, or the minimalist fallback.
 
 ## Creation Workflow
 
 1. Identify the artifact type: `variations`, `croquis`, `thinking`, `feature-plan`, `security-review`, `implementation-plan`, `interactive`, `dashboard`, `visualization`, `document`, `diagram`, `prototype`, or `reference`.
-2. Pick the `use-style` style and load its file.
+2. Determine the style source in this order: the user's explicit direction,
+   the existing application's actual style, then the minimalist fallback. Load
+   the closest `use-style` file for supporting guidance.
 3. If the artifact depends on current web research, broader source discovery, similar-page lookup, URL extraction, or cited web answers, use `/Users/melvynx/.agents/skills/exa-search/SKILL.md`.
 4. Scaffold the workspace:
 
 ```bash
-python3 /Users/melvynx/.agents/skills/use-artifacts/scripts/create_artifact.py "<short title>" --style black-grid --kind thinking
+python3 /Users/melvynx/.agents/skills/use-artifacts/scripts/create_artifact.py "<short title>" --style "<requested, project:app-name, or fallback style>" --kind thinking
 ```
 
 5. Implement the artifact in `index.html`.

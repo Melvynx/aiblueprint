@@ -180,8 +180,9 @@ npx skills@latest add melvynx/aiblueprint --skill use-style
 any UI (landing pages, app shells, components).
 
 **Use it for:** `$use-style <name>`, `/useskill <name>`, "list styles", or referencing
-a known style such as `ios-app`, `grid`, `vercel-simple`, `stripe`, `linear`,
-`raycast`, `gumroad`, `dusk`, `luma`, `split-auth`, or `testspirite`.
+a known style such as `ios-app`, `grid`, `vercel`, `black-grid`, `stripe`,
+`linear`, `new-york-times`, `anthropic`, `gumroad`, `raycast`, `dusk`, `luma`,
+or `testspirite`.
 
 **Key points:**
 - Invocation: explicit (`$use-style grid`, `/useskill list`) or implicit (referencing
@@ -190,3 +191,26 @@ a known style such as `ios-app`, `grid`, `vercel-simple`, `stripe`, `linear`,
   use before designing.
 - Workflow: read `styles/<name>.md` from the skill directory, then prefer any
   project-level overrides over the portable spec.
+
+---
+
+## use-artifacts
+
+```bash
+npx skills@latest add melvynx/aiblueprint --skill use-artifacts
+```
+
+**What it does:** Creates polished, reusable local HTML artifacts under
+`~/.agents/artifacts/<id>/` for substantial plans, comparisons, prototypes,
+visualizations, dashboards, and diagrams.
+
+**Use it for:** feature plans, thinking documents, croquis and variation boards,
+interactive prototypes, or any substantial result that should remain easy to
+inspect and iterate outside chat.
+
+**Key points:**
+- Uses the existing application's visual language first, then the closest
+  `use-style` guide, with `black-grid` as the minimal technical fallback.
+- Keeps `index.html`, `HIGHLOGIC.md`, and `manifest.json` together in a global
+  artifact workspace rather than adding files to the current repository.
+- Verifies the final HTML and links the artifact back in chat.

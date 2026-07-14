@@ -394,7 +394,7 @@ No drop shadows on cards - elevation is the fill step from `#0a0a0b` → `#16161
 | Consumer social/community product (dark) | Strong fit |
 | Dense analytics dashboard (KPIs, charts) | Poor fit - use `dusk` |
 | 3-pane issue tracker | Use `linear` |
-| Marketing hero / landing page | Use `raycast`, `grid`, or `vercel-simple` |
+| Marketing hero / landing page | Use `raycast`, `grid`, or `vercel` |
 
 Luma is for **dark consumer event/calendar/account app shells** built around a centered column and photo-led cards.
 

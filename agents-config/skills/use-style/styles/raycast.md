@@ -261,7 +261,7 @@ Chart.defaults.color = "#6b6b6b";
 - Hover: subtle bg lift (`#1c1c1e → #242424`), border lighten, or a gentle glow bloom. No hard movement.
 - `backdrop-blur` on the floating nav and any glass surface.
 - `transition-colors duration-150`; the featured card may breathe a slow glow.
-- Avoid hard offset shadows (that's Gumroad), avoid flat-no-glow (that's vercel-simple). Raycast is glossy-soft.
+- Avoid hard offset shadows (that's Gumroad), avoid flat-no-glow (that's black-grid). Raycast is glossy-soft.
 
 ---
 

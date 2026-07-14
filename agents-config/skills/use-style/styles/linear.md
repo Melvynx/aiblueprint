@@ -327,8 +327,8 @@ Chart.defaults.color = "#8a8f98";
 |---------|-----|
 | Issue tracker, inbox, dashboard, settings, admin panel | Strong fit |
 | Tool with sidebar + list + detail panes | Strong fit |
-| Marketing landing / hero page | Poor fit - use `grid` or `vercel-simple` |
-| Data calculator / index of tools | Use `vercel-simple` (mono + sharp) |
+| Marketing landing / hero page | Poor fit - use `grid` or `vercel` |
+| Data calculator / index of tools | Use `black-grid` (mono + sharp) |
 
 Linear style is for **product app shells**. If the request is a marketing page, redirect to another style.
 

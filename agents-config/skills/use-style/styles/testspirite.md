@@ -369,7 +369,7 @@ Chart.defaults.color = "#8a8d84";
 | Dev-tool dashboard, test runner, monitoring, settings, plan/billing | Strong fit |
 | App shell with grouped sidebar + content + promo rail | Strong fit |
 | Onboarding / empty states with illustrated CTAs | Strong fit |
-| Marketing hero / landing page | Poor fit - use `grid`, `vercel-simple`, or `raycast` |
+| Marketing hero / landing page | Poor fit - use `grid`, `vercel`, or `raycast` |
 | Dense issue-tracker triage (3-pane) | Use `linear` |
 
 TestSpirite is for **calm light-mode product app shells**. If the request is a marketing page, redirect to another style.

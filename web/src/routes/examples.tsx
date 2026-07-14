@@ -1,13 +1,7 @@
 import Link from "@/compat/link";
 import { cn } from "@/lib/utils";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  ArrowLeft,
-  Check,
-  Columns2,
-  ExternalLink,
-  Palette,
-} from "lucide-react";
+import { ArrowLeft, Check, Columns2, Palette } from "lucide-react";
 import { type CSSProperties, useMemo, useState } from "react";
 
 type StyleExample = {
@@ -30,10 +24,29 @@ type StyleExample = {
 
 const styles: StyleExample[] = [
   {
+    slug: "ios-app",
+    name: "iOS App",
+    label: "Native mobile shell",
+    description:
+      "Ink-and-paper mobile UI, one yellow spark, native tabs, and flat hairline cards.",
+    mood: "native, tactile, focused",
+    frame: { background: "#e9e7df" },
+    surface: { background: "#f8f6ef" },
+    accent: "#111111",
+    secondaryAccent: "#FFE040",
+    text: "#171717",
+    muted: "#6b6a64",
+    border: "#d5d1c7",
+    shadow: "0 24px 70px rgba(33, 31, 24, 0.14)",
+    radius: 28,
+    font: "Inter, sans-serif",
+  },
+  {
     slug: "grid",
     name: "Grid",
     label: "Blueprint landing",
-    description: "Square geometry, 1px borders, mono metrics, and a technical product grid.",
+    description:
+      "Square geometry, 1px borders, mono metrics, and a technical product grid.",
     mood: "structured, precise, diagrammatic",
     frame: { background: "#f6f7f8" },
     surface: { background: "#ffffff" },
@@ -47,11 +60,12 @@ const styles: StyleExample[] = [
     font: "Inter, sans-serif",
   },
   {
-    slug: "vercel-simple",
-    name: "Vercel Simple",
-    label: "Minimal dev tool",
-    description: "Black canvas, sharp neutral chrome, and developer-first hierarchy.",
-    mood: "minimal, dark, focused",
+    slug: "vercel",
+    name: "Vercel",
+    label: "Infrastructure product",
+    description:
+      "Exact black canvas, quiet hairlines, dense deployment data, and editorial whitespace.",
+    mood: "precise, spacious, operational",
     frame: { background: "#000000" },
     surface: { background: "#0a0a0a" },
     accent: "#ffffff",
@@ -64,10 +78,29 @@ const styles: StyleExample[] = [
     font: "Inter, sans-serif",
   },
   {
+    slug: "black-grid",
+    name: "Black Grid",
+    label: "Austere developer tool",
+    description:
+      "Monochrome technical surfaces, sharp line-defined indexes, and zero decoration.",
+    mood: "austere, technical, exact",
+    frame: { background: "#050505" },
+    surface: { background: "#000000" },
+    accent: "#f5f5f5",
+    secondaryAccent: "#171717",
+    text: "#f5f5f5",
+    muted: "#8a8a8a",
+    border: "#2a2a2a",
+    shadow: "none",
+    radius: 0,
+    font: "Inter, sans-serif",
+  },
+  {
     slug: "stripe",
     name: "Stripe",
     label: "Fintech dashboard",
-    description: "Pale canvas, blurple accent, white panels, and optimistic product motion.",
+    description:
+      "Pale canvas, blurple accent, white panels, and optimistic product motion.",
     mood: "bright, polished, financial",
     frame: { background: "linear-gradient(135deg, #f6f9fc 0%, #eef4ff 100%)" },
     surface: { background: "#ffffff" },
@@ -84,7 +117,8 @@ const styles: StyleExample[] = [
     slug: "linear",
     name: "Linear",
     label: "Dense app shell",
-    description: "Near-black panes, sidebar/list/detail structure, and quiet indigo selection.",
+    description:
+      "Near-black panes, sidebar/list/detail structure, and quiet indigo selection.",
     mood: "dense, aligned, operational",
     frame: { background: "#08090a" },
     surface: { background: "#101113" },
@@ -101,7 +135,8 @@ const styles: StyleExample[] = [
     slug: "new-york-times",
     name: "New York Times",
     label: "Editorial layout",
-    description: "Paper canvas, serif headlines, hairline rules, and a broadsheet rhythm.",
+    description:
+      "Paper canvas, serif headlines, hairline rules, and a broadsheet rhythm.",
     mood: "editorial, crisp, authoritative",
     frame: { background: "#f7f5ef" },
     surface: { background: "#fffdf7" },
@@ -118,7 +153,8 @@ const styles: StyleExample[] = [
     slug: "anthropic",
     name: "Anthropic",
     label: "Warm AI lab",
-    description: "Cream paper, clay-coral accents, reading serif, and soft dark product panels.",
+    description:
+      "Cream paper, clay-coral accents, reading serif, and soft dark product panels.",
     mood: "warm, researched, calm",
     frame: { background: "#f0efe9" },
     surface: { background: "#f8f6ef" },
@@ -135,7 +171,8 @@ const styles: StyleExample[] = [
     slug: "gumroad",
     name: "Gumroad",
     label: "Creator commerce",
-    description: "Loud yellow and pink fills, thick black borders, and hard offset shadows.",
+    description:
+      "Loud yellow and pink fills, thick black borders, and hard offset shadows.",
     mood: "bold, playful, commercial",
     frame: { background: "#ffc900" },
     surface: { background: "#ff90e8" },
@@ -152,13 +189,17 @@ const styles: StyleExample[] = [
     slug: "raycast",
     name: "Raycast",
     label: "Glossy product",
-    description: "Dark glossy surfaces, red glow, floating glass navigation, and premium scale.",
+    description:
+      "Dark glossy surfaces, red glow, floating glass navigation, and premium scale.",
     mood: "glossy, premium, cinematic",
     frame: {
       background:
         "radial-gradient(circle at 20% 10%, rgba(255, 99, 99, 0.45), transparent 32%), #0a0a0a",
     },
-    surface: { background: "rgba(20, 20, 22, 0.82)", backdropFilter: "blur(18px)" },
+    surface: {
+      background: "rgba(20, 20, 22, 0.82)",
+      backdropFilter: "blur(18px)",
+    },
     accent: "#ff6363",
     secondaryAccent: "#f97316",
     text: "#ffffff",
@@ -172,7 +213,8 @@ const styles: StyleExample[] = [
     slug: "dusk",
     name: "Dusk",
     label: "Data workspace",
-    description: "Twilight backdrop, dark floating window, blue charts, and colorful pills.",
+    description:
+      "Twilight backdrop, dark floating window, blue charts, and colorful pills.",
     mood: "refined, data-rich, atmospheric",
     frame: {
       background:
@@ -189,19 +231,41 @@ const styles: StyleExample[] = [
     font: "Inter, sans-serif",
   },
   {
-    slug: "split-auth",
-    name: "Split Auth",
-    label: "Two-panel auth",
-    description: "Visual brand panel on the left, clean form panel on the right, compact auth controls.",
-    mood: "focused, polished, conversion-ready",
-    frame: { background: "#f4f4f5" },
+    slug: "luma",
+    name: "Luma",
+    label: "Events and calendar",
+    description:
+      "Near-black event feed, soft teal aurora, photo-led cards, and crisp RSVP actions.",
+    mood: "social, atmospheric, immediate",
+    frame: {
+      background:
+        "radial-gradient(circle at 50% 0%, rgba(45, 212, 191, 0.28), transparent 36%), #0a0a0b",
+    },
+    surface: { background: "#121214" },
+    accent: "#ffffff",
+    secondaryAccent: "#2f6bff",
+    text: "#f7f7f7",
+    muted: "#9b9ba1",
+    border: "#242428",
+    shadow: "0 28px 90px rgba(0, 0, 0, 0.45)",
+    radius: 24,
+    font: "Inter, sans-serif",
+  },
+  {
+    slug: "testspirite",
+    name: "TestSpirite",
+    label: "Calm dev-tool shell",
+    description:
+      "Warm paper canvas, forest-green actions, grouped navigation, and quiet status cards.",
+    mood: "calm, trustworthy, structured",
+    frame: { background: "#f0f1ec" },
     surface: { background: "#ffffff" },
-    accent: "#111827",
-    secondaryAccent: "#e5e7eb",
-    text: "#111827",
-    muted: "#71717a",
-    border: "#e4e4e7",
-    shadow: "0 24px 70px rgba(15, 23, 42, 0.12)",
+    accent: "#3d7c4e",
+    secondaryAccent: "#eaf3ea",
+    text: "#1a1c19",
+    muted: "#8a8d84",
+    border: "#e0e2da",
+    shadow: "0 24px 70px rgba(43, 56, 44, 0.1)",
     radius: 18,
     font: "Inter, sans-serif",
   },
@@ -228,9 +292,9 @@ function ExamplesRoute() {
   );
 
   return (
-    <main className="min-h-dvh bg-[#f7f7f8] text-[#171717]">
+    <main className="min-h-dvh bg-[radial-gradient(circle_at_top,#ffffff_0%,#f4f4f6_48%,#ececf0_100%)] text-[#171717]">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-5 border-b border-[#d9d9dd] pb-6 md:flex-row md:items-end md:justify-between">
+        <header className="flex flex-col gap-5 rounded-2xl border border-white/80 bg-white/75 p-5 shadow-[0_24px_80px_rgba(24,24,27,0.08)] backdrop-blur-xl md:flex-row md:items-end md:justify-between sm:p-7">
           <div className="flex max-w-3xl flex-col gap-3">
             <Link
               href="/concepts/use-style"
@@ -245,7 +309,7 @@ function ExamplesRoute() {
               </span>
               <div>
                 <p className="font-mono text-xs font-semibold tracking-wider text-[#71717a] uppercase">
-                  Style picker
+                  {styles.length} visual systems · live picker
                 </p>
                 <h1 className="text-3xl font-semibold tracking-normal sm:text-4xl">
                   AIBlueprint UI style examples
@@ -263,13 +327,12 @@ function ExamplesRoute() {
           >
             <Columns2 className="size-4" />
             Skill list
-            <ExternalLink className="size-3.5" />
           </a>
         </header>
 
         <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
           <aside className="lg:sticky lg:top-6 lg:self-start">
-            <div className="grid gap-2">
+            <div className="grid gap-2 rounded-2xl border border-white/80 bg-white/70 p-2 shadow-[0_20px_60px_rgba(24,24,27,0.06)] backdrop-blur-xl">
               {styles.map((style) => {
                 const isSelected = style.slug === selected.slug;
                 return (
@@ -278,10 +341,10 @@ function ExamplesRoute() {
                     type="button"
                     onClick={() => setSelectedSlug(style.slug)}
                     className={cn(
-                      "flex min-h-20 w-full items-start gap-3 rounded-md border bg-white p-3 text-left transition-colors",
+                      "flex min-h-20 w-full items-start gap-3 rounded-xl border bg-white p-3 text-left transition-all",
                       isSelected
-                        ? "border-[#111827] shadow-[0_0_0_1px_#111827]"
-                        : "border-[#d9d9dd] hover:border-[#a1a1aa]",
+                        ? "border-[#111827] shadow-[0_8px_24px_rgba(24,24,27,0.1)]"
+                        : "border-transparent hover:-translate-y-0.5 hover:border-[#d9d9dd]",
                     )}
                   >
                     <span
@@ -310,7 +373,7 @@ function ExamplesRoute() {
 
           <section className="min-w-0">
             <div
-              className="min-h-[680px] overflow-hidden border p-4 sm:p-8"
+              className="min-h-[680px] overflow-hidden border p-4 shadow-[0_28px_90px_rgba(24,24,27,0.1)] sm:p-8"
               style={{
                 ...selected.frame,
                 borderColor: selected.border,
@@ -348,15 +411,19 @@ function ExamplesRoute() {
 
 function StyleScene({ style }: { style: StyleExample }) {
   const isEditorial = style.slug === "new-york-times";
-  const isAuth = style.slug === "split-auth";
-  const isAppShell = style.slug === "linear" || style.slug === "dusk";
+  const isAppShell = [
+    "ios-app",
+    "linear",
+    "dusk",
+    "luma",
+    "testspirite",
+  ].includes(style.slug);
   const isBrutal = style.slug === "gumroad";
 
   return (
     <div
       className={cn(
         "mx-auto flex min-h-[600px] w-full max-w-5xl flex-col overflow-hidden border",
-        isAuth && "md:grid md:grid-cols-[1.05fr_0.95fr]",
       )}
       style={{
         ...style.surface,
@@ -367,59 +434,60 @@ function StyleScene({ style }: { style: StyleExample }) {
         fontFamily: style.font,
       }}
     >
-      {isAuth ? (
-        <AuthPreview style={style} />
-      ) : (
-        <>
-          <div
-            className="flex items-center justify-between border-b px-5 py-4"
-            style={{ borderColor: style.border }}
-          >
-            <div className="flex items-center gap-3">
-              <span
-                className="grid size-9 place-items-center border text-sm font-bold"
-                style={{
-                  background: style.accent,
-                  borderColor: style.border,
-                  borderRadius: Math.max(0, style.radius - 8),
-                  color: style.slug === "stripe" ? "#ffffff" : style.surface.background?.toString().includes("#0") ? "#ffffff" : "#ffffff",
-                }}
-              >
-                AI
-              </span>
-              <div>
-                <p className="text-sm font-semibold">AIBlueprint</p>
-                <p className="text-xs" style={{ color: style.muted }}>
-                  {style.label}
-                </p>
-              </div>
-            </div>
-            <div className="hidden items-center gap-2 sm:flex">
-              {["Agents", "Skills", "Config"].map((item) => (
-                <span
-                  key={item}
-                  className="border px-3 py-1 text-xs font-medium"
-                  style={{
-                    borderColor: style.border,
-                    borderRadius: Math.max(0, style.radius - 10),
-                    color: style.muted,
-                  }}
-                >
-                  {item}
-                </span>
-              ))}
+      <>
+        <div
+          className="flex items-center justify-between border-b px-5 py-4"
+          style={{ borderColor: style.border }}
+        >
+          <div className="flex items-center gap-3">
+            <span
+              className="grid size-9 place-items-center border text-sm font-bold"
+              style={{
+                background: style.accent,
+                borderColor: style.border,
+                borderRadius: Math.max(0, style.radius - 8),
+                color:
+                  style.slug === "stripe"
+                    ? "#ffffff"
+                    : style.surface.background?.toString().includes("#0")
+                      ? "#ffffff"
+                      : "#ffffff",
+              }}
+            >
+              AI
+            </span>
+            <div>
+              <p className="text-sm font-semibold">AIBlueprint</p>
+              <p className="text-xs" style={{ color: style.muted }}>
+                {style.label}
+              </p>
             </div>
           </div>
+          <div className="hidden items-center gap-2 sm:flex">
+            {["Agents", "Skills", "Config"].map((item) => (
+              <span
+                key={item}
+                className="border px-3 py-1 text-xs font-medium"
+                style={{
+                  borderColor: style.border,
+                  borderRadius: Math.max(0, style.radius - 10),
+                  color: style.muted,
+                }}
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
 
-          {isEditorial ? (
-            <EditorialPreview style={style} />
-          ) : isAppShell ? (
-            <AppShellPreview style={style} />
-          ) : (
-            <MarketingPreview style={style} isBrutal={isBrutal} />
-          )}
-        </>
-      )}
+        {isEditorial ? (
+          <EditorialPreview style={style} />
+        ) : isAppShell ? (
+          <AppShellPreview style={style} />
+        ) : (
+          <MarketingPreview style={style} isBrutal={isBrutal} />
+        )}
+      </>
     </div>
   );
 }
@@ -449,7 +517,10 @@ function MarketingPreview({
           <h2 className="text-4xl font-bold tracking-normal sm:text-6xl">
             Build agent-ready UI without losing the visual direction.
           </h2>
-          <p className="max-w-xl text-base leading-7" style={{ color: style.muted }}>
+          <p
+            className="max-w-xl text-base leading-7"
+            style={{ color: style.muted }}
+          >
             {style.description}
           </p>
         </div>
@@ -530,18 +601,20 @@ function AppShellPreview({ style }: { style: StyleExample }) {
     <div className="grid flex-1 md:grid-cols-[190px_1fr]">
       <div className="border-r p-4" style={{ borderColor: style.border }}>
         <div className="grid gap-2">
-          {["Inbox", "Roadmap", "Automations", "Settings"].map((item, index) => (
-            <div
-              key={item}
-              className="rounded-md px-3 py-2 text-sm"
-              style={{
-                background: index === 1 ? style.accent : "transparent",
-                color: index === 1 ? "#ffffff" : style.muted,
-              }}
-            >
-              {item}
-            </div>
-          ))}
+          {["Inbox", "Roadmap", "Automations", "Settings"].map(
+            (item, index) => (
+              <div
+                key={item}
+                className="rounded-md px-3 py-2 text-sm"
+                style={{
+                  background: index === 1 ? style.accent : "transparent",
+                  color: index === 1 ? "#ffffff" : style.muted,
+                }}
+              >
+                {item}
+              </div>
+            ),
+          )}
         </div>
       </div>
       <div className="grid md:grid-cols-[1fr_1.1fr]">
@@ -554,7 +627,8 @@ function AppShellPreview({ style }: { style: StyleExample }) {
                   key={item}
                   className="border p-3"
                   style={{
-                    background: index === 0 ? style.secondaryAccent : "transparent",
+                    background:
+                      index === 0 ? style.secondaryAccent : "transparent",
                     borderColor: style.border,
                     borderRadius: 8,
                   }}
@@ -577,18 +651,20 @@ function AppShellPreview({ style }: { style: StyleExample }) {
                 className="flex-1 rounded-t-md"
                 style={{
                   height,
-                  background: index === 4 ? style.accent : style.secondaryAccent,
+                  background:
+                    index === 4 ? style.accent : style.secondaryAccent,
                 }}
               />
             ))}
           </div>
           <div className="mt-5 flex flex-wrap gap-2">
-            {["Grid", "Auth", "Dashboard"].map((item, index) => (
+            {["Grid", "Flows", "Dashboard"].map((item, index) => (
               <span
                 key={item}
                 className="rounded-full px-3 py-1 text-xs font-medium"
                 style={{
-                  background: index === 0 ? style.accent : style.secondaryAccent,
+                  background:
+                    index === 0 ? style.accent : style.secondaryAccent,
                   color: index === 0 ? "#ffffff" : style.text,
                 }}
               >
@@ -613,21 +689,34 @@ function EditorialPreview({ style }: { style: StyleExample }) {
         style={{ borderColor: style.border }}
       >
         <article>
-          <p className="font-mono text-xs font-bold tracking-wider uppercase" style={{ color: style.secondaryAccent }}>
+          <p
+            className="font-mono text-xs font-bold tracking-wider uppercase"
+            style={{ color: style.secondaryAccent }}
+          >
             Design desk
           </p>
           <h2 className="mt-3 text-4xl font-bold tracking-normal sm:text-5xl">
             A named visual system changes the result before code is written
           </h2>
-          <p className="mt-4 columns-1 text-sm leading-7 sm:columns-2" style={{ color: style.muted }}>
+          <p
+            className="mt-4 columns-1 text-sm leading-7 sm:columns-2"
+            style={{ color: style.muted }}
+          >
             {style.description} The skill gives the agent a concrete editorial
             grammar: type scale, rules, spacing, contrast, and composition.
           </p>
         </article>
         <div className="grid gap-4">
           {["Opinion", "Systems", "Reference"].map((item) => (
-            <div key={item} className="border-t pt-3" style={{ borderColor: style.border }}>
-              <p className="font-mono text-xs uppercase" style={{ color: style.secondaryAccent }}>
+            <div
+              key={item}
+              className="border-t pt-3"
+              style={{ borderColor: style.border }}
+            >
+              <p
+                className="font-mono text-xs uppercase"
+                style={{ color: style.secondaryAccent }}
+              >
                 {item}
               </p>
               <p className="mt-2 text-xl font-bold">
@@ -638,57 +727,5 @@ function EditorialPreview({ style }: { style: StyleExample }) {
         </div>
       </div>
     </div>
-  );
-}
-
-function AuthPreview({ style }: { style: StyleExample }) {
-  return (
-    <>
-      <div
-        className="flex min-h-[280px] flex-col justify-between p-6 text-white md:min-h-full"
-        style={{
-          background:
-            "linear-gradient(135deg, #111827 0%, #2f415f 50%, #64748b 100%)",
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <span className="grid size-10 place-items-center rounded-md bg-white/15 font-bold">
-            AI
-          </span>
-          <span className="text-sm font-semibold">AIBlueprint</span>
-        </div>
-        <div>
-          <p className="font-mono text-xs font-semibold tracking-wider uppercase text-white/70">
-            Secure setup
-          </p>
-          <h2 className="mt-3 text-4xl font-semibold tracking-normal">
-            Sign in to sync your agent workspace.
-          </h2>
-        </div>
-      </div>
-      <div className="flex flex-col justify-center p-6 sm:p-10">
-        <p className="text-2xl font-semibold">Welcome back</p>
-        <p className="mt-2 text-sm" style={{ color: style.muted }}>
-          {style.description}
-        </p>
-        <div className="mt-8 grid gap-3">
-          {["Continue with GitHub", "Continue with Google"].map((item) => (
-            <span
-              key={item}
-              className="flex h-11 items-center justify-center rounded-md border text-sm font-medium"
-              style={{ borderColor: style.border }}
-            >
-              {item}
-            </span>
-          ))}
-          <span
-            className="mt-2 flex h-11 items-center justify-center rounded-md text-sm font-semibold text-white"
-            style={{ background: style.accent }}
-          >
-            Continue
-          </span>
-        </div>
-      </div>
-    </>
   );
 }

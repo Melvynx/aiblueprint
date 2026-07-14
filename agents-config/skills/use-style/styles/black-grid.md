@@ -1,8 +1,8 @@
-# Vercel Simple Style
+# Black Grid Style
 
 Minimal dark-mode developer UI. High contrast, line-driven structure, no decoration.
 
-**Reference vibe:** Vercel dashboard, blog, and data tools (take-home pay, country index).
+**Reference vibe:** austere black developer tools, country indexes, calculators, and line-driven data products.
 
 ---
 
@@ -319,4 +319,4 @@ When unsure, default to mono + sharp for new tool UIs, and sans + `rounded-lg` f
 
 ## Project overrides
 
-If the repo defines `.agents/styles/vercel-simple.md` or `.agents/styles/vercel-simple-theme.md`, prefer those tokens and components over this portable spec.
+If the repo defines `.agents/styles/black-grid.md` or `.agents/styles/black-grid-theme.md`, prefer those tokens and components over this portable spec.

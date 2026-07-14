@@ -1,0 +1,7 @@
+interface:
+  display_name: "Use Style"
+  short_description: "Apply named visual style guides to landing pages, app..."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#02195C"
+  default_prompt: "Use $use-style to help with this task."
