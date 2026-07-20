@@ -48,6 +48,20 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
     }
   }
 
+  if (!settings.env || typeof settings.env !== "object" || Array.isArray(settings.env)) {
+    settings.env = {};
+  }
+
+  // Older Premium configs forced the Sonnet alias onto paid 1M context.
+  // Remove only that historical value so custom model mappings stay untouched.
+  if (
+    settings.env.ANTHROPIC_DEFAULT_SONNET_MODEL ===
+    "claude-sonnet-4-6[1m]"
+  ) {
+    delete settings.env.ANTHROPIC_DEFAULT_SONNET_MODEL;
+  }
+  settings.env.CLAUDE_CODE_DISABLE_1M_CONTEXT = "1";
+
   if (!settings.permissions) {
     settings.permissions = {};
   }

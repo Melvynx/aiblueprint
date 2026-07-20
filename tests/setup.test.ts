@@ -127,6 +127,43 @@ describe("Setup Command with Inquirer.js", () => {
     expect(consoleSpy.log).toHaveBeenCalledWith(
       expect.stringContaining("Settings updated"),
     );
+    expect(fs.writeJson).toHaveBeenCalledWith(
+      `${tempDir}/settings.json`,
+      expect.objectContaining({
+        env: expect.objectContaining({
+          CLAUDE_CODE_DISABLE_1M_CONTEXT: "1",
+        }),
+      }),
+      { spaces: 2 },
+    );
+  });
+
+  it("removes the historical Premium Sonnet 1M override", async () => {
+    const tempDir = "/tmp/test-claude";
+    vi.mocked(fs.readFile).mockResolvedValue(
+      JSON.stringify({
+        env: {
+          ANTHROPIC_DEFAULT_SONNET_MODEL: "claude-sonnet-4-6[1m]",
+          CUSTOM_MODEL_SETTING: "keep-me",
+        },
+      }) as any,
+    );
+
+    await setupCommand({
+      claudeCodeFolder: tempDir,
+      skipInteractive: true,
+    });
+
+    expect(fs.writeJson).toHaveBeenCalledWith(
+      `${tempDir}/settings.json`,
+      expect.objectContaining({
+        env: {
+          CLAUDE_CODE_DISABLE_1M_CONTEXT: "1",
+          CUSTOM_MODEL_SETTING: "keep-me",
+        },
+      }),
+      { spaces: 2 },
+    );
   });
 
   it("should install scripts through an existing scripts directory symlink", async () => {

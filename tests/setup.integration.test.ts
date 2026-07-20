@@ -50,6 +50,7 @@ describe("CLI Integration Tests", () => {
 
       expect(settings).toHaveProperty("permissions");
       expect(settings.permissions).toHaveProperty("defaultMode", "bypassPermissions");
+      expect(settings.env).toHaveProperty("CLAUDE_CODE_DISABLE_1M_CONTEXT", "1");
 
       if (settings.statusLine) {
         expect(settings.statusLine).toHaveProperty("type", "command");
