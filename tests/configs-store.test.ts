@@ -1,4 +1,5 @@
 import fs from "fs-extra";
+import net from "node:net";
 import os from "os";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -78,6 +79,26 @@ describe("configs store", () => {
     expect(await fs.pathExists(path.join(snapshotPath, ".agents", ".git", "config"))).toBe(true);
     expect(await fs.pathExists(path.join(snapshotPath, ".codex", "config.toml"))).toBe(true);
     expect(await fs.pathExists(path.join(snapshotPath, ".agents", "skills", "demo", "SKILL.md"))).toBe(true);
+  });
+
+  it("skips live Unix sockets when saving a config", async () => {
+    const socketPath = path.join(rootDir, ".codex", "ipc", "ipc.sock");
+    await fs.ensureDir(path.dirname(socketPath));
+
+    const server = net.createServer();
+    await new Promise<void>((resolve, reject) => {
+      server.once("error", reject);
+      server.listen(socketPath, resolve);
+    });
+
+    try {
+      const snapshotPath = await saveNamedConfig("with-ipc", { folder: rootDir });
+
+      expect(await fs.pathExists(path.join(snapshotPath, ".codex", "config.toml"))).toBe(true);
+      expect(await fs.pathExists(path.join(snapshotPath, ".codex", "ipc", "ipc.sock"))).toBe(false);
+    } finally {
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
   });
 
   it("loads a named config and backs up the previous folders", async () => {

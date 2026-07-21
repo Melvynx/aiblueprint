@@ -122,6 +122,15 @@ async function copyManagedFolder(source: string, destination: string): Promise<v
   await fs.copy(source, destination, {
     overwrite: true,
     dereference: os.platform() === "win32",
+    filter: async (sourcePath) => {
+      const stat = await fs.lstat(sourcePath);
+      return !(
+        stat.isSocket()
+        || stat.isFIFO()
+        || stat.isCharacterDevice()
+        || stat.isBlockDevice()
+      );
+    },
   });
 }
 
