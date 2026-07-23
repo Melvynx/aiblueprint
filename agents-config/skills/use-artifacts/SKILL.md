@@ -9,7 +9,7 @@ description: Create Claude-style local HTML artifacts under global ~/.agents/art
 
 Use this skill to simulate Claude Artifacts in agents that do not have a native artifact panel. The artifact is a small global workspace, usually a single self-contained HTML file, created at `~/.agents/artifacts/<id>/` so the user can open, inspect, and iterate on it from any repo.
 
-Always create artifacts in the global user directory: `/Users/melvynx/.agents/artifacts/<id>/`. Never create artifacts inside a repo-local `.agents/artifacts` directory, even when the current working directory is a product repo.
+Always create artifacts in the global user directory: `~/.agents/artifacts/<id>/`. Never create artifacts inside a repo-local `.agents/artifacts` directory, even when the current working directory is a product repo.
 
 The HTML is the deliverable. It should turn the agent's public reasoning, plan, findings, examples, and tradeoffs into a polished page the user can scan, not just dump markdown into a file.
 
@@ -112,7 +112,7 @@ application style, a requested style, or the minimalist fallback.
 4. Scaffold the workspace:
 
 ```bash
-python3 /Users/melvynx/.agents/skills/use-artifacts/scripts/create_artifact.py "<short title>" --style "<requested, project:app-name, or fallback style>" --kind thinking
+python3 "$HOME/.agents/skills/use-artifacts/scripts/create_artifact.py" "<short title>" --style "<requested, project:app-name, or fallback style>" --kind thinking
 ```
 
 5. Implement the artifact in `index.html`.
@@ -132,7 +132,7 @@ Each artifact directory should contain:
 
 Target location:
 
-- Always use `/Users/melvynx/.agents/artifacts/<id>/`.
+- Always use `~/.agents/artifacts/<id>/`.
 - Do not use `<current-project>/.agents/artifacts/<id>/`.
 - Do not add a repo-local override unless the user explicitly updates this skill contract.
 

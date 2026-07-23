@@ -1,6 +1,6 @@
 ---
 name: app-icon
-description: Generate a premium, vibrant, dimensional iOS + Android app icon for an Expo / React Native app with AI image generation, then post-process it to App Store / Play specs. Use for "create my app icon", "generate the iOS icon", "redo the app logo", "make the launcher icon". Works with ANY image-generation tool (Codex `image_gen`, `gemini-cli` Nano Banana, gpt-image, …).
+description: Generate a vibrant dimensional iOS and Android app icon for an Expo or React Native app with AI image generation, then post-process it for store specs. Use for creating, regenerating, or polishing an app logo or launcher icon.
 argument-hint: "[app concept or brand]"
 ---
 

@@ -102,24 +102,8 @@ npx aiblueprint-cli@latest agents config unify sessions
 
 ### Workflow Skills
 
-**Development:**
-- `commit` - Fast conventional commits
-- `create-pr` - Auto-generated PRs
-- `fix-pr-comments` - Resolve PR comments
-- `merge` - Context-aware branch merging
-
-**Project setup:**
-- `nextjs-setup-project` - Scaffold the preferred Next.js stack
-- `nextjs-add-prisma-db` - Add Prisma and PostgreSQL
-- `nextjs-setup-better-auth` - Wire Better Auth with email OTP
-- `create-vitejs-app` - Create a Vite app with Tailwind and shadcn/ui
-
-**SaaS planning:**
-- `saas-create-prd` - Build a lean Product Requirements Document
-- `saas-create-architecture` - Design technical architecture
-- `saas-create-tasks` - Generate implementation tasks
-- `saas-define-pricing` - Create pricing strategy
-- `saas-find-domain-name` - Generate and validate domains
+The free configuration ships the skills listed in the catalog below. The CLI
+installs every directory under `agents-config/skills/`.
 
 ### Agents (3 Specialized)
 
@@ -154,24 +138,26 @@ npx skills add Melvynx/aiblueprint --skill skill-manager
 
 | Skill | Description |
 |-------|-------------|
+| `agents-manager` | Create and orchestrate Claude Code agents |
+| `apex` | Structured implementation workflow |
+| `app-icon` | Generate and prepare app icons |
+| `appstore-connect` | Manage App Store Connect workflows |
 | `commit` | Quick commit and push with clean messages |
 | `create-pr` | Auto-generated pull requests |
 | `fix-pr-comments` | Resolve PR review comments |
+| `grill-me` | Stress-test a plan with focused questions |
 | `merge` | Context-aware branch merging |
+| `environments-manager` | Set up per-worktree agent environments |
+| `oneshot` | Implement one focused change quickly |
+| `prompt` | Create minimalist SVG logo variations |
 | `prompt-creator` | Expert prompt engineering |
+| `rules-manager` | Create and maintain agent rule files |
 | `skill-manager` | Manage skills and rules across Claude Code, Codex, and Cursor |
-| `saas-create-prd` | Build a lean SaaS PRD |
-| `saas-create-architecture` | Design SaaS technical architecture |
-| `saas-create-tasks` | Generate implementation task files |
-| `nextjs-setup-project` | Set up a production-ready Next.js project |
-| `create-vitejs-app` | Create a Vite app with Tailwind and shadcn/ui |
+| `tools` | AIBlueprint tools and libraries reference |
 | `use-style` | Apply named UI style guides before implementation |
 | `use-artifacts` | Create polished local HTML plans, prototypes, and visualizations |
-| `rules-manager` | Create and maintain AGENTS.md and agent rule files |
-| `agents-managers` | Manage Claude Code agents and Task-tool orchestration |
-| `environments-manager` | Set up per-worktree agent environments |
-| `grill-me` | Stress-test a plan with focused design questions |
-| `oneshot` | Ultra-fast feature implementation |
+| `use-delegate` | Delegate heavy work to cheap executors |
+| `use-goal` | Create evidence-based agent goals |
 | `ultrathink` | Deep thinking mode for elegant solutions |
 
 ## 💎 Premium

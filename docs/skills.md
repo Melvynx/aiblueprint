@@ -16,6 +16,35 @@ npx skills@latest add melvynx/aiblueprint --skill <skill-name>
 
 Replace `<skill-name>` with one of the identifiers below (e.g. `app-icon`).
 
+## Free catalog
+
+This catalog is generated from the directories shipped under
+`agents-config/skills/`; every entry below is installed by the free CLI setup.
+
+| Skill | Description |
+|-------|-------------|
+| `agents-manager` | Create and orchestrate Claude Code agents |
+| `apex` | Structured implementation workflow |
+| `app-icon` | Generate and prepare app icons |
+| `appstore-connect` | Manage App Store Connect workflows |
+| `commit` | Create clean commits and push changes |
+| `create-pr` | Create and push pull requests |
+| `environments-manager` | Set up per-worktree environments |
+| `fix-pr-comments` | Resolve pull-request review comments |
+| `grill-me` | Stress-test a plan with focused questions |
+| `merge` | Merge branches with conflict awareness |
+| `oneshot` | Implement one focused change quickly |
+| `prompt` | Create minimalist SVG logo variations |
+| `prompt-creator` | Expert prompt engineering |
+| `rules-manager` | Maintain AGENTS.md and agent rules |
+| `skill-manager` | Create, edit, audit, or prune skills |
+| `tools` | AIBlueprint tools and libraries reference |
+| `ultrathink` | Deep thinking for elegant solutions |
+| `use-artifacts` | Create reusable local HTML artifacts |
+| `use-delegate` | Delegate heavy work to cheap executors |
+| `use-goal` | Create evidence-based agent Goals |
+| `use-style` | Apply named visual style guides |
+
 ---
 
 ## app-icon
