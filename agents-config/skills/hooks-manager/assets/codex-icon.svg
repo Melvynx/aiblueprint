@@ -1,0 +1,5 @@
+<svg role="img" aria-label="hooks-manager skill icon" width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" rx="16" fill="#868259"/>
+  <path d="M20 22h24v6H20v-6Zm0 14h16v6H20v-6Zm0 14h24v6H20v-6Z" fill="#fff"/>
+  <circle cx="44" cy="39" r="7" fill="#868259" stroke="#fff" stroke-width="4"/>
+</svg>

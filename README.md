@@ -146,6 +146,7 @@ npx skills add Melvynx/aiblueprint --skill skill-manager
 | `create-pr` | Auto-generated pull requests |
 | `fix-pr-comments` | Resolve PR review comments |
 | `grill-me` | Stress-test a plan with focused questions |
+| `hooks-manager` | Create and debug Claude Code hooks |
 | `merge` | Context-aware branch merging |
 | `environments-manager` | Set up per-worktree agent environments |
 | `oneshot` | Implement one focused change quickly |

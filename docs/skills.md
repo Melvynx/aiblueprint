@@ -32,6 +32,7 @@ This catalog is generated from the directories shipped under
 | `environments-manager` | Set up per-worktree environments |
 | `fix-pr-comments` | Resolve pull-request review comments |
 | `grill-me` | Stress-test a plan with focused questions |
+| `hooks-manager` | Create and debug Claude Code hooks |
 | `merge` | Merge branches with conflict awareness |
 | `oneshot` | Implement one focused change quickly |
 | `prompt` | Create minimalist SVG logo variations |

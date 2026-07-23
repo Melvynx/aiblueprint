@@ -1,0 +1,7 @@
+interface:
+  display_name: "Hooks Manager"
+  short_description: "Create, edit, configure, and debug Claude Code hooks"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#868259"
+  default_prompt: "Use $hooks-manager to help with this task."
