@@ -28,6 +28,10 @@ export function getTokenFilePath(): string {
   return path.join(getConfigDir(), "token.txt");
 }
 
+export function getAssistantProTokenFilePath(): string {
+  return path.join(getConfigDir(), "assistant-pro-token.txt");
+}
+
 /**
  * Save GitHub token to file
  */
@@ -50,6 +54,12 @@ export async function saveToken(githubToken: string): Promise<void> {
   await fs.writeFile(tokenFile, githubToken, { mode: 0o600 });
 }
 
+export async function saveAssistantProToken(githubToken: string): Promise<void> {
+  const tokenFile = getAssistantProTokenFilePath();
+  await fs.ensureDir(path.dirname(tokenFile));
+  await fs.writeFile(tokenFile, githubToken, { mode: 0o600 });
+}
+
 /**
  * Read GitHub token from file
  * Returns null if file doesn't exist
@@ -65,6 +75,21 @@ export async function getToken(): Promise<string | null> {
     const token = await fs.readFile(tokenFile, "utf-8");
     return token.trim();
   } catch (error) {
+    return null;
+  }
+}
+
+export async function getAssistantProToken(): Promise<string | null> {
+  const tokenFile = getAssistantProTokenFilePath();
+
+  if (!(await fs.pathExists(tokenFile))) {
+    return null;
+  }
+
+  try {
+    const token = await fs.readFile(tokenFile, "utf-8");
+    return token.trim();
+  } catch {
     return null;
   }
 }
@@ -93,6 +118,13 @@ export async function deleteToken(): Promise<void> {
 export function getTokenInfo(): { path: string; platform: string } {
   return {
     path: getTokenFilePath(),
+    platform: os.platform(),
+  };
+}
+
+export function getAssistantProTokenInfo(): { path: string; platform: string } {
+  return {
+    path: getAssistantProTokenFilePath(),
     platform: os.platform(),
   };
 }

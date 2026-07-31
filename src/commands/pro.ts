@@ -1,13 +1,24 @@
 import * as p from "@clack/prompts";
 import chalk from "chalk";
 import path from "path";
-import { installProConfigs, type InstallProgressCallback } from "../lib/pro-installer.js";
+import {
+  configureAssistantProConsumers,
+  installAssistantProSkills,
+  installProConfigs,
+  type InstallProgressCallback,
+} from "../lib/pro-installer.js";
 import { resolveFolders, type FolderOptions } from "../lib/folder-paths.js";
 import { getVersion } from "../lib/version.js";
 
 export type ProCommandOptions = FolderOptions;
+export type AssistantProCommandOptions = Omit<FolderOptions, "agentsFolder"> & {
+  hermesFolder?: string;
+};
 import {
+  getAssistantProToken,
+  getAssistantProTokenInfo,
   saveToken,
+  saveAssistantProToken,
   getToken,
   getTokenInfo,
 } from "../lib/token-storage.js";
@@ -19,6 +30,7 @@ import { trackEvent, trackError, flushTelemetry } from "../lib/telemetry.js";
 
 const API_URL = "https://codeline.app/api/products";
 const PRODUCT_IDS = ["prd_XJVgxVPbGG", "prd_NKabAkdOkw"];
+const ASSISTANT_PRO_PRODUCT_ID = "prd_t2GRwX3aH1";
 
 type PremiumActivationData = {
   hasAccess?: boolean;
@@ -58,9 +70,21 @@ function logPremiumActivationError(error: PremiumActivationError) {
   }
 }
 
-async function promptForPremiumToken(): Promise<string> {
+interface PremiumActivationOptions {
+  productIds?: string[];
+  promptMessage?: string;
+  validationMessage?: string;
+  invalidMessage?: string;
+  cancelMessage?: string;
+  saveGithubToken?: (githubToken: string) => Promise<void>;
+}
+
+async function promptForPremiumToken(
+  message = "Enter your Premium access token:",
+  cancelMessage = "Premium activation cancelled",
+): Promise<string> {
   const result = await p.text({
-    message: "Enter your Premium access token:",
+    message,
     placeholder: "Your ProductsOnUsers ID from codeline.app",
     validate: (value) => {
       if (!value) return "Token is required";
@@ -70,7 +94,7 @@ async function promptForPremiumToken(): Promise<string> {
   });
 
   if (p.isCancel(result)) {
-    p.cancel("Premium activation cancelled");
+    p.cancel(cancelMessage);
     process.exit(0);
   }
 
@@ -79,10 +103,11 @@ async function promptForPremiumToken(): Promise<string> {
 
 async function fetchPremiumActivationData(
   userToken: string,
+  productIds = PRODUCT_IDS,
 ): Promise<PremiumActivationData | null> {
   const encodedToken = encodeURIComponent(userToken);
 
-  for (const productId of PRODUCT_IDS) {
+  for (const productId of productIds) {
     const response = await fetch(
       `${API_URL}/${productId}/have-access?token=${encodedToken}`,
     );
@@ -98,19 +123,25 @@ async function fetchPremiumActivationData(
   return null;
 }
 
-async function activatePremiumToken(userToken?: string): Promise<PremiumActivationResult> {
-  const premiumToken = userToken ?? await promptForPremiumToken();
+async function activatePremiumToken(
+  userToken?: string,
+  options: PremiumActivationOptions = {},
+): Promise<PremiumActivationResult> {
+  const premiumToken = userToken ?? await promptForPremiumToken(
+    options.promptMessage,
+    options.cancelMessage,
+  );
 
   const spinner = p.spinner();
-  spinner.start("Validating token against premium products...");
+  spinner.start(options.validationMessage ?? "Validating token against premium products...");
 
-  const data = await fetchPremiumActivationData(premiumToken);
+  const data = await fetchPremiumActivationData(premiumToken, options.productIds);
 
   if (!data) {
     spinner.stop("Token validation failed");
     throw new PremiumActivationError(
       "invalid-token",
-      "Invalid token or no access to premium products",
+      options.invalidMessage ?? "Invalid token or no access to premium products",
     );
   }
 
@@ -125,7 +156,7 @@ async function activatePremiumToken(userToken?: string): Promise<PremiumActivati
   }
 
   spinner.start("Saving token...");
-  await saveToken(githubToken);
+  await (options.saveGithubToken ?? saveToken)(githubToken);
   spinner.stop("Token saved");
 
   return { githubToken, data };
@@ -317,6 +348,78 @@ export async function proSetupCommand(
       p.log.error(error.message);
     }
     p.outro(chalk.red("❌ Setup failed"));
+    process.exit(1);
+  }
+}
+
+export async function assistantProSetupCommand(
+  options: AssistantProCommandOptions = {},
+) {
+  p.intro(chalk.blue(`🤖 Setup Assistant Pro ${chalk.gray(`v${getVersion()}`)}`));
+
+  try {
+    let githubToken = await getAssistantProToken();
+
+    if (!githubToken) {
+      p.log.info("Enter your Assistant Pro access key to activate and continue setup.");
+      const activation = await activatePremiumToken(undefined, {
+        productIds: [ASSISTANT_PRO_PRODUCT_ID],
+        promptMessage: "Enter your Assistant Pro access key:",
+        validationMessage: "Validating Assistant Pro access key...",
+        invalidMessage: "Invalid key or no access to AssistantPro",
+        cancelMessage: "Assistant Pro setup cancelled",
+        saveGithubToken: saveAssistantProToken,
+      });
+      githubToken = activation.githubToken;
+      p.log.success("✅ Assistant Pro key activated. Continuing setup...");
+    }
+
+    const { rootDir, claudeDir, codexDir, agentsDir } = resolveFolders(options);
+    const hermesDir = options.hermesFolder
+      ? path.resolve(options.hermesFolder)
+      : path.join(rootDir, ".hermes");
+    const spinner = p.spinner();
+
+    spinner.start("Installing the latest Assistant Pro skills...");
+    const result = await installAssistantProSkills({
+      githubToken,
+      rootDir,
+    });
+    spinner.stop(`Assistant Pro ${result.version} installed`);
+
+    spinner.start("Configuring Claude Code, Codex, Hermes, and OpenClaw...");
+    await configureAssistantProConsumers({
+      agentsDir,
+      claudeDir,
+      codexDir,
+      hermesDir,
+    });
+    spinner.stop("Assistant integrations configured");
+
+    trackEvent("assistant-pro-setup", {
+      skills: result.skillCount,
+      version: result.version,
+    });
+
+    p.log.success("✅ Assistant Pro setup complete!");
+    p.log.info(`  • ${result.skillCount} skills from assistant-pro-skills ${result.version}`);
+    p.log.info(`  • Codex source: ${path.join(agentsDir, "skills")}`);
+    p.log.info(`  • Claude Code symlinks: ${path.join(claudeDir, "skills")}`);
+    p.log.info(`  • Hermes external skills: ${path.join(hermesDir, "config.yaml")}`);
+    p.log.info("  • OpenClaw: native ~/.agents/skills discovery");
+    p.log.info(`  • Access key saved to: ${getAssistantProTokenInfo().path}`);
+
+    p.outro(chalk.green("🚀 Assistant Pro is ready! Start a new assistant session."));
+  } catch (error) {
+    trackError(error, { command: "assistant-pro-setup" });
+    await flushTelemetry();
+    if (isPremiumActivationError(error)) {
+      p.log.error(error.message);
+      p.log.info("Get Assistant Pro at: https://codeline.app");
+    } else if (error instanceof Error) {
+      p.log.error(error.message);
+    }
+    p.outro(chalk.red("❌ Assistant Pro setup failed"));
     process.exit(1);
   }
 }

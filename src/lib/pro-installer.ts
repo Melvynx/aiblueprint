@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import os from "os";
 import path from "path";
-import { exec } from "child_process";
+import { exec, execFile } from "child_process";
 import { promisify } from "util";
 import { applyPathPlaceholders, isTextFile, replaceClaudePathPlaceholder, replacePathPlaceholdersInDir } from "./platform.js";
 import {
@@ -13,9 +13,12 @@ import { resolveFolders } from "./folder-paths.js";
 import { mergeCodexConfigFile } from "./codex-config.js";
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 const PREMIUM_REPO = "Melvynx/aiblueprint-cli-premium";
 const PREMIUM_BRANCH = "main";
+const ASSISTANT_PRO_REPO = "Melvynx/assistant-pro-skills";
+const ASSISTANT_PRO_BRANCH = "main";
 const CONFIG_FOLDER_CANDIDATES = ["agents-config", "ai-coding", "claude-code-config", "ai-config"] as const;
 
 export type InstallProgressCallback = (
@@ -386,4 +389,260 @@ async function syncAllAgentSymlinks(agentsDir: string, claudeDir: string): Promi
   for (const category of AGENT_CATEGORIES) {
     await syncCategorySymlinks(category, agentsDir, claudeDir, undefined, true);
   }
+}
+
+export interface InstallAssistantProSkillsOptions {
+  githubToken: string;
+  rootDir: string;
+}
+
+export interface InstallAssistantProSkillsResult {
+  version: string;
+  skillCount: number;
+}
+
+export interface ConfigureAssistantProConsumersOptions {
+  agentsDir: string;
+  claudeDir: string;
+  codexDir: string;
+  hermesDir: string;
+}
+
+function getAssistantProCacheDir(): string {
+  return path.join(
+    os.homedir(),
+    ".config",
+    "aiblueprint",
+    "pro-repos",
+    "assistant-pro-skills",
+  );
+}
+
+async function runAuthenticatedGit(
+  args: string[],
+  token: string,
+  cwd?: string,
+): Promise<void> {
+  const authorization = Buffer.from(`x-access-token:${token}`).toString("base64");
+
+  try {
+    await execFileAsync(
+      "git",
+      ["-c", `http.extraHeader=Authorization: Basic ${authorization}`, ...args],
+      { cwd, timeout: 120000 },
+    );
+  } catch {
+    throw new Error("Unable to download the latest Assistant Pro skills from GitHub");
+  }
+}
+
+async function cloneOrUpdateAssistantProRepo(githubToken: string): Promise<string> {
+  const cacheDir = getAssistantProCacheDir();
+  const repoUrl = `https://github.com/${ASSISTANT_PRO_REPO}.git`;
+
+  if (await fs.pathExists(path.join(cacheDir, ".git"))) {
+    await runAuthenticatedGit(
+      ["fetch", "origin", ASSISTANT_PRO_BRANCH],
+      githubToken,
+      cacheDir,
+    );
+    await runAuthenticatedGit(["merge", "--ff-only", "FETCH_HEAD"], githubToken, cacheDir);
+    return cacheDir;
+  }
+
+  if (await fs.pathExists(cacheDir)) {
+    throw new Error(`Assistant Pro cache is not a Git repository: ${cacheDir}`);
+  }
+
+  await fs.ensureDir(path.dirname(cacheDir));
+  await runAuthenticatedGit(
+    [
+      "clone",
+      "--branch",
+      ASSISTANT_PRO_BRANCH,
+      "--single-branch",
+      repoUrl,
+      cacheDir,
+    ],
+    githubToken,
+  );
+  return cacheDir;
+}
+
+export async function installAssistantProSkills(
+  options: InstallAssistantProSkillsOptions,
+): Promise<InstallAssistantProSkillsResult> {
+  const cacheDir = await cloneOrUpdateAssistantProRepo(options.githubToken);
+  const installerPath = path.join(cacheDir, "ap_skills.py");
+  const manifestPath = path.join(cacheDir, "manifest.json");
+
+  if (!(await fs.pathExists(installerPath)) || !(await fs.pathExists(manifestPath))) {
+    throw new Error("Assistant Pro repository is missing ap_skills.py or manifest.json");
+  }
+
+  try {
+    await execFileAsync(
+      "python3",
+      [
+        installerPath,
+        "--home",
+        options.rootDir,
+        "--json",
+        "install",
+        "--bundle",
+        "all",
+        "--target",
+        "codex",
+      ],
+      { cwd: cacheDir, timeout: 120000 },
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    throw new Error(`Assistant Pro skill installation failed: ${message}`);
+  }
+
+  const manifest = await fs.readJson(manifestPath) as {
+    version?: string;
+    bundles?: { all?: string[] };
+  };
+
+  return {
+    version: manifest.version ?? "unknown",
+    skillCount: manifest.bundles?.all?.length ?? 0,
+  };
+}
+
+function countLeadingSpaces(line: string): number {
+  return line.length - line.trimStart().length;
+}
+
+function isYamlContentLine(line: string): boolean {
+  const trimmed = line.trim();
+  return trimmed.length > 0 && !trimmed.startsWith("#");
+}
+
+export async function ensureHermesExternalSkillsDir(
+  hermesDir: string,
+  agentsSkillsDir: string,
+): Promise<boolean> {
+  const configPath = path.join(hermesDir, "config.yaml");
+  const resolvedSkillsDir = path.resolve(agentsSkillsDir);
+  const defaultSkillsDir = path.join(os.homedir(), ".agents", "skills");
+  const configuredPath = resolvedSkillsDir === defaultSkillsDir
+    ? "~/.agents/skills"
+    : resolvedSkillsDir;
+  const yamlEntry = `    - ${JSON.stringify(configuredPath)}`;
+
+  await fs.ensureDir(hermesDir);
+
+  if (!(await fs.pathExists(configPath))) {
+    await fs.writeFile(
+      configPath,
+      `skills:\n  external_dirs:\n${yamlEntry}\n`,
+      "utf-8",
+    );
+    return true;
+  }
+
+  const original = await fs.readFile(configPath, "utf-8");
+  const lines = original.split(/\r?\n/);
+  let skillsIndex = lines.findIndex((line) => /^skills:\s*(?:#.*)?$/.test(line));
+
+  if (skillsIndex === -1) {
+    const inlineSkillsIndex = lines.findIndex((line) => /^skills:\s*\S+/.test(line));
+    if (inlineSkillsIndex !== -1) {
+      const inlineValue = lines[inlineSkillsIndex]
+        .replace(/^skills:\s*/, "")
+        .replace(/\s+#.*$/, "")
+        .trim();
+      if (inlineValue === "{}" || inlineValue === "null" || inlineValue === "~") {
+        lines[inlineSkillsIndex] = "skills:";
+        skillsIndex = inlineSkillsIndex;
+      } else {
+        throw new Error(
+          `Hermes skills uses an inline value in ${configPath}; add ${configuredPath} manually`,
+        );
+      }
+    }
+  }
+
+  if (skillsIndex === -1) {
+    const separator = original.length > 0 && !original.endsWith("\n") ? "\n" : "";
+    await fs.writeFile(
+      configPath,
+      `${original}${separator}skills:\n  external_dirs:\n${yamlEntry}\n`,
+      "utf-8",
+    );
+    return true;
+  }
+
+  let skillsEnd = lines.length;
+  for (let index = skillsIndex + 1; index < lines.length; index += 1) {
+    if (isYamlContentLine(lines[index]) && countLeadingSpaces(lines[index]) === 0) {
+      skillsEnd = index;
+      break;
+    }
+  }
+
+  const externalIndex = lines.findIndex((line, index) => {
+    return index > skillsIndex
+      && index < skillsEnd
+      && /^\s+external_dirs:\s*/.test(line);
+  });
+
+  if (externalIndex === -1) {
+    lines.splice(skillsIndex + 1, 0, "  external_dirs:", yamlEntry);
+  } else {
+    const match = lines[externalIndex].match(/^(\s+)external_dirs:\s*(.*)$/);
+    let inlineValue = match?.[2]?.replace(/\s+#.*$/, "").trim() ?? "";
+    if (inlineValue === "[]") {
+      lines[externalIndex] = `${match?.[1] ?? "  "}external_dirs:`;
+      inlineValue = "";
+    }
+    if (inlineValue) {
+      if (inlineValue.includes(configuredPath) || inlineValue.includes(resolvedSkillsDir)) {
+        return false;
+      }
+      throw new Error(
+        `Hermes external_dirs uses an inline value in ${configPath}; add ${configuredPath} manually`,
+      );
+    }
+
+    const externalIndent = match?.[1].length ?? 2;
+    let externalEnd = skillsEnd;
+    for (let index = externalIndex + 1; index < skillsEnd; index += 1) {
+      if (
+        isYamlContentLine(lines[index])
+        && countLeadingSpaces(lines[index]) <= externalIndent
+      ) {
+        externalEnd = index;
+        break;
+      }
+    }
+
+    const existingValues = lines
+      .slice(externalIndex + 1, externalEnd)
+      .map((line) => line.trim().replace(/^-\s*/, "").replace(/^['"]|['"]$/g, ""));
+
+    if (existingValues.includes(configuredPath) || existingValues.includes(resolvedSkillsDir)) {
+      return false;
+    }
+
+    const listIndent = " ".repeat(externalIndent + 2);
+    lines.splice(externalEnd, 0, `${listIndent}- ${JSON.stringify(configuredPath)}`);
+  }
+
+  await fs.writeFile(configPath, `${lines.join("\n").replace(/\n+$/, "")}\n`, "utf-8");
+  return true;
+}
+
+export async function configureAssistantProConsumers(
+  options: ConfigureAssistantProConsumersOptions,
+): Promise<void> {
+  await syncCategorySymlinks("skills", options.agentsDir, options.claudeDir, undefined, true);
+  await syncCategorySymlinks("skills", options.agentsDir, options.codexDir, undefined, true);
+  await ensureHermesExternalSkillsDir(
+    options.hermesDir,
+    path.join(options.agentsDir, "skills"),
+  );
 }

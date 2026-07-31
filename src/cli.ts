@@ -7,6 +7,7 @@ import { agentsUnifyCommand } from "./commands/agents-unify.js";
 import { codexAgentsCommand } from "./commands/codex-agents.js";
 import { sessionsUnifyCommand } from "./commands/session-unify.js";
 import {
+  assistantProSetupCommand,
   proActivateCommand,
   proStatusCommand,
   proSetupCommand,
@@ -427,6 +428,24 @@ addConfigFolderOptions(configsBackupsCmd
       dryRun: options.dryRun,
       includeManual: options.includeManual,
     });
+  });
+
+// ============================================
+// ASSISTANT PRO DOMAIN
+// ============================================
+const assistantsCmd = program
+  .command("assistants")
+  .description("Configure skills shared by Claude Code, Codex, Hermes, and OpenClaw");
+
+const assistantsProCmd = assistantsCmd
+  .command("pro")
+  .description("Manage Assistant Pro skills");
+
+assistantsProCmd
+  .command("setup")
+  .description("Install the latest Assistant Pro skills and configure supported assistants")
+  .action(() => {
+    return assistantProSetupCommand();
   });
 
 // ============================================

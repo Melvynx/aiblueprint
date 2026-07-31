@@ -3,8 +3,12 @@ import inquirer from "inquirer";
 import * as clack from "@clack/prompts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { setupCommand } from "../src/commands/setup";
-import { proSetupCommand } from "../src/commands/pro";
-import { installProConfigs } from "../src/lib/pro-installer.js";
+import { assistantProSetupCommand, proSetupCommand } from "../src/commands/pro";
+import {
+  configureAssistantProConsumers,
+  installAssistantProSkills,
+  installProConfigs,
+} from "../src/lib/pro-installer.js";
 import { promisify } from "util";
 import { exec } from "child_process";
 
@@ -32,6 +36,8 @@ vi.mock("@clack/prompts", () => ({
   },
 }));
 vi.mock("../src/lib/pro-installer.js", () => ({
+  configureAssistantProConsumers: vi.fn(),
+  installAssistantProSkills: vi.fn(),
   installProConfigs: vi.fn(),
 }));
 vi.mock("child_process", () => ({
@@ -257,6 +263,11 @@ describe("Premium setup", () => {
     // @ts-expect-error Not important
     vi.mocked(fs.readdir).mockResolvedValue([]);
     vi.mocked(installProConfigs).mockResolvedValue();
+    vi.mocked(installAssistantProSkills).mockResolvedValue({
+      version: "1.1.0",
+      skillCount: 17,
+    });
+    vi.mocked(configureAssistantProConsumers).mockResolvedValue();
     vi.mocked(clack.text).mockResolvedValue("premium user token");
 
     global.fetch = vi.fn(() =>
@@ -313,6 +324,42 @@ describe("Premium setup", () => {
     expect(clack.log.success).toHaveBeenCalledWith(
       "✅ Token activated. Continuing setup...",
     );
+    expect(mockExit).not.toHaveBeenCalled();
+  });
+
+  it("installs Assistant Pro and configures every supported assistant in one run", async () => {
+    await expect(
+      assistantProSetupCommand({
+        folder: "/tmp/test-home",
+        claudeCodeFolder: "/tmp/test-claude",
+        codexFolder: "/tmp/test-codex",
+        hermesFolder: "/tmp/test-hermes",
+      }),
+    ).resolves.not.toThrow();
+
+    expect(clack.text).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Enter your Assistant Pro access key:",
+      }),
+    );
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining("/prd_t2GRwX3aH1/have-access?token=premium%20user%20token"),
+    );
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      expect.stringContaining("assistant-pro-token.txt"),
+      "github-token",
+      { mode: 0o600 },
+    );
+    expect(installAssistantProSkills).toHaveBeenCalledWith({
+      githubToken: "github-token",
+      rootDir: "/tmp/test-home",
+    });
+    expect(configureAssistantProConsumers).toHaveBeenCalledWith({
+      agentsDir: "/tmp/test-home/.agents",
+      claudeDir: "/tmp/test-claude",
+      codexDir: "/tmp/test-codex",
+      hermesDir: "/tmp/test-hermes",
+    });
     expect(mockExit).not.toHaveBeenCalled();
   });
 });

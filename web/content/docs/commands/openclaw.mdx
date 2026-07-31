@@ -33,3 +33,19 @@ aiblueprint openclaw pro activate YOUR_TOKEN
 aiblueprint openclaw pro setup
 aiblueprint openclaw pro update
 ```
+
+## Assistant Pro skills
+
+For the current Assistant Pro skill catalog, use the multi-assistant setup:
+
+```bash
+aiblueprint assistants pro setup
+```
+
+OpenClaw discovers personal skills from `~/.agents/skills` natively, so this
+command does not duplicate them under `~/.openclaw/skills`. The same canonical
+skill files are also linked into Claude Code and Codex, while Hermes receives a
+`skills.external_dirs` entry in `~/.hermes/config.yaml`.
+
+The `openclaw pro` commands above remain available for the older OpenClaw-specific
+configuration repository.

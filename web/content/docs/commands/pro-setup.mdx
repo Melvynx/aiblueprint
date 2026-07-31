@@ -46,3 +46,20 @@ aiblueprint agents --folder ~/my-config pro setup
 
 To review individual changes during later updates, use
 [`agents pro sync`](/commands/sync).
+
+## Assistant Pro skills
+
+Assistant Pro is a separate, skills-only product. Install its latest complete
+bundle with:
+
+```bash
+aiblueprint assistants pro setup
+```
+
+The command asks for the Assistant Pro access key when no saved key exists,
+installs the `all` bundle from `Melvynx/assistant-pro-skills`, and configures the
+shared skills for Claude Code, Codex, Hermes, and OpenClaw. Python 3 is required
+by the repository's versioned installer.
+
+The command has no arguments or flags. It installs into the standard user-level
+assistant folders under `$HOME`.

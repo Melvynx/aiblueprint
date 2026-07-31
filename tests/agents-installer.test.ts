@@ -8,6 +8,10 @@ import {
   syncCategorySymlinks,
   isAgentCategory,
 } from "../src/lib/agents-installer";
+import {
+  configureAssistantProConsumers,
+  ensureHermesExternalSkillsDir,
+} from "../src/lib/pro-installer";
 
 const TMP_ROOT = path.join(os.tmpdir(), "aiblueprint-agents-installer-test");
 
@@ -251,5 +255,80 @@ describe("syncCategorySymlinks", () => {
     await syncCategorySymlinks("skills", fixture.agentsDir, fixture.claudeDir, undefined, true);
 
     expect(await fs.pathExists(path.join(claudeCategory, "ghost"))).toBe(false);
+  });
+});
+
+describe("Assistant Pro consumers", () => {
+  let root: string;
+
+  beforeEach(async () => {
+    root = path.join(TMP_ROOT, `${Date.now()}-assistant-pro`);
+    await fs.ensureDir(path.join(root, ".agents/skills/ap-example"));
+    await fs.writeFile(
+      path.join(root, ".agents/skills/ap-example/SKILL.md"),
+      "assistant pro skill",
+      "utf-8",
+    );
+  });
+
+  afterEach(async () => {
+    await fs.remove(root).catch(() => {});
+  });
+
+  it("links shared skills into Claude and Codex and configures Hermes", async () => {
+    await configureAssistantProConsumers({
+      agentsDir: path.join(root, ".agents"),
+      claudeDir: path.join(root, ".claude"),
+      codexDir: path.join(root, ".codex"),
+      hermesDir: path.join(root, ".hermes"),
+    });
+
+    expect(
+      (await fs.lstat(path.join(root, ".claude/skills/ap-example"))).isSymbolicLink(),
+    ).toBe(true);
+    expect(
+      (await fs.lstat(path.join(root, ".codex/skills/ap-example"))).isSymbolicLink(),
+    ).toBe(true);
+    expect(await fs.readFile(path.join(root, ".hermes/config.yaml"), "utf-8")).toBe(
+      `skills:\n  external_dirs:\n    - ${JSON.stringify(path.join(root, ".agents/skills"))}\n`,
+    );
+  });
+
+  it("adds the shared directory without replacing existing Hermes settings", async () => {
+    const hermesDir = path.join(root, ".hermes");
+    await fs.ensureDir(hermesDir);
+    await fs.writeFile(
+      path.join(hermesDir, "config.yaml"),
+      "model: test\nskills:\n  write_approval: true\n  external_dirs:\n    - /srv/team-skills\ngateway:\n  enabled: true\n",
+      "utf-8",
+    );
+
+    await expect(
+      ensureHermesExternalSkillsDir(hermesDir, path.join(root, ".agents/skills")),
+    ).resolves.toBe(true);
+
+    const config = await fs.readFile(path.join(hermesDir, "config.yaml"), "utf-8");
+    expect(config).toContain("model: test");
+    expect(config).toContain("    - /srv/team-skills");
+    expect(config).toContain(
+      `    - ${JSON.stringify(path.join(root, ".agents/skills"))}`,
+    );
+    expect(config).toContain("gateway:\n  enabled: true");
+
+    await expect(
+      ensureHermesExternalSkillsDir(hermesDir, path.join(root, ".agents/skills")),
+    ).resolves.toBe(false);
+  });
+
+  it("expands an empty inline Hermes skills map", async () => {
+    const hermesDir = path.join(root, ".hermes");
+    await fs.ensureDir(hermesDir);
+    await fs.writeFile(path.join(hermesDir, "config.yaml"), "skills: {}\n", "utf-8");
+
+    await ensureHermesExternalSkillsDir(hermesDir, path.join(root, ".agents/skills"));
+
+    expect(await fs.readFile(path.join(hermesDir, "config.yaml"), "utf-8")).toBe(
+      `skills:\n  external_dirs:\n    - ${JSON.stringify(path.join(root, ".agents/skills"))}\n`,
+    );
   });
 });

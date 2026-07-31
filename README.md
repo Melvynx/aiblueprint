@@ -161,7 +161,22 @@ npx skills add Melvynx/aiblueprint --skill skill-manager
 | `use-goal` | Create evidence-based agent goals |
 | `ultrathink` | Deep thinking mode for elegant solutions |
 
-## 💎 Premium
+## 🤖 Assistant Pro
+
+Install the latest complete skill bundle from the private
+[`assistant-pro-skills`](https://github.com/Melvynx/assistant-pro-skills)
+repository:
+
+```bash
+npx aiblueprint-cli@latest assistants pro setup
+```
+
+The command asks for the Assistant Pro access key when needed, installs the
+versioned `all` bundle into `~/.agents/skills`, creates Claude Code and Codex
+skill symlinks, adds the shared directory to Hermes, and exposes the same skills
+to OpenClaw through its native `~/.agents/skills` discovery.
+
+## 💎 Agents Config Pro
 
 Unlock advanced features at [mlv.sh/claude-cli](https://mlv.sh/claude-cli)
 
@@ -198,6 +213,7 @@ bun run test-local
 - Node.js 16+ or Bun
 - Claude Code installed
 - Optional: `bun`, `gh CLI`
+- Python 3 for `assistants pro setup`
 
 ## 🤝 Contributing
 
