@@ -1,0 +1,7 @@
+interface:
+  display_name: "Environments Manager"
+  short_description: "Set up per-worktree environments for Claude Code, Cursor, or..."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#444449"
+  default_prompt: "Use $environments-manager to help with this task."

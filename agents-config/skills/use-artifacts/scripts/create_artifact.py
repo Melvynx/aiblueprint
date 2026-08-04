@@ -271,7 +271,7 @@ TODO: Record how the artifact was opened or tested, including browser/runtime ch
 def main() -> int:
     parser = argparse.ArgumentParser(description="Create a local HTML artifact workspace.")
     parser.add_argument("title", help="Short artifact title or slug")
-    parser.add_argument("--style", default="black-grid", help="use-style style name")
+    parser.add_argument("--style", default="custom", help="style label recorded in the manifest (requested, project:<app-name>, or subject-specific)")
     parser.add_argument("--kind", default="thinking", help="artifact kind")
     args = parser.parse_args()
 

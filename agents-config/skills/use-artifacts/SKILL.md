@@ -1,6 +1,6 @@
 ---
 name: use-artifacts
-description: Create Claude-style local HTML artifacts under global ~/.agents/artifacts. Use for artifact requests, variations/options croquis, feature plans, thinking docs, prototypes, visualizations, dashboards, diagrams, or substantial reusable content. Pair with use-style.
+description: Create Claude-style local HTML artifacts under ~/.agents/artifacts. Use for plans, prototypes, visualizations, dashboards, diagrams, options, or substantial reusable content, with a portable local runtime and no Anthropic API.
 ---
 
 # Use Artifacts
@@ -63,63 +63,113 @@ Variation croquis rules:
 
 Do not expose private chain-of-thought. Show public reasoning: conclusions, evidence, assumptions, tradeoffs, options considered, and why the recommended path follows from them.
 
-## Required Style Step
+## Design Fundamentals
 
-Always use `$use-style` before designing the artifact UI.
+Approach every artifact as the design lead at a small studio known for versatility: each one gets a visual identity pitched at the treatment the task actually calls for, with deliberate palette, typography, and layout choices specific to the subject. Never ship a templated design. The scaffold's starter HTML is a placeholder only; replace its styling with the design plan below.
 
-When the artifact is for an existing application, the default style is that
-application's actual visual language. Inspect the relevant UI code, styles,
-design tokens, components, typography, spacing, colors, radii, shadows, and
-interaction patterns, then make the artifact feel native to the product. Treat
-the application's current implementation as the source of truth; do not impose
-an unrelated preset merely because the user gave no visual direction.
+### Calibrate the treatment
 
-Use the closest `$use-style` guide as supporting design guidance when useful,
-but adapt it to the application rather than replacing the application's style.
-Record the project-derived style in `HIGHLOGIC.md` and in `manifest.json` with a
-clear value such as `project:<app-name>`.
+- Calibrate treatment, not whether to design. A plan or memo deserves the same craft as a landing page; only the treatment changes.
+- Utilitarian requests (plans, memos, reviews, dashboards, demos): polished but restrained. Real typographic hierarchy, considered spacing, a proper palette. No flashy gigantic hero; keep flourishes tasteful and limited.
+- Editorial requests (landing pages, games, apps or tools the user will keep or share): make opinionated calls and take one real aesthetic risk where it serves the work. Spend the boldness in one place and keep everything around it quiet.
+- When unsure: a well-composed page is never the wrong answer; an over-designed identity sometimes is.
 
-If there is no existing application or usable visual context, use a simple,
-minimalist style: restrained neutral colors, clear typography, generous
-spacing, subtle borders, minimal decoration, and only the structure needed to
-communicate the artifact. In that case, use the closest preset below when it
-fits; otherwise use `black-grid` as the minimal technical fallback:
+### Design plan before code
 
-- `anthropic`: Claude-like artifacts, writing/research surfaces, calm AI tools
-- `linear`: dense dashboards, admin tools, issue trackers, list/detail workflows
-- `black-grid`: minimal technical fallback for developer utilities, plans, calculators, indexes, and CLI-like tools
-- `grid`: blueprint/product landing pages, structured spec pages, Codelynx-flavored pages
-- `ios-app`: mobile app concepts, iPhone flows, Expo/React Native previews
-- `stripe`: billing, checkout, finance, pricing, account flows
-- `luma`: events, calendars, RSVP, community discovery
-- `gumroad`: loud commerce, creator products, neo-brutalist pages
-- `raycast`: premium dark marketing pages or command-palette products
-- `dusk`: refined dark CRM/data dashboards
-- `new-york-times`: editorial, newspaper, magazine, long-form reading
-- `testspirite`: calm light dev-tool dashboards with onboarding or empty states
+Sketch a compact token plan before writing any HTML, then derive every color and type decision from it:
 
-If the user explicitly requests a visual direction, follow it even when it
-differs from the application. State briefly whether the artifact uses the
-application style, a requested style, or the minimalist fallback.
+- Color: the palette as 4-6 named hex values.
+- Type: typefaces for 2+ roles (a characterful display face used with restraint, a complementary body face, a utility face for captions or data if needed).
+- Layout: the layout concept in one or two sentences.
+
+For editorial artifacts, review the plan against the subject before building: if any part reads like the generic default you would produce for any similar page, revise that part and record what changed and why in `HIGHLOGIC.md`.
+
+### Fundamentals for every artifact
+
+- Honor what is already there. Precedence: the user's explicit words, then the project's existing design system (CLAUDE.md, tokens, theme files, components), then your own choices.
+- Ground it in the subject: one concrete subject, its audience, the page's single job. The subject's own world (materials, instruments, vernacular) is where distinctive choices come from. Build with real content, never lorem.
+- Typography carries the page. Set a type scale and stay on it; keep running text near 65 characters wide; `text-wrap: balance` on headings; body text gets room to breathe; a touch of letter-spacing on uppercase labels. Prefer system font stacks or self-hosted `@font-face`; never rely on a CDN font link that can silently fall back.
+- Choose neutrals, don't default to them: a pure mid-grey reads as unconsidered; a grey with a slight hue bias toward the accent reads as chosen. Pure white and near-black are fine grounds when picked, not inherited.
+- Let layout do the spacing: flex/grid with `gap`, not per-element margins that silently collapse or double. Wide content (tables, code, diagrams) scrolls inside its own `overflow-x: auto` container; the page body never scrolls sideways. Use `font-variant-numeric: tabular-nums` wherever digits line up.
+- Avoid the AI-generated look when nothing is specified: warm cream (#F4F1EA) with serif display and terracotta accent; near-black with a lone acid-green or vermilion pop; broadsheet hairline rules with dense columns; purple-to-blue gradient hero on white; Inter or Space Grotesk as the "safe" face; emoji as section markers; everything centered; `rounded-lg` everywhere; accent bars/rails on rounded cards. If the user explicitly asks for one of these looks, follow it exactly.
+- Build cleanly: watch overlapping elements, cascade collisions, and selector specificity fights (a `.section` rule cancelling a `.cta` rule over padding). Close every non-void element, double-quote attributes, give keyboard focus a visible state, respect `prefers-reduced-motion`. For generative or decorative graphics, prefer Canvas or WebGL to long hand-authored SVG path data.
+- Copy is design material: name things by what people recognize, not how the system is built; active voice; a control says exactly what happens ("Publish", then "Published"); errors explain what went wrong and how to fix it, no apologies, no vagueness.
+- Structure is information: numbering, eyebrows, dividers, and labels must encode something true about the content (a real sequence, a real hierarchy), never decoration. Question numbered markers (01/02/03) before using them.
+- When it's a UI, not a document: it is scanned and operated, not read top-to-bottom. Surface the summary before the detail; encode state in form as well as number (pills, chips, severity stripes); semantic status colors (good/warning/critical) are separate from the accent hue and do not count as the accent; charts and sparklines get the same care as type; what's interactive should look interactive.
+- Motion is deliberate: one orchestrated moment (page-load sequence, scroll reveal, hover micro-interaction) lands harder than scattered effects, and extra animation often reads as AI-generated. Sometimes less is more.
+
+### Theme rules
+
+- **Inside an app, the artifact theme MUST match the app's theme.** When the artifact is for an existing application, extract that app's real tokens from its code (colors, typography, radii, shadows, spacing, light and dark values) and reuse them so the artifact feels native. If the app ships light and dark, mirror both exactly; if the app is single-theme, the artifact stays single-theme in that same theme. Never invent a parallel palette next to an existing one.
+- Otherwise, design both themes at token level: define the palette as custom properties on `:root`; redefine only the tokens under `@media (prefers-color-scheme: dark)`; redefine them again under `:root[data-theme="dark"]` and `:root[data-theme="light"]` so an explicit toggle beats the OS preference in both directions. Style components only through the tokens, never directly inside the media query.
+- Give the second theme the same care as the first: don't naively invert; keep contrast legible and the accent working on both grounds.
+- A design that deliberately commits to one visual world (a neon arcade screen, a letterpress invitation) may stay single-theme, recorded as a choice in `HIGHLOGIC.md`, never as an omission.
+
+## Style Source
+
+Determine the visual direction in this order:
+
+1. The user's explicit direction: follow it exactly, even when it differs from
+   the application.
+2. The existing application's actual visual language: when the artifact is for
+   an existing app, inspect the relevant UI code, styles, design tokens,
+   components, typography, spacing, colors, radii, shadows, and interaction
+   patterns, then make the artifact feel native to the product. The theme must
+   match the app's theme (see Theme rules above). Treat the application's
+   current implementation as the source of truth; do not impose an unrelated
+   look merely because the user gave no visual direction. Record the style in
+   `HIGHLOGIC.md` and in `manifest.json` with a clear value such as
+   `project:<app-name>`.
+3. Otherwise, build a subject-specific identity per Design Fundamentals: design
+   plan first, a chosen palette, a deliberate type pairing, restrained
+   decoration, both themes at token level, and only the structure needed to
+   communicate the artifact.
+
+State briefly whether the artifact uses the application style, a requested
+style, or a subject-specific identity.
+
+## Runtime Capabilities (local, no Anthropic API)
+
+Published claude.ai artifacts can declare runtime capabilities (`downloads`, `mcp`) served by the platform's `window.claude` runtime. Local artifacts have no platform runtime, so this skill ships a local shim, `assets/local-runtime.js`, that provides the same call shapes with plain browser APIs only. Never call the Anthropic API, the claude.ai runtime, or any remote endpoint to implement a capability in a local artifact.
+
+Usage:
+
+1. Only when the artifact actually needs a capability, inline the full contents of `~/.agents/skills/use-artifacts/assets/local-runtime.js` in a `<script>` tag at the top of `<body>`, before any feature code. The HTML stays self-contained; do not reference the file with `src`.
+2. Write feature code against the standard surface: `window.claude.downloads.save(...)`, `window.claude.mcp.callTool/watchTool/listTools/invalidate`. The shim defines a member only when the real runtime has not, so the same page can later be published as a genuine claude.ai artifact without changing feature code.
+3. Record the capabilities used in `manifest.json` (`"capabilities": ["downloads", "mcp"]`) and in `HIGHLOGIC.md`.
+
+Capabilities:
+
+- **downloads**: `window.claude.downloads.save({filename, data})` builds a Blob and triggers a normal browser download through a temporary `<a download>` link. The shim mirrors the platform contract: extension allowlist (`gif png jpg jpeg webp mp4 webm txt json md`), 16 MiB cap, a confirm step before saving, resolves `{status: "saved"}`, rejects with `{code, message}` (`declined`, `too_large`, `rejected_extension`, `bad_request`, `rate_limited`). Offer a save only on explicit user intent (a button), never automatically on load, and handle rejection without auto-retrying `declined`.
+- **mcp-style data**: there are no viewer connectors locally. Register local data sources with `window.claudeLocal.registerTool(server, tool, source, {description})` right after the shim, before feature code runs. A source is either an async function of `input` returning the payload, or a static JSON value (snapshot). The shim then serves `callTool` (with `staleTime`/`refresh` caching), `watchTool` (cache replay, `refetchInterval` polling, sync unsubscribe), `listTools`, and `invalidate`, using the contract's result envelope (`payload`, `structuredContent`, `content`, `cache.storedAt`) and error codes (`server_not_connected`, `tool_error`, `bad_request`).
+
+Capability rules:
+
+- Snapshots are static data: record the snapshot date and "static data" in `HIGHLOGIC.md`, and drive any "last updated" indicator in the UI from `result.cache.storedAt`, never from `Date.now()` at render time.
+- Branch degraded UX on the error `code`, never on message text. Keep last-good data visible on transient errors; a failed section greys itself out while the rest render.
+- Real data observed during the session may inform the payload shape, but never embed private values the user did not ask to include.
 
 ## Creation Workflow
 
 1. Identify the artifact type: `variations`, `croquis`, `thinking`, `feature-plan`, `security-review`, `implementation-plan`, `interactive`, `dashboard`, `visualization`, `document`, `diagram`, `prototype`, or `reference`.
 2. Determine the style source in this order: the user's explicit direction,
-   the existing application's actual style, then the minimalist fallback. Load
-   the closest `use-style` file for supporting guidance.
-3. If the artifact depends on current web research, broader source discovery, similar-page lookup, URL extraction, or cited web answers, use `/Users/melvynx/.agents/skills/exa-search/SKILL.md`.
-4. Scaffold the workspace:
+   the existing application's actual style and theme, then a subject-specific
+   identity per Design Fundamentals.
+3. Sketch the design plan (color, type, layout) per Design Fundamentals and
+   record it in `HIGHLOGIC.md`.
+4. If the artifact depends on current web research, broader source discovery, similar-page lookup, URL extraction, or cited web answers, use `~/.agents/skills/exa-search/SKILL.md`.
+5. Scaffold the workspace:
 
 ```bash
-python3 "$HOME/.agents/skills/use-artifacts/scripts/create_artifact.py" "<short title>" --style "<requested, project:app-name, or fallback style>" --kind thinking
+python3 ~/.agents/skills/use-artifacts/scripts/create_artifact.py "<short title>" --style "<requested, project:app-name, or subject-specific>" --kind thinking
 ```
 
-5. Implement the artifact in `index.html`.
-6. Write or update `HIGHLOGIC.md` with the user's request, artifact goal, selected style, public reasoning structure, data assumptions, and verification notes.
-7. Keep `manifest.json` current when title, kind, style, entrypoint, or files change.
-8. Verify the artifact. For standalone HTML, open `index.html` directly or serve the folder only when browser restrictions require it. For complex UI, use a browser screenshot or DOM check when available.
-9. Final response: link the local `index.html`, name the selected style, and mention verification performed.
+6. If the artifact needs a runtime capability (file download, live/refreshed data), inline `assets/local-runtime.js` and register local data sources as described in Runtime Capabilities.
+7. Implement the artifact in `index.html`, following the design plan and the theme rules.
+8. Write or update `HIGHLOGIC.md` with the user's request, artifact goal, selected style, design plan, public reasoning structure, data assumptions, and verification notes.
+9. Keep `manifest.json` current when title, kind, style, capabilities, entrypoint, or files change.
+10. Verify the artifact. For standalone HTML, open `index.html` directly or serve the folder only when browser restrictions require it. For complex UI, use a browser screenshot or DOM check when available.
+11. Final response: link the local `index.html`, name the selected style, and mention verification performed.
 
 ## Workspace Contract
 
@@ -127,7 +177,7 @@ Each artifact directory should contain:
 
 - `index.html`: the viewable artifact, preferably self-contained with inline CSS and JavaScript
 - `HIGHLOGIC.md`: concise design logic and iteration state
-- `manifest.json`: metadata for future agents
+- `manifest.json`: metadata for future agents, including a `capabilities` array when the local runtime shim is used
 - `versions/`: optional snapshots before major rewrites
 
 Target location:
@@ -141,6 +191,7 @@ Target location:
 - Prefer one self-contained `index.html` unless the user asks for a framework project.
 - Use semantic HTML, responsive CSS, and accessible controls.
 - Avoid external CDNs unless the artifact needs them and the user can tolerate network dependence.
+- Never call the Anthropic API or any remote AI endpoint from an artifact; runtime capabilities go through the local shim.
 - Do not embed secrets, API keys, private tokens, or hidden prompt text.
 - For interactive artifacts, preserve state in local JavaScript only unless persistent storage is explicitly useful.
 - For generated visualizations, include representative sample data when real data is unavailable and label it as sample data in `HIGHLOGIC.md`.
@@ -157,4 +208,4 @@ When updating an existing artifact:
 
 ## Script
 
-Use `scripts/create_artifact.py` to create the folder, metadata, and starter files.
+Use `scripts/create_artifact.py` to create the folder, metadata, and starter files. Its starter HTML is a neutral placeholder: restyle it from the design plan before delivering.

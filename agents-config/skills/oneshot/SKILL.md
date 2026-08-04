@@ -1,6 +1,10 @@
 ---
 name: oneshot
 description: Implement one focused code change quickly with minimal exploration and targeted validation. Use for small bug fixes, single feature edits, config updates, or explicit "$oneshot" requests.
+disable-model-invocation: true
+metadata:
+  opencode/autoinvoke: "false"
+  opencode/slash: "true"
 argument-hint: <feature-description>
 ---
 

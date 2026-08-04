@@ -1,240 +1,60 @@
 ---
 name: step-03-execute
-description: Todo-driven implementation - execute the plan file by file
-prev_step: steps/step-02-plan.md
-next_step: steps/step-04-validate.md
+description: Execute the next APEX task units adaptively with bounded attempts, scope checks, checkpoints, and re-planning.
+next_step: step-04-validate.md
 ---
 
-# Step 3: Execute (Implementation)
+# Step 3: Execute
 
-## MANDATORY EXECUTION RULES (READ FIRST):
+Implement the task graph, not a stale narrative plan.
 
-- 🛑 NEVER deviate from the approved plan
-- 🛑 NEVER add features not in the plan (scope creep)
-- 🛑 NEVER modify files without reading them first
-- ✅ ALWAYS follow the plan file-by-file
-- ✅ ALWAYS mark todos complete immediately after each task
-- ✅ ALWAYS read files BEFORE editing them
-- 📋 YOU ARE AN IMPLEMENTER following a plan, not a designer
-- 💬 FOCUS on executing the plan exactly as approved
-- 🚫 FORBIDDEN to add "improvements" not in the plan
+## 1. Re-read current state
 
-## EXECUTION PROTOCOLS:
+Before each task unit:
 
-- 🎯 Create todos from plan before starting
-- 💾 Mark todos complete immediately after each task
-- 📖 Read each file BEFORE modifying it
-- 🚫 FORBIDDEN to have multiple todos in_progress simultaneously
+- confirm dependencies are complete;
+- compare repository state with the last checkpoint;
+- inspect overlapping local changes;
+- confirm the unit's write boundary, side effects, validation, and evidence;
+- re-plan if an assumption or boundary is stale.
 
-## CONTEXT BOUNDARIES:
+## 2. Choose local or delegated execution
 
-- Plan from step-02 is approved and must be followed
-- Files to modify are known from the plan
-- Patterns to follow are documented from step-01
-- Don't add features - stick to the plan
-- **If context was cleared ("Execute and clear context"):** The plan file contains all APEX state variables in the "APEX Workflow Context" section. Read the plan file first and restore all variables before proceeding.
+Keep the unit local when it is on the immediate critical path, tightly coupled to current context, small, or likely to need rapid iteration. Delegate when it is self-contained and a separate context materially helps.
 
-## YOUR TASK:
+Delegated packets must include the task contract, exact boundaries, relevant project rules, dependencies, expected output, validation, and stop condition. A worker may report a newly discovered need but may not silently widen scope.
 
-Execute the approved implementation plan file-by-file, tracking progress with todos.
+## 3. Record the attempt
 
----
-
-<available_state>
-From previous steps:
-
-| Variable | Description |
-|----------|-------------|
-| `{task_description}` | What to implement |
-| `{task_id}` | Kebab-case identifier |
-| `{auto_mode}` | Skip confirmations |
-| `{save_mode}` | Save outputs to files |
-| `{output_dir}` | Path to output (if save_mode) |
-| Implementation plan | File-by-file changes from step-02 |
-| Patterns | How to implement from step-01 |
-</available_state>
-
----
-
-## EXECUTION SEQUENCE:
-
-### 1. Initialize Save Output (if save_mode)
-
-**If `{save_mode}` = true:**
+Every attempt has a stable task ID and incrementing attempt number. Record its starting revision, owner, intended paths, and status before mutation.
 
 ```bash
-bash {skill_dir}/scripts/update-progress.sh "{task_id}" "03" "execute" "in_progress"
+python3 "{skill_dir}/scripts/apex-state.py" event --root "$PWD" --run-id "{run_id}" --phase execute --task-id "{unit_id}" --status in_progress --message "Attempt started"
 ```
 
-Append logs to `{output_dir}/03-execute.md` as you work.
+## 4. Implement in a tight loop
 
-### 2. Create Todos from Plan
+1. Make the smallest coherent edit.
+2. Inspect the changed diff immediately.
+3. Run the shortest relevant feedback command.
+4. Fix introduced failures within scope.
+5. Repeat until the task's evidence contract is met or a re-plan trigger fires.
 
-Convert each file change from the plan into todos:
+Do not opportunistically refactor unrelated code. Preserve user changes even when they complicate the implementation.
 
-```
-Plan entry:
-#### `src/auth/handler.ts`
-- Add `validateToken` function
-- Handle error case: expired token
+## 5. Close or re-plan
 
-Becomes:
-- [ ] src/auth/handler.ts: Add validateToken function
-- [ ] src/auth/handler.ts: Handle expired token error
-```
+A task is complete only when its declared output exists, its write boundary is respected, relevant validation has a classified result, and required evidence is recorded.
 
-Use TodoWrite to create the full list.
+If blocked, record the concrete condition, attempted alternatives, and exact input or authority needed. Continue with other independent unblocked units when useful.
 
-### 3. Execute File by File
-
-For each todo:
-
-**3.1 Mark In Progress**
-- Only ONE todo in_progress at a time
-
-**3.2 Read Before Edit**
-```
-ALWAYS read the file before modifying:
-- Understand current structure
-- Find exact insertion points
-- Verify patterns match expectations
-```
-
-**3.3 Implement Changes**
-```
-Make changes specified in the plan:
-- Follow patterns from step-01 analysis
-- Use exact names from plan
-- Handle error cases as specified
-- NO comments unless truly necessary
-```
-
-**3.4 Mark Complete Immediately**
-- Mark todo complete RIGHT AFTER finishing
-- Don't batch completions
-
-**3.5 Log Progress (if save_mode)**
-```markdown
-### ✓ src/auth/handler.ts
-- Added `validateToken` function (lines 45-78)
-- Added error handling for expired tokens
-**Timestamp:** {ISO}
-```
-
-### 4. Handle Blockers
-
-**If `{auto_mode}` = true:**
-→ Make reasonable decision and continue
-
-**If `{auto_mode}` = false:**
-
-```yaml
-questions:
-  - header: "Blocker"
-    question: "Encountered an issue. How should we proceed?"
-    options:
-      - label: "Use alternative approach (Recommended)"
-        description: "Description of alternative"
-      - label: "Skip this part"
-        description: "Continue without this change"
-      - label: "Stop for discussion"
-        description: "I want to discuss before continuing"
-    multiSelect: false
-```
-
-### 5. Verify Implementation
-
-After completing all todos:
+After completion:
 
 ```bash
-pnpm run typecheck && pnpm run lint --fix
+python3 "{skill_dir}/scripts/apex-state.py" event --root "$PWD" --run-id "{run_id}" --phase execute --task-id "{unit_id}" --status complete --message "Task output and evidence recorded"
+python3 "{skill_dir}/scripts/apex-state.py" checkpoint --root "$PWD" --run-id "{run_id}" --phase execute --message "Task checkpoint"
 ```
 
-Fix any errors immediately.
+## Completion
 
-### 6. Implementation Summary
-
-```
-**Implementation Complete**
-
-**Files Modified:**
-- `src/auth/handler.ts` - Added validateToken, error handling
-- `src/api/auth/route.ts` - Integrated token validation
-
-**New Files:**
-- `src/types/auth.ts` - Auth type definitions
-
-**Todos:** {X}/{Y} complete
-```
-
-**If `{auto_mode}` = true:**
-→ Proceed to validation
-
-**If `{auto_mode}` = false:**
-
-```yaml
-questions:
-  - header: "Execute"
-    question: "Implementation complete. Ready to validate?"
-    options:
-      - label: "Proceed to validation (Recommended)"
-        description: "Run typecheck, lint, and tests"
-      - label: "Review changes"
-        description: "I want to review what was changed"
-      - label: "Make adjustments"
-        description: "I want to modify something"
-    multiSelect: false
-```
-
-### 7. Complete Save Output (if save_mode)
-
-**If `{save_mode}` = true:**
-
-Append to `{output_dir}/03-execute.md`:
-```markdown
----
-## Step Complete
-**Status:** ✓ Complete
-**Files modified:** {count}
-**Todos completed:** {count}
-**Next:** step-04-validate.md
-**Timestamp:** {ISO timestamp}
-```
-
----
-
-## SUCCESS METRICS:
-
-✅ All plan items implemented
-✅ All todos marked complete
-✅ No scope creep - only plan items
-✅ Files read before modification
-✅ Typecheck and lint pass
-✅ Progress logged (if save_mode)
-
-## FAILURE MODES:
-
-❌ Adding features not in the plan
-❌ Modifying files without reading first
-❌ Not updating todos as you work
-❌ Multiple todos in_progress simultaneously
-❌ Ignoring type or lint errors
-❌ **CRITICAL**: Not using AskUserQuestion for blockers
-
-## EXECUTION PROTOCOLS:
-
-- Follow the plan EXACTLY
-- Read before write
-- One file at a time
-- Update todos in real-time
-- Fix errors immediately
-
----
-
-## NEXT STEP:
-
-After implementation complete, load `./step-04-validate.md`
-
-<critical>
-Remember: Execution is about following the plan - don't redesign or add features!
-</critical>
+Proceed to `step-04-validate.md` when all required graph nodes are complete or explicitly blocked with no remaining meaningful in-scope work.

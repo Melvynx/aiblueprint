@@ -1,0 +1,10 @@
+interface:
+  display_name: "Apex"
+  short_description: "Implement adaptively with proof-backed checks"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#CD0DC1"
+  default_prompt: "Use $apex to implement this task with adaptive planning, scoped execution, and current evidence."
+
+policy:
+  allow_implicit_invocation: false

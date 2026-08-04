@@ -1,0 +1,7 @@
+interface:
+  display_name: "Prompt Creator"
+  short_description: "Expert prompt engineering for creating effective prompts for..."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#60524E"
+  default_prompt: "Use $prompt-creator to help with this task."

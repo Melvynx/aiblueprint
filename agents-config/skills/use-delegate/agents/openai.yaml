@@ -1,0 +1,10 @@
+interface:
+  display_name: "Use Delegate"
+  short_description: "Delegate heavy work to OpenCode Kimi K3 and Codex"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#802F83"
+  default_prompt: "Use $use-delegate to orchestrate this task through cheap executors."
+
+policy:
+  allow_implicit_invocation: false

@@ -1,6 +1,6 @@
 interface:
   display_name: "Use Goal"
-  short_description: "Create evidence-based Codex or Claude Code goals"
+  short_description: "Use when the user asks to create, draft, set, start, or..."
   icon_small: "./assets/codex-icon.svg"
   icon_large: "./assets/codex-icon.svg"
   brand_color: "#C70A64"

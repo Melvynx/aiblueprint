@@ -1,0 +1,7 @@
+interface:
+  display_name: "Skill Manager"
+  short_description: "Create or edit Claude, Codex, and Cursor skills/rules"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#48AAB0"
+  default_prompt: "Use $skill-manager to help with this task."

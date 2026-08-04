@@ -1,4 +1,6 @@
-# Hook Types and Events
+# Shared Hook Concepts
+
+These are semantic concepts, not a universal schema. Use the platform references for the exact event spelling and blocking contract.
 
 | Event | Fires | Can block? |
 | --- | --- | --- |
@@ -8,6 +10,6 @@
 | `Stop` / `SubagentStop` | Before an agent stops | Yes |
 | `SessionStart` / `SessionEnd` | At session boundaries | No |
 | `PreCompact` | Before context compaction | Yes |
-| `Notification` | When Claude needs input | No |
+| `Notification` / native notification event | When the agent needs input | Usually no |
 
-Blocking responses should include `decision: "block"` and a useful `reason`. Stop hooks must honor `stop_hook_active` to avoid infinite loops.
+Blocking responses must use the target platform's contract. Claude/Codex commonly use `decision` and `reason`; Cursor may use a native follow-up or approval field. Stop hooks must honor the target platform's loop-prevention field, such as Claude's `stop_hook_active`.

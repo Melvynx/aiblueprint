@@ -1,223 +1,59 @@
 ---
 name: step-09-finish
-description: Finish APEX workflow and create pull request
-previous_step: step-08-run-tests.md (or step-04-validate.md if no tests)
+description: Complete an APEX run with scope review, proof-boundary reporting, and only the delivery actions authorized by the user.
 ---
 
-# Step 9: Finish & Create PR
+# Step 9: Handoff
 
-## MANDATORY EXECUTION RULES (READ FIRST):
+Do not edit implementation code here. Return to the relevant phase if the completion audit finds a defect.
 
-- 🛑 NEVER push without user confirmation (unless auto_mode)
-- 🛑 NEVER create PR if there are uncommitted changes
-- ✅ ALWAYS verify all changes are committed
-- ✅ ALWAYS push to remote before creating PR
-- 📋 YOU ARE A FINISHER, completing the workflow
-- 💬 FOCUS on PR creation and workflow summary
-- 🚫 FORBIDDEN to make code changes in this step
+## 1. Audit completion
 
-## EXECUTION PROTOCOLS:
+Confirm:
 
-- 🎯 Verify git status before any push/PR operations
-- 💾 Save PR details to output file if save_mode enabled
-- 📖 Provide clear workflow summary
-- 🚫 FORBIDDEN to proceed with uncommitted changes
+- every acceptance criterion has current evidence at the required level;
+- all introduced failures are resolved;
+- review requirements and confirmed findings are closed;
+- current Git diff matches the intended task scope;
+- unrelated staged, unstaged, deleted, and untracked paths remain untouched;
+- run state lists every unavailable check, blocker, and residual risk honestly.
 
-## CONTEXT BOUNDARIES:
+Do not call a blocked, unverified, or partially validated task complete.
 
-- Variables available: `{task_id}`, `{task_description}`, `{branch_name}`, `{pr_mode}`, `{auto_mode}`, `{save_mode}`, `{teams_mode}`, `{output_dir}`
-- Previous steps completed: analyze, plan, execute, validate (+ optional: tests, examine)
-- All implementation should be done at this point
+## 2. Report proof boundaries
 
-## YOUR TASK:
+Separate claims explicitly:
 
-Finalize the APEX workflow by committing remaining changes, pushing to remote, and creating a pull request.
+| Layer | Example evidence | Claim boundary |
+|---|---|---|
+| Local/static | Diff, typecheck, lint, tests, local runtime | What the inspected local state proves |
+| Provider | Authoritative provider/API read-back | What provider configuration or state proves |
+| Public artifact/deployment | Re-downloaded artifact, public URL, deployment revision | What an unauthenticated external consumer can obtain |
+| Authenticated live | Controlled signed-in flow, send/receipt, persistent read-back | What was observed through the real protected surface |
 
----
+Use `NOT RUN`, `UNAVAILABLE`, `NOT PROVEN`, or `BLOCKED` where appropriate. Do not let a stronger-sounding summary erase those boundaries.
 
-## EXECUTION SEQUENCE:
+## 3. Perform only requested delivery actions
 
-### 0. Shutdown Agent Team (if teams_mode)
+Implementation permission does not by itself request a commit, push, pull request, merge, deploy, release, provider mutation, or external message.
 
-<critical>
-This is the ONLY step where team shutdown should happen.
-All previous steps (validate, examine, resolve) keep the team alive.
-</critical>
+When a delivery action is in scope:
 
-**If `{teams_mode}` = true:**
+1. Review the exact paths and diff that belong to the task.
+2. Stage only those paths unless the user explicitly requested the entire reviewed tree.
+3. Scan the staged diff for secrets and scope drift.
+4. Commit using the repository convention.
+5. Push only the intended branch.
+6. Create or update the requested pull request with actual validation and proof boundaries.
+7. Read back the remote branch, pull request, deployment, provider state, or public artifact needed to support the delivery claim.
 
-1. Send shutdown_request to each teammate:
-```
-SendMessage:
-  type: "shutdown_request"
-  recipient: "impl-{name}"
-  content: "APEX workflow complete. Shutting down team."
-```
+Never force push, merge, release, deploy, or communicate externally without the corresponding authority.
 
-2. Wait for all teammates to confirm shutdown.
-
-3. Delete the team:
-```
-TeamDelete
-```
-
-→ This cleans up team files and task directories.
-
-### 1. Verify Git Status
+## 4. Close run state
 
 ```bash
-git status
+python3 "{skill_dir}/scripts/apex-state.py" event --root "$PWD" --run-id "{run_id}" --phase handoff --status complete --message "Completion audit and authorized handoff finished"
+python3 "{skill_dir}/scripts/apex-state.py" checkpoint --root "$PWD" --run-id "{run_id}" --phase handoff --message "APEX run complete"
 ```
 
-**If uncommitted changes exist:**
-→ Commit them with message: `feat({task_id}): {task_description}`
-
-**If working tree is clean:**
-→ Continue to step 2
-
-### 2. Check Commits to Push
-
-```bash
-git log origin/{branch_name}..HEAD --oneline 2>/dev/null || git log --oneline -5
-```
-
-Display commits that will be included in PR.
-
-### 3. Confirm Push (if not auto_mode)
-
-**If `{auto_mode}` = true:**
-→ Auto-push to remote
-
-**If `{auto_mode}` = false:**
-Use AskUserQuestion:
-```yaml
-questions:
-  - header: "Push"
-    question: "Ready to push {branch_name} and create PR?"
-    options:
-      - label: "Push and create PR (Recommended)"
-        description: "Push commits to remote and open pull request"
-      - label: "Push only"
-        description: "Push to remote without creating PR"
-      - label: "Review commits first"
-        description: "Show me the full diff before pushing"
-      - label: "Cancel"
-        description: "Don't push or create PR"
-    multiSelect: false
-```
-
-### 4. Push to Remote
-
-```bash
-git push -u origin {branch_name}
-```
-
-**If push fails:**
-→ Display error and ask user how to proceed
-→ Common fixes: pull --rebase, force push (with warning)
-
-### 5. Create Pull Request (if pr_mode)
-
-**If `{pr_mode}` = true:**
-
-Generate PR content:
-- **Title:** `feat({task_id}): {task_description}`
-- **Body:** Summary of changes from the workflow
-
-```bash
-gh pr create --title "feat({task_id}): {task_description}" --body "$(cat <<'EOF'
-## Summary
-
-{Brief description of what was implemented}
-
-## Changes
-
-{List of key changes made}
-
-## Testing
-
-{How the changes were validated}
-
----
-
-_Generated by APEX workflow_
-EOF
-)"
-```
-
-**Capture PR URL:**
-```bash
-gh pr view --json url -q '.url'
-```
-→ Store as `{pr_url}`
-
-### 6. Save Output (if save_mode)
-
-**If `{save_mode}` = true:**
-
-```bash
-bash {skill_dir}/scripts/update-progress.sh "{task_id}" "09" "finish" "in_progress"
-```
-
-Append to `{output_dir}/09-finish.md`: branch, PR URL, commits, timestamp.
-
-```bash
-bash {skill_dir}/scripts/update-progress.sh "{task_id}" "09" "finish" "complete"
-```
-
-### 7. Final Summary
-
-Display workflow completion summary:
-
-```
-═══════════════════════════════════════════════════════
-  APEX WORKFLOW COMPLETE
-═══════════════════════════════════════════════════════
-
-  Task: {task_description}
-  ID: {task_id}
-
-  ✓ Analysis complete
-  ✓ Plan created and approved
-  ✓ Implementation done
-  ✓ Validation passed
-  {if test_mode: "✓ Tests passing"}
-  {if examine_mode: "✓ Review findings resolved"}
-  ✓ Changes pushed to {branch_name}
-  {if pr_mode: "✓ PR created: {pr_url}"}
-
-═══════════════════════════════════════════════════════
-```
-
----
-
-## SUCCESS METRICS:
-
-✅ Agent team shut down gracefully via SendMessage shutdown_request (if teams_mode)
-✅ TeamDelete called to clean up team resources (if teams_mode)
-✅ All changes committed
-✅ Branch pushed to remote
-✅ PR created with proper title and description (if pr_mode)
-✅ PR URL captured and displayed
-✅ Output saved (if save_mode)
-✅ Clear completion summary provided
-
-## FAILURE MODES:
-
-❌ Creating PR with uncommitted changes
-❌ Pushing without user confirmation (when not auto_mode)
-❌ Force pushing without explicit user request
-❌ Not displaying PR URL after creation
-❌ **CRITICAL**: Using plain text prompts instead of AskUserQuestion
-
----
-
-## WORKFLOW COMPLETE
-
-This is the final step of the APEX workflow. No next step to load.
-
-<critical>
-Remember: This step handles git operations, PR creation, AND team shutdown (if teams_mode).
-All code changes should have been completed in earlier steps.
-Team shutdown MUST happen here - step 0 of execution sequence - before git operations.
-</critical>
+Present the outcome, changed files, validation ledger, review disposition, proof boundaries, delivery read-back, and any remaining local changes.

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Appstore Connect"
+  short_description: "Interact with App Store Connect via the asc CLI - apps,..."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#01C1C6"
+  default_prompt: "Use $appstore-connect to help with this task."

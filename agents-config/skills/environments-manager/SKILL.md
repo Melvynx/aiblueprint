@@ -108,7 +108,7 @@ Base template, before backend-specific additions:
 set -euo pipefail
 
 WORKTREE_PATH="${CODEX_WORKTREE_PATH:-${CURSOR_WORKTREE_PATH:-$(pwd)}}"
-SOURCE_PATH="${CODEX_SOURCE_TREE_PATH:-${ROOT_WORKTREE_PATH:-$HOME/Developer/saas/<repo>}}"
+SOURCE_PATH="${CODEX_SOURCE_TREE_PATH:-${ROOT_WORKTREE_PATH:-$HOME/Developer/projects/<repo>}}"
 
 cd "$WORKTREE_PATH"
 

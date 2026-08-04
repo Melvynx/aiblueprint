@@ -99,7 +99,7 @@ These wrappers exist because Claude's `WorktreeCreate` hook has Claude-specific 
 5. Run `scripts/worktree-up.sh` with `ROOT_WORKTREE_PATH`, `CLAUDE_WORKTREE_NAME`, and `CI=1` set, under a watchdog that hard-kills after `CLAUDE_WORKTREE_SETUP_TIMEOUT` (default 900s).
 6. Echo the worktree path on stdout — and absolutely nothing else.
 
-The remove wrapper mirrors steps 3–5 for cleanup, then runs `git worktree remove --force` + `git branch -D`.
+The remove wrapper mirrors steps 3–5 for cleanup, refuses a dirty worktree, then runs `git worktree remove` without force. It uses `git branch -d` and keeps any unmerged branch instead of destroying it.
 
 `ROOT_WORKTREE_PATH` is set so the shared `scripts/worktree-up.sh` can locate the source checkout via the existing cascade (`CODEX_SOURCE_TREE_PATH` → `ROOT_WORKTREE_PATH`).
 

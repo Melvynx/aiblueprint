@@ -13,7 +13,7 @@ CLEANUP_TIMEOUT_SEC="${CLAUDE_WORKTREE_CLEANUP_TIMEOUT:-300}"
 
 [[ ! -d "$WORKTREE" ]] && exit 0
 
-LOG_FILE="$WORKTREE/.worktree-cleanup.log"
+LOG_FILE="${TMPDIR:-/tmp}/claude-worktree-cleanup-$(basename "$WORKTREE").log"
 : > "$LOG_FILE" 2>/dev/null || LOG_FILE=""
 
 log_to() {
@@ -22,6 +22,18 @@ log_to() {
     echo "$(date '+%H:%M:%S') $*" >> "$LOG_FILE" 2>/dev/null || true
   fi
 }
+
+assert_clean_worktree() {
+  local changes
+  changes=$(git -C "$WORKTREE" status --porcelain --untracked-files=all 2>/dev/null || true)
+  if [[ -n "$changes" ]]; then
+    log_to "[claude-worktree-remove] REFUSED: worktree has uncommitted changes"
+    printf '%s\n' "$changes" >&2
+    exit 1
+  fi
+}
+
+assert_clean_worktree
 
 # Cleanup may call CLIs (e.g. convex env remove) that need the project's Node version.
 if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
@@ -61,6 +73,10 @@ if [[ -x "${REPO}/scripts/worktree-down.sh" ]]; then
   wait "$WATCHDOG_PID" 2>/dev/null || true
 fi
 
+assert_clean_worktree
 BRANCH=$(git -C "$WORKTREE" rev-parse --abbrev-ref HEAD 2>/dev/null || true)
-git -C "$REPO" worktree remove "$WORKTREE" --force 2>/dev/null || true
-[[ -n "$BRANCH" && "$BRANCH" != "HEAD" ]] && git -C "$REPO" branch -D "$BRANCH" 2>/dev/null || true
+git -C "$REPO" worktree remove "$WORKTREE"
+if [[ -n "$BRANCH" && "$BRANCH" != "HEAD" ]]; then
+  git -C "$REPO" branch -d "$BRANCH" 2>/dev/null || \
+    log_to "[claude-worktree-remove] Kept unmerged branch: $BRANCH"
+fi

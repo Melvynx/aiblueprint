@@ -91,8 +91,8 @@ Project-level agents override user-level when names conflict.
 When an agent may need online research, make the routing explicit in its prompt and grant the required tools.
 
 - Use default harness tools for local code, files, git, command output, and browser inspection first.
-- Use `/Users/melvynx/.agents/skills/find-docs/SKILL.md` before answering or coding against current libraries, frameworks, SDKs, CLIs, cloud services, APIs, or code examples.
-- Use `/Users/melvynx/.agents/skills/exa-search/SKILL.md` for broader online research, recent information, source discovery, similar pages, URL extraction, or cited web answers.
+- Use `~/.agents/skills/find-docs/SKILL.md` before answering or coding against current libraries, frameworks, SDKs, CLIs, cloud services, APIs, or code examples.
+- Use `~/.agents/skills/exa-search/SKILL.md` for broader online research, recent information, source discovery, similar pages, URL extraction, or cited web answers.
 - Prefer those skills over ad hoc web searches. Built-in `WebSearch` and `WebFetch` are fallback tools unless the task explicitly asks for them.
 - Add `Skill` to restricted tool lists when the agent should invoke these skills. Add `Bash` when the skill needs local CLIs such as `exa-cli` or `ctx7`.
 - Never include secrets, tokens, credentials, personal data, or proprietary code in external queries.

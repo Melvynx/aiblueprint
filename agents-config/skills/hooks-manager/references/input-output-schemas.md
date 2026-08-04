@@ -1,8 +1,8 @@
 # Input and Output Schemas
 
-Common hook input includes `session_id`, `transcript_path`, `cwd`, `permission_mode`, and `hook_event_name`. Tool events also include `tool_name` and `tool_input`; prompt submission includes `prompt`.
+Claude and Codex commonly provide `session_id`, `transcript_path`, `cwd`, `permission_mode`, and `hook_event_name`. Tool events commonly include `tool_name` and `tool_input`; prompt submission commonly includes `prompt`. Cursor payloads and response fields are platform-specific and must be checked against its current docs.
 
-Blocking output:
+Claude/Codex-style blocking output:
 
 ```json
 {"decision":"block","reason":"Explain what must change"}

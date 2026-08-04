@@ -1,0 +1,7 @@
+interface:
+  display_name: "Rules Manager"
+  short_description: "Create, edit, and maintain AGENTS.md and .agents/rules/ —..."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#2F5B3E"
+  default_prompt: "Use $rules-manager to help with this task."

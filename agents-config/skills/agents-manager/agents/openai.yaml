@@ -1,0 +1,7 @@
+interface:
+  display_name: "Agents Manager"
+  short_description: "Expert guidance for creating, building, and using Claude..."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#9C6925"
+  default_prompt: "Use $agents-manager to help with this task."

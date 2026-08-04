@@ -1,272 +1,68 @@
 ---
 name: step-04-validate
-description: Self-check - run tests, verify AC, audit implementation quality
-prev_step: steps/step-03-execute.md
-next_step: steps/step-05-examine.md
+description: Integrate the APEX diff and classify relevant validation without confusing regressions, baseline noise, or unavailable checks.
 ---
 
-# Step 4: Validate (Self-Check)
+# Step 4: Integrate and validate
 
-## MANDATORY EXECUTION RULES (READ FIRST):
+Validation is evidence collection, not a ritual command list.
 
-- 🛑 NEVER claim checks pass when they don't
-- 🛑 NEVER skip any validation step
-- ✅ ALWAYS run typecheck, lint, and tests
-- ✅ ALWAYS verify each acceptance criterion
-- ✅ ALWAYS fix failures before proceeding
-- 📋 YOU ARE A VALIDATOR, not an implementer
-- 💬 FOCUS on "Does it work correctly?"
-- 🚫 FORBIDDEN to proceed with failing checks
+## 1. Review the integrated scope
 
-## EXECUTION PROTOCOLS:
+Inspect current Git status, staged and unstaged diffs, untracked files, generated artifacts, and the task graph. Confirm:
 
-- 🎯 Run all validation commands
-- 💾 Log results to output (if save_mode)
-- 📖 Check each AC against implementation
-- 🚫 FORBIDDEN to mark complete with failures
+- every intended change maps to an acceptance criterion;
+- no unrelated user change was absorbed or overwritten;
+- no task exceeded its write boundary without a recorded re-plan;
+- dependencies and generated outputs are consistent;
+- formatting did not create unrelated churn.
 
-## CONTEXT BOUNDARIES:
+## 2. Discover relevant checks
 
-- Implementation from step-03 (or step-03-execute-teams) is complete
-- Tests may or may not pass yet
-- Type errors may exist
-- Focus is on verification, not new implementation
-- **If `{teams_mode}` = true:** The agent team is still alive. Do NOT shutdown or dismiss teammates. Team shutdown happens in step-09-finish only.
+Read project instructions, package scripts, CI configuration, and nearby tests. Select checks from the changed surface and risk:
 
-## YOUR TASK:
+- syntax, formatting, lint, and types;
+- targeted unit, integration, contract, or end-to-end tests;
+- build, packaging, schema, migration, or generated-code validation;
+- runtime, provider, or public-artifact checks when required.
 
-Validate the implementation by running checks, verifying acceptance criteria, and ensuring quality.
+Do not invent a command because another ecosystem commonly uses it.
 
----
+## 3. Establish baseline when needed
 
-<available_state>
-From previous steps:
+When a broad check fails and causality is unclear, compare against the pre-task revision or use targeted diagnostics that preserve user changes. Classify each result:
 
-| Variable | Description |
-|----------|-------------|
-| `{task_description}` | What was implemented |
-| `{task_id}` | Kebab-case identifier |
-| `{acceptance_criteria}` | Success criteria |
-| `{auto_mode}` | Skip confirmations |
-| `{save_mode}` | Save outputs to files |
-| `{test_mode}` | Include test steps |
-| `{examine_mode}` | Auto-proceed to review |
-| `{output_dir}` | Path to output (if save_mode) |
-| Implementation | Completed in step-03 |
-</available_state>
+| Status | Meaning |
+|---|---|
+| PASS | Check ran and passed on the current intended state |
+| FAIL_INTRODUCED | Current APEX changes caused the failure |
+| FAIL_PREEXISTING | Failure is reproduced outside the intended change or predates it |
+| FAIL_UNRELATED | Failure belongs to unrelated local changes or an out-of-scope area |
+| UNAVAILABLE | Required service, dependency, credential, command, or environment is absent |
+| NOT_RUN | Check was intentionally omitted with a concrete reason |
 
----
+Never turn `UNAVAILABLE`, `NOT_RUN`, or an unproven baseline inference into PASS.
 
-## EXECUTION SEQUENCE:
+## 4. Resolve introduced failures
 
-### 1. Initialize Save Output (if save_mode)
+Fix `FAIL_INTRODUCED` within scope and re-run every invalidated check. Do not repair pre-existing or unrelated failures unless the user expands scope.
 
-**If `{save_mode}` = true:**
+If a failure exposes a flawed plan or interface, record a re-plan event and return to execution.
+
+## 5. Record validation ledger
+
+For each check, record command/tool, environment, timestamp, revision, exit status, concise result, classification, and artifact path when useful.
 
 ```bash
-bash {skill_dir}/scripts/update-progress.sh "{task_id}" "04" "validate" "in_progress"
+python3 "{skill_dir}/scripts/apex-state.py" event --root "$PWD" --run-id "{run_id}" --phase validate --status complete --message "Validation ledger classified"
+python3 "{skill_dir}/scripts/apex-state.py" checkpoint --root "$PWD" --run-id "{run_id}" --phase validate --message "Integrated validation checkpoint"
 ```
 
-Append results to `{output_dir}/04-validate.md` as you work.
+## Routing
 
-### 2. Discover Available Commands
-
-Check `package.json` for exact command names:
-```bash
-cat package.json | grep -A 20 '"scripts"'
-```
-
-Look for: `typecheck`, `lint`, `test`, `build`, `format`
-
-### 3. Run Validation Suite
-
-**3.1 Typecheck**
-```bash
-pnpm run typecheck  # or npm run typecheck
-```
-
-**MUST PASS.** If fails:
-1. Read error messages
-2. Fix type issues
-3. Re-run until passing
-
-**3.2 Lint**
-```bash
-pnpm run lint
-```
-
-**MUST PASS.** If fails:
-1. Try auto-fix: `pnpm run lint --fix`
-2. Manually fix remaining
-3. Re-run until passing
-
-**3.3 Tests**
-```bash
-pnpm run test -- --filter={affected-area}
-```
-
-**MUST PASS.** If fails:
-1. Identify failing test
-2. Determine if code bug or test bug
-3. Fix the root cause
-4. Re-run until passing
-
-**If `{save_mode}` = true:** Log each result
-
-### 4. Self-Audit Checklist
-
-Verify each item:
-
-**Tasks Complete:**
-- [ ] All todos from step-03 marked complete
-- [ ] No tasks skipped without reason
-- [ ] Any blocked tasks have explanation
-
-**Tests Passing:**
-- [ ] All existing tests pass
-- [ ] New tests written for new functionality
-- [ ] No skipped tests without reason
-
-**Acceptance Criteria:**
-- [ ] Each AC demonstrably met
-- [ ] Can explain how implementation satisfies AC
-- [ ] Edge cases considered
-
-**Patterns Followed:**
-- [ ] Code follows existing patterns
-- [ ] Error handling consistent
-- [ ] Naming conventions match
-
-### 5. Format Code
-
-If format command available:
-```bash
-pnpm run format
-```
-
-### 6. Final Verification
-
-Re-run all checks:
-```bash
-pnpm run typecheck && pnpm run lint
-```
-
-Both MUST pass.
-
-### 7. Present Validation Results
-
-```
-**Validation Complete**
-
-**Typecheck:** ✓ Passed
-**Lint:** ✓ Passed
-**Tests:** ✓ {X}/{X} passing
-**Format:** ✓ Applied
-
-**Acceptance Criteria:**
-- [✓] AC1: Verified by [how]
-- [✓] AC2: Verified by [how]
-
-**Files Modified:** {list}
-
-**Summary:** All checks passing, ready for next step.
-```
-
-### 8. Determine Next Step
-
-**Decision tree:**
-
-```
-IF {test_mode} = true:
-    → Load step-07-tests.md (test analysis and creation)
-
-ELSE IF {examine_mode} = true:
-    → Load step-05-examine.md (adversarial review)
-
-ELSE IF {verify_mode} = true:
-    → Load step-10-verify.md (feature verification)
-
-ELSE IF {auto_mode} = false:
-    → Ask user:
-```
-
-```yaml
-questions:
-  - header: "Next"
-    question: "Validation complete. What would you like to do?"
-    options:
-      - label: "Run adversarial review"
-        description: "Deep review for security, logic, and quality"
-      - label: "Verify feature"
-        description: "Launch app and test feature works"
-      - label: "Complete workflow"
-        description: "Skip review and finalize"
-      - label: "Add tests"
-        description: "Create additional tests first"
-    multiSelect: false
-```
-
-```
-ELSE:
-    → Complete workflow (show final summary)
-```
-
-### 9. Complete Save Output (if save_mode)
-
-**If `{save_mode}` = true:**
-
-Append to `{output_dir}/04-validate.md`:
-```markdown
----
-## Step Complete
-**Status:** ✓ Complete
-**Typecheck:** ✓
-**Lint:** ✓
-**Tests:** ✓
-**Next:** {next step based on flags}
-**Timestamp:** {ISO timestamp}
-```
-
----
-
-## SUCCESS METRICS:
-
-✅ Typecheck passes
-✅ Lint passes
-✅ All tests pass
-✅ All AC verified
-✅ Code formatted
-✅ User informed of status
-
-## FAILURE MODES:
-
-❌ Claiming checks pass when they don't
-❌ Not running all validation commands
-❌ Skipping tests for modified code
-❌ Missing AC verification
-❌ Proceeding with failures
-❌ **CRITICAL**: Not using AskUserQuestion for next step
-
-## VALIDATION PROTOCOLS:
-
-- Run EVERY validation command
-- Fix failures IMMEDIATELY
-- Don't proceed until all green
-- Verify EACH acceptance criterion
-- Document all results
-
----
-
-## NEXT STEP:
-
-Based on flags (check in order):
-- **If test_mode:** Load `./step-07-tests.md`
-- **If examine_mode OR user requests:** Load `./step-05-examine.md`
-- **If verify_mode:** Load `./step-10-verify.md` to verify feature
-- **If pr_mode:** Load `./step-09-finish.md` to create pull request
-- **Otherwise:** Workflow complete - show summary
-
-<critical>
-Remember: NEVER proceed with failing checks - fix everything first!
-If teams_mode is active: NEVER shutdown teammates - they stay alive until step-09-finish!
-</critical>
+- If `{test_authoring}=on`, load `step-07-tests.md` when new tests remain to be authored.
+- If `{test_authoring}=off`, do not author new tests; report material coverage gaps precisely.
+- If `{test_authoring}=risk-based`, load `step-07-tests.md` only for an evidence-backed material gap.
+- Load `step-05-examine.md` for adversarial or risk-required review.
+- Load `step-10-verify.md` when runtime proof is required and review requirements are already satisfied.
+- Otherwise continue to `step-09-finish.md`.

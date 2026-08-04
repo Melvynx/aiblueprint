@@ -1,6 +1,10 @@
 ---
 name: use-delegate
 description: "Delegation mode: the host agent (Claude or Codex) plans and reviews while heavy work runs on cheap executors: OpenCode Kimi K3, Codex GPT-5.6 terra/sol. Use when the user invokes /use-delegate, says 'use delegate', 'delegate mode', 'orchestrator mode', or wants to save tokens/rate limits."
+disable-model-invocation: true
+metadata:
+  opencode/autoinvoke: "false"
+  opencode/slash: "true"
 ---
 
 # Use Delegate
