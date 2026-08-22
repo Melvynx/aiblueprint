@@ -1,0 +1,10 @@
+interface:
+  display_name: "Audit Agent Memories"
+  short_description: "Audit and clean project agent documentation"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#5F3DC4"
+  default_prompt: "Use $audit-memories audit to compare every agent instruction, rule, skill, and task trace in this project with the current code and configuration."
+
+policy:
+  allow_implicit_invocation: false

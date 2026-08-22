@@ -1,0 +1,19 @@
+<svg role="img" aria-label="audit memories skill icon"
+  xmlns="http://www.w3.org/2000/svg"
+  width="128"
+  height="128"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <ellipse cx="9" cy="5" rx="6" ry="3" />
+  <path d="M3 5v8c0 1.7 2.7 3 6 3" />
+  <path d="M15 5v5" />
+  <path d="M3 9c0 1.7 2.7 3 6 3 2 0 3.8-.5 4.9-1.3" />
+  <circle cx="16" cy="16" r="4" />
+  <path d="m19 19 2 2" />
+  <path d="m14.5 16 1 1 2-2" />
+</svg>
