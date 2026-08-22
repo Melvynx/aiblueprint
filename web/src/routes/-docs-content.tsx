@@ -13,9 +13,9 @@ import { type ReactNode, useMemo } from "react";
 
 function DocsShell(props: { tree: DocTree; children: ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="dark flex min-h-screen flex-col bg-[#08090a] font-sans text-[#f7f8f8] antialiased selection:bg-white/20">
       <DocsHeader />
-      <div className="flex flex-1">
+      <div className="flex flex-1 border-t border-white/[0.06]">
         <DocsSidebar tree={props.tree} />
         <main className="min-w-0 flex-1">{props.children}</main>
       </div>
@@ -24,7 +24,7 @@ function DocsShell(props: { tree: DocTree; children: ReactNode }) {
 }
 
 const navButton = cn(
-  "border-border hover:bg-muted/60 inline-flex max-w-[45%] items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium no-underline transition-colors",
+  "group flex max-w-[48%] flex-col gap-1 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 text-sm no-underline transition-colors hover:border-white/20 hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none",
 );
 
 export function DocsNotFound(props: { tree: DocTree }) {
@@ -60,27 +60,27 @@ export function DocsContent(props: {
       <div className={toc.length > 0 ? "xl:pr-64" : ""}>
         <div className="flex w-full">
           <div className="flex min-w-0 flex-1">
-            <div className="mx-auto w-full min-w-0 px-6 py-8">
-              <div className="mx-auto flex w-full min-w-0 max-w-prose flex-col gap-6">
+            <div className="mx-auto w-full min-w-0 px-6 py-10 sm:py-14">
+              <div className="mx-auto flex w-full min-w-0 max-w-prose flex-col gap-8">
                 <div className="flex flex-col gap-3">
-                  <h1 className="text-4xl font-bold tracking-tight">
+                  <h1 className="text-[2rem] leading-[1.1] font-medium tracking-[-0.025em] text-balance text-[#f7f8f8] sm:text-4xl">
                     {props.doc.attributes.title}
                   </h1>
                   {props.doc.attributes.description && (
-                    <p className="text-muted-foreground text-lg">
+                    <p className="text-lg leading-relaxed text-pretty text-[#8a8f98]">
                       {props.doc.attributes.description}
                     </p>
                   )}
                 </div>
 
-                <ServerMdx source={props.doc.content} />
+                <ServerMdx className="docs-typography" source={props.doc.content} />
 
                 {(previous || next) && (
-                  <div className="border-border flex items-center justify-between border-t pt-6">
+                  <div className="grid grid-cols-1 gap-3 border-t border-white/[0.06] pt-8 sm:grid-cols-2">
                     {previous && (
                       <Link href={previous.url} className={navButton}>
-                        <ArrowLeft className="size-4 shrink-0" />
-                        <span className="truncate">
+                        <span className="flex items-center gap-1 font-mono text-[10px] tracking-[0.12em] text-white/40 uppercase"><ArrowLeft className="size-3" /> Previous</span>
+                        <span className="truncate font-medium text-[#f7f8f8]">
                           {previous.attributes.title}
                         </span>
                       </Link>
@@ -90,8 +90,8 @@ export function DocsContent(props: {
                         href={next.url}
                         className={cn(navButton, "ml-auto")}
                       >
-                        <span className="truncate">{next.attributes.title}</span>
-                        <ArrowRight className="size-4 shrink-0" />
+                        <span className="flex items-center gap-1 font-mono text-[10px] tracking-[0.12em] text-white/40 uppercase">Next <ArrowRight className="size-3" /></span>
+                        <span className="truncate font-medium text-[#f7f8f8]">{next.attributes.title}</span>
                       </Link>
                     )}
                   </div>
@@ -102,7 +102,7 @@ export function DocsContent(props: {
 
           {toc.length > 0 && (
             <div className="fixed top-16 right-0 hidden h-[calc(100vh-4rem)] overflow-y-auto xl:flex">
-              <aside className="bg-background w-64 overflow-y-auto border-l">
+              <aside className="w-64 overflow-y-auto border-l border-white/[0.06] bg-[#08090a]">
                 <div className="p-6">
                   <DocsTableOfContents toc={toc} />
                 </div>

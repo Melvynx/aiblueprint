@@ -1,0 +1,34 @@
+---
+title: Apex
+description: A minimal configurable router for the complete feature workflow.
+keywords: ["apex", "flags", "workflow", "verify"]
+---
+
+`apex` calls the core skills in this order:
+
+```text
+analyze -> plan -> implement -> review with -x -> verify
+```
+
+## Flags
+
+| Flag | Behavior |
+| --- | --- |
+| `-a` | Continue without plan-validation pauses, using safe reversible decisions. |
+| `-x` | Run `review` after implementation. |
+| `-v` | Explicitly request `verify`, which is already enabled by default. |
+
+Flags can be grouped, for example `-axv`. No other workflow flags, saved step
+files, task graphs, resume state, teams mode, branch mode, or PR mode belong to
+this router.
+
+```bash
+/apex -a add organization invitations
+/apex -ax add organization invitations
+```
+
+## Minimal router
+
+Apex owns orchestration only. If review or verification changes the
+implementation, it reruns the affected downstream stages. It closes the issue
+only after every verification criterion passes.

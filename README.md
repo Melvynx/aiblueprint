@@ -151,7 +151,6 @@ npx skills add Melvynx/aiblueprint --skill skill-manager
 | `environments-manager` | Set up per-worktree agent environments |
 | `oneshot` | Implement one focused change quickly |
 | `prompt` | Create minimalist SVG logo variations |
-| `prompt-creator` | Expert prompt engineering |
 | `rules-manager` | Create and maintain agent rule files |
 | `skill-manager` | Manage skills and rules across Claude Code, Codex, and Cursor |
 | `tools` | AIBlueprint tools and libraries reference |

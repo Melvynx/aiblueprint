@@ -36,7 +36,6 @@ This catalog is generated from the directories shipped under
 | `merge` | Merge branches with conflict awareness |
 | `oneshot` | Implement one focused change quickly |
 | `prompt` | Create minimalist SVG logo variations |
-| `prompt-creator` | Expert prompt engineering |
 | `rules-manager` | Maintain AGENTS.md and agent rules |
 | `skill-manager` | Create, edit, audit, or prune skills |
 | `tools` | AIBlueprint tools and libraries reference |
@@ -114,27 +113,6 @@ dependencies one decision at a time.
 
 ---
 
-## prompt-creator
-
-```bash
-npx skills@latest add melvynx/aiblueprint --skill prompt-creator
-```
-
-**What it does:** Expert prompt engineering for Claude, GPT, and other LLMs, using
-proven techniques from Anthropic and OpenAI research (clarity, structure, examples,
-reasoning, and advanced patterns).
-
-**Use it for:** writing system prompts, user prompts, few-shot examples, or
-optimizing existing prompts for better performance.
-
-**Key points:**
-- Workflow: clarify purpose → identify the target model → select techniques →
-  structure content (XML tags for Claude, markdown for GPT) → add examples → define
-  success criteria.
-- Tailors technique choices to the target model and task complexity.
-
----
-
 ## rules-manager
 
 ```bash
@@ -185,18 +163,22 @@ platforms.
 npx skills@latest add melvynx/aiblueprint --skill apex
 ```
 
-**What it does:** Structured implementation using the APEX method — **A**nalyze →
-**P**lan → **E**xecute → e**X**amine. The lightweight, single-skill workflow for
-deliberate feature/bug work (the "cute" version of the heavier multi-agent APEX).
+**What it does:** Routes feature work through focused Premium skills:
+`analyze → plan → implement → review (with -x) → verify`. The GitHub issue
+created by `plan` remains the source of truth for every downstream stage.
 
 **Use it for:** implementing a feature or fixing a bug that benefits from a clear,
 deliberate workflow instead of jumping straight to code.
 
 **Key points:**
-- Four phases: **Analyze** (gather just enough context, restate the task as 2–4
-  acceptance criteria), **Plan**, **Execute**, **eXamine** (validate).
-- Add `-x` to the request for an extra adversarial review pass after validation.
-- Argument hint: `[-x] <task-description>`.
+- `-a` runs autonomously without pausing after analysis or planning.
+- `-x` adds the separate `review` gate before verification.
+- `-v` explicitly requests verification, which is already enabled by default.
+- Flags can be grouped, for example `-axv`.
+- `oneshot` runs the complete sequence with review always enabled.
+- After `verify` runs, every later implementation change must be re-verified
+  with fresh screenshots shown directly in the response.
+- Argument hint: `[-a] [-v] [-x] <request>`.
 
 ---
 

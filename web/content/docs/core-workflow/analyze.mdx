@@ -1,0 +1,24 @@
+---
+title: Analyze
+description: Understand the requested change without planning or modifying state.
+---
+
+`analyze` inspects the repository, current behavior, rules, constraints, risks,
+and nearby prior art.
+
+## Output
+
+- The problem and desired behavior.
+- Evidence from the current environment.
+- Constraints and material risks.
+- Measurable acceptance criteria.
+- Decisions that genuinely require the user.
+
+## Boundary
+
+It stops when the request is understood well enough to plan. It does not create
+a plan, issue, or implementation.
+
+```bash
+/analyze add organization invitations
+```

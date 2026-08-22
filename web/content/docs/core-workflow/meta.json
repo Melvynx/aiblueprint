@@ -1,0 +1,4 @@
+{
+  "title": "The Core Workflow",
+  "pages": ["index", "analyze", "plan", "implement", "review", "verify", "code-debug"]
+}

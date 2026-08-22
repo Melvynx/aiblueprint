@@ -54,7 +54,7 @@ export function DocsTableOfContents({
 
   return (
     <div className={cn("flex flex-col gap-3", className)}>
-      <h4 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+      <h4 className="font-mono text-[10px] tracking-[0.12em] text-white/40 uppercase">
         On This Page
       </h4>
       <nav className="flex flex-col gap-2">
@@ -63,8 +63,8 @@ export function DocsTableOfContents({
             key={item.url}
             href={item.url}
             className={cn(
-              "text-muted-foreground hover:text-foreground block text-sm no-underline transition-colors",
-              item.url === `#${activeHeading}` && "text-foreground font-medium",
+              "block text-[13px] text-[#8a8f98] no-underline transition-colors hover:text-[#f7f8f8]",
+              item.url === `#${activeHeading}` && "font-medium text-[#f7f8f8]",
               item.depth === 3 && "pl-4",
               item.depth === 4 && "pl-6",
             )}

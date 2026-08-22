@@ -1,0 +1,25 @@
+---
+title: OneShot
+description: Run every core feature stage and close the issue only after proof passes.
+keywords: ["oneshot", "workflow", "review", "verify"]
+---
+
+`oneshot` is the opinionated complete workflow:
+
+```text
+analyze -> plan -> implement -> review -> verify -> close issue
+```
+
+## Flags
+
+| Flag | Behavior |
+| --- | --- |
+| `-a`, `auto` | Continue without confirmation unless authority, credentials, or an irreversible decision is missing. |
+
+```bash
+/oneshot -a add organization invitations
+```
+
+OneShot always runs review and verification. Failures are fixed and every
+affected downstream stage runs again. The GitHub issue remains open whenever
+verification is blocked or any criterion is not proven.

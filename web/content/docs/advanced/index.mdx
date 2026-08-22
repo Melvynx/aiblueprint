@@ -1,0 +1,20 @@
+---
+title: Advanced Workflows
+description: Bundle the core skills into complete, repeatable feature workflows.
+keywords: ["apex", "oneshot", "automation", "workflow"]
+---
+
+`apex` and `oneshot` are intentionally small routers. They call the core skills
+in order, pass each result forward, and keep the GitHub issue from `plan` as the
+source of truth.
+
+They do not contain separate analysis, planning, implementation, review, or
+verification logic.
+
+| Router | Best for | Review | Verification |
+| --- | --- | --- | --- |
+| `apex` | A configurable complete feature flow. | Optional with `-x`. | Enabled by default. |
+| `oneshot` | The full quality-gated flow with one decision. | Always. | Always. |
+
+Start with [Apex](/advanced/apex) when review should be optional. Use
+[OneShot](/advanced/oneshot) when every gate should always run.

@@ -1,0 +1,21 @@
+---
+title: Plan
+description: Convert an analysis into one confirmed implementation-ready GitHub issue.
+---
+
+`plan` turns the analyzed request into the contract used by downstream skills.
+
+## Output
+
+The issue records the problem, desired behavior, scope, exclusions,
+implementation decisions, acceptance criteria, and verification requirements.
+After creation, the agent reads the issue back from GitHub and returns its URL.
+
+## Boundary
+
+The stage is incomplete until the provider read-back confirms the issue. It does
+not implement the issue.
+
+```bash
+/plan use the current analysis
+```

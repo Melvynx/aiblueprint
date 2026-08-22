@@ -64,8 +64,8 @@ export function DocCard({
     <Link
       href={href}
       className={cn(
-        "group border-border flex flex-col gap-3 rounded-lg border p-4 no-underline",
-        "hover:border-muted-foreground/25 hover:bg-muted/40 transition-colors",
+        "group flex flex-col gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 no-underline",
+        "transition-colors hover:border-white/20 hover:bg-white/[0.04]",
       )}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
     >
@@ -100,7 +100,7 @@ export function DocSection({
 }) {
   return (
     <section className="flex flex-col gap-3">
-      <h3 className="text-muted-foreground text-sm font-medium">{title}</h3>
+      <h3 className="font-mono text-[10px] tracking-[0.12em] text-white/40 uppercase">{title}</h3>
       {children}
     </section>
   );

@@ -1,0 +1,21 @@
+---
+title: Verify
+description: Prove every acceptance criterion through the real product surface.
+---
+
+`verify` is the completion gate. It exercises the real user-facing or
+authoritative runtime surface and marks every criterion `PASS` or `NOT PROVEN`.
+
+## Persistent verification
+
+Once invoked, verification remains active for the conversation. Every later
+change invalidates the previous proof and requires the affected flow to run
+again.
+
+For visual behavior, the agent captures fresh screenshots for every affected
+observable step and displays them directly in the response. A path, old image,
+report, or passing static check is not a substitute for current proof.
+
+```bash
+/verify issue 123
+```

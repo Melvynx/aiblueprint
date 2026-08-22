@@ -1,11 +1,27 @@
 ---
 title: Skills
 description: Reusable workflows for commits, PRs, prompting, and more.
-keywords: ["skills", "commit", "create-pr", "prompt-creator", "ultrathink"]
+keywords: ["skills", "commit", "create-pr", "ultrathink"]
 ---
 
 Skills are reusable workflows that Claude Code and Codex can invoke. AIBlueprint
 installs 30+ skills into the shared `~/.agents/skills` folder.
+
+## Main feature workflow
+
+Premium feature work starts with one of two routers:
+
+- **`oneshot`** runs the complete workflow: `analyze → plan → implement → review → verify`.
+- **`apex`** runs `analyze → plan → implement → verify` by default and adds `review` with `-x`.
+
+Both routers pass one GitHub issue through focused subskills instead of keeping
+the whole implementation procedure in one large prompt. Use `oneshot -a` for a
+complete autonomous feature, or `apex -a -x` when you want the configurable
+router with review enabled. Verification remains on by default.
+
+See [The Core Workflow](/core-workflow) for stage ownership and direct skill
+invocation, then [Advanced Workflows](/advanced) for Apex and OneShot flags,
+automation, and persistent screenshot-backed verification.
 
 ## Bundled skills
 
@@ -15,7 +31,6 @@ installs 30+ skills into the shared `~/.agents/skills` folder.
 | `create-pr` | Generate a pull request from the current branch. |
 | `fix-pr-comments` | Address reviewer feedback on a PR. |
 | `merge` | Context-aware branch merging. |
-| `prompt-creator` | Expert prompt engineering with best-practice references. |
 | `skill-manager` | Create and edit skills across Claude, Codex, and Cursor. |
 | `use-style` | Apply named visual style guides before designing or implementing UI. |
 | `use-artifacts` | Create polished local HTML plans, explorations, prototypes, and visualizations. |
@@ -24,7 +39,7 @@ installs 30+ skills into the shared `~/.agents/skills` folder.
 | `environments-manager` | Per-worktree agent environments. |
 | `grill-me` | Stress-test a plan with focused design questions. |
 | `hooks-manager` | Create, configure, and debug Claude Code hooks. |
-| `oneshot` | Ultra-fast explore-code-test implementation. |
+| `oneshot` | Complete analyze-to-verify feature workflow. |
 | `ultrathink` | Deep thinking mode for elegant solutions. |
 | `use-goal` | Create evidence-based Codex or Claude Code Goals. |
 | `codex-environment` | Codex-specific environment setup. |

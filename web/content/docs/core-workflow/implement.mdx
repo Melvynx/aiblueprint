@@ -1,0 +1,22 @@
+---
+title: Implement
+description: Implement the agreed GitHub issue with focused feedback loops.
+---
+
+`implement` reads the complete issue and treats it as the source of truth.
+
+## Behavior
+
+- Change only the agreed scope.
+- Prefer the smallest coherent implementation.
+- Run focused checks throughout and broader relevant checks at the end.
+- Record safe reversible assumptions when autonomous mode is active.
+
+## Boundary
+
+Implementation reports the diff, checks, and remaining uncertainty. Passing
+static checks is not runtime verification.
+
+```bash
+/implement https://github.com/owner/repo/issues/123
+```

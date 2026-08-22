@@ -1,0 +1,53 @@
+---
+title: The Core Workflow
+description: Small, focused skills for taking a feature from investigation to runtime proof.
+keywords: ["workflow", "analyze", "plan", "implement", "review", "verify"]
+---
+
+The core workflow is a sequence of independent skills. Each skill owns one job,
+produces one explicit result, and stops before the next responsibility begins.
+
+```text
+request
+  -> analyze
+  -> plan
+  -> implement
+  -> review
+  -> verify
+```
+
+## Available stages
+
+| Skill | Produces | Stops before |
+| --- | --- | --- |
+| `analyze` | Evidence, constraints, risks, and acceptance criteria. | Planning or editing. |
+| `plan` | A confirmed implementation-ready GitHub issue. | Implementation. |
+| `implement` | The scoped change and relevant static checks. | Runtime proof. |
+| `review` | Separate Spec and Standards verdicts. | Runtime verification. |
+| `verify` | Current proof for every acceptance criterion. | Completion while anything is unproven. |
+| `code-debug` | A reproduced root cause, regression coverage, and a verified fix. | Guessing without a red-capable loop. |
+
+## Minimal by design
+
+The skills do not duplicate each other. `analyze` does not create a plan,
+`implement` does not claim runtime proof, and `review` does not replace
+`verify`. The GitHub issue created by `plan` becomes the shared source of truth
+for every downstream stage.
+
+Use a skill directly when only one stage is needed:
+
+```bash
+/analyze investigate slow navigation
+/plan use the current analysis
+/implement https://github.com/owner/repo/issues/123
+/review issue 123 since origin/main
+/verify issue 123
+/code-debug reproduce the intermittent save failure
+```
+
+## Flags
+
+Core skills intentionally expose almost no workflow configuration. `code-debug`
+accepts `-a` or `auto` to choose safe reversible debugging decisions without
+pausing. Automation across the complete sequence belongs to `apex` and
+`oneshot`, documented under [Advanced](/advanced).

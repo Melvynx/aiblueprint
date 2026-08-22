@@ -261,3 +261,93 @@
     font-weight: 600;
   }
 }
+
+.typography.docs-typography :is(h1, h2, h3, h4, h5, h6) {
+  color: #f7f8f8;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+
+.typography.docs-typography h2:not(.not-typography h2) {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.typography.docs-typography :is(p, li) {
+  color: #c5c8ce;
+  line-height: 1.75;
+}
+
+.typography.docs-typography a:not(.not-typography a) {
+  color: #f7f8f8;
+  text-decoration-color: rgb(255 255 255 / 30%);
+  text-decoration-thickness: from-font;
+  text-underline-position: from-font;
+}
+
+.typography.docs-typography a:not(.not-typography a):hover {
+  text-decoration-color: #fff;
+}
+
+.typography.docs-typography strong:not(.not-typography strong) {
+  color: #f7f8f8;
+}
+
+.typography.docs-typography blockquote:not(.not-typography blockquote) {
+  border-color: rgb(255 255 255 / 20%);
+  color: #c5c8ce;
+}
+
+.typography.docs-typography pre:not(.not-typography pre) {
+  border: 1px solid rgb(255 255 255 / 8%);
+  background: rgb(255 255 255 / 4%);
+}
+
+.typography.docs-typography code:not(pre code):not(.not-typography code) {
+  background: rgb(255 255 255 / 8%);
+  color: #f7f8f8;
+}
+
+.typography.docs-typography table:not(.not-typography table) {
+  border-collapse: collapse;
+}
+
+.typography.docs-typography table:not(.not-typography table) thead tr,
+.typography.docs-typography table:not(.not-typography table) thead tr:nth-child(even),
+.typography.docs-typography table:not(.not-typography table) tbody tr,
+.typography.docs-typography table:not(.not-typography table) tbody tr:nth-child(even) {
+  border-top: 0;
+  background-color: transparent;
+}
+
+.typography.docs-typography table:not(.not-typography table) th {
+  border: 0;
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+  padding: calc(var(--spacing) * 2.5) calc(var(--spacing) * 4);
+  color: rgb(255 255 255 / 45%);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.typography.docs-typography table:not(.not-typography table) td {
+  border: 0;
+  border-top: 1px solid rgb(255 255 255 / 6%);
+  padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
+}
+
+.typography.docs-typography table:not(.not-typography table) tbody tr:first-child td {
+  border-top: 0;
+}
+
+.typography.docs-typography table:not(.not-typography table) th:first-child,
+.typography.docs-typography table:not(.not-typography table) td:first-child {
+  padding-left: 0;
+}
+
+.typography.docs-typography table:not(.not-typography table) th:last-child,
+.typography.docs-typography table:not(.not-typography table) td:last-child {
+  padding-right: 0;
+}

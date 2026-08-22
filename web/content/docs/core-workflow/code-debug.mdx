@@ -1,0 +1,26 @@
+---
+title: Code Debug
+description: Debug difficult bugs with a deterministic red-capable loop before changing code.
+---
+
+`code-debug` starts by reproducing the exact symptom with one fast,
+agent-runnable command. Hypotheses are not allowed until that loop can go red.
+
+## Debugging loop
+
+1. Reproduce and minimize the failure.
+2. Rank falsifiable hypotheses with predictions.
+3. Test one variable at a time.
+4. Add regression coverage at the real seam.
+5. Apply the smallest evidenced fix.
+6. Rerun the original path and hand the result to `verify`.
+
+## Flags
+
+| Flag | Behavior |
+| --- | --- |
+| `-a`, `auto` | Use the recommended safe reversible option without pausing. |
+
+```bash
+/code-debug -a checkout occasionally loses the selected plan
+```
