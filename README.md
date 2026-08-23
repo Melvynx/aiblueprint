@@ -142,6 +142,8 @@ npx skills add Melvynx/aiblueprint --skill skill-manager
 | `apex` | Structured implementation workflow |
 | `app-icon` | Generate and prepare app icons |
 | `appstore-connect` | Manage App Store Connect workflows |
+| `audit-memories` | Manually audit and clean project agent documentation |
+| `audit-skills` | Manually audit skill usage, invocation controls, duplicates, and scope |
 | `commit` | Quick commit and push with clean messages |
 | `create-pr` | Auto-generated pull requests |
 | `fix-pr-comments` | Resolve PR review comments |

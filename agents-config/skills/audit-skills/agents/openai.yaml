@@ -1,0 +1,7 @@
+interface:
+  display_name: "Audit Skills"
+  short_description: "Audit skill usage, invocation, and scope"
+  default_prompt: "Use $audit-skills to audit global and project skill placement."
+
+policy:
+  allow_implicit_invocation: false

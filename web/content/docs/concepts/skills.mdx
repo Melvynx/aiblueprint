@@ -23,6 +23,16 @@ See [The Core Workflow](/core-workflow) for stage ownership and direct skill
 invocation, then [Advanced Workflows](/advanced) for Apex and OneShot flags,
 automation, and persistent screenshot-backed verification.
 
+## Manual utilities
+
+These miscellaneous maintenance skills run only when the user invokes them
+explicitly. Claude and Codex are both configured to prevent implicit selection.
+
+| Skill | Command | Purpose |
+| ----- | ------- | ------- |
+| `audit-memories` | `$audit-memories` | Audit or clean agent-facing project documentation against current project truth. |
+| `audit-skills` | `$audit-skills` | Audit observed skill usage, duplicate discovery, invocation controls, and global-versus-project scope. |
+
 ## Bundled skills
 
 | Skill | Description |
