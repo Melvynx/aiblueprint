@@ -27,22 +27,17 @@ This catalog is generated from the directories shipped under
 | `apex` | Structured implementation workflow |
 | `app-icon` | Generate and prepare app icons |
 | `appstore-connect` | Manage App Store Connect workflows |
-| `commit` | Create clean commits and push changes |
-| `create-pr` | Create and push pull requests |
+| `audit-memories` | Audit and clean project agent documentation |
+| `audit-skills` | Audit installed skill usage, discovery, invocation controls, and scope |
 | `environments-manager` | Set up per-worktree environments |
 | `fix-pr-comments` | Resolve pull-request review comments |
 | `grill-me` | Stress-test a plan with focused questions |
 | `hooks-manager` | Create and debug Claude Code hooks |
 | `merge` | Merge branches with conflict awareness |
-| `oneshot` | Implement one focused change quickly |
 | `prompt` | Create minimalist SVG logo variations |
 | `rules-manager` | Maintain AGENTS.md and agent rules |
 | `skill-manager` | Create, edit, audit, or prune skills |
-| `tools` | AIBlueprint tools and libraries reference |
 | `ultrathink` | Deep thinking for elegant solutions |
-| `use-artifacts` | Create reusable local HTML artifacts |
-| `use-delegate` | Delegate heavy work to cheap executors |
-| `use-goal` | Create evidence-based agent Goals |
 | `use-style` | Apply named visual style guides |
 
 ---
@@ -203,26 +198,3 @@ or `testspirite`.
   use before designing.
 - Workflow: read `styles/<name>.md` from the skill directory, then prefer any
   project-level overrides over the portable spec.
-
----
-
-## use-artifacts
-
-```bash
-npx skills@latest add melvynx/aiblueprint --skill use-artifacts
-```
-
-**What it does:** Creates polished, reusable local HTML artifacts under
-`~/.agents/artifacts/<id>/` for substantial plans, comparisons, prototypes,
-visualizations, dashboards, and diagrams.
-
-**Use it for:** feature plans, thinking documents, croquis and variation boards,
-interactive prototypes, or any substantial result that should remain easy to
-inspect and iterate outside chat.
-
-**Key points:**
-- Uses the existing application's visual language first, then the closest
-  `use-style` guide, with `black-grid` as the minimal technical fallback.
-- Keeps `index.html`, `HIGHLOGIC.md`, and `manifest.json` together in a global
-  artifact workspace rather than adding files to the current repository.
-- Verifies the final HTML and links the artifact back in chat.
