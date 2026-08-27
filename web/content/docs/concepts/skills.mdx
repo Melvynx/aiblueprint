@@ -1,7 +1,7 @@
 ---
 title: Skills
 description: Reusable workflows for implementation, prompting, and more.
-keywords: ["skills", "apex", "oneshot", "ultrathink"]
+keywords: ["skills", "apex", "oneshot", "verify"]
 ---
 
 Skills are reusable workflows that Claude Code and Codex can invoke. AIBlueprint
@@ -37,8 +37,6 @@ explicitly. Claude and Codex are both configured to prevent implicit selection.
 
 | Skill | Description |
 | ----- | ----------- |
-| `fix-pr-comments` | Address reviewer feedback on a PR. |
-| `merge` | Context-aware branch merging. |
 | `skill-manager` | Create and edit skills across Claude, Codex, and Cursor. |
 | `use-style` | Apply named visual style guides before designing or implementing UI. |
 | `rules-manager` | Maintain `AGENTS.md` and modular rule files. |
@@ -46,7 +44,6 @@ explicitly. Claude and Codex are both configured to prevent implicit selection.
 | `environments-manager` | Per-worktree agent environments. |
 | `grill-me` | Stress-test a plan with focused design questions. |
 | `hooks-manager` | Create, configure, and debug Claude Code hooks. |
-| `ultrathink` | Deep thinking mode for elegant solutions. |
 | `codex-environment` | Codex-specific environment setup. |
 
 ## Product workflow skills
@@ -69,7 +66,6 @@ Former one-off prompt workflows now ship as skills too:
 | `nextjs-add-prisma-db` | Add Prisma and PostgreSQL to a Next.js app. |
 | `nextjs-setup-better-auth` | Wire Better Auth with email OTP. |
 | `create-vitejs-app` | Create a Vite app with Tailwind and shadcn/ui. |
-| `prompt` | Generate minimalist SVG logo variations. |
 | `setup-tmux` | Install and configure tmux with Ghostty. |
 
 ## How skills are organized

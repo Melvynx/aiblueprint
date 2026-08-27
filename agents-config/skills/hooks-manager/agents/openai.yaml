@@ -5,3 +5,6 @@ interface:
   icon_large: "./assets/codex-icon.svg"
   brand_color: "#868259"
   default_prompt: "Use $hooks-manager to help with this task."
+
+policy:
+  allow_implicit_invocation: false

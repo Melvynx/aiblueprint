@@ -1,6 +1,9 @@
 interface:
   display_name: "Audit Skills"
   short_description: "Audit skill usage, invocation, and scope"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#737373"
   default_prompt: "Use $audit-skills to audit global and project skill placement."
 
 policy:

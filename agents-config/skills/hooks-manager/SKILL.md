@@ -1,6 +1,7 @@
 ---
 name: hooks-manager
 description: Create, edit, configure, and debug hooks for Claude Code, Codex, and Cursor. Use for lifecycle events, command validation, routing shared hooks, notifications, automation, or platform-specific hook configuration.
+disable-model-invocation: true
 ---
 
 # Hooks Manager

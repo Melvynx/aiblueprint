@@ -5,3 +5,6 @@ interface:
   icon_large: "./assets/codex-icon.svg"
   brand_color: "#2F5B3E"
   default_prompt: "Use $rules-manager to help with this task."
+
+policy:
+  allow_implicit_invocation: true

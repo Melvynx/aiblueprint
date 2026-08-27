@@ -30,14 +30,10 @@ This catalog is generated from the directories shipped under
 | `audit-memories` | Audit and clean project agent documentation |
 | `audit-skills` | Audit installed skill usage, discovery, invocation controls, and scope |
 | `environments-manager` | Set up per-worktree environments |
-| `fix-pr-comments` | Resolve pull-request review comments |
 | `grill-me` | Stress-test a plan with focused questions |
 | `hooks-manager` | Create and debug Claude Code hooks |
-| `merge` | Merge branches with conflict awareness |
-| `prompt` | Create minimalist SVG logo variations |
 | `rules-manager` | Maintain AGENTS.md and agent rules |
 | `skill-manager` | Create, edit, audit, or prune skills |
-| `ultrathink` | Deep thinking for elegant solutions |
 | `use-style` | Apply named visual style guides |
 
 ---

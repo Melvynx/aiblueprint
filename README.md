@@ -127,7 +127,7 @@ Install skills directly into `~/.claude/skills/`:
 npx skills@latest add melvynx/aiblueprint
 
 # Install a single skill
-npx skills add Melvynx/aiblueprint --skill ultrathink
+npx skills add Melvynx/aiblueprint --skill app-icon
 
 # Install multiple skills
 npx skills add Melvynx/aiblueprint --skill rules-manager
@@ -144,16 +144,12 @@ npx skills add Melvynx/aiblueprint --skill skill-manager
 | `appstore-connect` | Manage App Store Connect workflows |
 | `audit-memories` | Manually audit and clean project agent documentation |
 | `audit-skills` | Manually audit skill usage, invocation controls, duplicates, and scope |
-| `fix-pr-comments` | Resolve PR review comments |
 | `grill-me` | Stress-test a plan with focused questions |
 | `hooks-manager` | Create and debug Claude Code hooks |
-| `merge` | Context-aware branch merging |
 | `environments-manager` | Set up per-worktree agent environments |
-| `prompt` | Create minimalist SVG logo variations |
 | `rules-manager` | Create and maintain agent rule files |
 | `skill-manager` | Manage skills and rules across Claude Code, Codex, and Cursor |
 | `use-style` | Apply named UI style guides before implementation |
-| `ultrathink` | Deep thinking mode for elegant solutions |
 
 ## 🤖 Assistant Pro
 

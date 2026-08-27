@@ -5,3 +5,6 @@ interface:
   icon_large: "./assets/codex-icon.svg"
   brand_color: "#01C1C6"
   default_prompt: "Use $appstore-connect to help with this task."
+
+policy:
+  allow_implicit_invocation: false

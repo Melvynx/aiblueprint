@@ -4,5 +4,6 @@ interface:
   icon_small: "./assets/codex-icon.svg"
   icon_large: "./assets/codex-icon.svg"
   brand_color: "#F5F5F5"
+  default_prompt: "Use $grill-me to stress-test this plan or decision."
 policy:
   allow_implicit_invocation: false

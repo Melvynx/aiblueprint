@@ -1,6 +1,7 @@
 ---
 name: appstore-connect
 description: Interact with App Store Connect via the asc CLI - apps, builds, TestFlight, beta testers, reviews, sales/analytics, metadata, IAP, signing, submissions. Use for "check my app", "App Store Connect", "TestFlight status", "app review", "my app sales", or "asc".
+disable-model-invocation: true
 ---
 
 # App Store Connect (asc)

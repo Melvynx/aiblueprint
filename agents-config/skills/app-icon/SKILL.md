@@ -1,6 +1,7 @@
 ---
 name: app-icon
 description: Generate a vibrant dimensional iOS and Android app icon for an Expo or React Native app with AI image generation, then post-process it for store specs. Use for creating, regenerating, or polishing an app logo or launcher icon.
+disable-model-invocation: true
 argument-hint: "[app concept or brand]"
 ---
 
