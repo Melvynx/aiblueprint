@@ -1,73 +1,47 @@
 ---
 title: Skills
-description: Reusable workflows for implementation, prompting, and more.
+description: Reusable workflows installed into ~/.agents/skills and invoked from Claude Code or Codex.
 keywords: ["skills", "apex", "oneshot", "verify"]
 ---
 
 Skills are reusable workflows that Claude Code and Codex can invoke. AIBlueprint
-installs the free skill bundle into the shared `~/.agents/skills` folder.
+installs the free bundle into the shared `~/.agents/skills` folder. Premium
+setup adds the rest.
+
+The full catalog, with a PRO badge on Premium skills, lives under
+[Skills](/skills).
 
 ## Main feature workflow
 
 Choose a workflow based on the task:
 
-- **`apex`** is included in the free bundle. It runs an adaptive Analyze → Plan → Execute → eXamine loop with resumable checkpoints, risk-based review, and validation.
-- **`oneshot`** is a Premium router that runs `analyze → plan → implement → code-review → verify` in order.
+- **`apex`** is included in the free bundle. It runs an adaptive Analyze → Plan → Execute → eXamine loop with resumable checkpoints, risk-based review, and validation. See [Apex](/skills/apex).
+- **`oneshot`** is a Premium router that runs `analyze → plan → implement → code-review → verify` in order. See [OneShot](/skills/oneshot).
 
 Use `apex -a -x` for low-interaction implementation with adversarial review,
-or `oneshot -a` for the complete fixed sequence. OneShot uses the implementation
-plan as its source of truth; a GitHub issue is optional for focused work.
+or `oneshot -a` for the complete fixed sequence.
 
-See [The Core Workflow](/core-workflow) for stage ownership and direct skill
-invocation, then [Advanced Workflows](/advanced) for Apex and OneShot flags,
-automation, and persistent screenshot-backed verification.
+See [The Core Workflow](/core-workflow) for stage ownership, then
+[Advanced Workflows](/advanced) for flags and automation.
 
 ## Manual utilities
 
-These miscellaneous maintenance skills run only when the user invokes them
-explicitly. Claude and Codex are both configured to prevent implicit selection.
+These maintenance skills run only when you invoke them explicitly. Claude and
+Codex are both configured to prevent implicit selection.
 
-| Skill | Command | Purpose |
-| ----- | ------- | ------- |
-| `audit-memories` | `$audit-memories` | Audit or clean agent-facing project documentation against current project truth. |
-| `audit-skills` | `$audit-skills` | Audit observed skill usage, duplicate discovery, invocation controls, and global-versus-project scope. |
+- [`audit-memories`](/skills/audit-memories) — clean agent-facing project Markdown against current project truth.
+- [`audit-skills`](/skills/audit-skills) — audit usage, duplicates, invocation controls, and scope.
 
-## Bundled skills
-
-| Skill | Description |
-| ----- | ----------- |
-| `skill-manager` | Create and edit skills across Claude, Codex, and Cursor. |
-| `use-style` | Apply named visual style guides before designing or implementing UI. |
-| `rules-manager` | Maintain `AGENTS.md` and modular rule files. |
-| `agents-manager` | Manage agents and Task-tool orchestration. |
-| `environments-manager` | Per-worktree agent environments. |
-| `grill-me` | Stress-test a plan with focused design questions. |
-| `hooks-manager` | Create, configure, and debug Claude Code hooks. |
-| `app-icon` | Create app icon assets. |
-| `appstore-connect` | Work with App Store Connect. |
-
-## Premium skills
-
-[Premium setup](/commands/pro-setup) adds the core workflow (`analyze`, `plan`,
-`implement`, `code-review`, `verify`, and `oneshot`) and additional skills such
-as `impeccable`, `better`, `animate`, and `use-artifacts`.
-
-The installed catalog depends on your bundle and version. Use the assistant's
-skill picker to inspect the skills available after setup.
-
-## How skills are organized
+## How they are organized
 
 Each skill is a folder containing a `SKILL.md` file, and often a `references/`
 folder with supporting guides. Because they live in `~/.agents/skills`, every
 linked tool shares the same skills.
 
-## Installing
+Install with [agents setup](/commands/agents-setup). Premium skills need
+[agents pro setup](/commands/pro-setup). Use [agents unify](/commands/unify) to
+centralize skills you already have.
 
-Skills are installed by [agents setup](/commands/agents-setup). Use
-[agents unify](/commands/unify) to centralize global skills you already have
-into `~/.agents`, or `agents unify projects` to move project-local skills into
-that repository's `.agents/skills` folder.
-
-See [Use Style](/concepts/use-style) for the visual system, [Use Artifacts](/concepts/use-artifacts)
-for reusable local HTML experiences, [Don't overflow memory](/concepts/dont-overflow-memory)
-for keeping agent memory small, and [Examples](/examples) for the live style picker.
+See [Use Style](/skills/use-style), [Use Artifacts](/skills/use-artifacts),
+[Don't overflow memory](/concepts/dont-overflow-memory), and
+[Examples](/examples).

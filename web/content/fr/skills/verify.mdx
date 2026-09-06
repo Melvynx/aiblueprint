@@ -1,0 +1,34 @@
+---
+title: Verify
+description: "Prouver chaque critère d'acceptance avec de l'evidence actuelle sur la vraie surface."
+keywords: ["verify"]
+pro: true
+---
+
+`verify` check un changement, un fix, un comportement, un artefact ou un état externe via de l'evidence actuelle sur sa surface autoritative. Il ne termine pas tant que quelque chose n'est pas prouvé.
+
+## Invoquer
+
+```bash
+$verify issue 123
+```
+
+## Ce qu'il fait
+
+- Preuve runtime, pas « les tests passent sur ma machine » en vibe.
+- Dernière étape de `oneshot`. Indépendant de `code-review`.
+- À utiliser dès que l'utilisateur demande de prouver, checker ou démontrer quelque chose.
+
+## Installer
+
+Inclus dans Premium. Installe ou rafraîchis avec :
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+Voir [Configuration Premium](/commands/pro-setup).
+
+## Voir aussi
+
+Guide complet : [Verify](/core-workflow/verify).

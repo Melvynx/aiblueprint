@@ -1,0 +1,34 @@
+---
+title: Code Review
+description: "Verdicts Spec et Standards séparés contre le plan convenu."
+keywords: ["code-review"]
+pro: true
+---
+
+`code-review` review un changement contre la requête, le plan, la spec ou une issue GitHub optionnelle, plus les standards du repo. Ça ne remplace pas `verify`.
+
+## Invoquer
+
+```bash
+$code-review issue 123 since origin/main
+```
+
+## Ce qu'il fait
+
+- Deux verdicts : Spec (on a construit la bonne chose) et Standards (le code est acceptable).
+- S'arrête avant la preuve runtime. Ça, c'est `verify`.
+- Étape de revue dans `oneshot`, ou passe standalone.
+
+## Installer
+
+Inclus dans Premium. Installe ou rafraîchis avec :
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+Voir [Configuration Premium](/commands/pro-setup).
+
+## Voir aussi
+
+Guide complet : [Review](/core-workflow/review).

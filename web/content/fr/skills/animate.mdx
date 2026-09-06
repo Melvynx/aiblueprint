@@ -1,0 +1,30 @@
+---
+title: Animate
+description: "Router le travail d'animation via le toolkit animations.dev."
+keywords: ["animate"]
+pro: true
+---
+
+`animate` est le skill d'animation unique. Les modes vivent en references internes (CSS, Motion for React, revue, perf, accessibilité, variants). Distillé du cours animations.dev d'Emil Kowalski.
+
+## Invoquer
+
+```bash
+$animate
+```
+
+## Ce qu'il fait
+
+- Décide si ça doit animer du tout avant d'écrire une transition. Les actions clavier haute fréquence restent instantanées.
+- Prends le plus petit mode : CSS, Motion for React, revue, improve, motion brief, perf, accessibilité, ou prototype variants.
+- Le motion est une épice. Si tout anime, plus rien ne ressort.
+
+## Installer
+
+Inclus dans Premium. Installe ou rafraîchis avec :
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+Voir [Configuration Premium](/commands/pro-setup).

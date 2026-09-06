@@ -1,0 +1,34 @@
+---
+title: Implement
+description: "Ship the scoped change from an agreed plan. Stop before runtime proof."
+keywords: ["implement"]
+pro: true
+---
+
+`implement` executes an agreed request, plan, spec, or optional GitHub issue with a tight feedback loop. It does not claim runtime proof.
+
+## Invoke
+
+```bash
+$implement https://github.com/owner/repo/issues/123
+```
+
+## What it does
+
+- The plan is the source of truth. A GitHub issue is optional and is read in full when supplied.
+- Runs relevant static checks. Runtime verification belongs to `verify`.
+- Used as the execute stage inside `oneshot`.
+
+## Install
+
+Included in Premium. Install or refresh with:
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+See [Premium setup](/commands/pro-setup).
+
+## See also
+
+Full walkthrough: [Implement](/core-workflow/implement).

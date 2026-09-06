@@ -1,0 +1,34 @@
+---
+title: App Store Connect
+description: "Drive App Store Connect through the asc CLI, including TestFlight shipping."
+keywords: ["appstore-connect"]
+pro: false
+---
+
+`appstore-connect` talks to App Store Connect via `asc`: apps, builds, TestFlight, testers, reviews, sales, metadata, IAP, signing, and submissions.
+
+## Invoke
+
+```bash
+$appstore-connect testflight
+```
+
+## What it does
+
+- `appstore-connect testflight` builds and uploads (API-key signing, `eas build --local` by default, `--expo` for a cloud build).
+- `appstore-connect testflight setup` stops once credentials are ready.
+- Requires the `asc` CLI. Check `asc auth status` before shipping.
+
+## Install
+
+Included in the free bundle:
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Install only this skill:
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill appstore-connect
+```

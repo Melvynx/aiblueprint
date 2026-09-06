@@ -32,14 +32,14 @@ export function DocsHeader() {
         <div className="flex items-center gap-4">
           <Link
             href={withLocale("/", locale)}
-            className="flex items-center gap-2 sm:gap-3 no-underline"
+            className="flex items-center gap-2 no-underline"
           >
             <img
               src="/aiblueprint-logo.png"
               alt=""
-              width="40"
-              height="40"
-              className="size-10 shrink-0 object-contain"
+              width="20"
+              height="20"
+              className="size-5 shrink-0 rounded-md object-contain"
             />
             <span className="text-sm sm:text-lg font-semibold tracking-[-0.025em] text-[#f7f8f8]">
               AIBlueprint CLI
@@ -52,7 +52,7 @@ export function DocsHeader() {
             <Link
               key={link.label}
               href={link.href}
-              className="rounded-md px-2 sm:px-3 py-1.5 text-sm font-medium text-[#8a8f98] no-underline transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
+              className="rounded-full px-2 sm:px-3 py-1.5 text-sm font-medium text-[#8a8f98] no-underline transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
               {...(link.external
                 ? { target: "_blank", rel: "noopener noreferrer" }
                 : {})}

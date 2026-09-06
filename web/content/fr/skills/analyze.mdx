@@ -1,0 +1,34 @@
+---
+title: Analyze
+description: "Comprendre le changement demandé avant de planifier ou d'éditer."
+keywords: ["analyze"]
+pro: true
+---
+
+`analyze` inspecte le repo, le comportement actuel, les contraintes, les risques et l'art antérieur proche. Il s'arrête quand la requête est assez comprise pour planifier.
+
+## Invoquer
+
+```bash
+$analyze add organization invitations
+```
+
+## Ce qu'il fait
+
+- Produit preuves, contraintes, risques et critères d'acceptance mesurables.
+- N'écrit pas de plan, n'ouvre pas d'issue, n'édite pas le code.
+- Première étape du workflow Premium et de `oneshot`.
+
+## Installer
+
+Inclus dans Premium. Installe ou rafraîchis avec :
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+Voir [Configuration Premium](/commands/pro-setup).
+
+## Voir aussi
+
+Guide complet : [Analyser](/core-workflow/analyze).

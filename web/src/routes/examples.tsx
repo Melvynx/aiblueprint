@@ -312,7 +312,7 @@ export function ExamplesPage({ locale }: { locale: Locale }) {
         <header className="flex flex-col gap-5 rounded-2xl border border-white/80 bg-white/75 p-5 shadow-[0_24px_80px_rgba(24,24,27,0.08)] backdrop-blur-xl md:flex-row md:items-end md:justify-between sm:p-7">
           <div className="flex max-w-3xl flex-col gap-3">
             <Link
-              href={withLocale("/concepts/use-style", locale)}
+              href={withLocale("/skills/use-style", locale)}
               className="inline-flex w-fit items-center gap-2 rounded-md border border-[#d9d9dd] bg-white px-3 py-2 text-sm font-medium text-[#3f3f46] no-underline transition-colors hover:bg-[#f1f1f3]"
             >
               <ArrowLeft className="size-4" />
@@ -362,7 +362,7 @@ export function ExamplesPage({ locale }: { locale: Locale }) {
               ))}
             </div>
             <Link
-              href={withLocale("/concepts/skills", locale)}
+              href={withLocale("/skills", locale)}
               className="inline-flex w-fit items-center gap-2 rounded-md bg-[#111827] px-4 py-2.5 text-sm font-medium text-white no-underline transition-colors hover:bg-[#27272a]"
             >
               <Columns2 className="size-4" />

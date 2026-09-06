@@ -1,0 +1,34 @@
+---
+title: Code Debug
+description: "Bugs durs et régressions perf avec une boucle red-capable et une preuve runtime."
+keywords: ["code-debug"]
+pro: true
+---
+
+`code-debug` reproduit une failure, pose des hypothèses falsifiables, applique un fix ciblé, ajoute de la couverture de régression, et prouve avec de la vraie evidence runtime.
+
+## Invoquer
+
+```bash
+$code-debug reproduce the intermittent save failure
+```
+
+## Ce qu'il fait
+
+- Pas de guess sans boucle red-capable.
+- `-a` / `auto` choisit des décisions de debug sûres et réversibles sans pause.
+- S'arrête avant de crier victoire tant que la failure d'origine n'est pas reproduite.
+
+## Installer
+
+Inclus dans Premium. Installe ou rafraîchis avec :
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+Voir [Configuration Premium](/commands/pro-setup).
+
+## Voir aussi
+
+Guide complet : [Code Debug](/core-workflow/code-debug).

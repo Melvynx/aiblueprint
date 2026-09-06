@@ -1,0 +1,38 @@
+---
+title: Apex
+description: "Boucle adaptative Analyze → Plan → Execute → eXamine avec checkpoints et preuve."
+keywords: ["apex"]
+pro: false
+---
+
+`apex` est le workflow d'implémentation structuré du lot gratuit. Il adapte plan, délégation, revue et preuve à la requête au lieu d'un pipeline fixe.
+
+## Invoquer
+
+```bash
+$apex -a -x
+```
+
+## Ce qu'il fait
+
+- Checkpoints reprenables pour continuer une feature longue sans tout relancer.
+- Tests et revue fondés sur le risque. `-x` demande une revue adversariale.
+- `apex -a -x` est le chemin peu interactif avec plus de pression de revue.
+
+## Installer
+
+Inclus dans le lot gratuit :
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Installer uniquement ce skill :
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill apex
+```
+
+## Voir aussi
+
+Guide complet : [Apex](/advanced/apex).

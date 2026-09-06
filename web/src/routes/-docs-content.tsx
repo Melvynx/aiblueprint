@@ -31,7 +31,7 @@ function DocsShell(props: { tree: DocTree; children: ReactNode }) {
             event.currentTarget.open = false;
         }}
       >
-        <summary className="cursor-pointer px-6 py-3 text-sm text-primary focus-visible:outline-2 focus-visible:outline-primary">
+        <summary className="cursor-pointer rounded-xl px-6 py-3 text-sm text-primary focus-visible:outline-2 focus-visible:outline-primary">
           {copy.browse}
         </summary>
         <DocsSidebar tree={props.tree} mobile />
@@ -45,7 +45,7 @@ function DocsShell(props: { tree: DocTree; children: ReactNode }) {
 }
 
 const navButton = cn(
-  "group flex max-w-[48%] flex-col gap-1 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 text-sm no-underline transition-colors hover:border-primary/40 hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
+  "group flex max-w-[48%] flex-col gap-1 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 text-sm no-underline transition-colors hover:border-primary/40 hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
 );
 
 export function DocsNotFound(props: { tree: DocTree }) {
@@ -129,8 +129,8 @@ export function DocsContent(props: {
           </div>
 
           {toc.length > 0 && (
-            <div className="fixed top-16 right-0 hidden h-[calc(100vh-4rem)] overflow-y-auto xl:flex">
-              <aside className="w-64 overflow-y-auto border-l border-white/[0.06] bg-[#08090a]">
+            <div className="docs-sidebar-scroll fixed top-16 right-0 hidden h-[calc(100vh-4rem)] overflow-y-auto xl:flex">
+              <aside className="w-64 border-l border-white/[0.06] bg-[#08090a]">
                 <div className="p-6">
                   <DocsTableOfContents toc={toc} />
                 </div>

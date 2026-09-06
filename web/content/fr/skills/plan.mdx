@@ -1,0 +1,34 @@
+---
+title: Plan
+description: "Transformer l'analyse en plan prêt à implémenter, avec une issue GitHub optionnelle."
+keywords: ["plan"]
+pro: true
+---
+
+`plan` consomme une requête analysée et produit un plan prêt à implémenter. Il s'arrête avant d'écrire du code.
+
+## Invoquer
+
+```bash
+$plan use the current analysis
+```
+
+## Ce qu'il fait
+
+- Issue GitHub optionnelle pour un travail ciblé. Lue en entier si fournie.
+- N'implémente pas. Ça, c'est `implement`.
+- Le plan devient la source de vérité pour `oneshot` et les étapes suivantes.
+
+## Installer
+
+Inclus dans Premium. Installe ou rafraîchis avec :
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+Voir [Configuration Premium](/commands/pro-setup).
+
+## Voir aussi
+
+Guide complet : [Plan](/core-workflow/plan).

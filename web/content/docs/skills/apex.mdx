@@ -1,0 +1,38 @@
+---
+title: Apex
+description: "Adaptive Analyze → Plan → Execute → eXamine loop with checkpoints and proof."
+keywords: ["apex"]
+pro: false
+---
+
+`apex` is the free structured implementation workflow. It adapts plan, delegation, review, and proof to the request instead of running a fixed pipeline.
+
+## Invoke
+
+```bash
+$apex -a -x
+```
+
+## What it does
+
+- Resumable checkpoints so a long feature can continue without restarting from zero.
+- Risk-based tests and review. `-x` requests adversarial review.
+- `apex -a -x` is the low-interaction implementation path with extra review pressure.
+
+## Install
+
+Included in the free bundle:
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Install only this skill:
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill apex
+```
+
+## See also
+
+Full walkthrough: [Apex](/advanced/apex).

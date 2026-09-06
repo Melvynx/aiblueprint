@@ -1,0 +1,34 @@
+---
+title: Hooks Manager
+description: "Créer, configurer et debugger des hooks Claude Code, Codex et Cursor."
+keywords: ["hooks-manager"]
+pro: false
+---
+
+`hooks-manager` gère les hooks de lifecycle : validation de commandes, routing des hooks partagés, notifications, et config par plateforme.
+
+## Invoquer
+
+```bash
+$hooks-manager
+```
+
+## Ce qu'il fait
+
+- Crée ou édite des hooks PreToolUse / PostToolUse / notification sans deviner le schema.
+- Debug pourquoi un hook a fire, bloqué, ou no-op en silence.
+- Route les hooks partagés depuis `~/.agents` pour garder Claude et Codex alignés.
+
+## Installer
+
+Inclus dans le lot gratuit :
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Installer uniquement ce skill :
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill hooks-manager
+```

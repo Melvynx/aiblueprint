@@ -1,0 +1,30 @@
+---
+title: Use Goal
+description: "Draft and refine a persistent /goal for multi-turn Codex or Claude Code work."
+keywords: ["use-goal"]
+pro: true
+---
+
+`use-goal` creates, drafts, sets, starts, or refines a Codex or Claude Code `/goal` objective so multi-turn work stays pointed at one outcome.
+
+## Invoke
+
+```bash
+$use-goal ship the billing v2 migration
+```
+
+## What it does
+
+- A goal is a persistent objective, not a one-shot prompt.
+- Use it when a task will span many turns and you do not want the agent to drift.
+- Refine an existing goal instead of stacking conflicting instructions.
+
+## Install
+
+Included in Premium. Install or refresh with:
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+See [Premium setup](/commands/pro-setup).

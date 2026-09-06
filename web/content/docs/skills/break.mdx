@@ -1,0 +1,30 @@
+---
+title: Break
+description: "Render one component in every real state and report what actually broke."
+keywords: ["break"]
+pro: true
+---
+
+`break` answers “does this survive?” for one component. It mounts every state real use can put it in and hands you a visual report of what failed.
+
+## Invoke
+
+```bash
+$break
+```
+
+## What it does
+
+- Empty, loading, error, overflow, tiny viewport, huge content, disabled, and edge props.
+- The deliverable is a page you can look at, not a theoretical checklist.
+- One component per run. Do not use it as a whole-app QA pass.
+
+## Install
+
+Included in Premium. Install or refresh with:
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+See [Premium setup](/commands/pro-setup).

@@ -51,6 +51,14 @@ const ICONS: Record<string, LucideIcon> = {
   Target,
 };
 
+export function ProBadge() {
+  return (
+    <span className="rounded-full bg-primary/15 px-1.5 py-px font-mono text-[8px] font-semibold tracking-[0.14em] text-primary">
+      PRO
+    </span>
+  );
+}
+
 type DocCardProps = {
   href: string;
   icon: string;
@@ -75,22 +83,16 @@ export function DocCard({
     <Link
       href={withLocale(href, locale)}
       className={cn(
-        "group flex flex-col gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 no-underline",
+        "group flex flex-col gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 no-underline",
         "transition-colors hover:border-primary/40 hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-primary",
       )}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
     >
-      <div className="flex items-center gap-2">
-        <Icon className="text-primary size-5" />
-        {pro ? (
-          <span className="font-mono text-[9px] font-semibold tracking-[0.14em] text-primary">
-            PRO
-          </span>
-        ) : null}
-      </div>
+      <Icon className="text-primary size-5" />
       <div className="flex flex-col gap-0.5">
-        <span className="text-foreground text-sm font-medium">
+        <span className="text-foreground flex items-center gap-1.5 text-sm font-medium">
           {title}
+          {pro ? <ProBadge /> : null}
           {external && <span className="text-muted-foreground ml-1">↗</span>}
         </span>
         <span className="text-muted-foreground text-[13px] leading-snug">

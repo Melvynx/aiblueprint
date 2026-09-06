@@ -1,0 +1,84 @@
+---
+title: Skills
+description: "Every AIBlueprint skill, free and Premium, with invocation and install notes."
+keywords: ["skills", "apex", "oneshot", "use-style", "pro"]
+---
+
+Skills are reusable workflows installed into `~/.agents/skills`. Claude Code
+and Codex both invoke them. The free bundle ships with setup. Premium adds the
+core workflow plus design, marketing, browser, and verification skills.
+
+In Codex, use `$skill-name`. In Claude Code, `/skill-name` also works.
+
+<DocCardWrapper>
+<DocSection title="Free">
+<DocCardGrid>
+  <DocCard href="/skills/agents-manager" icon="Users" title="Agents Manager" description="Create and orchestrate agents and the Task tool." />
+  <DocCard href="/skills/apex" icon="Workflow" title="Apex" description="Adaptive implementation loop with checkpoints and proof." />
+  <DocCard href="/skills/app-icon" icon="Sparkles" title="App Icon" description="Dimensional iOS and Android launcher icons." />
+  <DocCard href="/skills/appstore-connect" icon="Settings" title="App Store Connect" description="Drive ASC and TestFlight through the asc CLI." />
+  <DocCard href="/skills/audit-memories" icon="HardDrive" title="Audit Memories" description="Clean stale agent Markdown against project truth." />
+  <DocCard href="/skills/audit-skills" icon="Sparkles" title="Audit Skills" description="Audit usage, invocation controls, duplicates, and scope." />
+  <DocCard href="/skills/environments-manager" icon="Layers" title="Environments Manager" description="Per-worktree agent environments." />
+  <DocCard href="/skills/grill-me" icon="Target" title="Grill Me" description="Stress-test a plan with one question at a time." />
+  <DocCard href="/skills/hooks-manager" icon="Settings" title="Hooks Manager" description="Create, configure, and debug agent hooks." />
+  <DocCard href="/skills/rules-manager" icon="BookOpen" title="Rules Manager" description="Keep AGENTS.md and modular rules small." />
+  <DocCard href="/skills/skill-manager" icon="Sparkles" title="Skill Manager" description="Create, edit, audit, or prune skills." />
+  <DocCard href="/skills/use-style" icon="Palette" title="Use Style" description="Named visual systems before any UI work." />
+</DocCardGrid>
+</DocSection>
+
+<DocSection title="Premium">
+<DocCardGrid>
+  <DocCard href="/skills/analyze" icon="FileText" title="Analyze" description="Understand the change before planning." pro={true} />
+  <DocCard href="/skills/animate" icon="Sparkles" title="Animate" description="Motion work through the animations.dev toolkit." pro={true} />
+  <DocCard href="/skills/better" icon="Eye" title="Better" description="Holistic interface review, evidence not taste." pro={true} />
+  <DocCard href="/skills/brainstorm" icon="Sparkles" title="Brainstorm" description="Diverge, analyze, converge, then execute." pro={true} />
+  <DocCard href="/skills/break" icon="Target" title="Break" description="Mount one component in every real state." pro={true} />
+  <DocCard href="/skills/clean-code" icon="Code2" title="Clean Code" description="TypeScript, React, and Next.js writing rules." pro={true} />
+  <DocCard href="/skills/code-debug" icon="Code2" title="Code Debug" description="Red-capable loop, then a proven fix." pro={true} />
+  <DocCard href="/skills/code-review" icon="Eye" title="Code Review" description="Separate Spec and Standards verdicts." pro={true} />
+  <DocCard href="/skills/commit-and-monitor" icon="RefreshCw" title="Commit and Monitor" description="Commit, push, watch CI and Vercel until green." pro={true} />
+  <DocCard href="/skills/copywritting" icon="FileText" title="Copywriting" description="High-converting copy without flattening voice." pro={true} />
+  <DocCard href="/skills/dev-browser" icon="Eye" title="Dev Browser" description="Persistent browser automation via CLI." pro={true} />
+  <DocCard href="/skills/impeccable" icon="Palette" title="Impeccable" description="Production frontend craft, critique, and polish." pro={true} />
+  <DocCard href="/skills/implement" icon="Play" title="Implement" description="Ship the scoped change. Stop before proof." pro={true} />
+  <DocCard href="/skills/marketing" icon="Target" title="Marketing" description="Positioning, offers, funnels, and GTM audits." pro={true} />
+  <DocCard href="/skills/oneshot" icon="Zap" title="OneShot" description="Fixed analyze → plan → implement → review → verify." pro={true} />
+  <DocCard href="/skills/plan" icon="FileText" title="Plan" description="Turn analysis into an implementation-ready plan." pro={true} />
+  <DocCard href="/skills/show-me" icon="Eye" title="Show Me" description="Diagrams and sketches when prose is the wrong medium." pro={true} />
+  <DocCard href="/skills/use-artifacts" icon="FileText" title="Use Artifacts" description="Polished local HTML for plans, options, and prototypes." pro={true} />
+  <DocCard href="/skills/use-delegate" icon="Users" title="Use Delegate" description="Host thinks. Cheap executors do the heavy work." pro={true} />
+  <DocCard href="/skills/use-goal" icon="Target" title="Use Goal" description="Persistent /goal objectives for multi-turn work." pro={true} />
+  <DocCard href="/skills/variant" icon="Layers" title="Variant" description="Genuinely different UI versions behind a picker." pro={true} />
+  <DocCard href="/skills/verify" icon="Shield" title="Verify" description="Prove every acceptance criterion on the real surface." pro={true} />
+  <DocCard href="/skills/web-pentest" icon="Shield" title="Web Pentest" description="Authorized assessment of a site you own." pro={true} />
+</DocCardGrid>
+</DocSection>
+</DocCardWrapper>
+
+## Installing
+
+Free skills install with [agents setup](/commands/agents-setup). Premium skills
+install with [agents pro setup](/commands/pro-setup).
+
+```bash
+npx aiblueprint-cli@latest agents setup
+npx aiblueprint-cli@latest agents pro setup
+```
+
+A single free skill from the public registry:
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill use-style
+```
+
+## How they live on disk
+
+Each skill is a folder with `SKILL.md`, often plus `references/` and scripts.
+Because they live in `~/.agents/skills`, every linked tool shares the same
+catalog. [agents unify](/commands/unify) centralizes skills you already have.
+
+See [The Core Workflow](/core-workflow) for stage ownership, [Advanced](/advanced)
+for Apex and OneShot, and [Don't overflow memory](/concepts/dont-overflow-memory)
+for keeping the always-on files small.

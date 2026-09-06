@@ -1,0 +1,34 @@
+---
+title: Rules Manager
+description: "Maintain AGENTS.md and modular .agents/rules files."
+keywords: ["rules-manager"]
+pro: false
+---
+
+`rules-manager` keeps `AGENTS.md` and `.agents/rules/` minimal, specific, and discoverable. Two-tier: the index is always loaded; rule files load on demand.
+
+## Invoke
+
+```bash
+$rules-manager
+```
+
+## What it does
+
+- `AGENTS.md` is the index plus universal rules. Domain files live under `.agents/rules/`.
+- Add, restructure, or prune rules instead of pasting another wall of Markdown into the always-on file.
+- Pairs with [Don't overflow memory](/concepts/dont-overflow-memory).
+
+## Install
+
+Included in the free bundle:
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Install only this skill:
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill rules-manager
+```

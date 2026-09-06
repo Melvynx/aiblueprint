@@ -1,0 +1,34 @@
+---
+title: Audit Skills
+description: "Auditer les skills installés : usage, invocation, doublons et scope."
+keywords: ["audit-skills"]
+pro: false
+---
+
+`audit-skills` inspecte le catalogue de skills installé. Invocation explicite uniquement.
+
+## Invoquer
+
+```bash
+$audit-skills
+```
+
+## Ce qu'il fait
+
+- Repère les skills jamais utilisés, ou sélectionnés alors qu'ils devraient être user-only.
+- Trouve les chemins de discovery en double et le scope global vs projet pourri.
+- À lancer après un unify ou un gros dump de skills, pas en hygiène de fond.
+
+## Installer
+
+Inclus dans le lot gratuit :
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Installer uniquement ce skill :
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill audit-skills
+```

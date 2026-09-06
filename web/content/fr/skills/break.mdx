@@ -1,0 +1,30 @@
+---
+title: Break
+description: "Rendre un composant dans chaque état réel et rapporter ce qui casse."
+keywords: ["break"]
+pro: true
+---
+
+`break` répond à « est-ce que ça survit ? » pour un composant. Il monte chaque état que le vrai usage peut lui coller et te tend un rapport visuel de ce qui a foiré.
+
+## Invoquer
+
+```bash
+$break
+```
+
+## Ce qu'il fait
+
+- Vide, loading, erreur, overflow, viewport minuscule, contenu énorme, disabled, et props limites.
+- Le livrable est une page que tu regardes, pas une checklist théorique.
+- Un composant par run. Pas un QA de toute l'app.
+
+## Installer
+
+Inclus dans Premium. Installe ou rafraîchis avec :
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+Voir [Configuration Premium](/commands/pro-setup).

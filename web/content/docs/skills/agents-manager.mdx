@@ -1,0 +1,34 @@
+---
+title: Agents Manager
+description: "Create and orchestrate Claude Code agents and the Task tool."
+keywords: ["agents-manager"]
+pro: false
+---
+
+`agents-manager` is the guide for creating, wiring, and launching specialized agents. Use it when you are designing agent configs or deciding how the Task tool should spawn work.
+
+## Invoke
+
+```bash
+$agents-manager
+```
+
+## What it does
+
+- Design agent prompts, tools, and orchestration instead of dumping everything into the host.
+- Decide when a subagent is cheaper and cleaner than doing the work inline.
+- Keep agent configs discoverable across Claude, Codex, and Cursor.
+
+## Install
+
+Included in the free bundle:
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Install only this skill:
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill agents-manager
+```

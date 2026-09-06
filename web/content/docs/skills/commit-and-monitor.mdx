@@ -1,0 +1,30 @@
+---
+title: Commit and Monitor
+description: "Commit, push, then watch Vercel and GitHub Actions until green."
+keywords: ["commit-and-monitor"]
+pro: true
+---
+
+`commit-and-monitor` commits, pushes, then monitors Vercel deployment and GitHub Actions. It auto-fixes failures and retries until the ship is actually green.
+
+## Invoke
+
+```bash
+$commit-and-monitor
+```
+
+## What it does
+
+- Use when the commit is not done until CI and the deploy agree.
+- Reads real check and deployment status. Does not assume push equals success.
+- Keeps iterating on failures instead of dumping a red link in chat.
+
+## Install
+
+Included in Premium. Install or refresh with:
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+See [Premium setup](/commands/pro-setup).

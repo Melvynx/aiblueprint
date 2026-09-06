@@ -59,6 +59,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.13 0 0);
   --foreground: oklch(0.95 0 0);
   --card: oklch(0.18 0 0);
@@ -357,6 +358,12 @@
   padding-right: 0;
 }
 
+.docs-sidebar-scroll {
+  color-scheme: dark;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 18%) transparent;
+}
+
 .docs-code-scroll,
 .typography.docs-typography table:not(.not-typography table) {
   scrollbar-width: thin;
@@ -364,23 +371,31 @@
 }
 
 .docs-code-scroll::-webkit-scrollbar,
+.docs-sidebar-scroll::-webkit-scrollbar,
 .typography.docs-typography table:not(.not-typography table)::-webkit-scrollbar {
   height: 8px;
   width: 8px;
 }
 
+.docs-sidebar-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
 .docs-code-scroll::-webkit-scrollbar-track,
+.docs-sidebar-scroll::-webkit-scrollbar-track,
 .typography.docs-typography table:not(.not-typography table)::-webkit-scrollbar-track {
   background: transparent;
 }
 
 .docs-code-scroll::-webkit-scrollbar-thumb,
+.docs-sidebar-scroll::-webkit-scrollbar-thumb,
 .typography.docs-typography table:not(.not-typography table)::-webkit-scrollbar-thumb {
   background: rgb(255 255 255 / 16%);
   border-radius: 999px;
 }
 
 .docs-code-scroll::-webkit-scrollbar-thumb:hover,
+.docs-sidebar-scroll::-webkit-scrollbar-thumb:hover,
 .typography.docs-typography table:not(.not-typography table)::-webkit-scrollbar-thumb:hover {
   background: rgb(255 255 255 / 28%);
 }

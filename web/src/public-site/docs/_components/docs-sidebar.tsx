@@ -10,6 +10,7 @@ import {
   Sparkles,
   Terminal,
 } from "lucide-react";
+import { ProBadge } from "./doc-card";
 import type { DocTree } from "../doc-manager";
 import { getChrome, getLocaleFromPathname, withLocale } from "../locale";
 
@@ -66,7 +67,7 @@ export function DocsSidebar({
   return (
     <aside
       className={cn(
-        "no-scrollbar shrink-0 overflow-y-auto bg-[#08090a]",
+        "docs-sidebar-scroll shrink-0 overflow-y-auto bg-[#08090a]",
         mobile
           ? "max-h-[65vh] w-full"
           : "sticky top-16 hidden h-[calc(100vh-4rem)] w-64 border-r border-white/[0.06] lg:block",
@@ -89,7 +90,7 @@ export function DocsSidebar({
                   <Link
                     href={localizedHref}
                     className={cn(
-                      "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
+                      "flex items-center gap-2.5 rounded-xl px-2 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
                       isActive
                         ? "bg-primary/10 font-medium text-primary"
                         : "text-[#8a8f98] hover:bg-primary/5 hover:text-primary",
@@ -126,20 +127,16 @@ export function DocsSidebar({
                       <Link
                         href={doc.url}
                         className={cn(
-                          "-ml-px flex items-center gap-2 rounded-r-md border-l py-1 pr-2 pl-2 text-[13px] transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
+                          "-ml-px flex items-center gap-1.5 rounded-r-xl border-l py-1 pr-2 pl-3 text-[13px] transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
                           isActive
                             ? "border-primary bg-primary/5 font-medium text-primary"
                             : "border-transparent text-[#8a8f98] hover:border-white/25 hover:text-primary",
                         )}
                       >
-                        <span className="inline-flex w-7 shrink-0 justify-start">
-                          {doc.attributes.pro ? (
-                            <span className="font-mono text-[9px] font-semibold tracking-[0.14em] text-primary">
-                              PRO
-                            </span>
-                          ) : null}
+                        <span className="min-w-0 truncate">
+                          {doc.attributes.title}
                         </span>
-                        {doc.attributes.title}
+                        {doc.attributes.pro ? <ProBadge /> : null}
                       </Link>
                     </li>
                   );

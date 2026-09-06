@@ -1,0 +1,34 @@
+---
+title: Grill Me
+description: "Stress-tester un plan avec des questions ciblées jusqu'à résoudre l'arbre de décision."
+keywords: ["grill-me"]
+pro: false
+---
+
+`grill-me` t'interviewe par salves rapides jusqu'à ce qu'un plan, une décision ou une idée soit vraiment nette. Une question à la fois, avec une réponse recommandée.
+
+## Invoquer
+
+```bash
+$grill-me
+```
+
+## Ce qu'il fait
+
+- Descend chaque branche de l'arbre de décision et résout les dépendances dans l'ordre.
+- Préfère lire le codebase plutôt que de poser une question dont la réponse est déjà dans le repo.
+- Triggers : « grill me », un interview rigoureux, ou un design à mettre sous pression.
+
+## Installer
+
+Inclus dans le lot gratuit :
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Installer uniquement ce skill :
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill grill-me
+```

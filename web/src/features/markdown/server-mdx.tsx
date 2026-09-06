@@ -56,7 +56,7 @@ function CodeBlock({ children, className, ...props }: CodeBlockProps) {
   }
 
   return (
-    <div className="not-typography my-6 min-w-0 overflow-hidden rounded-xl border border-white/10 bg-[#0c1017]">
+    <div className="not-typography my-6 min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#0c1017]">
       <div className="flex items-center justify-between gap-4 border-b border-white/[0.08] bg-white/[0.03] px-4 py-2">
         <span className="flex items-center gap-2 font-mono text-xs text-[#a6b2c5]">
           <Terminal aria-hidden="true" className="size-3.5 text-primary" />
@@ -69,7 +69,7 @@ function CodeBlock({ children, className, ...props }: CodeBlockProps) {
             aria-label={copy.lineWrap}
             onClick={() => setWrapped(!isWrapped)}
             className={cn(
-              "grid size-7 place-items-center rounded-md transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+              "grid size-7 place-items-center rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
               isWrapped
                 ? "bg-primary/10 text-primary"
                 : "text-[#a6b2c5] hover:bg-primary/10 hover:text-primary",
@@ -81,7 +81,7 @@ function CodeBlock({ children, className, ...props }: CodeBlockProps) {
             type="button"
             aria-label={copyStatus === "copied" ? copy.copiedCode : copy.copyCode}
             onClick={copyCode}
-            className="grid size-7 place-items-center rounded-md text-[#a6b2c5] transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="grid size-7 place-items-center rounded-full text-[#a6b2c5] transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             {copyStatus === "copied" ? <Check aria-hidden="true" className="size-3.5 text-primary" /> : <Copy aria-hidden="true" className="size-3.5" />}
           </button>

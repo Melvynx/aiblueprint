@@ -1,0 +1,87 @@
+---
+title: Skills
+description: "Tous les skills AIBlueprint, gratuits et Premium, avec invocation et install."
+keywords: ["skills", "apex", "oneshot", "use-style", "pro"]
+---
+
+Les skills sont des workflows réutilisables installés dans `~/.agents/skills`.
+Claude Code et Codex les invoquent. Le lot gratuit arrive avec le setup.
+Premium ajoute le workflow principal plus du design, du marketing, du browser
+et de la vérif.
+
+Dans Codex, utilise `$skill-name`. Dans Claude Code, `/skill-name` marche aussi.
+
+<DocCardWrapper>
+<DocSection title="Gratuit">
+<DocCardGrid>
+  <DocCard href="/skills/agents-manager" icon="Users" title="Agents Manager" description="Créer et orchestrer des agents et l'outil Task." />
+  <DocCard href="/skills/apex" icon="Workflow" title="Apex" description="Boucle d'implémentation adaptative avec checkpoints et preuve." />
+  <DocCard href="/skills/app-icon" icon="Sparkles" title="App Icon" description="Icônes launcher iOS et Android dimensionnelles." />
+  <DocCard href="/skills/appstore-connect" icon="Settings" title="App Store Connect" description="Piloter ASC et TestFlight via la CLI asc." />
+  <DocCard href="/skills/audit-memories" icon="HardDrive" title="Audit Memories" description="Nettoyer le Markdown agent mort contre la vérité du projet." />
+  <DocCard href="/skills/audit-skills" icon="Sparkles" title="Audit Skills" description="Auditer usage, invocation, doublons et scope." />
+  <DocCard href="/skills/environments-manager" icon="Layers" title="Environments Manager" description="Environnements d'agents par worktree." />
+  <DocCard href="/skills/grill-me" icon="Target" title="Grill Me" description="Stress-tester un plan, une question à la fois." />
+  <DocCard href="/skills/hooks-manager" icon="Settings" title="Hooks Manager" description="Créer, configurer et debugger des hooks." />
+  <DocCard href="/skills/rules-manager" icon="BookOpen" title="Rules Manager" description="Garder AGENTS.md et les rules modulaires petits." />
+  <DocCard href="/skills/skill-manager" icon="Sparkles" title="Skill Manager" description="Créer, éditer, auditer ou prune des skills." />
+  <DocCard href="/skills/use-style" icon="Palette" title="Utiliser un style" description="Systèmes visuels nommés avant tout travail UI." />
+</DocCardGrid>
+</DocSection>
+
+<DocSection title="Premium">
+<DocCardGrid>
+  <DocCard href="/skills/analyze" icon="FileText" title="Analyze" description="Comprendre le changement avant de planifier." pro={true} />
+  <DocCard href="/skills/animate" icon="Sparkles" title="Animate" description="Motion via le toolkit animations.dev." pro={true} />
+  <DocCard href="/skills/better" icon="Eye" title="Better" description="Revue d'interface holistique, preuve pas goût." pro={true} />
+  <DocCard href="/skills/brainstorm" icon="Sparkles" title="Brainstorm" description="Diverger, analyser, converger, puis exécuter." pro={true} />
+  <DocCard href="/skills/break" icon="Target" title="Break" description="Monter un composant dans chaque état réel." pro={true} />
+  <DocCard href="/skills/clean-code" icon="Code2" title="Clean Code" description="Rules d'écriture TypeScript, React et Next.js." pro={true} />
+  <DocCard href="/skills/code-debug" icon="Code2" title="Code Debug" description="Boucle red-capable, puis un fix prouvé." pro={true} />
+  <DocCard href="/skills/code-review" icon="Eye" title="Code Review" description="Verdicts Spec et Standards séparés." pro={true} />
+  <DocCard href="/skills/commit-and-monitor" icon="RefreshCw" title="Commit and Monitor" description="Commit, push, surveiller CI et Vercel jusqu'au vert." pro={true} />
+  <DocCard href="/skills/copywritting" icon="FileText" title="Copywriting" description="Copy qui convertit sans aplatir la voix." pro={true} />
+  <DocCard href="/skills/dev-browser" icon="Eye" title="Dev Browser" description="Automation navigateur persistante via CLI." pro={true} />
+  <DocCard href="/skills/impeccable" icon="Palette" title="Impeccable" description="Craft frontend production, critique et polish." pro={true} />
+  <DocCard href="/skills/implement" icon="Play" title="Implement" description="Shipper le changement scopé. S'arrêter avant la preuve." pro={true} />
+  <DocCard href="/skills/marketing" icon="Target" title="Marketing" description="Positionnement, offres, funnels et audits GTM." pro={true} />
+  <DocCard href="/skills/oneshot" icon="Zap" title="OneShot" description="Séquence fixe analyze → plan → implement → review → verify." pro={true} />
+  <DocCard href="/skills/plan" icon="FileText" title="Plan" description="Transformer l'analyse en plan prêt à implémenter." pro={true} />
+  <DocCard href="/skills/show-me" icon="Eye" title="Show Me" description="Diagrammes et croquis quand la prose est le mauvais medium." pro={true} />
+  <DocCard href="/skills/use-artifacts" icon="FileText" title="Utiliser des artefacts" description="HTML local soigné pour plans, options et prototypes." pro={true} />
+  <DocCard href="/skills/use-delegate" icon="Users" title="Use Delegate" description="L'hôte pense. Des executeurs cheap font le lourd." pro={true} />
+  <DocCard href="/skills/use-goal" icon="Target" title="Use Goal" description="Objectifs /goal persistants pour du travail multi-tours." pro={true} />
+  <DocCard href="/skills/variant" icon="Layers" title="Variant" description="Versions UI vraiment différentes derrière un picker." pro={true} />
+  <DocCard href="/skills/verify" icon="Shield" title="Verify" description="Prouver chaque critère d'acceptance sur la vraie surface." pro={true} />
+  <DocCard href="/skills/web-pentest" icon="Shield" title="Web Pentest" description="Assessment autorisé d'un site que tu possèdes." pro={true} />
+</DocCardGrid>
+</DocSection>
+</DocCardWrapper>
+
+## Installation
+
+Les skills gratuits s'installent avec [agents setup](/commands/agents-setup).
+Les skills Premium s'installent avec [agents pro setup](/commands/pro-setup).
+
+```bash
+npx aiblueprint-cli@latest agents setup
+npx aiblueprint-cli@latest agents pro setup
+```
+
+Un seul skill gratuit depuis le registry public :
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill use-style
+```
+
+## Sur le disque
+
+Chaque skill est un dossier avec `SKILL.md`, souvent plus `references/` et des
+scripts. Comme ils vivent dans `~/.agents/skills`, chaque outil lié partage le
+même catalogue. [agents unify](/commands/unify) centralise les skills que tu
+as déjà.
+
+Voir [Workflow principal](/core-workflow) pour la responsabilité des étapes,
+[Avancé](/advanced) pour Apex et OneShot, et
+[Ne pas overflow la mémoire](/concepts/dont-overflow-memory) pour garder les
+fichiers always-on petits.

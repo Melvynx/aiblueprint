@@ -1,0 +1,30 @@
+---
+title: Dev Browser
+description: "Automation navigateur persistante via la CLI dev-browser."
+keywords: ["dev-browser"]
+pro: true
+---
+
+`dev-browser` est la surface d'automation navigateur autorisée. Il pilote les pages avec une session CLI persistante. Le Browser MCP de Cursor, Playwright, Computer Use et curl-as-a-browser ne sont pas des substituts.
+
+## Invoquer
+
+```bash
+$dev-browser open the staging checkout and screenshot the error state
+```
+
+## Ce qu'il fait
+
+- Les pages nommées persistent entre scripts. Écris de petits scripts qui font une chose, puis log l'état.
+- Installe avec `npm install -g dev-browser` puis `dev-browser install` si le workspace autorise npm.
+- Pour cliquer, fill, screenshot et vérifier la vraie UI au lieu de deviner depuis le HTML.
+
+## Installer
+
+Inclus dans Premium. Installe ou rafraîchis avec :
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+Voir [Configuration Premium](/commands/pro-setup).

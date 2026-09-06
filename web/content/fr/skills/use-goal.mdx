@@ -1,0 +1,30 @@
+---
+title: Use Goal
+description: "Rédiger et affûter un /goal persistant pour du travail multi-tours Codex ou Claude Code."
+keywords: ["use-goal"]
+pro: true
+---
+
+`use-goal` crée, draft, pose, lance ou affine un objectif `/goal` Codex ou Claude Code pour que le travail multi-tours reste pointé sur un résultat.
+
+## Invoquer
+
+```bash
+$use-goal ship the billing v2 migration
+```
+
+## Ce qu'il fait
+
+- Un goal est un objectif persistant, pas un prompt one-shot.
+- À utiliser quand une tâche va durer plusieurs tours et que tu ne veux pas que l'agent dérive.
+- Affine un goal existant au lieu d'empiler des instructions conflictuelles.
+
+## Installer
+
+Inclus dans Premium. Installe ou rafraîchis avec :
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+Voir [Configuration Premium](/commands/pro-setup).

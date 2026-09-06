@@ -1,0 +1,34 @@
+---
+title: Skill Manager
+description: "Create, edit, audit, or prune skills across Claude, Codex, and Cursor."
+keywords: ["skill-manager"]
+pro: false
+---
+
+`skill-manager` is the authoring skill for `SKILL.md`, Cursor rules, frontmatter, references, scripts, and discovery. Use it to create a skill, not to run one.
+
+## Invoke
+
+```bash
+$skill-manager
+```
+
+## What it does
+
+- Writes predictable frontmatter: name, description, user-invocable, disable-model-invocation.
+- Keeps references and scripts next to the skill instead of stuffing the whole guide into `SKILL.md`.
+- Also audits and prunes skills that nobody invokes.
+
+## Install
+
+Included in the free bundle:
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Install only this skill:
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill skill-manager
+```

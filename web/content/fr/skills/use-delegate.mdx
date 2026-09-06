@@ -1,0 +1,30 @@
+---
+title: Use Delegate
+description: "L'hôte planifie et review. Des executeurs cheap font le travail gourmand en tokens."
+keywords: ["use-delegate"]
+pro: true
+---
+
+`use-delegate` met l'agent hôte (Claude ou Codex) en mode orchestrateur. L'hôte pense et juge. L'implémentation lourde, l'exploration et la vérif tournent sur des executeurs moins chers.
+
+## Invoquer
+
+```bash
+$use-delegate implement the plan with K3
+```
+
+## Ce qu'il fait
+
+- Executeur par défaut : OpenCode Kimi K3. Codex GPT-5.6 terra pour le mécanique, sol pour les bugs durs et la vérif UI.
+- L'hôte ne doit pas implémenter, explorer tout le codebase, ni lancer de longs loops de build lui-même.
+- Pour sauver tokens et rate limits sur les grosses tâches mécaniques.
+
+## Installer
+
+Inclus dans Premium. Installe ou rafraîchis avec :
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+Voir [Configuration Premium](/commands/pro-setup).

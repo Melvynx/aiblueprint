@@ -1,0 +1,34 @@
+---
+title: Implement
+description: "Shipper le changement scopé depuis un plan convenu. S'arrêter avant la preuve runtime."
+keywords: ["implement"]
+pro: true
+---
+
+`implement` exécute une requête, un plan, une spec ou une issue GitHub optionnelle avec une boucle de feedback serrée. Il ne revendique pas la preuve runtime.
+
+## Invoquer
+
+```bash
+$implement https://github.com/owner/repo/issues/123
+```
+
+## Ce qu'il fait
+
+- Le plan est la source de vérité. Une issue GitHub est optionnelle et lue en entier si fournie.
+- Lance les checks statiques pertinents. La vérif runtime appartient à `verify`.
+- Étape d'exécution dans `oneshot`.
+
+## Installer
+
+Inclus dans Premium. Installe ou rafraîchis avec :
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+Voir [Configuration Premium](/commands/pro-setup).
+
+## Voir aussi
+
+Guide complet : [Implement](/core-workflow/implement).

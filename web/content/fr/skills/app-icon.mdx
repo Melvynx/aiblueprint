@@ -1,0 +1,34 @@
+---
+title: App Icon
+description: "Générer une icône iOS/Android dimensionnelle, puis la post-traiter pour les stores."
+keywords: ["app-icon"]
+pro: false
+---
+
+`app-icon` génère une icône launcher premium et dimensionnelle pour Expo / React Native, puis la post-traite pour App Store, Play Store et favicon.
+
+## Invoquer
+
+```bash
+$app-icon a dimensional lemon mascot
+```
+
+## Ce qu'il fait
+
+- Vise un mascotte 3D glossy ou un objet symbolique fort sur un fond branded full-bleed, pas un pictogramme plat.
+- Marche avec Codex `image_gen`, Nano Banana, gpt-image, ou n'importe quel outil d'image.
+- Hint d'argument : `[concept d'app ou marque]`.
+
+## Installer
+
+Inclus dans le lot gratuit :
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Installer uniquement ce skill :
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill app-icon
+```

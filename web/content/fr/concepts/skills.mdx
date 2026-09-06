@@ -1,81 +1,49 @@
 ---
 title: Skills
-description: Workflows réutilisables pour l'implémentation, le prompting, et plus.
+description: Workflows réutilisables installés dans ~/.agents/skills et invoqués depuis Claude Code ou Codex.
 keywords: ["skills", "apex", "oneshot", "verify"]
 ---
 
 Les skills sont des workflows réutilisables que Claude Code et Codex peuvent
 invoquer. AIBlueprint installe le lot gratuit dans le dossier partagé
-`~/.agents/skills`.
+`~/.agents/skills`. Le setup Premium ajoute le reste.
+
+Le catalogue complet, avec un badge PRO sur les skills Premium, est dans
+[Skills](/skills).
 
 ## Workflow de fonctionnalité principal
 
 Choisis un workflow selon la tâche :
 
-- **`apex`** est inclus dans le lot gratuit. Il lance une boucle adaptative Analyze → Plan → Execute → eXamine avec checkpoints reprenables, revue fondée sur le risque, et validation.
-- **`oneshot`** est un routeur Premium qui exécute `analyze → plan → implement → code-review → verify` dans l'ordre.
+- **`apex`** est inclus dans le lot gratuit. Il lance une boucle adaptative Analyze → Plan → Execute → eXamine avec checkpoints reprenables, revue fondée sur le risque, et validation. Voir [Apex](/skills/apex).
+- **`oneshot`** est un routeur Premium qui exécute `analyze → plan → implement → code-review → verify` dans l'ordre. Voir [OneShot](/skills/oneshot).
 
 Utilise `apex -a -x` pour une implémentation peu interactive avec revue
-adversariale, ou `oneshot -a` pour la séquence fixe complète. OneShot utilise
-le plan d'implémentation comme source de vérité ; une issue GitHub est
-optionnelle pour un travail ciblé.
+adversariale, ou `oneshot -a` pour la séquence fixe complète.
 
-Voir [Workflow principal](/core-workflow) pour la responsabilité des étapes
-et l'invocation directe des skills, puis [Workflows avancés](/advanced) pour
-les flags Apex et OneShot, l'automatisation, et la vérification persistante
-adossée à des screenshots.
+Voir [Workflow principal](/core-workflow) pour la responsabilité des étapes,
+puis [Workflows avancés](/advanced) pour les flags et l'automatisation.
 
 ## Utilitaires manuels
 
-Ces skills de maintenance divers ne tournent que quand tu les invoques
-explicitement. Claude et Codex sont tous les deux configurés pour empêcher
-la sélection implicite.
+Ces skills de maintenance ne tournent que quand tu les invoques
+explicitement. Claude et Codex sont configurés pour empêcher la sélection
+implicite.
 
-| Skill | Commande | Objectif |
-| ----- | ------- | ------- |
-| `audit-memories` | `$audit-memories` | Auditer ou nettoyer la doc projet destinée aux agents contre la vérité actuelle du projet. |
-| `audit-skills` | `$audit-skills` | Auditer l'usage observé des skills, la découverte de doublons, les contrôles d'invocation, et le scope global versus projet. |
+- [`audit-memories`](/skills/audit-memories) — nettoyer le Markdown agent du projet contre la vérité actuelle.
+- [`audit-skills`](/skills/audit-skills) — auditer usage, doublons, contrôles d'invocation et scope.
 
-## Skills fournis
+## Comment ils sont organisés
 
-| Skill | Description |
-| ----- | ----------- |
-| `skill-manager` | Créer et éditer des skills pour Claude, Codex et Cursor. |
-| `use-style` | Appliquer des guides de style visuel nommés avant de designer ou d'implémenter une UI. |
-| `rules-manager` | Maintenir `AGENTS.md` et les fichiers de règles modulaires. |
-| `agents-manager` | Gérer les agents et l'orchestration de l'outil Task. |
-| `environments-manager` | Environnements d'agents par worktree. |
-| `grill-me` | Stress-tester un plan avec des questions de design ciblées. |
-| `hooks-manager` | Créer, configurer et déboguer les hooks Claude Code. |
-| `app-icon` | Créer des assets d'icône d'app. |
-| `appstore-connect` | Travailler avec App Store Connect. |
+Chaque skill est un dossier qui contient un `SKILL.md`, et souvent un dossier
+`references/` avec des guides complémentaires. Comme ils vivent dans
+`~/.agents/skills`, chaque outil lié partage les mêmes skills.
 
-## Skills Premium
+Installe avec [agents setup](/commands/agents-setup). Les skills Premium
+passent par [agents pro setup](/commands/pro-setup). Utilise
+[agents unify](/commands/unify) pour centraliser ceux que tu as déjà.
 
-[Configuration Premium](/commands/pro-setup) ajoute le workflow principal
-(`analyze`, `plan`, `implement`, `code-review`, `verify` et `oneshot`) et des
-skills supplémentaires comme `impeccable`, `better`, `animate` et
-`use-artifacts`.
-
-Le catalogue installé dépend de ton lot et de ta version. Utilise le
-sélecteur de skills de l'assistant pour inspecter les skills disponibles
-après le setup.
-
-## Comment les skills sont organisés
-
-Chaque skill est un dossier qui contient un fichier `SKILL.md`, et souvent
-un dossier `references/` avec des guides complémentaires. Comme ils vivent
-dans `~/.agents/skills`, chaque outil lié partage les mêmes skills.
-
-## Installation
-
-Les skills sont installés par [agents setup](/commands/agents-setup).
-Utilise [agents unify](/commands/unify) pour centraliser dans `~/.agents` les
-skills globaux que tu as déjà, ou `agents unify projects` pour déplacer les
-skills locaux au projet dans le dossier `.agents/skills` de ce dépôt.
-
-Voir [Utiliser un style](/concepts/use-style) pour le système visuel,
-[Utiliser des artefacts](/concepts/use-artifacts) pour les expériences HTML
-locales réutilisables, [Ne pas overflow la mémoire](/concepts/dont-overflow-memory)
-pour garder la mémoire d'agent courte, et [Exemples](/examples) pour le
-sélecteur de styles live.
+Voir [Utiliser un style](/skills/use-style),
+[Utiliser des artefacts](/skills/use-artifacts),
+[Ne pas overflow la mémoire](/concepts/dont-overflow-memory), et
+[Exemples](/examples).

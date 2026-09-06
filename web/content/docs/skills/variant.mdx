@@ -1,0 +1,30 @@
+---
+title: Variant
+description: "Build several genuinely different UI versions behind a picker in the real page."
+keywords: ["variant"]
+pro: true
+---
+
+`variant` answers “which of these?” rather than “is this right?”. It builds several different versions of one piece of UI behind a picker in the actual page so you can flip and promote the winner.
+
+## Invoke
+
+```bash
+$variant
+```
+
+## What it does
+
+- Variants must be genuinely different, not opacity tweaks of the same layout.
+- They live in the real page, not a disconnected sandbox.
+- Promote the winner and delete the rest. Do not ship the picker.
+
+## Install
+
+Included in Premium. Install or refresh with:
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+See [Premium setup](/commands/pro-setup).

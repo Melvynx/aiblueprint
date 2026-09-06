@@ -1,0 +1,34 @@
+---
+title: Environments Manager
+description: "Per-worktree agent environments for Claude Code, Cursor, or Codex."
+keywords: ["environments-manager"]
+pro: false
+---
+
+`environments-manager` sets up isolated agent environments per git worktree so Claude, Cursor, and Codex do not leak state across checkouts.
+
+## Invoke
+
+```bash
+$environments-manager
+```
+
+## What it does
+
+- Worktree-ready repos, IDE env config, and `dev.sh` wiring.
+- Worktree-up / worktree-down scripts so each checkout has its own env.
+- Use it when you parallelize features in worktrees and agents keep stepping on each other.
+
+## Install
+
+Included in the free bundle:
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Install only this skill:
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill environments-manager
+```

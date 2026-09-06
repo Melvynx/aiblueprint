@@ -1,0 +1,34 @@
+---
+title: OneShot
+description: "Séquence Premium fixe : analyze → plan → implement → code-review → verify."
+keywords: ["oneshot"]
+pro: true
+---
+
+`oneshot` lance le workflow principal complet dans l'ordre. Le plan d'implémentation est la source de vérité. Une issue GitHub est optionnelle pour un travail ciblé.
+
+## Invoquer
+
+```bash
+$oneshot -a add organization invitations
+```
+
+## Ce qu'il fait
+
+- `oneshot -a` est la séquence complète peu interactive.
+- Contrairement à `apex`, l'ordre est fixe. Revue et vérif tournent toujours.
+- Apex si tu veux des checkpoints adaptatifs ; OneShot si tu veux la séquence Melvyn complète.
+
+## Installer
+
+Inclus dans Premium. Installe ou rafraîchis avec :
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+Voir [Configuration Premium](/commands/pro-setup).
+
+## Voir aussi
+
+Guide complet : [OneShot](/advanced/oneshot).

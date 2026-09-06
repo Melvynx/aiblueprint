@@ -1,0 +1,34 @@
+---
+title: Audit Memories
+description: "Audit manuel du Markdown agent du projet contre la vérité actuelle."
+keywords: ["audit-memories"]
+pro: false
+---
+
+`audit-memories` est explicit-only. Il audite et nettoie le Markdown agent du projet courant. Jamais sélectionné implicitement.
+
+## Invoquer
+
+```bash
+$audit-memories
+```
+
+## Ce qu'il fait
+
+- Lance uniquement via `$audit-memories` ou `/audit-memories`.
+- Compare la doc agent à la vérité du projet et vire les instructions mortes.
+- Va avec [Ne pas overflow la mémoire](/concepts/dont-overflow-memory).
+
+## Installer
+
+Inclus dans le lot gratuit :
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Installer uniquement ce skill :
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill audit-memories
+```
