@@ -126,12 +126,19 @@ export function DocsSidebar({
                       <Link
                         href={doc.url}
                         className={cn(
-                          "-ml-px block rounded-r-md border-l py-1 pr-2 pl-3 text-[13px] transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
+                          "-ml-px flex items-center gap-2 rounded-r-md border-l py-1 pr-2 pl-2 text-[13px] transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
                           isActive
                             ? "border-primary bg-primary/5 font-medium text-primary"
                             : "border-transparent text-[#8a8f98] hover:border-white/25 hover:text-primary",
                         )}
                       >
+                        <span className="inline-flex w-7 shrink-0 justify-start">
+                          {doc.attributes.pro ? (
+                            <span className="font-mono text-[9px] font-semibold tracking-[0.14em] text-primary">
+                              PRO
+                            </span>
+                          ) : null}
+                        </span>
                         {doc.attributes.title}
                       </Link>
                     </li>

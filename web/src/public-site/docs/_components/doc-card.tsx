@@ -57,6 +57,7 @@ type DocCardProps = {
   title: string;
   description: string;
   external?: boolean;
+  pro?: boolean;
 };
 
 export function DocCard({
@@ -65,6 +66,7 @@ export function DocCard({
   title,
   description,
   external,
+  pro,
 }: DocCardProps) {
   const Icon = ICONS[icon] ?? FileText;
   const locale = getLocaleFromPathname(usePathname());
@@ -78,7 +80,14 @@ export function DocCard({
       )}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
     >
-      <Icon className="text-primary size-5" />
+      <div className="flex items-center gap-2">
+        <Icon className="text-primary size-5" />
+        {pro ? (
+          <span className="font-mono text-[9px] font-semibold tracking-[0.14em] text-primary">
+            PRO
+          </span>
+        ) : null}
+      </div>
       <div className="flex flex-col gap-0.5">
         <span className="text-foreground text-sm font-medium">
           {title}

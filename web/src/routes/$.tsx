@@ -9,7 +9,9 @@ export const Route = createFileRoute("/$")({
     const slug = slugParts.join("/");
     const legacyPaths: Record<string, string> = {
       "concepts/apex": "advanced/apex",
-      "concepts/slash-commands": "concepts/skills",
+      "concepts/slash-commands": "skills",
+      "concepts/use-style": "skills/use-style",
+      "concepts/use-artifacts": "skills/use-artifacts",
     };
     const destination = legacyPaths[slug];
     if (destination) {
