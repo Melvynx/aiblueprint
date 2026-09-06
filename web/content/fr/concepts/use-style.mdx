@@ -1,0 +1,101 @@
+---
+title: Utiliser un style
+description: Donne à chaque interface un système visuel délibéré avant que l'implémentation commence.
+keywords: ["use-style", "styles", "ui", "frontend", "design system"]
+---
+
+`use-style` transforme une direction visuelle en contraintes
+d'implémentation. L'agent charge un système nommé avant de toucher l'UI,
+puis suit sa typographie, sa palette, son espacement, sa géométrie, son
+mouvement et ses anti-patterns, au lieu de retomber sur un look SaaS
+générique.
+
+<DocCardWrapper>
+  <DocSection title="Commencer par une direction">
+    <DocCardGrid>
+      <DocCard
+        href="/examples"
+        icon="Eye"
+        title="Explorer les 13 styles"
+        description="Compare chaque système visuel fourni dans le sélecteur interactif."
+      />
+      <DocCard
+        href="/concepts/use-artifacts"
+        icon="Sparkles"
+        title="Associer à Utiliser des artefacts"
+        description="Transforme un plan, un prototype ou une exploration en artefact HTML local soigné."
+      />
+      <DocCard
+        href="/concepts/skills"
+        icon="Workflow"
+        title="Parcourir tous les skills"
+        description="Voir la collection complète de workflows AIBlueprint."
+      />
+    </DocCardGrid>
+  </DocSection>
+</DocCardWrapper>
+
+## Invoquer le skill
+
+Nomme une direction explicitement quand tu sais ce que tu veux :
+
+```bash
+$use-style ios-app
+$use-style vercel
+$use-style black-grid
+$use-style list
+```
+
+Le langage naturel marche aussi : « utilise le style Linear », « donne à ça
+l'ambiance Luma », ou « affiche les styles disponibles ». Si le nom manque
+ou est ambigu, le skill affiche le sélecteur complet et attend un choix.
+
+## La collection actuelle
+
+| Style            | Conçu pour                                    | Langage visuel                                                                             |
+| ---------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `ios-app`        | Apps mobiles Expo et natives                  | Encre et papier monochromes, une étincelle jaune, onglets natifs OS, cartes plates à filet fin. |
+| `grid`           | Landings produit et specs structurées         | Géométrie carrée, bordures 1px, données mono, typo display condensée.                      |
+| `vercel`         | Dashboards d'infra et marketing               | Toile noire exacte, filets discrets, données de déploiement denses, vaste espace éditorial. |
+| `black-grid`     | Outils techniques, calculateurs et index      | Surfaces monochromes austères, Geist plus mono, structure nette définie par les lignes, zéro déco. |
+| `stripe`         | Facturation, paiement, fintech et flux de compte | Toile pâle, surfaces blanches, actions blurple, succès vert, élévation douce.            |
+| `linear`         | Suivi d'issues et interfaces d'app denses     | Panneaux alignés quasi noirs, accent indigo, chrome opérationnel compact.                  |
+| `new-york-times` | Expériences éditoriales et long format        | Toile papier, titres serif, filets fins, rythme multi-colonnes.                            |
+| `anthropic`      | Produits IA, recherche et surfaces de lecture | Crème chaude, typo grotesque plus serif, accent clay-coral, panneaux sombres doux.         |
+| `gumroad`        | Commerce créateur et lancements expressifs    | Fonds jaune et rose, bordures noires épaisses, ombres décalées dures.                      |
+| `raycast`        | Marketing sombre premium et produits commande | Surfaces quasi noires brillantes, lueur rouge, navigation en verre flottante, typo surdimensionnée. |
+| `dusk`           | CRM, analytics et espaces de données          | Fond crépuscule, fenêtre sombre flottante, graphiques bleu vif, pastilles de catégorie colorées. |
+| `luma`           | Événements, calendriers, découverte et flux RSVP | Cartes sombres menées par la photo, aurore teal, actions en pilule blanche, accents de statut bleu et or. |
+| `testspirite`    | Dashboards d'outils développeur calmes        | Toile papier chaude, actions vert forêt, barre latérale groupée, cartes et pastilles de statut discrètes. |
+
+## Comment marche la sélection
+
+Le skill résout les alias familiers comme `vercel-simple` → `black-grid` et
+`testsprite` → `testspirite`. Il peut aussi inférer une direction depuis le
+langage produit : une UI de déploiement Vercel sélectionne `vercel`, un
+flux d'événements inspiré de lu.ma sélectionne `luma`, et une app Expo avec
+onglets natifs sélectionne `ios-app`.
+
+Une fois sélectionné, l'agent lit `styles/<name>.md`, vérifie le projet pour
+une surcharge locale sous `.agents/styles/`, et traite la spec résultante
+comme une contrainte dure. Les motifs de features réutilisables comme
+l'authentification scindée vivent dans `use-feature` ; ils sont
+volontairement séparés des styles visuels.
+
+## Installer ou rafraîchir
+
+Le setup standard garde le skill partagé à jour pour Claude Code et Codex :
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Installe uniquement ce skill via le registre public de skills :
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill use-style
+```
+
+La CLI installe dans `~/.agents/skills/use-style`. Quand tu utilises
+l'installateur de skills, choisis le scope d'installation et les assistants
+cibles dans ses invites.

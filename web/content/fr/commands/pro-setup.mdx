@@ -1,0 +1,66 @@
+---
+title: agents pro setup
+description: Active Premium si besoin et installe la config Premium complète.
+keywords: ["pro", "premium", "setup", "install"]
+---
+
+`agents pro setup` fait l'installation Premium complète de première fois. Si
+aucun token n'est sauvegardé, ça te demande ton token d'accès Premium, l'active,
+et continue dans le même run.
+
+## Usage
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+## Ce que ça installe
+
+- Agents et skills Premium.
+- Skills de routing frontend : `better`, `animate` et `impeccable`.
+- Scripts Premium et leurs dépendances.
+- La statusline avancée et sa config `settings.json`.
+- Raccourcis shell comme `cc`, `ccc`, `cx` et `cxc`.
+- Dépendances globales requises.
+
+## Options de dossier
+
+Ces options appartiennent à la commande parente `agents`, donc place-les avant
+`pro setup`.
+
+| Option | Description |
+| ------ | ----------- |
+| `-f, --folder <path>` | Racine qui contient `.claude`, `.codex` et `.agents` (défaut : `$HOME`). |
+| `--claudeCodeFolder <path>` | Remplace le dossier Claude Code. |
+| `--codexFolder <path>` | Remplace le dossier Codex. |
+| `--agentsFolder <path>` | Remplace le dossier agents partagé. |
+
+## Exemples
+
+```bash
+# Standard installation
+npx aiblueprint-cli@latest agents pro setup
+
+# Install into a custom configuration root
+npx aiblueprint-cli@latest agents --folder ~/my-config pro setup
+```
+
+Pour relire les changements un par un lors des updates suivantes, utilise
+[`agents pro sync`](/commands/sync).
+
+## Skills Assistant Pro
+
+Assistant Pro est un produit séparé, uniquement des skills. Installe son dernier bundle
+complet avec :
+
+```bash
+npx aiblueprint-cli@latest assistants pro setup
+```
+
+La commande demande la clé d'accès Assistant Pro si aucune clé n'est
+sauvegardée, installe le bundle `all` depuis `Melvynx/assistant-pro-skills`, et
+configure les skills partagées pour Claude Code, Codex, Hermes et OpenClaw.
+Python 3 est requis par l'installeur versionné du repository.
+
+La commande n'a ni arguments ni flags. Elle installe dans les dossiers
+assistant standard au niveau user sous `$HOME`.

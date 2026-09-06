@@ -1,20 +1,22 @@
 ---
 title: Plan
-description: Convert an analysis into one confirmed implementation-ready GitHub issue.
+description: Convert an analysis into an implementation-ready plan, with an optional GitHub issue.
 ---
 
 `plan` turns the analyzed request into the contract used by downstream skills.
 
 ## Output
 
-The issue records the problem, desired behavior, scope, exclusions,
+The plan records the problem, desired behavior, scope, exclusions,
 implementation decisions, acceptance criteria, and verification requirements.
-After creation, the agent reads the issue back from GitHub and returns its URL.
+A focused plan is returned directly. An issue is created when requested, required
+by repository rules, or needed for work spanning multiple units, systems, or sessions.
+When an issue is created, the agent reads it back and returns its URL.
 
 ## Boundary
 
-The stage is incomplete until the provider read-back confirms the issue. It does
-not implement the issue.
+This stage does not implement the plan. GitHub is not required for a focused
+plan that does not need an issue.
 
 ```bash
 /plan use the current analysis

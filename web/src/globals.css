@@ -40,17 +40,17 @@
   --card-foreground: oklch(0.2 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.2 0 0);
-  --primary: oklch(0.628 0.258 29.23);
+  --primary: oklch(0.55 0.22 255);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.96 0 0);
   --secondary-foreground: oklch(0.2 0 0);
   --muted: oklch(0.96 0 0);
   --muted-foreground: oklch(0.45 0 0);
-  --accent: oklch(0.95 0.02 29.23);
-  --accent-foreground: oklch(0.628 0.258 29.23);
+  --accent: oklch(0.95 0.02 255);
+  --accent-foreground: oklch(0.55 0.22 255);
   --border: oklch(0.92 0 0);
   --input: oklch(0.92 0 0);
-  --ring: oklch(0.628 0.258 29.23);
+  --ring: oklch(0.55 0.22 255);
   --font-sans: Inter, sans-serif;
   --font-serif: Source Serif 4, serif;
   --font-mono: JetBrains Mono, monospace;
@@ -65,17 +65,17 @@
   --card-foreground: oklch(0.95 0 0);
   --popover: oklch(0.18 0 0);
   --popover-foreground: oklch(0.95 0 0);
-  --primary: oklch(0.628 0.258 29.23);
+  --primary: oklch(0.75 0.14 245);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.22 0 0);
   --secondary-foreground: oklch(0.95 0 0);
   --muted: oklch(0.22 0 0);
   --muted-foreground: oklch(0.65 0 0);
-  --accent: oklch(0.25 0.05 29.23);
+  --accent: oklch(0.25 0.05 255);
   --accent-foreground: oklch(0.95 0 0);
   --border: oklch(0.28 0 0);
   --input: oklch(0.28 0 0);
-  --ring: oklch(0.628 0.258 29.23);
+  --ring: oklch(0.75 0.14 245);
 }
 
 @layer base {
@@ -262,6 +262,10 @@
   }
 }
 
+.typography.docs-typography {
+  color: #c5c8ce;
+}
+
 .typography.docs-typography :is(h1, h2, h3, h4, h5, h6) {
   color: #f7f8f8;
   font-weight: 500;
@@ -279,14 +283,14 @@
 }
 
 .typography.docs-typography a:not(.not-typography a) {
-  color: #f7f8f8;
-  text-decoration-color: rgb(255 255 255 / 30%);
+  color: var(--primary);
+  text-decoration-color: color-mix(in oklch, var(--primary) 45%, transparent);
   text-decoration-thickness: from-font;
   text-underline-position: from-font;
 }
 
 .typography.docs-typography a:not(.not-typography a):hover {
-  text-decoration-color: #fff;
+  text-decoration-color: var(--primary);
 }
 
 .typography.docs-typography strong:not(.not-typography strong) {
@@ -294,11 +298,12 @@
 }
 
 .typography.docs-typography blockquote:not(.not-typography blockquote) {
-  border-color: rgb(255 255 255 / 20%);
+  border-color: var(--primary);
   color: #c5c8ce;
 }
 
 .typography.docs-typography pre:not(.not-typography pre) {
+  color: #f7f8f8;
   border: 1px solid rgb(255 255 255 / 8%);
   background: rgb(255 255 255 / 4%);
 }
@@ -350,4 +355,46 @@
 .typography.docs-typography table:not(.not-typography table) th:last-child,
 .typography.docs-typography table:not(.not-typography table) td:last-child {
   padding-right: 0;
+}
+
+.docs-code-scroll,
+.typography.docs-typography table:not(.not-typography table) {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 16%) transparent;
+}
+
+.docs-code-scroll::-webkit-scrollbar,
+.typography.docs-typography table:not(.not-typography table)::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.docs-code-scroll::-webkit-scrollbar-track,
+.typography.docs-typography table:not(.not-typography table)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.docs-code-scroll::-webkit-scrollbar-thumb,
+.typography.docs-typography table:not(.not-typography table)::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 16%);
+  border-radius: 999px;
+}
+
+.docs-code-scroll::-webkit-scrollbar-thumb:hover,
+.typography.docs-typography table:not(.not-typography table)::-webkit-scrollbar-thumb:hover {
+  background: rgb(255 255 255 / 28%);
+}
+
+html[data-code-wrap="1"] .docs-code-scroll {
+  overflow-x: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.typography.docs-typography img:not(.not-typography img) {
+  margin-top: calc(var(--spacing) * 6);
+  margin-bottom: calc(var(--spacing) * 6);
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 10%);
 }

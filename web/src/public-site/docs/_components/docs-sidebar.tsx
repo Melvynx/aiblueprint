@@ -1,40 +1,106 @@
 import Link from "@/compat/link";
 import { usePathname } from "@/compat/navigation";
 import { cn } from "@/lib/utils";
-import { BookOpen, Boxes, GitBranch, Layers3, Rocket, Terminal } from "lucide-react";
+import {
+  BookOpen,
+  Boxes,
+  GitBranch,
+  Layers3,
+  Rocket,
+  Sparkles,
+  Terminal,
+} from "lucide-react";
 import type { DocTree } from "../doc-manager";
+import { getChrome, getLocaleFromPathname, withLocale } from "../locale";
 
-const TOP_LEVEL_SECTIONS = [
-  { name: "Introduction", href: "/", icon: BookOpen },
-  { name: "Getting Started", href: "/getting-started/installation", activePrefix: "/getting-started", icon: Rocket },
-  { name: "Core Workflow", href: "/core-workflow", activePrefix: "/core-workflow", icon: GitBranch },
-  { name: "Advanced", href: "/advanced", activePrefix: "/advanced", icon: Layers3 },
-  { name: "Commands", href: "/commands/agents-setup", activePrefix: "/commands", icon: Terminal },
-  { name: "Concepts", href: "/concepts/skills", activePrefix: "/concepts", icon: Boxes },
-];
-
-export function DocsSidebar({ tree }: { tree: DocTree }) {
+export function DocsSidebar({
+  tree,
+  mobile = false,
+}: {
+  tree: DocTree;
+  mobile?: boolean;
+}) {
   const pathname = usePathname();
+  const locale = getLocaleFromPathname(pathname);
+  const copy = getChrome(locale);
+  const sections = [
+    { name: copy.sections.introduction, href: "/", icon: BookOpen },
+    {
+      name: copy.sections.gettingStarted,
+      href: "/getting-started/installation",
+      activePrefix: "/getting-started",
+      icon: Rocket,
+    },
+    {
+      name: copy.sections.coreWorkflow,
+      href: "/core-workflow",
+      activePrefix: "/core-workflow",
+      icon: GitBranch,
+    },
+    {
+      name: copy.sections.advanced,
+      href: "/advanced",
+      activePrefix: "/advanced",
+      icon: Layers3,
+    },
+    {
+      name: copy.sections.skills,
+      href: "/skills",
+      activePrefix: "/skills",
+      icon: Sparkles,
+    },
+    {
+      name: copy.sections.commands,
+      href: "/commands/agents-setup",
+      activePrefix: "/commands",
+      icon: Terminal,
+    },
+    {
+      name: copy.sections.concepts,
+      href: "/concepts/shell-shortcuts",
+      activePrefix: "/concepts",
+      icon: Boxes,
+    },
+  ];
 
   return (
-    <aside className="no-scrollbar sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 overflow-y-auto border-r border-white/[0.06] bg-[#08090a] lg:block">
+    <aside
+      className={cn(
+        "no-scrollbar shrink-0 overflow-y-auto bg-[#08090a]",
+        mobile
+          ? "max-h-[65vh] w-full"
+          : "sticky top-16 hidden h-[calc(100vh-4rem)] w-64 border-r border-white/[0.06] lg:block",
+      )}
+    >
       <nav className="flex flex-col gap-7 px-3 pt-4 pb-16">
         <div className="flex flex-col gap-0.5">
           <ul className="flex flex-col gap-0.5">
-            {TOP_LEVEL_SECTIONS.map(({ name, href, activePrefix, icon: Icon }) => {
-              const isActive = href === "/" ? pathname === href : pathname.startsWith(activePrefix ?? href);
+            {sections.map(({ name, href, activePrefix, icon: Icon }) => {
+              const localizedHref = withLocale(href, locale);
+              const localizedPrefix = activePrefix
+                ? withLocale(activePrefix, locale)
+                : localizedHref;
+              const isActive =
+                href === "/"
+                  ? pathname === localizedHref
+                  : pathname.startsWith(localizedPrefix);
               return (
                 <li key={name}>
                   <Link
-                    href={href}
+                    href={localizedHref}
                     className={cn(
-                      "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none",
+                      "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
                       isActive
-                        ? "bg-white/[0.06] font-medium text-[#f7f8f8]"
-                        : "text-[#8a8f98] hover:bg-white/[0.03] hover:text-[#f7f8f8]",
+                        ? "bg-primary/10 font-medium text-primary"
+                        : "text-[#8a8f98] hover:bg-primary/5 hover:text-primary",
                     )}
                   >
-                    <Icon className={cn("size-3.5 shrink-0", isActive ? "text-[#f7f8f8]" : "text-[#8a8f98]/70")} />
+                    <Icon
+                      className={cn(
+                        "size-3.5 shrink-0",
+                        isActive ? "text-primary" : "text-[#8a8f98]/70",
+                      )}
+                    />
                     {name}
                   </Link>
                 </li>
@@ -60,10 +126,10 @@ export function DocsSidebar({ tree }: { tree: DocTree }) {
                       <Link
                         href={doc.url}
                         className={cn(
-                          "-ml-px block rounded-r-md border-l py-1 pr-2 pl-3 text-[13px] transition-colors focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:outline-none",
+                          "-ml-px block rounded-r-md border-l py-1 pr-2 pl-3 text-[13px] transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none",
                           isActive
-                            ? "border-[#f7f8f8] font-medium text-[#f7f8f8]"
-                            : "border-transparent text-[#8a8f98] hover:border-white/25 hover:text-[#f7f8f8]",
+                            ? "border-primary bg-primary/5 font-medium text-primary"
+                            : "border-transparent text-[#8a8f98] hover:border-white/25 hover:text-primary",
                         )}
                       >
                         {doc.attributes.title}

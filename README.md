@@ -34,8 +34,6 @@ npx aiblueprint-cli@latest agents setup
 # Run without installation
 npx aiblueprint-cli@latest agents setup
 
-# Or install globally
-npm install -g aiblueprint-cli
 ```
 
 ## 🎯 Usage
@@ -221,4 +219,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 **Created by AIBlueprint** - [mlv.sh/claude-cli](https://mlv.sh/claude-cli)
 
-Need help? [Open an issue](https://github.com/melvynx/aiblueprint/issues) | [Documentation](https://codelynx.dev/docs)
+Need help? [Open an issue](https://github.com/melvynx/aiblueprint/issues) | [Documentation](https://docs.aiblueprint.dev)

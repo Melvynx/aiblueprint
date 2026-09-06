@@ -1,0 +1,110 @@
+---
+title: Effort level
+description: Thinking budget is not intelligence. Route Low, Medium, High, Extra High, and Max from the task, not from a reflex to spend more tokens.
+keywords: ["effort", "thinking", "reasoning", "tokens", "low", "medium", "high", "max"]
+---
+
+The most underestimated agent setting is not the model. It is the thinking budget you give it.
+
+Max does not automatically make an agent smarter. It buys more exploration: longer reasoning blocks, more steps, more tokens, more wall time. Sometimes that saves a hard architecture. Sometimes it turns a working animation into four minutes of overthinking.
+
+<YouTubeEmbed id="4VZPCEtg6uU" title="Effort matters more than you think: which level to pick" />
+
+![Cursor effort slider set to Medium on GPT-6 Astra](/docs/effort-level-slider.png)
+
+## Thinking is a budget, not a guarantee
+
+Effort is a cap on how much the model may write down before it acts. At Low, you get short thinking blocks. At Extra High or Max, those blocks get several times larger, especially at the start of a conversation.
+
+That text is the model talking to itself: what to inspect, what to try, what might break. It can look like intelligence. It is still just generated text with the instruction "think about this."
+
+Raising the slider systematically raises cost. Quality does not rise on the same curve.
+
+The result still comes from the system around the model: the brief, the repo context, rules, agents, skills, tools, and whether the target is verifiable. Switching Opus for Sol is a small delta next to that stack.
+
+## One High vs Max run is not a law
+
+In the comparison shown in the video, Max used about 17% more depth and 45% more steps than High. Cost landed around +50%. Time landed around +74% (about 1 minute on High vs about 4 minutes on Max).
+
+| Signal | High vs Max in that run |
+| ------ | ----------------------- |
+| Depth | about +17% |
+| Steps | about +45% |
+| Cost | about +50% |
+| Time | about +74% |
+
+Those numbers describe one demo, not every agent. The task, model, harness, context, and tools can flip the ratio.
+
+What the demo did show: Max launched the app and took screenshots because it decided a real review needed that. High did not. Max also fixated on a 2-second hero delay that was not actually a problem, while High talked about positioning. More budget can buy a useful extra check. It can also buy confident noise.
+
+## Vague work wants more thinking. Precise work does not.
+
+The vaguer the request, the more a high thinking budget can help. "Make the group filter better placed and simpler" does not say what better means. Extra thinking can propose a hierarchy, then a second variant, then an implementation that actually lands.
+
+A precise rename of three tags with almost no room for interpretation does not need that. Medium is enough. Max has almost nothing useful to buy.
+
+The biggest lever is still making the task verifiable. If the agent can run a test, a script, or a visual check until the goal is true, effort matters less than the loop. A medium run with a real acceptance check beats Max guessing what you wanted.
+
+## How to route the five levels
+
+Start at **medium-high** for daily work, then ask whether the result is enough. Claude's own default for most tasks is **High**. ChatGPT's is **Medium**. Escalate when you want the model to invent the feature with you, not when the slider looks more premium.
+
+Skip Ultra. It burns tokens for almost no extra gain over Max.
+
+| Level | Use it for |
+| ----- | ---------- |
+| **Low** | Sub-tasks, classification, small copy edits, robotic renames. The result is obvious. |
+| **Medium** | Daily default when the task is bounded and easy to check. |
+| **High** | Hard agentic code, real reasoning, repo exploration. Starting point for Claude / Opus. |
+| **Extra High** | Demanding plans, exploration, frontend that needs taste, or a large budget on a hard problem. |
+| **Max** | Frontier architecture or system redesign. Several high-thinking passes on a decision that has to last. |
+
+If tokens are plentiful and latency does not matter, staying on High is fine. Max still has to earn its place.
+
+Three questions before you move the slider:
+
+1. Is the task precise? Known files, known change, known proof → Low or Medium.
+2. Does it need to decide for you? Design, exploration, architecture → High or Extra High.
+3. Does a wrong direction cost more than a long think? Only then Max is defensible.
+
+If Medium fails because the brief is fuzzy, fix the brief before you pay more for the same ambiguity. If Max is spinning, stop it.
+
+## Force an escalation instead of a default Max
+
+Reuse this prompt when you do not want Max to become an invisible habit:
+
+```text
+Work this task at the lowest effort that stays reliable:
+[describe the observable result]
+
+Context and limits:
+- scope: [allowed files, surface, or folder];
+- acceptance: [verifiable outcomes];
+- checks: [tests, command, measurement, or visual path];
+- out of scope: [what must not change].
+
+Start at [Low / Medium / High] given the task.
+Do not raise effort automatically.
+
+If that level is not enough:
+1. show exactly what is blocked or still ambiguous;
+2. separate a bad brief from a real need for more reasoning;
+3. propose the next level and what it would explore;
+4. wait for approval before going to Max.
+
+At the end, give me:
+- the result;
+- the checks actually run;
+- remaining limits;
+- the effort used and why.
+```
+
+The point is not to hoard every token. The point is to know which extra decision you are buying before you fund more reasoning.
+
+## Related
+
+- [Skills](/concepts/skills) — reusable workflows that often matter more than the slider.
+- [The Core Workflow](/core-workflow) — analyze, plan, implement, review, verify.
+- [Apex](/advanced/apex) — adaptive implementation with checkpoints instead of blind Max runs.
+
+Source: [Codelynx article](https://codelynx.dev/posts/effort-thinking-agent-ia) and [the video](https://youtu.be/4VZPCEtg6uU).

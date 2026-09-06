@@ -6,7 +6,8 @@
     "dev": "vite dev",
     "build": "vite build",
     "start": "node .output/server/index.mjs",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "check:docs-i18n": "bun scripts/check-docs-i18n.ts"
   },
   "dependencies": {
     "@tanstack/react-router": "^1.169.2",

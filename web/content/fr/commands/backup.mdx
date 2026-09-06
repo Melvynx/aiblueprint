@@ -1,0 +1,31 @@
+---
+title: agents backup
+description: Restaure une config précédente depuis un backup automatique.
+keywords: ["backup", "restore", "load", "undo"]
+---
+
+`agents backup` restaure des snapshots depuis le store de backup legacy. Les
+snapshots setup et sync actuels sont gérés par
+[configs backups](/commands/configs). Les backups préservent les dossiers
+complets `.claude`, `.codex` et `.agents`, y compris les sessions et
+l'historique projet.
+
+```bash
+npx aiblueprint-cli@latest agents backup load
+```
+
+## Ce que ça fait
+
+- Liste tous les backups stockés dans `~/.config/aiblueprint/backup/`.
+- Affiche le timestamp et le temps relatif de chaque backup.
+- Te laisse en sélectionner un de façon interactive.
+- Demande confirmation avant de restaurer.
+- Backup d'abord ta config actuelle, donc une restauration est elle-même
+  réversible.
+
+## Lié
+
+Pour des snapshots nommés, gérés manuellement, et un set plus riche de
+commandes backup, voir [configs](/commands/configs), qui expose
+`configs backups list`, `configs backups create`, `configs backups load` et
+`configs backups clean`.

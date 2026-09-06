@@ -1,0 +1,57 @@
+---
+title: agents pro sync
+description: Passe en revue les changements Premium, choisis quoi importer, et backup ta config actuelle.
+keywords: ["pro", "premium", "sync", "backup", "selective update"]
+---
+
+`agents pro sync` compare ta config installée avec la dernière version
+Premium, puis te laisse importer toutes les updates disponibles ou choisir
+des items précis. Ça exige que Premium soit déjà activé.
+
+## Usage
+
+```bash
+npx aiblueprint-cli@latest agents pro sync
+```
+
+## Comment sync fonctionne
+
+1. Récupère la dernière config Premium et analyse les différences locales.
+2. Groupe les items nouveaux, modifiés et de migration par catégorie. Skills et
+   scripts sont résumés par leur dossier de premier niveau.
+3. Te laisse importer toutes les updates ou faire une sélection custom.
+4. Affiche les additions prévues, les updates, et les migrations `.claude`
+   vers `.agents`, puis demande confirmation.
+5. Crée un backup de config dans `~/.aiblueprint/backups/` avant d'écrire.
+6. Applique les changements sélectionnés et installe les dépendances des
+   scripts si des scripts étaient inclus.
+
+Les items inchangés ne sont pas sélectionnables. La sélection custom par
+défaut inclut tous les changements disponibles. Si tout est à jour, la
+commande quitte sans rien écrire.
+
+## Options de dossier
+
+Ces options appartiennent à la commande parente `agents`, donc place-les avant
+`pro sync`.
+
+| Option | Description |
+| ------ | ----------- |
+| `-f, --folder <path>` | Racine qui contient `.claude`, `.codex` et `.agents` (défaut : `$HOME`). |
+| `--claudeCodeFolder <path>` | Remplace le dossier Claude Code. |
+| `--codexFolder <path>` | Remplace le dossier Codex. |
+| `--agentsFolder <path>` | Remplace le dossier agents partagé. |
+
+## Exemples
+
+```bash
+# Review and sync the default Premium installation
+npx aiblueprint-cli@latest agents pro sync
+
+# Sync a custom configuration root
+npx aiblueprint-cli@latest agents --folder ~/my-config pro sync
+```
+
+Utilise [`agents pro update`](/commands/pro-update) à la place quand tu veux
+installer la dernière config Premium complète sans sélectionner les items un
+par un.

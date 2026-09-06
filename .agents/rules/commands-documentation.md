@@ -18,4 +18,4 @@ Keep user-facing command documentation in sync with command behavior.
 
 ## Example
 
-If `aiblueprint agents --skip setup` becomes `aiblueprint agents --skip-setup`, update the CLI implementation, tests, and every user-facing usage example before pushing.
+If `npx aiblueprint-cli@latest agents --skip setup` becomes `npx aiblueprint-cli@latest agents --skip-setup`, update the CLI implementation, tests, and every user-facing usage example before pushing.

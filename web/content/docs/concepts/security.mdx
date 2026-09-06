@@ -32,6 +32,8 @@ ones via a deny list:
 ```toml
 [[hooks.PreToolUse]]
 matcher = "^Bash$"
+
+[[hooks.PreToolUse.hooks]]
 type = "command"
 command = "/usr/bin/env node \"$HOME/.codex/hooks/command-deny-list.ts\""
 timeout = 5
@@ -40,6 +42,7 @@ statusMessage = "Checking command safety"
 
 ## Backups
 
-Every configuration change is backed up automatically before it is applied, so
-you can always roll back with [configs undo](/commands/configs) or
-[agents backup](/commands/backup).
+Setup and sync create snapshots before updating existing configuration. Use
+[configs backups](/commands/configs) to restore these snapshots. `configs undo`
+reverses the most recent configuration load; [agents backup](/commands/backup)
+reads the separate legacy backup store.

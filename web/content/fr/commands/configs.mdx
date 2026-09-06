@@ -1,0 +1,80 @@
+---
+title: configs
+description: Sauvegarde, charge, liste et restaure des configs nommées et des backups automatiques.
+keywords: ["configs", "save", "load", "undo", "backups"]
+---
+
+`configs` gère des snapshots complets de tes dossiers `.claude`, `.codex` et
+`.agents`. Les configs sauvegardées et les backups incluent sessions,
+projets, logs, caches, et tous les autres fichiers dans ces dossiers, pour
+que changer de config ne jette pas l'historique.
+
+## Configs nommées
+
+| Commande | Description |
+| ------- | ----------- |
+| `configs save <name>` | Sauvegarde les dossiers actuels comme config nommée. |
+| `configs load <name>` | Charge une config nommée (les dossiers actuels sont backupés d'abord). |
+| `configs list` | Liste toutes les configs nommées sauvegardées. |
+| `configs undo` | Annule le dernier `load` via le backup automatique. |
+
+### Save
+
+```bash
+# Save a snapshot
+npx aiblueprint-cli@latest configs save work
+
+# Overwrite an existing snapshot
+npx aiblueprint-cli@latest configs save work --force
+```
+
+### Load et undo
+
+```bash
+npx aiblueprint-cli@latest configs load work
+npx aiblueprint-cli@latest configs undo
+```
+
+Charger fait toujours un backup de ta config actuelle d'abord, donc
+`configs undo` peut annuler le changement.
+
+## Backups automatiques
+
+Le CLI prend un snapshot de ta config automatiquement avant setup et sync.
+Gère ces snapshots avec les sous-commandes `backups` :
+
+| Commande | Description |
+| ------- | ----------- |
+| `configs backups list` | Liste les backups automatiques avec leurs raisons. |
+| `configs backups load <name>` | Charge un backup (les dossiers actuels sont backupés d'abord). |
+| `configs backups create [reason]` | Crée un backup manuel avec une raison optionnelle. |
+| `configs backups clean` | Supprime les backups automatiques plus vieux que la fenêtre de rétention. |
+
+```bash
+npx aiblueprint-cli@latest configs backups list
+npx aiblueprint-cli@latest configs backups create "before experiment"
+npx aiblueprint-cli@latest configs backups load 2026-05-28-setup
+npx aiblueprint-cli@latest configs backups clean --days 30
+npx aiblueprint-cli@latest configs backups clean --days 30 --dry-run
+npx aiblueprint-cli@latest configs backups clean --days 90 --include-manual
+```
+
+Chaque entrée affiche son nom, sa date, sa raison, son trigger, les dossiers
+inclus, et son chemin sur disque. `configs backups clean` supprime les
+backups gérés par rétention plus vieux que 30 jours par défaut. Les backups
+manuels créés avec `configs backups create` sont conservés sauf si tu passes
+`--include-manual`. Utilise `--days` pour changer la fenêtre de rétention et
+`--dry-run` pour prévisualiser ce qui serait supprimé.
+
+## Récupération de sessions
+
+Si tu as des sessions éparpillées dans des configs et backups sauvegardés,
+fusionne-les dans les dossiers courants sans écraser les fichiers existants :
+
+```bash
+npx aiblueprint-cli@latest agents config unify sessions
+```
+
+Les fichiers de session identiques sont ignorés. Si le même chemin de session
+existe avec un contenu différent, le fichier importé est copié avec un
+suffixe source.

@@ -1,5 +1,12 @@
 import Link from "@/compat/link";
 import { cn } from "@/lib/utils";
+import {
+  LOCALES,
+  getChrome,
+  type Locale,
+  switchLocalePath,
+  withLocale,
+} from "@public-site/docs/locale";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowLeft, Check, Columns2, Palette } from "lucide-react";
 import { type CSSProperties, useMemo, useState } from "react";
@@ -272,19 +279,27 @@ const styles: StyleExample[] = [
 ];
 
 export const Route = createFileRoute("/examples")({
-  head: () => ({
-    meta: [
-      { title: "Style Examples - AIBlueprint CLI" },
-      {
-        name: "description",
-        content: "Preview the visual styles bundled with the use-style skill.",
-      },
-    ],
-  }),
-  component: ExamplesRoute,
+  head: () => examplesHead("en"),
+  component: () => <ExamplesPage locale="en" />,
 });
 
-function ExamplesRoute() {
+export function examplesHead(locale: Locale) {
+  const copy = getChrome(locale);
+  return {
+    meta: [
+      { title: copy.examplesTitle },
+      { name: "description", content: copy.examplesDescription },
+    ],
+    links: [
+      { rel: "alternate", hrefLang: "en", href: "/examples" },
+      { rel: "alternate", hrefLang: "fr", href: "/fr/examples" },
+      { rel: "alternate", hrefLang: "x-default", href: "/examples" },
+    ],
+  };
+}
+
+export function ExamplesPage({ locale }: { locale: Locale }) {
+  const copy = getChrome(locale);
   const [selectedSlug, setSelectedSlug] = useState(styles[0].slug);
   const selected = useMemo(
     () => styles.find((style) => style.slug === selectedSlug) ?? styles[0],
@@ -297,11 +312,11 @@ function ExamplesRoute() {
         <header className="flex flex-col gap-5 rounded-2xl border border-white/80 bg-white/75 p-5 shadow-[0_24px_80px_rgba(24,24,27,0.08)] backdrop-blur-xl md:flex-row md:items-end md:justify-between sm:p-7">
           <div className="flex max-w-3xl flex-col gap-3">
             <Link
-              href="/concepts/use-style"
+              href={withLocale("/concepts/use-style", locale)}
               className="inline-flex w-fit items-center gap-2 rounded-md border border-[#d9d9dd] bg-white px-3 py-2 text-sm font-medium text-[#3f3f46] no-underline transition-colors hover:bg-[#f1f1f3]"
             >
               <ArrowLeft className="size-4" />
-              use-style docs
+              {copy.examplesBack}
             </Link>
             <div className="flex items-center gap-3">
               <span className="grid size-10 place-items-center rounded-md bg-[#111827] text-white">
@@ -309,25 +324,51 @@ function ExamplesRoute() {
               </span>
               <div>
                 <p className="font-mono text-xs font-semibold tracking-wider text-[#71717a] uppercase">
-                  {styles.length} visual systems · live picker
+                  {styles.length} {copy.examplesKicker}
                 </p>
                 <h1 className="text-3xl font-semibold tracking-normal sm:text-4xl">
-                  AIBlueprint UI style examples
+                  {copy.examplesHeading}
                 </h1>
               </div>
             </div>
             <p className="max-w-2xl text-base leading-7 text-[#52525b]">
-              Switch styles to preview the visual direction loaded by the
-              bundled use-style skill before an agent starts UI work.
+              {copy.examplesIntro}
             </p>
           </div>
-          <a
-            href="/concepts/skills"
-            className="inline-flex w-fit items-center gap-2 rounded-md bg-[#111827] px-4 py-2.5 text-sm font-medium text-white no-underline transition-colors hover:bg-[#27272a]"
-          >
-            <Columns2 className="size-4" />
-            Skill list
-          </a>
+          <div className="flex flex-wrap items-center gap-2">
+            <div
+              role="group"
+              aria-label={copy.language}
+              className="flex items-center rounded-md border border-[#d9d9dd] bg-white p-0.5"
+            >
+              {LOCALES.map((option) => (
+                <Link
+                  key={option}
+                  href={switchLocalePath(
+                    locale === "fr" ? "/fr/examples" : "/examples",
+                    option,
+                  )}
+                  hrefLang={option}
+                  aria-current={option === locale ? "page" : undefined}
+                  className={cn(
+                    "rounded px-2 py-1 font-mono text-[11px] font-medium tracking-[0.08em] no-underline uppercase",
+                    option === locale
+                      ? "bg-[#111827] text-white"
+                      : "text-[#71717a] hover:text-[#171717]",
+                  )}
+                >
+                  {option}
+                </Link>
+              ))}
+            </div>
+            <Link
+              href={withLocale("/concepts/skills", locale)}
+              className="inline-flex w-fit items-center gap-2 rounded-md bg-[#111827] px-4 py-2.5 text-sm font-medium text-white no-underline transition-colors hover:bg-[#27272a]"
+            >
+              <Columns2 className="size-4" />
+              {copy.examplesSkillList}
+            </Link>
+          </div>
         </header>
 
         <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">

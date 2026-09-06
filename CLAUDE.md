@@ -31,7 +31,7 @@ This is a CLI tool built with TypeScript and Bun that sets up AI coding configur
 
 **CLI Command Structure**:
 
-- `aiblueprint agents setup` - Main setup command
+- `npx aiblueprint-cli@latest agents setup` - Main setup command
 - Options: `-f/--folder` (custom install path), `-s/--skip` (skip interactive prompts)
 
 **Setup Process** (`src/commands/setup.ts`):

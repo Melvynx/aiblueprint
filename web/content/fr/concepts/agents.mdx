@@ -1,0 +1,31 @@
+---
+title: Agents
+description: Agents IA spécialisés pour l'exploration, la recherche et les actions sûres.
+keywords: ["agents", "explore", "websearch", "action"]
+---
+
+AIBlueprint livre des agents ciblés auxquels Claude Code et Codex peuvent
+déléguer. Ils vivent dans le dossier partagé `~/.agents/agents` et sont
+rendus automatiquement au format TOML de Codex.
+
+## Agents fournis
+
+| Agent | Objectif |
+| ----- | ------- |
+| `explore-codebase` | Découverte approfondie du code : trouve fichiers, motifs et utilitaires. Lecture seule, ne crée jamais de fichiers. |
+| `explore-docs` | Recherche la doc des libs et extrait les exemples pertinents pour l'implémentation. |
+| `websearch` | Recherche web rapide et précise depuis des sources fiables. |
+| `action` | Exécuteur conditionnel par lots : petites actions vérifiées, comme supprimer des exports, packages ou fichiers inutilisés. |
+
+## Pourquoi utiliser des agents
+
+Déléguer à un agent spécialisé garde la conversation principale concentrée.
+Chaque agent a un prompt système ajusté et un jeu d'outils étroit, ce qui le
+rend plus rapide et plus fiable pour sa tâche.
+
+## Installation et mise à jour
+
+Les agents sont installés par [agents setup](/commands/agents-setup) et
+peuvent être centralisés à tout moment avec [agents unify](/commands/unify).
+Pour les rendre au format Codex à la demande, lance
+[agents codex-agents](/commands/codex-agents).

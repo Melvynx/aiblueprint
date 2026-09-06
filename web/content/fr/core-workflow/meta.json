@@ -1,0 +1,4 @@
+{
+  "title": "Workflow principal",
+  "pages": ["index", "analyze", "plan", "implement", "review", "verify", "code-debug"]
+}

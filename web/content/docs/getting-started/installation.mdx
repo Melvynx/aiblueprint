@@ -5,7 +5,7 @@ keywords: ["install", "npx", "setup", "node"]
 ---
 
 The AIBlueprint CLI runs with Node.js. You do not need to install it globally -
-`npx` always fetches the latest version.
+`npx aiblueprint-cli@latest` selects the latest published version.
 
 ## Run without installing
 
@@ -15,15 +15,6 @@ npx aiblueprint-cli@latest agents setup
 
 This is the recommended way to use the CLI. You always get the newest agents,
 skills, and defaults.
-
-## Install globally
-
-If you prefer a permanent `aiblueprint` binary on your PATH:
-
-```bash
-npm install -g aiblueprint-cli
-aiblueprint agents setup
-```
 
 ## Requirements
 
@@ -53,8 +44,8 @@ By default the CLI writes to your home directory:
 You can override the root with `--folder`, or each tool individually:
 
 ```bash
-aiblueprint agents setup --folder ~/my-config
-aiblueprint agents setup --claudeCodeFolder ~/.claude --codexFolder ~/.codex
+npx aiblueprint-cli@latest agents setup --folder ~/my-config
+npx aiblueprint-cli@latest agents setup --claudeCodeFolder ~/.claude --codexFolder ~/.codex
 ```
 
 ## Next step

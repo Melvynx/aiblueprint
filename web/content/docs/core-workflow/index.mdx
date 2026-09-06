@@ -12,27 +12,30 @@ request
   -> analyze
   -> plan
   -> implement
-  -> review
+  -> code-review
   -> verify
 ```
+
+These core skills are included in Premium. In Codex, use `$skill-name` instead
+of `/skill-name`. The free bundle includes [Apex](/advanced/apex).
 
 ## Available stages
 
 | Skill | Produces | Stops before |
 | --- | --- | --- |
 | `analyze` | Evidence, constraints, risks, and acceptance criteria. | Planning or editing. |
-| `plan` | A confirmed implementation-ready GitHub issue. | Implementation. |
+| `plan` | An implementation-ready plan, with an optional GitHub issue. | Implementation. |
 | `implement` | The scoped change and relevant static checks. | Runtime proof. |
-| `review` | Separate Spec and Standards verdicts. | Runtime verification. |
+| `code-review` | Separate Spec and Standards verdicts. | Runtime verification. |
 | `verify` | Current proof for every acceptance criterion. | Completion while anything is unproven. |
 | `code-debug` | A reproduced root cause, regression coverage, and a verified fix. | Guessing without a red-capable loop. |
 
 ## Minimal by design
 
 The skills do not duplicate each other. `analyze` does not create a plan,
-`implement` does not claim runtime proof, and `review` does not replace
-`verify`. The GitHub issue created by `plan` becomes the shared source of truth
-for every downstream stage.
+`implement` does not claim runtime proof, and `code-review` does not replace
+`verify`. The agreed plan is the shared source of truth. A GitHub issue is optional for
+focused work and is read in full when supplied.
 
 Use a skill directly when only one stage is needed:
 
@@ -40,7 +43,7 @@ Use a skill directly when only one stage is needed:
 /analyze investigate slow navigation
 /plan use the current analysis
 /implement https://github.com/owner/repo/issues/123
-/review issue 123 since origin/main
+/code-review issue 123 since origin/main
 /verify issue 123
 /code-debug reproduce the intermittent save failure
 ```

@@ -1,13 +1,13 @@
 ---
-title: Review
-description: Review an implementation independently against its issue and repository standards.
+title: Code Review
+description: Review an implementation independently against its agreed contract and repository standards.
 ---
 
-`review` evaluates the change from a fixed point on two separate axes.
+`code-review` evaluates the change from a fixed point on two separate axes.
 
 | Axis | Question |
 | --- | --- |
-| Spec | Does the implementation satisfy the issue without missing behavior or scope creep? |
+| Spec | Does the implementation satisfy the request, plan, specification, or issue without missing behavior or scope creep? |
 | Standards | Does it follow repository rules and remain maintainable? |
 
 The result is `PASS` or `CHANGES REQUIRED` for each axis. Findings include exact
@@ -16,5 +16,5 @@ file and line references and remain separate from optional improvements.
 Review does not prove runtime behavior.
 
 ```bash
-/review issue 123 since origin/main
+/code-review issue 123 since origin/main
 ```

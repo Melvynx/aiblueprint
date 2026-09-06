@@ -1,0 +1,58 @@
+---
+title: Sweet spot du contexte
+description: Une fenêtre à 1M de tokens n'est pas un upgrade gratuit. L'attention se dégrade, chaque tour renvoie tout l'historique, et passé le palier de prix tu paies plus cher un modèle plus bête.
+keywords: ["contexte", "sweet spot", "compact", "tokens", "1 million", "cache"]
+---
+
+Une fenêtre à 1 million de tokens, ça ressemble à de la marge. En pratique, c'est souvent un piège.
+
+Chaque tour d'agent renvoie tout l'historique : système, tools, user, résultats d'outils. Le cache rend ça tenable. Ça ne rend pas une fenêtre géante gratuite, et ça ne garde pas le modèle aussi vif.
+
+<YouTubeEmbed id="OTxy6NabllI" title="1 million de contexte est la pire chose que tu puisses faire" />
+
+## La fenêtre est facturée à chaque tour
+
+Le tour 1 peut faire 40k tokens de système + tools + prompt. Le tour 20 peut faire 200k. Un compact te reset vers 50k. Sans compact, la même session peut ramper vers 1M.
+
+C'est pour ça qu'une fenêtre 1M donne l'impression d'être illimitée, puis bouffe le quota. Avec un gros contexte, une poignée d'appels d'outils en une minute, c'est une poignée de gros bills d'input. Le cache (souvent ~10x moins cher à la relecture) est la seule raison qu'un abonnement type Codex tienne plus d'une journée.
+
+GPT 5.6 Sol, sur la grille montrée dans la vidéo, double aussi l'input une fois passé ~272k tokens. Remplir la fenêtre n'est pas un coût linéaire. C'est une marche.
+
+## Compact est moins cher qu'un crawl à 1M
+
+Compact : ça monte, ça reset, ça monte, ça reset. Le contexte moyen reste plus bas. 1M : ça monte longtemps, tu paies le tarif haut à chaque tool call suivant, puis tu compactes une fois si tu touches le plafond.
+
+Le graphe de la vidéo est une session estimée, pas un benchmark. Dans cette run, le compact tournait autour de ~153k de contexte moyen. Le chemin 1M autour de ~514k. Combiné au palier Sol à 272k, le même travail tombait environ 2x plus cher sur la longue fenêtre, et environ 4x une fois que tu vis vraiment près du million.
+
+Un compact plus rapide, c'est surtout pour ça que Codex donnait souvent l'impression d'avoir "plus de tokens" que Claude : tu passais moins de temps facturé sur un contexte énorme. Un chiffre de "valeur API" Claude Max qui est surtout des cache reads, ce n'est pas plus de travail. L'output (la vraie génération) peut être similaire pendant que le compteur explose parce qu'un côté relit 1M et l'autre ~200k.
+
+## L'attention a un sweet spot
+
+Matt Pocock appelle ça la smart zone. Même idée : passé un point, le même modèle devient plus sloppy, plus forgetful, plus fautif, plus halluciné. L'attention est un budget fini. Plus de tokens rend les tokens utiles plus durs à trouver.
+
+Pocock place la dumb zone vers 125k–150k. La vidéo n'est pas d'accord sur la falaise exacte et traite jusqu'à ~272k comme encore utilisable, avec un modèle encore à peu près vif jusqu'à ~200k et clairement plus bête après. Ne prends pas ces seuils pour de la physique. Prends-les pour "ne vis pas en haut de la fenêtre."
+
+| Zone | Ce que ça donne |
+| ---- | --------------- |
+| Sweet spot | Attention haute. L'engineering dur passe encore. |
+| Montée | Les edits simples one-shot encore. L'archi et le multi-fichiers commencent à glisser. |
+| Dumb zone | Même modèle, pire. Plus de slop, plus de contraintes oubliées, plus d'erreurs confiantes. |
+
+Les tâches simples masquent les dégâts. "Enlève le spacing" marche à 80 tokens et à 999k. "Refais ce parcours de billing sans casser l'auth" non. Si ton travail c'est de l'UI niveau CE1, une grosse fenêtre a l'air fine. Si c'est du vrai engineering, le sweet spot est la feature.
+
+## Quoi faire à la place du 1M
+
+- Garde le compact (ou `/compact` exprès) au lieu de le couper pour "utiliser le million."
+- Nouvelle session quand la tâche change. Une session, un job.
+- Ne confonds pas l'économie du cache avec du contexte gratuit. Les tokens cachés occupent encore la fenêtre et dégradent encore l'attention.
+- Regarde la statusline. Si tu vis au-dessus de ~200k sur une tâche dure, compacte ou split avant d'ajouter un autre dump de subagent.
+
+Une plus grosse fenêtre, c'est un last resort pour un problème de retrieval que tu as déjà raté de structurer. Ce n'est pas un upgrade de qualité.
+
+## Voir aussi
+
+- [Ne pas overflow la mémoire](/concepts/dont-overflow-memory) si le junk dans le contexte est du Markdown, pas de l'historique
+- [Effort level](/concepts/effort-level) si tu paies du thinking par-dessus une fenêtre déjà grasse
+- [Statusline](/concepts/statusline) pour voir les tokens avant la falaise
+
+Source : [la vidéo](https://youtu.be/OTxy6NabllI). Les montants en dollars sont une session estimée de cet enregistrement, pas la grille de ton plan.

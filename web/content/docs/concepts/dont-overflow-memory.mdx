@@ -1,0 +1,108 @@
+---
+title: Don't overflow memory
+description: Dead Markdown pollutes the agent. Keep AGENTS.md short, archive finished plans, and stop injecting unused skill descriptions.
+keywords: ["agents.md", "claude.md", "memory", "skills", "audit-memories", "context"]
+---
+
+The most common agent-memory mistake is not a missing rule. It is too much Markdown.
+
+You document a feature, the code moves, the Markdown does not. Then the agent reads a command that does not exist, a component that was deleted, a plan that already shipped. You are not guiding it. You are poisoning the context.
+
+<YouTubeEmbed id="qgDgvtyHOcI" title="Stop adding Markdown: the biggest vibe-coder mistake" />
+
+## Agents copy existing code first
+
+An agent is a statistical model. It does the most probable thing, which means it continues whatever already exists.
+
+If `DELETE /api/v1/user` has a middleware, a new `GET` or `PATCH` on the same route will usually reuse that middleware. The agent does not reinvent the stack. It copies it.
+
+So clean code stays clean. Dirty code stays dirty. Rules lose to the repo.
+
+Write "do not add comments" in `AGENTS.md`, then let the agent explore a tree where half the files have comments. It will add comments. The code it just read weighs more than the rule.
+
+Quality in the codebase is the real memory. Markdown is optional commentary on top.
+
+## Keep AGENTS.md short
+
+Treat `AGENTS.md` as an index, not a dump. Symlink it with `CLAUDE.md` if both tools should see the same file.
+
+Keep:
+
+- what the product is
+- the current stack, kept current
+- useful commands, or a pointer to where they live
+- project structure
+- security constraints on auth, database, and APIs
+
+Cut:
+
+- naming conventions the code already shows
+- React / shadcn / component how-tos
+- feature explanations the agent can read in the source
+- Sonnet-era patches for bugs the current models no longer make
+
+On the Lumail cleanup shown in the video, the main file went from 185 lines to 68. The broader diff deleted 573 lines and added 193. Those numbers describe that repo, not a universal target.
+
+Be restrictive. Assume the agent will read the code.
+
+## Archive dead plans and outputs
+
+The main file is not the only leak. `.agents/`, rule folders, and leftover docs fill up with merged plans, finished tasks, output dumps, and placeholders.
+
+When the agent searches, it finds them. They have no current value and they still occupy reasoning.
+
+Delete finished plans or move them off the agent's read path. Rules that describe a component now owned by a skill should go too. Keep specific rules when they still encode a real constraint, but park them in separate files instead of stuffing the index.
+
+## Put project skills in the project
+
+A video-editing skill sitting in `~/.agents/skills` injects its description into every SaaS repo you open.
+
+Project-specific skills live in that project's `.agents/skills`. Only truly shared skills stay global. Ask the agent to move them; one pass is enough. The descriptions stop polluting every other context.
+
+## Disable implicit invocation, keep one router
+
+Codex will warn when skills eat too many tokens. That is expected: every available skill description is injected, even if you never call it.
+
+On Claude, set `disable-model-invocation: true` in the skill frontmatter. On Codex, set `allow_implicit_invocation: false` (or the equivalent `policy` field your harness actually documents). Do not copy a guessed key from a transcript. Check the current skill spec.
+
+The effect is the same: the model cannot self-trigger the skill, and the description leaves the default prompt.
+
+The pattern that scales is a router. Keep `animate` invocable. Disable every `animate-*` child. The parent points at the children only when you actually need them: one description in context instead of dozens.
+
+## Audit, then clean
+
+AIBlueprint ships `$audit-memories` and `$audit-skills` as explicit-only utilities. They do not run unless you invoke them.
+
+`$audit-memories` reads agent-facing Markdown in the current project and returns keep / update / merge / delete per file. In the Lumail run: 129 files, about 85% marked delete. Typical hits: a seed command advertised in `AGENTS.md` that is not in `package.json`, documented components that no longer exist, context pages with no current use.
+
+`$audit-skills` checks usage, implicit-invocation flags, duplicates, and global-versus-project scope.
+
+Read the report. Then clean. Look at the git diff before you commit. When unsure, archive instead of deleting.
+
+```text
+Audit every memory and rule Markdown in this repo
+(AGENTS.md, CLAUDE.md, .agents/, .claude/, internal docs).
+
+For each file, verdict: keep, update, merge, or delete.
+
+Justify against the code:
+- do cited commands exist in package.json?
+- do mentioned files, components, and routes still exist?
+- is the information obvious from reading the code?
+
+Do not edit anything. Return a verdict table.
+```
+
+## What this does not fix
+
+Cleaning memory will not make an agent good on a dirty codebase. Clean code is the condition. Clean Markdown is the bonus.
+
+The counts above are one audit, not a law for your repo. Invocation flags also move between harnesses. Verify what yours actually supports before renaming everything.
+
+## Related
+
+- [Skills](/concepts/skills) for `audit-memories` and `audit-skills`
+- [agents unify](/commands/unify) to move global skills into a project
+- [Effort level](/concepts/effort-level) if you are burning tokens on thinking instead of on junk context
+
+Source: [Codelynx article](https://codelynx.dev/posts/nettoyer-agents-md-skills-contexte-ia) and [the video](https://youtu.be/qgDgvtyHOcI).

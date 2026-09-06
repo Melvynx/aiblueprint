@@ -1,0 +1,129 @@
+---
+title: agents unify
+description: Centralise la config agents globale ou projet dans .agents.
+keywords: ["unify", "agents", "skills", "rules", "projects", "centralize", "codex"]
+---
+
+`agents unify` centralise la config agents dans `.agents`. Par défaut, ça
+tourne en mode global et consolide tes skills et agents au niveau home dans
+`~/.agents`.
+
+```bash
+npx aiblueprint-cli@latest agents unify
+npx aiblueprint-cli@latest agents unify -i
+npx aiblueprint-cli@latest agents unify global
+npx aiblueprint-cli@latest agents unify projects
+npx aiblueprint-cli@latest agents unify projects --agents-md --skills --rules
+npx aiblueprint-cli@latest agents unify repository
+npx aiblueprint-cli@latest agents config unify sessions
+```
+
+## Modes
+
+| Mode | Dossier par défaut | Ce que ça fait |
+| ---- | -------------- | ------------ |
+| `global` | `$HOME` | Importe les fichiers d'instructions globaux, skills et agents depuis les chemins Claude, Codex, Cursor, OpenCode et Factory vers `~/.agents`, puis relie les chemins des outils à la source partagée. |
+| `projects` | Dossier de travail courant | Alias du mode repository. Importe les fichiers d'instructions, skills, agents, rules et memories locaux au projet dans `.agents`, crée uniquement les dossiers de catégories nécessaires, relie `.claude/rules` vers `.agents/rules`, crée `AGENTS.md`, et symlink `CLAUDE.md` vers ce fichier. |
+| `repository` | Dossier de travail courant | Même comportement que `projects`. Conservé comme nom technique explicite pour la config locale au repo. |
+
+Utilise `--folder <path>` avec n'importe quel mode pour cibler une racine précise.
+
+## Sélection des catégories
+
+Par défaut, `agents unify` exécute toutes les catégories supportées par le mode
+sélectionné. Utilise `-i` ou `--interactive` pour choisir les catégories dans
+un prompt :
+
+```bash
+npx aiblueprint-cli@latest agents unify projects -i
+```
+
+Utilise les flags pour les runs non interactifs :
+
+| Flag | Catégorie |
+| ---- | -------- |
+| `--agents-md` | Fichiers d'instructions comme `.claude/CLAUDE.md`, `.codex/AGENTS.md` et `.cursor/AGENTS.md` |
+| `--skills` | Dossiers de skills |
+| `--agents` | Agents Markdown |
+| `--rules` | Rules et memories du repository |
+
+Quand un ou plusieurs flags de catégorie sont fournis, seules ces catégories
+tournent. La catégorie `--rules` s'applique aux modes `projects` et
+`repository`.
+
+## Mode projects
+
+Le mode projects est conçu pour les repos qui ont déjà une config spécifique
+à un outil dans `.claude`, `.codex`, `.cursor` ou `.agents`.
+
+```bash
+npx aiblueprint-cli@latest agents unify projects
+```
+
+Ça va :
+
+1. Déplacer `.claude/CLAUDE.md`, `.codex/AGENTS.md` et `.cursor/AGENTS.md`
+   vers `.agents/AGENTS.md`, et préserver les conflits avec une copie suffixée.
+2. Déplacer les skills réutilisables vers `.agents/skills`.
+3. Déplacer les agents Markdown vers `.agents/agents`.
+4. Déplacer les rules et notes de mémoire vers `.agents/rules`.
+5. Réécrire les références texte copiées depuis les chemins spécifiques à un
+   outil comme `.claude/rules` ou `.cursor/agents` vers `.agents/rules` et
+   `.agents/agents`.
+6. Créer des symlinks de compatibilité pour que les outils existants
+   continuent de lire les dossiers partagés.
+7. Générer un index de rules `AGENTS.md` et faire pointer `CLAUDE.md` vers
+   cet index.
+
+Si un projet n'a ni skills, ni agents, ni rules, la commande ne crée pas de
+dossiers vides `.agents/skills`, `.agents/agents` ou `.agents/rules`. Le mode
+projet ne crée pas non plus `.codex` de zéro : Codex lit le contexte
+projet partagé `.agents`.
+
+## Mode global
+
+Le mode global conserve le comportement d'origine.
+
+```bash
+npx aiblueprint-cli@latest agents unify global
+```
+
+Ça va :
+
+1. Importer `.claude/CLAUDE.md`, `.codex/AGENTS.md`, `.cursor/AGENTS.md`, les skills et les agents dans `~/.agents`.
+2. Ignorer les doublons et renommer les fichiers en cas de conflit.
+3. Créer des symlinks retour pour que les outils existants continuent de marcher.
+4. Backup de la source avant de déplacer quoi que ce soit.
+5. Rendre les agents partagés au format TOML Codex.
+
+## Résumé de sortie
+
+Après l'exécution, le CLI affiche par catégorie :
+
+- Nombre importé
+- Doublons ignorés
+- Fichiers renommés
+- Symlinks créés
+- Déjà liés (ignorés)
+- Backups source créés
+- Rules projet indexées, quand le mode projects est utilisé
+
+Les backups source du mode projet sont stockés dans la racine de backup
+globale AIBlueprint, pas dans le repository. Le nom du dossier de backup
+inclut le chemin du projet avec les slashes remplacés, pour identifier et
+restaurer un backup projet facilement plus tard.
+
+## Unify des sessions
+
+`agents config unify sessions` scanne les configs et backups sauvegardés, puis
+importe les racines de sessions Claude, Codex et agents partagés dans les
+dossiers courants. Ça garde les fichiers actuels, ignore les doublons
+identiques, et préserve les conflits avec un suffixe source au lieu
+d'écraser l'historique de session.
+
+## Pourquoi centraliser
+
+Une seule source de vérité `.agents` veut dire que tes skills, agents et
+rules projet marchent de façon cohérente dans Claude Code, Codex, Cursor et
+les autres outils liés. Pour rendre uniquement les agents Codex sans un
+unify complet, utilise [agents codex-agents](/commands/codex-agents).

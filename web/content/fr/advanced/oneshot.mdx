@@ -1,0 +1,28 @@
+---
+title: OneShot
+description: Exécuter chaque étape cœur et ne terminer qu'après une preuve qui passe.
+keywords: ["oneshot", "workflow", "review", "verify"]
+---
+
+`oneshot` est le workflow complet et opiniâtre :
+
+```text
+analyze -> plan -> implement -> code-review -> verify
+```
+
+## Flags
+
+| Flag | Comportement |
+| --- | --- |
+| `-a`, `auto` | Continuer sans confirmation sauf s'il manque une autorité, des credentials, ou une décision irréversible. |
+
+```bash
+/oneshot -a add organization invitations
+```
+
+OneShot lance toujours la revue et la vérification. Les échecs sont
+corrigés et chaque étape aval concernée est rejouée. Le plan
+d'implémentation est la source de vérité. Une issue GitHub est optionnelle
+pour un travail ciblé ; quand cette run en crée une, OneShot ne la ferme
+qu'après une vérification qui passe. Elle reste ouverte si un critère est
+bloqué ou non prouvé.

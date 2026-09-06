@@ -27,8 +27,8 @@ function walkFiles(directory: string, extension: string): string[] {
   return files;
 }
 
-function getDocsPaths() {
-  const docsDirectory = join(import.meta.dirname, "content/docs");
+function getDocsPaths(directoryName: string, prefix: string) {
+  const docsDirectory = join(import.meta.dirname, "content", directoryName);
   const docs = walkFiles(docsDirectory, ".mdx").map((filePath) => {
     const slug = relative(docsDirectory, filePath)
       .replace(/\.mdx$/, "")
@@ -36,13 +36,21 @@ function getDocsPaths() {
       .filter((part) => part !== "index")
       .join("/");
 
-    return slug ? `/${slug}` : "/";
+    if (!slug) return prefix || "/";
+    return `${prefix}/${slug}`;
   });
 
-  return Array.from(new Set(["/", ...docs]));
+  return Array.from(new Set([prefix || "/", ...docs]));
 }
 
-const publicPages = Array.from(new Set(["/examples", ...getDocsPaths()])).map((path) => ({
+const publicPages = Array.from(
+  new Set([
+    ...getDocsPaths("docs", ""),
+    ...getDocsPaths("fr", "/fr"),
+    "/examples",
+    "/fr/examples",
+  ]),
+).map((path) => ({
   path,
   prerender: { enabled: true },
 }));

@@ -1,0 +1,148 @@
+---
+title: Utiliser des artefacts
+description: Transformer plans, explorations, prototypes et réponses substantielles en artefacts HTML locaux soignés.
+keywords:
+  ["use-artifacts", "artifacts", "html", "prototype", "visualization", "plan"]
+---
+
+`use-artifacts` donne à Claude Code et Codex un workspace d'artefacts qui
+épouse ta façon de penser. Au lieu d'enfouir un plan, une comparaison ou un
+prototype substantiel dans le chat, il crée une expérience HTML soignée et
+réutilisable sous `~/.agents/artifacts/<id>/`.
+
+<DocCardWrapper>
+  <DocSection title="Choisir le bon artefact">
+    <DocCardGrid>
+      <DocCard
+        href="#thinking-documents"
+        icon="FileText"
+        title="Documents de réflexion"
+        description="Plans, revues, architecture, stratégie et explications prêtes à décider."
+      />
+      <DocCard
+        href="#croquis-and-variations"
+        icon="Palette"
+        title="Croquis et variations"
+        description="Trois à six directions clairement distinctes, disposées pour comparer vite."
+      />
+      <DocCard
+        href="#interactive-artifacts"
+        icon="Code2"
+        title="Artefacts interactifs"
+        description="Prototypes, calculateurs, dashboards, diagrammes, simulations et visualisations."
+      />
+    </DocCardGrid>
+  </DocSection>
+  <DocSection title="Conçus pour aller de pair">
+    <DocCardGrid>
+      <DocCard
+        href="/concepts/use-style"
+        icon="Palette"
+        title="Utiliser un style d'abord"
+        description="Adopte le vrai langage visuel du produit, ou charge le style nommé le plus proche."
+      />
+      <DocCard
+        href="/examples"
+        icon="Eye"
+        title="Explorer les systèmes visuels"
+        description="Prévisualise chaque style fourni avant de choisir une direction."
+      />
+      <DocCard
+        href="/concepts/skills"
+        icon="Workflow"
+        title="Parcourir tous les skills"
+        description="Voir comment les artefacts s'insèrent dans la collection complète de workflows."
+      />
+    </DocCardGrid>
+  </DocSection>
+</DocCardWrapper>
+
+## Quand l'utiliser
+
+Crée un artefact quand le résultat est substantiel, autonome, visuel,
+interactif, de type document, ou susceptible d'être revisité. Les bons cas
+incluent les plans de features, les revues de sécurité, les briefs produit,
+les explications d'architecture, les tableaux d'options, les dashboards, les
+diagrammes et les prototypes.
+
+Garde les réponses minuscules et les extraits courts dans le chat. Si le
+changement appartient directement à un produit existant, implémente-le
+là-bas, sauf si un prototype séparé a été demandé.
+
+<a id="thinking-documents"></a>
+
+## Documents de réflexion
+
+Le mode par défaut transforme le raisonnement public en une page moderne,
+facile à parcourir : une thèse claire, la recommandation la plus forte près
+du haut, et des sections structurées pour les preuves, les flux, les
+compromis, les cas limites, le déploiement et la validation.
+
+Les artefacts de plan incluent toujours deux vues de l'idée :
+
+- un brouillon de contenu qui décrit ce que la page ou la feature dit et fait
+- des croquis qui montrent comment la hiérarchie et le contenu pourraient être disposés
+
+<a id="croquis-and-variations"></a>
+
+## Croquis et variations
+
+Quand la demande porte sur des options, l'artefact devient un tableau de
+comparaison. Il montre trois à six directions en une séquence verticale,
+donne à chaque direction toute la largeur disponible, et garde une fidélité
+assez basse pour comparer les concepts sans prétendre que l'implémentation
+est finie.
+
+<a id="interactive-artifacts"></a>
+
+## Artefacts interactifs
+
+Calculateurs, dashboards, simulations, mini-apps, diagrammes et
+visualisations utilisent le mode interactif. La sortie préférée est un
+`index.html` unique, responsive et autonome, avec un balisage sémantique,
+des contrôles accessibles et un état local. Les dépendances externes sont
+évitées sauf si l'idée en a vraiment besoin.
+
+## Le style suit le produit
+
+Chaque artefact commence par `use-style`. Pour une app existante, ses vrais
+tokens, composants, typographie, espacement, couleur, radius, ombre et
+motifs d'interaction sont la source de vérité. Un style nommé peut soutenir
+ce langage, mais ne le remplace pas.
+
+S'il n'existe aucun contexte produit, le skill choisit le préréglage sobre
+le plus proche ; `black-grid` est le repli technique minimal. Une direction
+visuelle explicite de ta part l'emporte toujours.
+
+## Contrat du workspace
+
+Chaque artefact vit hors du dépôt courant :
+
+```text
+~/.agents/artifacts/<id>/
+├── index.html      # the viewable artifact
+├── HIGHLOGIC.md    # concise design logic and iteration state
+├── manifest.json   # title, kind, style, entrypoint, and files
+└── versions/       # optional snapshots before major rewrites
+```
+
+L'emplacement global garde les artefacts disponibles d'un projet à l'autre
+sans polluer les dépôts produit.
+
+## En créer un
+
+Invoque le skill directement :
+
+```bash
+$use-artifacts Create three modern onboarding directions
+```
+
+Ce skill est inclus dans le lot Premium. Installe-le ou rafraîchis-le avec :
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+Le script d'échafaudage inclus crée les métadonnées du workspace et les
+fichiers de départ ; l'agent implémente ensuite, ouvre et vérifie le HTML
+final avant de le lier dans le chat.

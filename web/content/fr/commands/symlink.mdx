@@ -1,0 +1,36 @@
+---
+title: agents symlink
+description: Partage les agents entre Claude Code, Codex et FactoryAI.
+keywords: ["symlink", "share", "codex", "factoryai", "agents"]
+---
+
+`agents symlink` crée des symlinks pour que plusieurs outils de coding IA
+partagent les mêmes agents. Tu édites une fois, chaque outil lié reste sync.
+
+```bash
+npx aiblueprint-cli@latest agents symlink
+```
+
+## Comment ça marche
+
+La commande est interactive :
+
+1. Choisis un outil **source** (Claude Code, Codex ou FactoryAI).
+2. Sélectionne un ou plusieurs outils **destination**.
+3. Le CLI crée les symlinks, et ignore toute cible qui existe déjà comme
+   fichier réel.
+
+## Outils supportés
+
+| Outil | Agents |
+| ---- | ------ |
+| Claude Code | Oui |
+| Codex | Oui |
+| FactoryAI | Oui |
+
+## Quand l'utiliser
+
+Utilise `symlink` quand tu maintiens la config dans un outil et que tu veux
+qu'un autre la réutilise sans copier. Pour une migration complète vers le
+dossier partagé `~/.agents`, utilise [agents unify](/commands/unify) à la
+place.

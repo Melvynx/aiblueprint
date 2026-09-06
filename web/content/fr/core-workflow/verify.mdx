@@ -1,0 +1,23 @@
+---
+title: Vérifier
+description: Prouver chaque critère d'acceptation via la vraie surface produit.
+---
+
+`verify` est le garde-fou de fin. Il exerce la vraie surface runtime, côté
+utilisateur ou source d'autorité, et marque chaque critère `PASS` ou
+`NOT PROVEN`.
+
+## Vérification persistante
+
+Une fois invoquée, la vérification reste active pour la conversation. Chaque
+changement ultérieur invalide la preuve précédente et exige de rejouer le
+flux concerné.
+
+Pour le comportement visuel, l'agent capture des screenshots frais pour
+chaque étape observable concernée et les affiche directement dans la réponse.
+Un chemin, une ancienne image, un rapport ou un check statique qui passe
+ne remplacent pas une preuve actuelle.
+
+```bash
+/verify issue 123
+```

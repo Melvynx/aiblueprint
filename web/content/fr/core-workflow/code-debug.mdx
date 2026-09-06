@@ -1,0 +1,27 @@
+---
+title: Débogage de code
+description: Déboguer les bugs difficiles avec une boucle déterministe capable de passer au rouge avant de changer le code.
+---
+
+`code-debug` commence par reproduire le symptôme exact avec une commande
+rapide, exécutable par l'agent. Les hypothèses sont interdites tant que
+cette boucle ne peut pas passer au rouge.
+
+## Boucle de debug
+
+1. Reproduire et minimiser l'échec.
+2. Classer des hypothèses falsifiables avec des prédictions.
+3. Tester une variable à la fois.
+4. Ajouter une couverture de régression à la vraie jointure.
+5. Appliquer le plus petit fix étayé.
+6. Relancer le chemin d'origine et passer le résultat à `verify`.
+
+## Flags
+
+| Flag | Comportement |
+| --- | --- |
+| `-a`, `auto` | Utiliser l'option sûre et réversible recommandée sans pause. |
+
+```bash
+/code-debug -a checkout occasionally loses the selected plan
+```

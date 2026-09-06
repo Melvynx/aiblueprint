@@ -1,0 +1,22 @@
+---
+title: Revue de code
+description: Relire une implémentation de façon indépendante contre son contrat convenu et les standards du dépôt.
+---
+
+`code-review` évalue le changement depuis un point fixe sur deux axes
+séparés.
+
+| Axe | Question |
+| --- | --- |
+| Spec | L'implémentation satisfait-elle la demande, le plan, la spécification ou l'issue, sans comportement manquant ni dérapage de périmètre ? |
+| Standards | Suit-elle les règles du dépôt et reste-t-elle maintenable ? |
+
+Le résultat est `PASS` ou `CHANGES REQUIRED` pour chaque axe. Les findings
+incluent des références exactes de fichier et de ligne, et restent séparés
+des améliorations optionnelles.
+
+La revue ne prouve pas le comportement runtime.
+
+```bash
+/code-review issue 123 since origin/main
+```

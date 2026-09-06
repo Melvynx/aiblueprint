@@ -22,17 +22,17 @@ history.
 
 ```bash
 # Save a snapshot
-aiblueprint configs save work
+npx aiblueprint-cli@latest configs save work
 
 # Overwrite an existing snapshot
-aiblueprint configs save work --force
+npx aiblueprint-cli@latest configs save work --force
 ```
 
 ### Load and undo
 
 ```bash
-aiblueprint configs load work
-aiblueprint configs undo
+npx aiblueprint-cli@latest configs load work
+npx aiblueprint-cli@latest configs undo
 ```
 
 Loading always backs up your current configuration first, so `configs undo`
@@ -51,12 +51,12 @@ those snapshots with the `backups` subcommands:
 | `configs backups clean` | Delete automatic backups older than the retention window. |
 
 ```bash
-aiblueprint configs backups list
-aiblueprint configs backups create "before experiment"
-aiblueprint configs backups load 2026-05-28-setup
-aiblueprint configs backups clean --days 30
-aiblueprint configs backups clean --days 30 --dry-run
-aiblueprint configs backups clean --days 90 --include-manual
+npx aiblueprint-cli@latest configs backups list
+npx aiblueprint-cli@latest configs backups create "before experiment"
+npx aiblueprint-cli@latest configs backups load 2026-05-28-setup
+npx aiblueprint-cli@latest configs backups clean --days 30
+npx aiblueprint-cli@latest configs backups clean --days 30 --dry-run
+npx aiblueprint-cli@latest configs backups clean --days 90 --include-manual
 ```
 
 Each entry shows its name, date, reason, trigger, the folders included, and its

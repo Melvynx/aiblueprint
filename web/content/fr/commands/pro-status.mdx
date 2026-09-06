@@ -1,0 +1,26 @@
+---
+title: agents pro status
+description: Vérifie si un token AIBlueprint Premium est sauvegardé.
+keywords: ["pro", "premium", "status", "token"]
+---
+
+`agents pro status` indique si le credential repository Premium est
+sauvegardé en local, et affiche le chemin du fichier token ainsi que la
+plateforme actuelle.
+
+## Usage
+
+```bash
+npx aiblueprint-cli@latest agents pro status
+```
+
+Cette commande vérifie le stockage local du token. Elle ne réinstalle ni
+ne met à jour aucune config Premium.
+
+Si aucun token n'est présent, active Premium d'abord :
+
+```bash
+npx aiblueprint-cli@latest agents pro activate YOUR_TOKEN
+```
+
+Récupère un token Premium sur [mlv.sh/claude-cli](https://mlv.sh/claude-cli).

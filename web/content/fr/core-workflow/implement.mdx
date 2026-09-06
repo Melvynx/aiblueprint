@@ -1,0 +1,24 @@
+---
+title: Implémenter
+description: Implémenter la demande, le plan, la spécification ou l'issue GitHub convenus.
+---
+
+`implement` résout le contrat convenu à partir de la demande, du plan, de la
+spécification ou de l'issue fournie. Une issue est optionnelle ; quand elle
+est fournie, elle est lue en entier.
+
+## Comportement
+
+- Ne change que le périmètre convenu.
+- Préfère la plus petite implémentation cohérente.
+- Lance des checks ciblés en continu et des checks pertinents plus larges à la fin.
+- Enregistre les hypothèses sûres et réversibles quand le mode autonome est actif.
+
+## Frontière
+
+L'implémentation rapporte le diff, les checks et l'incertitude restante. Des
+checks statiques qui passent ne sont pas une vérification runtime.
+
+```bash
+/implement https://github.com/owner/repo/issues/123
+```

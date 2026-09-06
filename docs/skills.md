@@ -154,22 +154,22 @@ platforms.
 npx skills@latest add melvynx/aiblueprint --skill apex
 ```
 
-**What it does:** Routes feature work through focused Premium skills:
-`analyze → plan → implement → review (with -x) → verify`. The GitHub issue
-created by `plan` remains the source of truth for every downstream stage.
+**What it does:** Runs an adaptive **Analyze → Plan → Execute → eXamine**
+loop. Apex is included in the free bundle and records resumable checkpoints.
+Its plan, review, and runtime proof adapt to the task and risk.
 
-**Use it for:** implementing a feature or fixing a bug that benefits from a clear,
-deliberate workflow instead of jumping straight to code.
+**Use it for:** implementing features, fixing bugs, or migrations that need
+scoped execution and evidence for their acceptance criteria.
 
 **Key points:**
-- `-a` runs autonomously without pausing after analysis or planning.
-- `-x` adds the separate `review` gate before verification.
-- `-v` explicitly requests verification, which is already enabled by default.
-- Flags can be grouped, for example `-axv`.
-- `oneshot` runs the complete sequence with review always enabled.
-- After `verify` runs, every later implementation change must be re-verified
-  with fresh screenshots shown directly in the response.
-- Argument hint: `[-a] [-v] [-x] <request>`.
+- `-a` reduces interaction while preserving the user's authorization boundaries.
+- `-x` requests adversarial review; material or high-risk changes require independent review.
+- `-v` explicitly requests runtime proof. Relevant existing validation always runs.
+- `-r <id>` resumes a validated checkpoint from `.agents/apex/runs/<run-id>/`.
+- A GitHub issue is optional. External delivery actions require user authorization.
+- Changes invalidate affected checks, which must be rerun before completion.
+- See the [complete Apex documentation](https://docs.aiblueprint.dev/advanced/apex)
+  for all flags, workflow stages, and evidence requirements.
 
 ---
 

@@ -1,0 +1,82 @@
+---
+title: agents setup
+description: "Installez les defaults AIBlueprint : agents, skills, statusline, hooks et raccourcis."
+keywords: ["setup", "agents", "install", "skip"]
+---
+
+`agents setup` est la commande principale. Elle configure ton environnement de
+coding IA avec les defaults AIBlueprint.
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+## Options
+
+| Option | Description |
+| ------ | ----------- |
+| `-s, --skip` | Installe toutes les features sans prompts interactifs. |
+| `-f, --folder <path>` | Dossier racine pour `.claude`, `.codex` et `.agents` (défaut : `$HOME`). |
+| `--claudeCodeFolder <path>` | Remplace le dossier Claude Code. |
+| `--codexFolder <path>` | Remplace le dossier Codex. |
+| `--agentsFolder <path>` | Remplace le dossier agents partagé. |
+
+## Features installées
+
+### Raccourcis shell
+
+Ajoute des alias pour lancer Claude Code et Codex rapidement :
+
+```bash
+alias cc="claude --dangerously-skip-permissions"
+alias ccc="claude --dangerously-skip-permissions -c"
+alias cx="codex"
+alias cxc="codex resume --last"
+```
+
+`cxc` reprend la dernière session Codex du dossier courant.
+
+Voir [Raccourcis shell](/concepts/shell-shortcuts) pour les détails.
+
+### Statusline custom
+
+Installe une statusline en Bun qui affiche le statut git, l'usage de tokens et
+le coût, puis la branche dans `~/.claude/settings.json`. Voir
+[Statusline](/concepts/statusline).
+
+### Agents AIBlueprint
+
+Copie les agents sélectionnés dans `~/.agents/agents`. Voir [Agents](/concepts/agents).
+
+### Skills AIBlueprint
+
+Copie le bundle de skills gratuites et réutilisables dans `~/.agents/skills`,
+dont `use-style` pour les guides de style UI nommés. Voir [Skills](/concepts/skills).
+
+### Setup Codex
+
+Fusionne des defaults raisonnables dans `~/.codex/config.toml`, installe le hook
+de sécurité, et rend les agents partagés au format TOML Codex.
+
+### Paramètres de sécurité
+
+Applique les defaults de permissions et les règles deny dans
+`~/.claude/settings.json`. Voir [Sécurité](/concepts/security).
+
+## Exemples
+
+```bash
+# Interactive setup
+npx aiblueprint-cli@latest agents setup
+
+# Install everything without prompts
+npx aiblueprint-cli@latest agents setup --skip
+
+# Install into a custom location
+npx aiblueprint-cli@latest agents setup --folder ~/my-config
+```
+
+## Alias
+
+`ai-coding setup` et `claude-code setup` sont des alias legacy qui se
+comportent exactement comme `agents setup`.

@@ -1,13 +1,13 @@
 ---
 title: OneShot
-description: Run every core feature stage and close the issue only after proof passes.
+description: Run every core feature stage and finish only after proof passes.
 keywords: ["oneshot", "workflow", "review", "verify"]
 ---
 
 `oneshot` is the opinionated complete workflow:
 
 ```text
-analyze -> plan -> implement -> review -> verify -> close issue
+analyze -> plan -> implement -> code-review -> verify
 ```
 
 ## Flags
@@ -21,5 +21,7 @@ analyze -> plan -> implement -> review -> verify -> close issue
 ```
 
 OneShot always runs review and verification. Failures are fixed and every
-affected downstream stage runs again. The GitHub issue remains open whenever
-verification is blocked or any criterion is not proven.
+affected downstream stage runs again. The implementation plan is the source of
+truth. A GitHub issue is optional for focused work; when this run creates one,
+OneShot closes it only after verification passes. It remains open when any
+criterion is blocked or not proven.

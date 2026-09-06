@@ -1,5 +1,7 @@
-import * as React from "react";
+import { usePathname } from "@/compat/navigation";
 import { cn } from "@/lib/utils";
+import * as React from "react";
+import { getChrome, getLocaleFromPathname } from "../locale";
 
 function useActiveItem(itemIds: string[]) {
   const [activeId, setActiveId] = React.useState<string | null>(null);
@@ -47,6 +49,7 @@ export function DocsTableOfContents({
     [toc],
   );
   const activeHeading = useActiveItem(itemIds);
+  const locale = getLocaleFromPathname(usePathname());
 
   if (!toc.length) {
     return null;
@@ -55,7 +58,7 @@ export function DocsTableOfContents({
   return (
     <div className={cn("flex flex-col gap-3", className)}>
       <h4 className="font-mono text-[10px] tracking-[0.12em] text-white/40 uppercase">
-        On This Page
+        {getChrome(locale).onThisPage}
       </h4>
       <nav className="flex flex-col gap-2">
         {toc.map((item) => (
@@ -63,8 +66,8 @@ export function DocsTableOfContents({
             key={item.url}
             href={item.url}
             className={cn(
-              "block text-[13px] text-[#8a8f98] no-underline transition-colors hover:text-[#f7f8f8]",
-              item.url === `#${activeHeading}` && "font-medium text-[#f7f8f8]",
+              "block text-[13px] text-[#8a8f98] no-underline transition-colors hover:text-primary",
+              item.url === `#${activeHeading}` && "font-medium text-primary",
               item.depth === 3 && "pl-4",
               item.depth === 4 && "pl-6",
             )}

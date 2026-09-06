@@ -1,0 +1,54 @@
+---
+title: Installation
+description: Installe la CLI AIBlueprint et lance-la pour la première fois.
+keywords: ["install", "npx", "setup", "node"]
+---
+
+La CLI AIBlueprint tourne avec Node.js. Pas besoin de l'installer globalement :
+`npx aiblueprint-cli@latest` prend toujours la dernière version publiée.
+
+## Lancer sans installer
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+C'est la façon recommandée d'utiliser la CLI. Tu as toujours les derniers
+agents, skills et defaults.
+
+## Prérequis
+
+| Outil | Requis | Rôle |
+| ----- | ------ | ---- |
+| Node.js 16+ | Oui | Lance la CLI. |
+| Bun | Optionnel | Alimente la statusline. Installé automatiquement si besoin. |
+| ccusage | Optionnel | Suit l'usage de tokens et le coût. Installé automatiquement si besoin. |
+
+## Support des plateformes
+
+- **macOS** - Support complet. Les raccourcis shell sont écrits dans `~/.zshenv`.
+- **Linux** - Support complet. Détecte bash ou zsh et met à jour le bon fichier.
+- **Windows** - Support limité. Le setup terminal recommande WSL ; les raccourcis
+  shell sont écrits dans ton profil PowerShell.
+
+## Où les fichiers sont installés
+
+Par défaut, la CLI écrit dans ton home :
+
+| Dossier | Contenu |
+| ------- | ------- |
+| `~/.claude` | Settings Claude Code, scripts et statusline. |
+| `~/.codex` | Config Codex, hooks et agents rendus. |
+| `~/.agents` | Skills et agents partagés par tous les outils. |
+
+Tu peux changer la racine avec `--folder`, ou chaque outil individuellement :
+
+```bash
+npx aiblueprint-cli@latest agents setup --folder ~/my-config
+npx aiblueprint-cli@latest agents setup --claudeCodeFolder ~/.claude --codexFolder ~/.codex
+```
+
+## Étape suivante
+
+Continue avec le [Démarrage rapide](/getting-started/quick-start) pour tout
+configurer en une commande.

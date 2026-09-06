@@ -5,19 +5,18 @@ keywords: ["skills", "apex", "oneshot", "verify"]
 ---
 
 Skills are reusable workflows that Claude Code and Codex can invoke. AIBlueprint
-installs 30+ skills into the shared `~/.agents/skills` folder.
+installs the free skill bundle into the shared `~/.agents/skills` folder.
 
 ## Main feature workflow
 
-Premium feature work starts with one of two routers:
+Choose a workflow based on the task:
 
-- **`oneshot`** runs the complete workflow: `analyze → plan → implement → review → verify`.
-- **`apex`** runs `analyze → plan → implement → verify` by default and adds `review` with `-x`.
+- **`apex`** is included in the free bundle. It runs an adaptive Analyze → Plan → Execute → eXamine loop with resumable checkpoints, risk-based review, and validation.
+- **`oneshot`** is a Premium router that runs `analyze → plan → implement → code-review → verify` in order.
 
-Both routers pass one GitHub issue through focused subskills instead of keeping
-the whole implementation procedure in one large prompt. Use `oneshot -a` for a
-complete autonomous feature, or `apex -a -x` when you want the configurable
-router with review enabled. Verification remains on by default.
+Use `apex -a -x` for low-interaction implementation with adversarial review,
+or `oneshot -a` for the complete fixed sequence. OneShot uses the implementation
+plan as its source of truth; a GitHub issue is optional for focused work.
 
 See [The Core Workflow](/core-workflow) for stage ownership and direct skill
 invocation, then [Advanced Workflows](/advanced) for Apex and OneShot flags,
@@ -44,29 +43,17 @@ explicitly. Claude and Codex are both configured to prevent implicit selection.
 | `environments-manager` | Per-worktree agent environments. |
 | `grill-me` | Stress-test a plan with focused design questions. |
 | `hooks-manager` | Create, configure, and debug Claude Code hooks. |
-| `codex-environment` | Codex-specific environment setup. |
+| `app-icon` | Create app icon assets. |
+| `appstore-connect` | Work with App Store Connect. |
 
-## Product workflow skills
+## Premium skills
 
-Former one-off prompt workflows now ship as skills too:
+[Premium setup](/commands/pro-setup) adds the core workflow (`analyze`, `plan`,
+`implement`, `code-review`, `verify`, and `oneshot`) and additional skills such
+as `impeccable`, `better`, `animate`, and `use-artifacts`.
 
-| Skill | Description |
-| ----- | ----------- |
-| `saas-create-prd` | Build a lean Product Requirements Document through a discovery conversation. |
-| `saas-create-architecture` | Design technical architecture from a PRD. |
-| `saas-create-tasks` | Generate implementation task files from PRD and architecture docs. |
-| `saas-define-pricing` | Create a data-driven SaaS pricing strategy. |
-| `saas-find-domain-name` | Generate and validate domain name options. |
-| `saas-create-headline` | Generate landing page headline options. |
-| `saas-create-landing-copywritting` | Generate conversion-focused landing page copy. |
-| `saas-implement-landing-page` | Implement a production landing page from a specification. |
-| `saas-create-logos` | Generate logo concepts and a showcase. |
-| `saas-create-legals-docs` | Draft SaaS legal document templates. |
-| `nextjs-setup-project` | Set up the preferred Next.js stack. |
-| `nextjs-add-prisma-db` | Add Prisma and PostgreSQL to a Next.js app. |
-| `nextjs-setup-better-auth` | Wire Better Auth with email OTP. |
-| `create-vitejs-app` | Create a Vite app with Tailwind and shadcn/ui. |
-| `setup-tmux` | Install and configure tmux with Ghostty. |
+The installed catalog depends on your bundle and version. Use the assistant's
+skill picker to inspect the skills available after setup.
 
 ## How skills are organized
 
@@ -82,4 +69,5 @@ into `~/.agents`, or `agents unify projects` to move project-local skills into
 that repository's `.agents/skills` folder.
 
 See [Use Style](/concepts/use-style) for the visual system, [Use Artifacts](/concepts/use-artifacts)
-for reusable local HTML experiences, and [Examples](/examples) for the live style picker.
+for reusable local HTML experiences, [Don't overflow memory](/concepts/dont-overflow-memory)
+for keeping agent memory small, and [Examples](/examples) for the live style picker.

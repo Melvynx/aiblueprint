@@ -1,0 +1,50 @@
+---
+title: Sécurité
+description: Hooks de sécurité et permissions par défaut appliqués pendant le setup.
+keywords: ["security", "hooks", "permissions", "deny", "command validation"]
+---
+
+AIBlueprint applique des defaults de sécurité pour que tu puisses aller vite
+sans t'exposer à des commandes destructrices ou à des fuites de secrets.
+
+## Permissions par défaut
+
+Le setup met à jour `~/.claude/settings.json` pour définir un mode de
+permission par défaut et ajouter des règles de refus qui bloquent les
+opérations dangereuses, même quand les invites d'autorisation sont ignorées
+par le raccourci `cc`.
+
+## Règles de refus
+
+| Motif | Bloque |
+| ------- | ------ |
+| `Bash(rm -rf *)` | Suppression récursive destructrice. |
+| `Bash(sudo *)` | Élévation de privilèges. |
+| `Bash(curl * \| bash)` | Injection de scripts distants dans un shell via un pipe. |
+| `Bash(wget * \| bash)` | Injection de téléchargements distants dans un shell via un pipe. |
+| `Read(./.env)` | Lecture du fichier `.env`. |
+| `Read(./.env.*)` | Lecture des variantes `.env`. |
+
+## Hook de validation des commandes
+
+Pour Codex, un hook `PreToolUse` tourne avant toute commande Bash et bloque
+les commandes dangereuses via une liste de refus :
+
+```toml
+[[hooks.PreToolUse]]
+matcher = "^Bash$"
+
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "/usr/bin/env node \"$HOME/.codex/hooks/command-deny-list.ts\""
+timeout = 5
+statusMessage = "Checking command safety"
+```
+
+## Sauvegardes
+
+Le setup et le sync créent des instantanés avant de mettre à jour une config
+existante. Utilise [configs backups](/commands/configs) pour restaurer ces
+instantanés. `configs undo` annule le chargement de config le plus récent ;
+[agents backup](/commands/backup) lit le magasin de sauvegardes héritées
+séparé.

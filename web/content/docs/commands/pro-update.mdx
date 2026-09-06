@@ -10,7 +10,7 @@ configuration. It requires Premium to be activated already.
 ## Usage
 
 ```bash
-aiblueprint agents pro update
+npx aiblueprint-cli@latest agents pro update
 ```
 
 Unlike [`agents pro sync`](/commands/sync), `update` does not offer a file
@@ -31,10 +31,10 @@ Place inherited folder options before `pro update`.
 
 ```bash
 # Update the default installation
-aiblueprint agents pro update
+npx aiblueprint-cli@latest agents pro update
 
 # Update a custom configuration root
-aiblueprint agents --folder ~/my-config pro update
+npx aiblueprint-cli@latest agents --folder ~/my-config pro update
 ```
 
 If the CLI reports that no token is present, run

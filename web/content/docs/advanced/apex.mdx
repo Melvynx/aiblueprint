@@ -1,34 +1,77 @@
 ---
 title: Apex
-description: A minimal configurable router for the complete feature workflow.
+description: An adaptive implementation workflow with checkpoints, risk-based review, and verification.
 keywords: ["apex", "flags", "workflow", "verify"]
 ---
 
-`apex` calls the core skills in this order:
+Apex runs an **Analyze → Plan → Execute → eXamine** loop. It inspects the
+repository, defines acceptance criteria, and adapts the plan as new evidence
+appears. It is included in the free skill bundle.
 
-```text
-analyze -> plan -> implement -> review with -x -> verify
+## Usage
+
+Run these commands in your coding assistant after installing the skills:
+
+```bash
+/apex add organization invitations
+/apex -a -x add organization invitations
 ```
+
+In Codex, invoke the skill with `$apex` instead of `/apex`.
+
+## Workflow
+
+1. **Preflight** — Read project instructions, establish scope, and capture the baseline.
+2. **Analyze and plan** — Resolve missing context and define tasks, dependencies, and validation.
+3. **Execute** — Implement locally or delegate bounded, independent work when useful.
+4. **Validate and examine** — Run relevant checks, review according to risk, and fix confirmed findings.
+5. **Prove and hand off** — Exercise the real flow when required and report the evidence and any remaining blockers.
+
+Material or high-risk changes require independent review. Apex re-plans when
+checks or new evidence invalidate an assumption, then repeats affected validation.
 
 ## Flags
 
-| Flag | Behavior |
-| --- | --- |
-| `-a` | Continue without plan-validation pauses, using safe reversible decisions. |
-| `-x` | Run `review` after implementation. |
-| `-v` | Explicitly request `verify`, which is already enabled by default. |
+Flags express intent. Explicit user instructions and mandatory project rules
+still apply.
 
-Flags can be grouped, for example `-axv`. No other workflow flags, saved step
-files, task graphs, resume state, teams mode, branch mode, or PR mode belong to
-this router.
+| Flag | Intent |
+|---|---|
+| `-a` / `-A` | Set interaction to `low` / `standard`. External actions remain separately scoped. |
+| `-x` / `-X` | Set review to `adversarial` / `risk-based`. |
+| `-s` / `-S` | Set artifacts to `verbose` / `minimal`. Minimal run state is always recorded. |
+| `-t` / `-T` | Set new test authoring to `on` / `off`. Relevant existing validation still runs. |
+| `-v` / `-V` | Set runtime proof to `on` / `off`. Explicit user wording or mandatory project rules take precedence. |
+| `-e` / `-E` | Set budget to `low` / `standard`. Low budget may still use one high-value subagent. |
+| `-b` / `-B` | Set branch creation to `on` / `off`. |
+| `-pr` / `-PR` | Set pull-request delivery to `on` / `off`. |
+| `-i` | Configure intent interactively. |
+| `-k` / `-K` | Set expanded task artifacts to `on` / `off`. A compact graph still exists for multi-step work. |
+| `-m` / `-M` | Set orchestration to `prefer-parallel` / `direct`. Actual fan-out still follows conflict checks. |
+| `-r <id>` | Resume a validated run checkpoint. |
+
+`-a` reduces interaction; it does not authorize publishing, deployment, or other
+external actions. Disabling new tests with `-T` still runs relevant existing
+checks. Runtime proof depends on the request and risk, and can be explicitly
+requested with `-v`.
+
+## Resume a run
+
+Apex records compact checkpoints in `.agents/apex/runs/<run-id>/`. Resume a
+validated checkpoint with:
 
 ```bash
-/apex -a add organization invitations
-/apex -ax add organization invitations
+/apex -r <run-id>
 ```
 
-## Minimal router
+Verbose artifacts are optional. A GitHub issue is not required for every run.
 
-Apex owns orchestration only. If review or verification changes the
-implementation, it reruns the affected downstream stages. It closes the issue
-only after every verification criterion passes.
+## Completion and evidence
+
+Apex finishes when the requested change is implemented, introduced failures are
+resolved, and acceptance criteria have current evidence. It distinguishes local
+checks, provider state, deployed artifacts, and authenticated live behavior.
+Unavailable checks and pre-existing failures are reported explicitly.
+
+Use [OneShot](/advanced/oneshot) for a fixed sequence of core skills with review
+and verification on every run.

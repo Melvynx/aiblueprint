@@ -11,7 +11,7 @@ Start with `setup` for a first installation. It asks for your access token when
 none is saved yet.
 
 ```bash
-aiblueprint agents pro setup
+npx aiblueprint-cli@latest agents pro setup
 ```
 
 ## Subcommands
@@ -36,7 +36,7 @@ Commands that read or install configuration inherit the folder options from
 `agents`. Place these options before `pro`:
 
 ```bash
-aiblueprint agents --folder ~/my-config pro setup
+npx aiblueprint-cli@latest agents --folder ~/my-config pro setup
 ```
 
 See each command page for its exact behavior and examples.
@@ -49,7 +49,7 @@ Assistant Pro uses a separate command because it distributes a dedicated
 versioned skill catalog rather than the complete Agents Config Pro setup:
 
 ```bash
-aiblueprint assistants pro setup
+npx aiblueprint-cli@latest assistants pro setup
 ```
 
 This one command activates Assistant Pro when needed and configures its skills

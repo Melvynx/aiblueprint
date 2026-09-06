@@ -1,0 +1,82 @@
+---
+title: Apex
+description: Un workflow d'implémentation adaptatif avec checkpoints, revue fondée sur le risque et vérification.
+keywords: ["apex", "flags", "workflow", "verify"]
+---
+
+Apex exécute une boucle **Analyze → Plan → Execute → eXamine**. Il inspecte
+le dépôt, définit les critères d'acceptation, et adapte le plan quand de
+nouvelles preuves apparaissent. Il est inclus dans le lot de skills gratuit.
+
+## Utilisation
+
+Lance ces commandes dans ton assistant de coding après avoir installé les
+skills :
+
+```bash
+/apex add organization invitations
+/apex -a -x add organization invitations
+```
+
+Dans Codex, invoquer le skill avec `$apex` à la place de `/apex`.
+
+## Workflow
+
+1. **Preflight** : lire les instructions du projet, établir le périmètre et capturer la baseline.
+2. **Analyze and plan** : résoudre le contexte manquant et définir les tâches, dépendances et validations.
+3. **Execute** : implémenter en local ou déléguer un travail borné et indépendant quand c'est utile.
+4. **Validate and examine** : lancer les checks pertinents, relire selon le risque, et corriger les findings confirmés.
+5. **Prove and hand off** : exercer le vrai flux quand c'est requis et rapporter les preuves ainsi que les blockers restants.
+
+Les changements matériels ou à haut risque exigent une revue indépendante.
+Apex replanifie quand des checks ou de nouvelles preuves invalident une
+hypothèse, puis rejoue la validation concernée.
+
+## Flags
+
+Les flags expriment une intention. Tes instructions explicites et les règles
+obligatoires du projet s'appliquent toujours.
+
+| Flag | Intention |
+|---|---|
+| `-a` / `-A` | Régler l'interaction sur `low` / `standard`. Les actions externes restent scopées à part. |
+| `-x` / `-X` | Régler la revue sur `adversarial` / `risk-based`. |
+| `-s` / `-S` | Régler les artefacts sur `verbose` / `minimal`. L'état de run minimal est toujours enregistré. |
+| `-t` / `-T` | Régler l'écriture de nouveaux tests sur `on` / `off`. La validation existante pertinente tourne toujours. |
+| `-v` / `-V` | Régler la preuve runtime sur `on` / `off`. Ta formulation explicite ou les règles obligatoires du projet priment. |
+| `-e` / `-E` | Régler le budget sur `low` / `standard`. Un budget low peut encore utiliser un subagent à haute valeur. |
+| `-b` / `-B` | Régler la création de branche sur `on` / `off`. |
+| `-pr` / `-PR` | Régler la livraison de pull request sur `on` / `off`. |
+| `-i` | Configurer l'intention de façon interactive. |
+| `-k` / `-K` | Régler les artefacts de tâche étendus sur `on` / `off`. Un graphe compact existe toujours pour le travail multi-étapes. |
+| `-m` / `-M` | Régler l'orchestration sur `prefer-parallel` / `direct`. Le fan-out réel suit toujours les checks de conflit. |
+| `-r <id>` | Reprendre un checkpoint de run validé. |
+
+`-a` réduit l'interaction ; ça n'autorise ni publication, ni déploiement, ni
+d'autres actions externes. Désactiver les nouveaux tests avec `-T` lance
+quand même les checks existants pertinents. La preuve runtime dépend de la
+demande et du risque, et peut être demandée explicitement avec `-v`.
+
+## Reprendre une run
+
+Apex enregistre des checkpoints compacts dans `.agents/apex/runs/<run-id>/`.
+Reprends un checkpoint validé avec :
+
+```bash
+/apex -r <run-id>
+```
+
+Les artefacts verbeux sont optionnels. Une issue GitHub n'est pas requise
+pour chaque run.
+
+## Fin et preuves
+
+Apex termine quand le changement demandé est implémenté, les échecs
+introduits sont résolus, et les critères d'acceptation ont une preuve
+actuelle. Il distingue les checks locaux, l'état provider, les artefacts
+déployés et le comportement live authentifié.
+Les checks indisponibles et les échecs préexistants sont rapportés
+explicitement.
+
+Utilise [OneShot](/advanced/oneshot) pour une séquence fixe de skills cœur
+avec revue et vérification à chaque run.

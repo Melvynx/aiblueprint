@@ -1,29 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  getAllDocs,
-  getCurrentDoc,
-  getDocsTree,
-} from "@public-site/docs/doc-manager";
 import { DocsContent, DocsNotFound } from "./-docs-content";
+import { docsHead, loadDocsPage } from "./-docs-loader";
 
 export const Route = createFileRoute("/")({
   loader: () => {
-    const tree = getDocsTree();
-    const doc = getCurrentDoc([]) ?? tree.rootDocs.at(0) ?? null;
-    return { tree, doc, allDocs: getAllDocs() };
-  },
-  head: ({ loaderData }) => {
-    const doc = loaderData?.doc;
-    if (!doc) return {};
+    const data = loadDocsPage("en", []);
     return {
-      meta: [
-        { title: doc.attributes.title },
-        ...(doc.attributes.description
-          ? [{ name: "description", content: doc.attributes.description }]
-          : []),
-      ],
+      ...data,
+      doc: data.doc ?? data.tree.rootDocs.at(0) ?? null,
     };
   },
+  head: ({ loaderData }) =>
+    docsHead(loaderData?.doc ?? null, loaderData?.locale ?? "en"),
   component: IndexRoute,
 });
 

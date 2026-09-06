@@ -1,32 +1,30 @@
-import { createFileRoute } from "@tanstack/react-router";
-import {
-  getAllDocs,
-  getCurrentDoc,
-  getDocsTree,
-} from "@public-site/docs/doc-manager";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { parseDocsSplat } from "@public-site/docs/locale";
 import { DocsContent, DocsNotFound } from "./-docs-content";
+import { docsHead, loadDocsPage } from "./-docs-loader";
 
 export const Route = createFileRoute("/$")({
+  beforeLoad: ({ params }) => {
+    const { locale, slugParts } = parseDocsSplat(params._splat);
+    const slug = slugParts.join("/");
+    const legacyPaths: Record<string, string> = {
+      "concepts/apex": "advanced/apex",
+      "concepts/slash-commands": "concepts/skills",
+    };
+    const destination = legacyPaths[slug];
+    if (destination) {
+      throw redirect({
+        href: locale === "fr" ? `/fr/${destination}` : `/${destination}`,
+        statusCode: 301,
+      });
+    }
+  },
   loader: ({ params }) => {
-    const slug = params._splat ? params._splat.split("/") : [];
-    return {
-      tree: getDocsTree(),
-      doc: getCurrentDoc(slug),
-      allDocs: getAllDocs(),
-    };
+    const { locale, slugParts } = parseDocsSplat(params._splat);
+    return loadDocsPage(locale, slugParts);
   },
-  head: ({ loaderData }) => {
-    const doc = loaderData?.doc;
-    if (!doc) return {};
-    return {
-      meta: [
-        { title: `${doc.attributes.title} - AIBlueprint CLI` },
-        ...(doc.attributes.description
-          ? [{ name: "description", content: doc.attributes.description }]
-          : []),
-      ],
-    };
-  },
+  head: ({ loaderData }) =>
+    docsHead(loaderData?.doc ?? null, loaderData?.locale ?? "en"),
   component: DocsSplatRoute,
 });
 

@@ -1,0 +1,57 @@
+---
+title: Workflow principal
+description: Skills ciblés pour emmener une feature de l'investigation jusqu'à la preuve runtime.
+keywords: ["workflow", "analyze", "plan", "implement", "review", "verify"]
+---
+
+Le workflow principal est une séquence de skills indépendants. Chaque skill
+possède un seul job, produit un résultat explicite, et s'arrête avant que la
+responsabilité suivante commence.
+
+```text
+request
+  -> analyze
+  -> plan
+  -> implement
+  -> code-review
+  -> verify
+```
+
+Ces skills cœur sont inclus dans Premium. Dans Codex, utilise `$skill-name`
+à la place de `/skill-name`. Le lot gratuit inclut [Apex](/advanced/apex).
+
+## Étapes disponibles
+
+| Skill | Produit | S'arrête avant |
+| --- | --- | --- |
+| `analyze` | Preuves, contraintes, risques et critères d'acceptation. | La planification ou l'édition. |
+| `plan` | Un plan prêt à implémenter, avec une issue GitHub optionnelle. | L'implémentation. |
+| `implement` | Le changement borné et les checks statiques pertinents. | La preuve runtime. |
+| `code-review` | Des verdicts Spec et Standards séparés. | La vérification runtime. |
+| `verify` | Une preuve actuelle pour chaque critère d'acceptation. | De conclure tant que quelque chose n'est pas prouvé. |
+| `code-debug` | Une cause racine reproduite, une couverture de régression et un fix vérifié. | De deviner sans une boucle capable de passer au rouge. |
+
+## Minimal par conception
+
+Les skills ne se dupliquent pas. `analyze` ne crée pas de plan, `implement` ne
+prétend pas à une preuve runtime, et `code-review` ne remplace pas `verify`.
+Le plan convenu est la source de vérité partagée. Une issue GitHub est
+optionnelle pour un travail ciblé et est lue en entier quand elle est fournie.
+
+Utilise un skill directement quand une seule étape suffit :
+
+```bash
+/analyze investigate slow navigation
+/plan use the current analysis
+/implement https://github.com/owner/repo/issues/123
+/code-review issue 123 since origin/main
+/verify issue 123
+/code-debug reproduce the intermittent save failure
+```
+
+## Flags
+
+Les skills cœur exposent volontairement presque aucune config de workflow.
+`code-debug` accepte `-a` ou `auto` pour choisir des décisions de debug sûres
+et réversibles sans pause. L'automatisation de la séquence complète appartient
+à `apex` et `oneshot`, documentés sous [Avancé](/advanced).

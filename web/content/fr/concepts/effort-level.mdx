@@ -1,0 +1,112 @@
+---
+title: Effort level
+description: Le budget de réflexion n'est pas de l'intelligence. Route Low, Medium, High, Extra High et Max selon la tâche, pas par réflexe Max.
+keywords: ["effort", "thinking", "raisonnement", "tokens", "low", "medium", "high", "max"]
+---
+
+Le réglage le plus sous-estimé dans un agent IA n'est pas le modèle. C'est le budget de réflexion que tu lui accordes.
+
+Le réflexe paraît logique : si Max réfléchit davantage, Max doit produire un meilleur résultat. En pratique, tu lui donnes surtout plus de temps et plus de tokens pour explorer des pistes qui ne sont pas toujours utiles. Parfois ça sauve une architecture difficile. Parfois ça transforme une remarque simple en quatre minutes d'overthinking sur une animation qui fonctionne déjà.
+
+<YouTubeEmbed id="4VZPCEtg6uU" title="Effort: lequel choisir ?" />
+
+![Slider d'effort Cursor sur Medium pour GPT-6 Astra](/docs/effort-level-slider.png)
+
+## Le thinking achète de l'exploration, pas une garantie d'intelligence
+
+Le niveau d'effort agit comme un budget de réflexion. Plus tu le montes, plus l'agent peut produire de longs blocs de raisonnement, multiplier les étapes et vérifier des choses qu'un niveau inférieur aurait ignorées.
+
+À Low, les blocs de thinking restent courts. En Extra High ou Max, ils deviennent trois ou quatre fois plus gros, surtout en début de conversation. Ce texte, c'est le modèle qui pose ses réflexions : de quoi il a besoin, quoi inspecter, quoi tenter. Ça ressemble à de l'intelligence. C'est encore du texte généré avec la consigne « réfléchis à ça ».
+
+Ce budget est utile quand la demande est vague, créative ou pleine de décisions imbriquées. Il ne corrige pas magiquement un mauvais système. Le contexte, le prompt, les règles du dépôt, les outils, les tests et la capacité à vérifier le résultat pèsent souvent plus lourd que le slider. Passer d'Opus à Sol est un delta minime à côté de tout ça.
+
+Plus de réflexion augmente systématiquement la consommation. La qualité, elle, ne monte pas de manière systématique.
+
+## Les chiffres de la vidéo décrivent une run, pas tous les agents
+
+Dans la comparaison High contre Max montrée dans la vidéo, Max affiche environ 17 % de profondeur en plus et 45 % d'étapes en plus. Le coût annoncé tourne autour de +50 %, le temps autour de +74 % (environ 1 minute en High contre environ 4 minutes en Max).
+
+| Signal | High vs Max dans cette run |
+| ------ | -------------------------- |
+| Profondeur | ≈ +17 % |
+| Étapes | ≈ +45 % |
+| Coût | ≈ +50 % |
+| Temps | ≈ +74 % |
+
+Je ne présente pas ces nombres comme une étude scientifique. La tâche, le modèle, le harness, le contexte et les outils peuvent complètement changer le rapport.
+
+La bonne lecture est plus limitée : dans la démo, Max a nettement alourdi la run sans produire un gain de qualité proportionnel. Max a lancé l'app et pris des screenshots parce qu'il s'est dit qu'un vrai review en avait besoin. High n'a pas fait ça. Max s'est aussi coincé sur un délai de 2 secondes dans le hero qui n'était pas un vrai problème, pendant que High parlait de positionnement. Plus de budget peut acheter une vérif utile. Ça peut aussi acheter du bruit confiant.
+
+## Une tâche vérifiable a moins besoin de réfléchir dans le vide
+
+Le plus gros levier n'est pas de monter l'effort. C'est de rendre la cible observable.
+
+Si je demande « améliore cette interface », l'agent doit décider ce que veut dire améliorer. Un effort élevé peut l'aider à explorer la hiérarchie, les usages, les variantes et les compromis.
+
+Si je demande « renomme ces trois tags, ne touche à rien d'autre et lance ce test », la marge d'interprétation est minuscule. Max n'a presque rien d'intéressant à acheter.
+
+Un niveau moyen avec une bonne boucle de vérification bat souvent un niveau Max condamné à deviner ce que tu voulais.
+
+## Comment router les cinq niveaux
+
+Démarre en **medium-high** pour le quotidien, puis demande si le résultat suffit. Pour Claude, le défaut recommandé par l'équipe sur la majorité des tâches est **High**. Pour ChatGPT, c'est **Medium**. Monte quand tu veux que le modèle invente la feature avec toi, pas parce que le slider a l'air plus premium.
+
+Évite Ultra. Ça brûle trop de tokens pour un gain quasi nul par rapport à Max.
+
+| Niveau | À utiliser pour |
+| ------ | --------------- |
+| **Low** | Sous-tâches, classification, petite MAJ de texte, renommage robotique. Le résultat est évident. |
+| **Medium** | Drop-in quotidien quand la demande est bornée et facile à contrôler. |
+| **High** | Code agentique difficile, raisonnement complexe, exploration d'un repo. Point de départ pour Claude / Opus. |
+| **Extra High** | Plans exigeants, exploration, frontend qui demande du goût, ou gros budget sur un problème dur. |
+| **Max** | Architecture frontière ou redesign de système. Plusieurs passes à haut thinking sur une décision qui doit tenir. |
+
+Si tes tokens sont abondants et que la latence ne te gêne pas, rester sur High est confortable. Max, lui, doit toujours gagner sa place.
+
+Trois questions avant de bouger le slider :
+
+1. La tâche est-elle précise ? Fichiers, changement et preuve connus → Low ou Medium.
+2. Doit-elle décider à ta place ? Design, exploration, architecture → High ou Extra High.
+3. Une mauvaise direction coûte-t-elle plus cher qu'une longue réflexion ? C'est seulement là que Max se défend.
+
+Si Medium échoue parce que le brief est flou, corrige le brief avant de payer davantage pour la même ambiguïté. Si Max tourne en rond, arrête-le.
+
+## Force une escalade au lieu d'un Max par défaut
+
+Réutilise ce prompt pour éviter que l'effort maximal devienne une habitude invisible :
+
+```text
+Travaille sur cette tâche avec le niveau d'effort le plus bas qui reste fiable :
+[décris le résultat observable]
+
+Contexte et limites :
+- périmètre : [fichiers, surface ou dossier autorisé] ;
+- critères d'acceptation : [résultats vérifiables] ;
+- vérifications : [tests, commande, mesure ou parcours visuel] ;
+- hors périmètre : [ce qui ne doit pas changer].
+
+Commence en [Low / Medium / High] selon la nature de la tâche.
+N'augmente pas l'effort automatiquement.
+
+Si le niveau choisi ne suffit pas :
+1. montre précisément ce qui bloque ou reste ambigu ;
+2. distingue un mauvais brief d'un vrai besoin de raisonnement ;
+3. propose le niveau suivant et explique ce qu'il permettra d'explorer ;
+4. attends mon accord avant de passer en Max.
+
+À la fin, donne-moi :
+- le résultat obtenu ;
+- les vérifications réellement exécutées ;
+- les limites restantes ;
+- le niveau d'effort utilisé et la raison.
+```
+
+Le but n'est pas d'économiser chaque token comme si c'était le dernier. Le but est de ne pas financer du raisonnement sans savoir quelle décision supplémentaire tu veux acheter.
+
+## Voir aussi
+
+- [Skills](/concepts/skills) — les workflows réutilisables pèsent souvent plus que le slider.
+- [Le workflow principal](/core-workflow) — analyze, plan, implement, review, verify.
+- [Apex](/advanced/apex) — implémentation adaptive avec checkpoints, pas un Max à l'aveugle.
+
+Source : [l'article Codelynx](https://codelynx.dev/posts/effort-thinking-agent-ia) et [la vidéo](https://youtu.be/4VZPCEtg6uU).

@@ -4,12 +4,12 @@ description: Restore a previous configuration from an automatic backup.
 keywords: ["backup", "restore", "load", "undo"]
 ---
 
-`agents backup` works with the automatic backups the CLI creates before every
-change. Backups preserve the full `.claude`, `.codex`, and `.agents` folders,
+`agents backup` restores snapshots from the legacy backup store. Current setup
+and sync snapshots are managed by [configs backups](/commands/configs). Backups preserve the full `.claude`, `.codex`, and `.agents` folders,
 including sessions and project history.
 
 ```bash
-aiblueprint agents backup load
+npx aiblueprint-cli@latest agents backup load
 ```
 
 ## What it does

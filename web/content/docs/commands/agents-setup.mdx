@@ -8,7 +8,7 @@ keywords: ["setup", "agents", "install", "skip"]
 with AIBlueprint defaults.
 
 ```bash
-aiblueprint agents setup
+npx aiblueprint-cli@latest agents setup
 ```
 
 ## Options
@@ -49,7 +49,7 @@ Copies the curated agents into `~/.agents/agents`. See [Agents](/concepts/agents
 
 ### AIBlueprint skills
 
-Copies 30+ reusable skills into `~/.agents/skills`, including `use-style` for
+Copies the free reusable skill bundle into `~/.agents/skills`, including `use-style` for
 named UI style guides. See [Skills](/concepts/skills).
 
 ### Codex setup
@@ -66,13 +66,13 @@ Applies permission defaults and deny rules to `~/.claude/settings.json`. See
 
 ```bash
 # Interactive setup
-aiblueprint agents setup
+npx aiblueprint-cli@latest agents setup
 
 # Install everything without prompts
-aiblueprint agents setup --skip
+npx aiblueprint-cli@latest agents setup --skip
 
 # Install into a custom location
-aiblueprint agents setup --folder ~/my-config
+npx aiblueprint-cli@latest agents setup --folder ~/my-config
 ```
 
 ## Aliases

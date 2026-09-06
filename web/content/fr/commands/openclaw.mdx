@@ -1,0 +1,53 @@
+---
+title: openclaw
+description: Configure OpenClaw et gère OpenClaw Pro.
+keywords: ["openclaw", "pro", "activate", "setup"]
+---
+
+`openclaw` configure l'outil OpenClaw et gère son palier Pro. Ça reprend la
+structure des commandes `agents pro`.
+
+```bash
+npx aiblueprint-cli@latest openclaw pro status
+```
+
+## Options
+
+| Option | Description |
+| ------ | ----------- |
+| `-f, --folder <path>` | Dossier OpenClaw custom (défaut : `~/.openclaw`). |
+
+## Sous-commandes Pro
+
+| Commande | Description |
+| ------- | ----------- |
+| `openclaw pro activate [token]` | Active OpenClaw Pro avec un token d'accès. |
+| `openclaw pro status` | Vérifie le statut du token OpenClaw Pro. |
+| `openclaw pro setup` | Installe les configs OpenClaw Pro (activation requise). |
+| `openclaw pro update` | Update les configs OpenClaw Pro. |
+
+## Exemple
+
+```bash
+npx aiblueprint-cli@latest openclaw pro activate YOUR_TOKEN
+npx aiblueprint-cli@latest openclaw pro setup
+npx aiblueprint-cli@latest openclaw pro update
+```
+
+## Skills Assistant Pro
+
+Pour le catalogue de skills Assistant Pro actuel, utilise le setup
+multi-assistant :
+
+```bash
+npx aiblueprint-cli@latest assistants pro setup
+```
+
+OpenClaw découvre les skills personnelles depuis `~/.agents/skills` nativement,
+donc cette commande ne les duplique pas sous `~/.openclaw/skills`. Les mêmes
+fichiers de skills canoniques sont aussi liés dans Claude Code et Codex,
+tandis que Hermes reçoit une entrée `skills.external_dirs` dans
+`~/.hermes/config.yaml`.
+
+Les commandes `openclaw pro` ci-dessus restent disponibles pour l'ancien
+repository de config spécifique à OpenClaw.

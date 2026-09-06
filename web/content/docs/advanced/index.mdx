@@ -1,20 +1,21 @@
 ---
 title: Advanced Workflows
-description: Bundle the core skills into complete, repeatable feature workflows.
+description: Choose an adaptive implementation loop or a fixed sequence of core skills.
 keywords: ["apex", "oneshot", "automation", "workflow"]
 ---
 
-`apex` and `oneshot` are intentionally small routers. They call the core skills
-in order, pass each result forward, and keep the GitHub issue from `plan` as the
-source of truth.
+[Apex](/advanced/apex) adapts its plan, delegation, review, and proof to the
+request and risk. It records resumable checkpoints and is included in the free
+skill bundle.
 
-They do not contain separate analysis, planning, implementation, review, or
-verification logic.
+[OneShot](/advanced/oneshot) runs the Premium core skills in a fixed order,
+using the implementation plan as the source of truth. A GitHub issue is optional
+for focused work.
 
-| Router | Best for | Review | Verification |
+| Workflow | Best for | Review | Verification |
 | --- | --- | --- | --- |
-| `apex` | A configurable complete feature flow. | Optional with `-x`. | Enabled by default. |
-| `oneshot` | The full quality-gated flow with one decision. | Always. | Always. |
+| `apex` | Adaptive implementation with resumable checkpoints. | Risk-based; `-x` requests adversarial review. | Relevant validation always runs; runtime proof follows intent and risk. |
+| `oneshot` | A complete sequence of core skills. | Always. | Always. |
 
-Start with [Apex](/advanced/apex) when review should be optional. Use
-[OneShot](/advanced/oneshot) when every gate should always run.
+Both workflows repeat affected checks after fixes. Neither workflow authorizes
+external actions beyond the user's request.

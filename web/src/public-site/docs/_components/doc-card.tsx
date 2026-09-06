@@ -1,9 +1,13 @@
 import Link from "@/compat/link";
+import { usePathname } from "@/compat/navigation";
+import { getLocaleFromPathname, withLocale } from "../locale";
 import {
   BookOpen,
   Code2,
   Eye,
   FileText,
+  Gauge,
+  HardDrive,
   Key,
   Layers,
   Link2,
@@ -15,6 +19,7 @@ import {
   Settings,
   Shield,
   Sparkles,
+  Target,
   Terminal,
   Users,
   Workflow,
@@ -39,8 +44,11 @@ const ICONS: Record<string, LucideIcon> = {
   Link2,
   Palette,
   Eye,
+  Gauge,
+  HardDrive,
   RefreshCw,
   Save,
+  Target,
 };
 
 type DocCardProps = {
@@ -59,17 +67,18 @@ export function DocCard({
   external,
 }: DocCardProps) {
   const Icon = ICONS[icon] ?? FileText;
+  const locale = getLocaleFromPathname(usePathname());
 
   return (
     <Link
-      href={href}
+      href={withLocale(href, locale)}
       className={cn(
         "group flex flex-col gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 no-underline",
-        "transition-colors hover:border-white/20 hover:bg-white/[0.04]",
+        "transition-colors hover:border-primary/40 hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-primary",
       )}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
     >
-      <Icon className="text-muted-foreground size-5" />
+      <Icon className="text-primary size-5" />
       <div className="flex flex-col gap-0.5">
         <span className="text-foreground text-sm font-medium">
           {title}

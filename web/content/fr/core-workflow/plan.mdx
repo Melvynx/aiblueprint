@@ -1,0 +1,26 @@
+---
+title: Planifier
+description: Transformer une analyse en plan prêt à implémenter, avec une issue GitHub optionnelle.
+---
+
+`plan` transforme la demande analysée en contrat utilisé par les skills
+aval.
+
+## Sortie
+
+Le plan enregistre le problème, le comportement souhaité, le périmètre, les
+exclusions, les décisions d'implémentation, les critères d'acceptation et les
+exigences de vérification.
+Un plan ciblé est renvoyé directement. Une issue est créée quand elle est
+demandée, exigée par les règles du dépôt, ou nécessaire pour un travail qui
+couvre plusieurs unités, systèmes ou sessions.
+Quand une issue est créée, l'agent la relit et renvoie son URL.
+
+## Frontière
+
+Cette étape n'implémente pas le plan. GitHub n'est pas requis pour un plan
+ciblé qui n'a pas besoin d'issue.
+
+```bash
+/plan use the current analysis
+```

@@ -1,13 +1,26 @@
 import fm from "front-matter";
 import { z } from "zod";
+import { DEFAULT_LOCALE, type Locale, withLocale } from "./locale";
 
-const docFiles = import.meta.glob("../../../content/docs/**/*.mdx", {
+const enDocFiles = import.meta.glob("../../../content/docs/**/*.mdx", {
   eager: true,
   import: "default",
   query: "?raw",
 }) as Record<string, string>;
 
-const metaFiles = import.meta.glob("../../../content/docs/**/meta.json", {
+const frDocFiles = import.meta.glob("../../../content/fr/**/*.mdx", {
+  eager: true,
+  import: "default",
+  query: "?raw",
+}) as Record<string, string>;
+
+const enMetaFiles = import.meta.glob("../../../content/docs/**/meta.json", {
+  eager: true,
+  import: "default",
+  query: "?raw",
+}) as Record<string, string>;
+
+const frMetaFiles = import.meta.glob("../../../content/fr/**/meta.json", {
   eager: true,
   import: "default",
   query: "?raw",
@@ -23,6 +36,7 @@ const AttributeSchema = z.object({
   description: z.string().optional(),
   keywords: z.array(z.string()).optional(),
   order: z.number().optional(),
+  pro: z.boolean().optional(),
 });
 
 type DocAttributes = z.infer<typeof AttributeSchema>;
@@ -45,13 +59,36 @@ export type DocTree = {
   folders: DocFolder[];
 };
 
-function readMdxFile(filePath: string, slug: string): DocType | null {
-  const fileContents = docFiles[filePath];
+function contentRoot(locale: Locale): string {
+  return locale === "fr"
+    ? "../../../content/fr/"
+    : "../../../content/docs/";
+}
+
+function docFilesFor(locale: Locale): Record<string, string> {
+  return locale === "fr" ? frDocFiles : enDocFiles;
+}
+
+function metaFilesFor(locale: Locale): Record<string, string> {
+  return locale === "fr" ? frMetaFiles : enMetaFiles;
+}
+
+function readMdxFile(
+  filePath: string,
+  slug: string,
+  locale: Locale,
+): DocType | null {
+  const fileContents = docFilesFor(locale)[filePath];
   if (!fileContents) {
     return null;
   }
 
-  const matter = fm(fileContents);
+  let matter: ReturnType<typeof fm>;
+  try {
+    matter = fm(fileContents);
+  } catch {
+    return null;
+  }
   const result = AttributeSchema.safeParse(matter.attributes);
 
   if (!result.success) {
@@ -60,17 +97,18 @@ function readMdxFile(filePath: string, slug: string): DocType | null {
 
   return {
     slug,
-    url: slug ? `/${slug}` : "/",
+    url: withLocale(slug ? `/${slug}` : "/", locale),
     content: matter.body,
     attributes: result.data,
   };
 }
 
-function getMetaOrder(folderSlug = ""): string[] | null {
+function getMetaOrder(locale: Locale, folderSlug = ""): string[] | null {
+  const root = contentRoot(locale);
   const metaPath = folderSlug
-    ? `../../../content/docs/${folderSlug}/meta.json`
-    : "../../../content/docs/meta.json";
-  const metaContents = metaFiles[metaPath];
+    ? `${root}${folderSlug}/meta.json`
+    : `${root}meta.json`;
+  const metaContents = metaFilesFor(locale)[metaPath];
   if (!metaContents) {
     return null;
   }
@@ -78,9 +116,12 @@ function getMetaOrder(folderSlug = ""): string[] | null {
   return meta.success ? meta.data.pages : null;
 }
 
-function getFolderTitle(folderSlug: string, fallback: string): string {
-  const metaContents =
-    metaFiles[`../../../content/docs/${folderSlug}/meta.json`];
+function getFolderTitle(
+  locale: Locale,
+  folderSlug: string,
+  fallback: string,
+): string {
+  const metaContents = metaFilesFor(locale)[`${contentRoot(locale)}${folderSlug}/meta.json`];
   if (!metaContents) {
     return fallback;
   }
@@ -92,14 +133,13 @@ function getFolderTitle(folderSlug: string, fallback: string): string {
   }
 }
 
-function processFolder(folderName: string): DocFolder {
-  const folderOrder = getMetaOrder(folderName);
-  const folderTitle = getFolderTitle(folderName, folderName);
+function processFolder(locale: Locale, folderName: string): DocFolder {
+  const folderOrder = getMetaOrder(locale, folderName);
+  const folderTitle = getFolderTitle(locale, folderName, folderName);
+  const root = contentRoot(locale);
 
-  const folderDocs = Object.keys(docFiles)
-    .filter((filePath) =>
-      filePath.startsWith(`../../../content/docs/${folderName}/`),
-    )
+  const folderDocs = Object.keys(docFilesFor(locale))
+    .filter((filePath) => filePath.startsWith(`${root}${folderName}/`))
     .map((filePath) => {
       const fileName = filePath.split("/").at(-1)?.replace(".mdx", "");
       if (!fileName) {
@@ -107,7 +147,7 @@ function processFolder(folderName: string): DocFolder {
       }
       const slug =
         fileName === "index" ? folderName : `${folderName}/${fileName}`;
-      return readMdxFile(filePath, slug);
+      return readMdxFile(filePath, slug, locale);
     })
     .filter((doc): doc is DocType => doc !== null);
 
@@ -131,11 +171,13 @@ function sortByOrder(order: string[], a: string, b: string): number {
   return aIndex - bIndex;
 }
 
-export function getDocsTree(): DocTree {
+export function getDocsTree(locale: Locale = DEFAULT_LOCALE): DocTree {
   try {
-    const rootOrder = getMetaOrder();
-    const relativePaths = Object.keys(docFiles).map((filePath) =>
-      filePath.replace("../../../content/docs/", ""),
+    const root = contentRoot(locale);
+    const files = docFilesFor(locale);
+    const rootOrder = getMetaOrder(locale);
+    const relativePaths = Object.keys(files).map((filePath) =>
+      filePath.replace(root, ""),
     );
     const directories = Array.from(
       new Set(
@@ -144,12 +186,11 @@ export function getDocsTree(): DocTree {
           .map((filePath) => filePath.split("/")[0]),
       ),
     );
-    const rootFiles = Object.keys(docFiles).filter(
-      (filePath) =>
-        !filePath.replace("../../../content/docs/", "").includes("/"),
+    const rootFiles = Object.keys(files).filter(
+      (filePath) => !filePath.replace(root, "").includes("/"),
     );
 
-    const folders = directories.map(processFolder);
+    const folders = directories.map((folder) => processFolder(locale, folder));
     const rootDocs = rootFiles
       .map((filePath) => {
         const fileName = filePath.split("/").at(-1)?.replace(".mdx", "");
@@ -157,7 +198,7 @@ export function getDocsTree(): DocTree {
           return null;
         }
         const slug = fileName === "index" ? "" : fileName;
-        return readMdxFile(filePath, slug);
+        return readMdxFile(filePath, slug, locale);
       })
       .filter((doc): doc is DocType => doc !== null);
 
@@ -174,12 +215,15 @@ export function getDocsTree(): DocTree {
   }
 }
 
-export function getAllDocs(): DocType[] {
-  const tree = getDocsTree();
+export function getAllDocs(locale: Locale = DEFAULT_LOCALE): DocType[] {
+  const tree = getDocsTree(locale);
   return [...tree.rootDocs, ...tree.folders.flatMap((folder) => folder.docs)];
 }
 
-export function getCurrentDoc(slugParts: string[] | undefined): DocType | null {
+export function getCurrentDoc(
+  slugParts: string[] | undefined,
+  locale: Locale = DEFAULT_LOCALE,
+): DocType | null {
   const slug = slugParts?.join("/") ?? "";
-  return getAllDocs().find((doc) => doc.slug === slug) ?? null;
+  return getAllDocs(locale).find((doc) => doc.slug === slug) ?? null;
 }

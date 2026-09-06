@@ -1,0 +1,21 @@
+---
+title: Workflows avancés
+description: Choisir une boucle d'implémentation adaptative ou une séquence fixe de skills cœur.
+keywords: ["apex", "oneshot", "automation", "workflow"]
+---
+
+[Apex](/advanced/apex) adapte son plan, sa délégation, sa revue et sa preuve
+à la demande et au risque. Il enregistre des checkpoints reprenables et est
+inclus dans le lot de skills gratuit.
+
+[OneShot](/advanced/oneshot) exécute les skills cœur Premium dans un ordre
+fixe, en utilisant le plan d'implémentation comme source de vérité. Une issue
+GitHub est optionnelle pour un travail ciblé.
+
+| Workflow | Idéal pour | Revue | Vérification |
+| --- | --- | --- | --- |
+| `apex` | Implémentation adaptative avec checkpoints reprenables. | Fondée sur le risque ; `-x` demande une revue adversariale. | La validation pertinente tourne toujours ; la preuve runtime suit l'intention et le risque. |
+| `oneshot` | Une séquence complète de skills cœur. | Toujours. | Toujours. |
+
+Les deux workflows rejouent les checks concernés après un fix. Aucun
+n'autorise d'actions externes au-delà de ta demande.

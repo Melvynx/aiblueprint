@@ -1,0 +1,58 @@
+---
+title: Context sweet spot
+description: A 1M context window is not a free upgrade. Attention degrades, every turn resends the whole history, and past the pricing cliff you pay more for a dumber model.
+keywords: ["context", "sweet spot", "compact", "tokens", "1 million", "cache"]
+---
+
+A 1 million token window looks like headroom. It is usually a trap.
+
+Every agent turn resends the full history: system, tools, user, tool results. Cache makes that survivable. It does not make a giant window free, and it does not keep the model as sharp.
+
+<YouTubeEmbed id="OTxy6NabllI" title="1 million context is the worst thing you can do" />
+
+## The window is billed every turn
+
+Turn 1 might be 40k tokens of system plus tools plus prompt. Turn 20 might be 200k. Compact then resets you near 50k. Without compact, the same session can crawl toward 1M.
+
+That is why a 1M window feels "unlimited" and then eats the quota. At a fat context, a handful of tool calls in a minute is a handful of fat input bills. Cache (often about 10x cheaper on reread) is the only reason a Codex-style subscription lasts more than a day.
+
+GPT 5.6 Sol, in the pricing shown in the video, also doubles input once you cross about 272k tokens. Filling the window is not a linear cost. It is a step function.
+
+## Compact is cheaper than a 1M crawl
+
+Compact: grow, reset, grow, reset. Average context stays lower. 1M: grow for a long time, pay the high rate on every later tool call, then compact once if you ever hit the ceiling.
+
+The graph in the video is one estimated session, not a benchmark. In that run, compact sat around ~153k average context. The 1M path sat around ~514k. Combined with Sol's 272k price step, the same work landed about 2x more expensive on the long window, and about 4x once you actually live near 1M.
+
+Faster compact is why Codex often felt like "more tokens" than Claude: you spent less time billed at a huge context. A Claude Max "API value" number that is mostly cache reads is not more work. Output (the actual generation) can be similar while the meter explodes because one side rereads 1M and the other rereads ~200k.
+
+## Attention has a sweet spot
+
+Matt Pocock calls it the smart zone. Same idea: past a point the same model gets sloppier, more forgetful, more error-prone, more hallucinated. Attention is a finite budget. More tokens makes the useful ones harder to find.
+
+Pocock puts the dumb zone around 125k–150k. The video disagrees on the exact cliff and treats up to ~272k as still usable, with the model still sharp-ish until about 200k and clearly dumber after that. Do not treat those cutoffs as physics. Treat them as "do not live in the top of the window."
+
+| Zone | What it feels like |
+| ---- | ------------------ |
+| Sweet spot | High attention. Hard engineering still lands. |
+| Climbing | Simple edits still one-shot. Architecture and multi-file reasoning start to slip. |
+| Dumb zone | Same model, worse. More slop, more forgotten constraints, more confident mistakes. |
+
+Simple tasks hide the damage. "Remove the spacing" works at 80 tokens and at 999k. "Redesign this billing path and do not break auth" does not. If your work is CE1-level UI, a fat window looks fine. If it is real engineering, the sweet spot is the feature.
+
+## What to do instead of 1M
+
+- Keep compact (or `/compact` on purpose) instead of disabling it to "use the million."
+- Start a new session when the task changes. One session, one job.
+- Do not confuse cache savings with free context. Cached tokens still occupy the window and still degrade attention.
+- Watch the statusline. If you are living above ~200k on a hard task, compact or split before you add another subagent dump.
+
+A bigger window is a last resort for a retrieval problem you already failed to structure. It is not a quality upgrade.
+
+## Related
+
+- [Don't overflow memory](/concepts/dont-overflow-memory) if the junk in context is Markdown, not history
+- [Effort level](/concepts/effort-level) if you are paying for thinking on top of a fat window
+- [Statusline](/concepts/statusline) to see tokens before you hit the cliff
+
+Source: [the video](https://youtu.be/OTxy6NabllI). The dollar figures are one estimated session from that recording, not a rate card for your plan.

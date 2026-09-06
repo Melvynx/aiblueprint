@@ -1,0 +1,58 @@
+---
+title: agents pro
+description: Vue d'ensemble des commandes AIBlueprint Premium.
+keywords: ["pro", "premium", "activate", "token", "sync"]
+---
+
+`agents pro` gère AIBlueprint Premium. Premium ajoute des agents, skills,
+scripts, settings et tooling en plus des defaults gratuits.
+
+Commence par `setup` pour une première installation. Ça te demande ton token
+d'accès si aucun n'est encore sauvegardé.
+
+```bash
+npx aiblueprint-cli@latest agents pro setup
+```
+
+## Sous-commandes
+
+| Commande | Description |
+| ------- | ----------- |
+| [`agents pro activate [token]`](/commands/pro-activate) | Active Premium avec un token d'accès. |
+| [`agents pro status`](/commands/pro-status) | Vérifie si un token Premium est sauvegardé. |
+| [`agents pro setup`](/commands/pro-setup) | Installe Premium et son tooling requis. |
+| [`agents pro update`](/commands/pro-update) | Remplace la config Premium locale par la dernière version complète. |
+| [`agents pro sync`](/commands/sync) | Passe en revue les changements et importe sélectivement les updates Premium. |
+
+## Update ou sync ?
+
+Utilise [`update`](/commands/pro-update) quand tu veux la config Premium
+complète la plus récente. Utilise [`sync`](/commands/sync) quand tu veux
+inspecter le diff, choisir quelles additions ou modifications importer, et
+créer un backup d'abord.
+
+## Dossiers custom
+
+Les commandes qui lisent ou installent de la config héritent des options de
+dossier de `agents`. Place ces options avant `pro` :
+
+```bash
+npx aiblueprint-cli@latest agents --folder ~/my-config pro setup
+```
+
+Voir chaque page de commande pour le comportement exact et les exemples.
+
+Récupère un token Premium sur [mlv.sh/claude-cli](https://mlv.sh/claude-cli).
+
+## Assistant Pro
+
+Assistant Pro utilise une commande séparée parce qu'il distribue un catalogue
+de skills versionné dédié, pas le setup Agents Config Pro complet :
+
+```bash
+npx aiblueprint-cli@latest assistants pro setup
+```
+
+Cette commande unique active Assistant Pro si besoin et configure ses skills
+pour Claude Code, Codex, Hermes et OpenClaw. Voir
+[`agents pro setup`](/commands/pro-setup) pour la comparaison détaillée.

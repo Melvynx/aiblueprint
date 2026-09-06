@@ -1,0 +1,39 @@
+---
+title: agents codex-agents
+description: Rend les agents Markdown partagés en custom agents TOML Codex.
+keywords: ["codex", "agents", "toml", "render"]
+---
+
+`agents codex-agents` rend les agents Markdown partagés de `~/.agents/agents`
+en custom agents TOML Codex.
+
+```bash
+npx aiblueprint-cli@latest agents codex-agents
+```
+
+## Options
+
+| Option | Description |
+| ------ | ----------- |
+| `--overwrite` | Écrase les fichiers agents Codex existants non générés. |
+
+## Ce que ça fait
+
+- Lit chaque agent `*.md` du dossier partagé `~/.agents/agents`.
+- Convertit chacun au format custom-agent TOML Codex.
+- Écrit les résultats dans ton dossier agents Codex.
+- Affiche le dossier source, le dossier cible, le nombre rendu, et les
+  fichiers ignorés avec leurs raisons.
+
+## Exemple
+
+```bash
+# Render new agents only
+npx aiblueprint-cli@latest agents codex-agents
+
+# Force overwrite existing files
+npx aiblueprint-cli@latest agents codex-agents --overwrite
+```
+
+Cette commande tourne aussi automatiquement comme dernière étape de
+[agents unify](/commands/unify).

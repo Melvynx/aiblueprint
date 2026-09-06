@@ -1,0 +1,108 @@
+---
+title: Ne pas overflow la mémoire
+description: Le Markdown mort pollue l'agent. Garde AGENTS.md court, archive les plans finis, et arrête d'injecter des descriptions de skills inutiles.
+keywords: ["agents.md", "claude.md", "mémoire", "skills", "audit-memories", "contexte"]
+---
+
+L'erreur de mémoire d'agent la plus courante n'est pas une règle manquante. C'est trop de Markdown.
+
+Tu documentes une feature, le code bouge, le Markdown non. Ensuite l'agent lit une commande qui n'existe plus, un composant supprimé, un plan déjà mergé. Tu ne le guides plus. Tu empoisonnes le contexte.
+
+<YouTubeEmbed id="qgDgvtyHOcI" title="Arrete d'ajouter du Markdown" />
+
+## Les agents recopient d'abord le code existant
+
+Un agent est un modèle statistique. Il fait ce qui est le plus probable, donc il continue ce qui existe déjà.
+
+Si `DELETE /api/v1/user` a un middleware, un nouveau `GET` ou `PATCH` sur la même route va presque toujours reprendre ce middleware. L'agent ne réinvente pas la stack. Il la copie.
+
+Donc un code propre reste propre. Un code sale reste sale. Les règles perdent face au repo.
+
+Écris « n'ajoute aucun commentaire » dans `AGENTS.md`, puis laisse l'agent explorer un arbre où la moitié des fichiers ont des commentaires. Il en ajoutera. Le code qu'il vient de lire pèse plus lourd que la règle.
+
+La qualité du code, c'est la vraie mémoire. Le Markdown n'est qu'un commentaire optionnel par-dessus.
+
+## Garde AGENTS.md court
+
+Traite `AGENTS.md` comme un index, pas une décharge. Symlinke-le avec `CLAUDE.md` si les deux outils doivent voir le même fichier.
+
+Garde :
+
+- ce qu'est le produit
+- la stack actuelle, tenue à jour
+- les commandes utiles, ou un pointeur vers l'endroit où elles vivent
+- la structure du projet
+- les contraintes de sécu sur l'auth, la base et les API
+
+Coupe :
+
+- les conventions de naming que le code montre déjà
+- les how-to React / shadcn / composants
+- les explications de features que l'agent lit dans le source
+- les rustines de l'époque Sonnet pour des bugs que les modèles actuels ne font plus
+
+Sur le cleanup Lumail montré dans la vidéo, le fichier principal est passé de 185 lignes à 68. Le diff plus large a supprimé 573 lignes et en a ajouté 193. Ces chiffres décrivent ce repo, pas une cible universelle.
+
+Sois restrictif. Pars du principe que l'agent va lire le code.
+
+## Archive les plans et outputs morts
+
+Le fichier principal n'est pas la seule fuite. `.agents/`, les dossiers de règles et la doc restante se remplissent de plans mergés, de tâches finies, de dumps d'output et de placeholders.
+
+Quand l'agent cherche, il tombe dessus. Plus aucune valeur, et ça occupe encore du raisonnement.
+
+Supprime les plans terminés ou sors-les du chemin de lecture. Les règles qui décrivent un composant maintenant porté par un skill, pareil. Garde les règles spécifiques quand elles encodent encore une vraie contrainte, mais parque-les dans des fichiers séparés au lieu de gonfler l'index.
+
+## Range les skills projet dans le projet
+
+Un skill de montage vidéo dans `~/.agents/skills` injecte sa description dans chaque repo SaaS que tu ouvres.
+
+Un skill lié à un projet vit dans `.agents/skills` de ce projet. Seuls les skills vraiment transversaux restent globaux. Demande à l'agent de les déplacer ; une passe suffit. Les descriptions arrêtent de polluer tous les autres contextes.
+
+## Désactive l'invocation implicite, garde un routeur
+
+Codex prévient quand les skills bouffent trop de tokens. C'est normal : chaque description disponible est injectée, même si tu ne l'appelles jamais.
+
+Côté Claude, mets `disable-model-invocation: true` dans le frontmatter du skill. Côté Codex, mets `allow_implicit_invocation: false` (ou le champ `policy` que ton harnais documente vraiment). Ne recopie pas une clé devinée depuis un transcript. Vérifie la spec actuelle.
+
+L'effet est le même : le modèle ne peut plus s'auto-lancer le skill, et la description sort du prompt par défaut.
+
+Le pattern qui scale, c'est un routeur. Laisse `animate` invocable. Désactive chaque enfant `animate-*`. Le parent pointe vers les enfants seulement quand tu en as besoin : une description dans le contexte au lieu de dizaines.
+
+## Audite, puis clean
+
+AIBlueprint livre `$audit-memories` et `$audit-skills` en utilitaires explicit-only. Ils ne tournent pas tant que tu ne les invoques pas.
+
+`$audit-memories` lit le Markdown destiné aux agents dans le projet courant et rend keep / update / merge / delete par fichier. Sur la run Lumail : 129 fichiers, environ 85 % en delete. Hits typiques : une commande de seed annoncée dans `AGENTS.md` absente de `package.json`, des composants documentés qui n'existent plus, des pages de contexte sans usage actuel.
+
+`$audit-skills` vérifie l'usage, les flags d'invocation implicite, les doublons, et le scope global versus projet.
+
+Lis le rapport. Ensuite clean. Regarde le git diff avant de committer. En cas de doute, archive au lieu de supprimer.
+
+```text
+Audite tous les Markdown de mémoire et de règles de ce repo
+(AGENTS.md, CLAUDE.md, .agents/, .claude/, docs internes).
+
+Pour chaque fichier, verdict : keep, update, merge ou delete.
+
+Justifie contre le code :
+- les commandes citées existent-elles dans package.json ?
+- les fichiers, composants et routes mentionnés existent-ils encore ?
+- l'info est-elle évidente en lisant simplement le code ?
+
+Ne modifie rien. Rends un tableau de verdicts.
+```
+
+## Ce que ça ne règle pas
+
+Nettoyer la mémoire ne rendra pas un agent bon sur une codebase sale. Le code propre est la condition. Le Markdown propre est le bonus.
+
+Les chiffres ci-dessus sont un audit, pas une loi pour ton repo. Les flags d'invocation bougent aussi d'un harnais à l'autre. Vérifie ce que le tien supporte vraiment avant de tout renommer.
+
+## Voir aussi
+
+- [Skills](/concepts/skills) pour `audit-memories` et `audit-skills`
+- [agents unify](/commands/unify) pour déplacer des skills globaux dans un projet
+- [Effort level](/concepts/effort-level) si tu brûles des tokens sur le thinking plutôt que sur du contexte poubelle
+
+Source : [l'article Codelynx](https://codelynx.dev/posts/nettoyer-agents-md-skills-contexte-ia) et [la vidéo](https://youtu.be/qgDgvtyHOcI).

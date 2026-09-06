@@ -1,0 +1,41 @@
+---
+title: Raccourcis shell
+description: Alias rapides pour lancer Claude Code et Codex.
+keywords: ["shell", "alias", "cc", "ccc", "cx", "cxc", "zsh", "codex"]
+---
+
+Le setup peut ajouter des alias qui lancent Claude Code et Codex rapidement,
+pour que tu puisses commencer tout de suite.
+
+## Alias
+
+| Alias | Équivaut à |
+| ----- | ---------- |
+| `cc` | `claude --dangerously-skip-permissions` |
+| `ccc` | `claude --dangerously-skip-permissions -c` |
+| `cx` | `codex` |
+| `cxc` | `codex resume --last` |
+
+`ccc` ajoute `-c` pour continuer la conversation Claude Code précédente.
+`cxc` reprend la session Codex la plus récente pour le répertoire courant.
+
+## Où ils sont écrits
+
+| Plateforme | Fichier |
+| -------- | ---- |
+| macOS | `~/.zshenv` |
+| Linux | `~/.zshrc` ou `~/.bashrc` (détecté) |
+| Windows | `~/Documents/PowerShell/Profile.ps1` (sous forme de fonctions) |
+
+## Utilisation
+
+Après le setup, recharge ton shell ou ouvre un nouveau terminal, puis lance :
+
+```bash
+cc
+cx
+```
+
+> Les alias Claude Code sautent les invites d'autorisation. Associe-les aux
+> règles de refus de [sécurité](/concepts/security), qui bloquent les
+> commandes dangereuses même quand les permissions sont ignorées.
