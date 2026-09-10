@@ -312,6 +312,41 @@ script3: /Users/melvynx/.claude/scripts/c.ts
       expect(result).not.toContain("\\");
     });
 
+    it("preserves regexes and escapes while replacing Claude paths", async () => {
+      const { transformFileContent } = await import("../src/lib/platform");
+      const content = String.raw`const script = "{CLAUDE_PATH}/scripts/test.ts";
+const other = "/Users/olduser/.claude/scripts/other.ts";
+const branch = value.match(/\+(\d+)/);
+const model = name.replace(/\s*\((\d+[KM])\s+context\)/i, " $1");
+const jsonl = JSON.stringify(entry) + "\n";
+const escaped = "\t\r\n\\\"";
+const unrelated = "C:\\temp\\file.txt";`;
+
+      expect(transformFileContent(content, String.raw`C:\Users\newuser\.claude`)).toBe(
+        content
+          .replace("{CLAUDE_PATH}", "C:/Users/newuser/.claude")
+          .replace("/Users/olduser/.claude/", "C:/Users/newuser/.claude/"),
+      );
+    });
+
+    it("normalizes only recognized Windows paths, including JSON-escaped paths", async () => {
+      const { transformFileContent } = await import("../src/lib/platform");
+      const content = String.raw`path: c:\Users\test\.claude\scripts\nested\test.ts
+{"path":"C:\\Users\\test\\.claude\\scripts\\test.ts","line":"\n","regex":"\\d+"}`;
+
+      expect(transformFileContent(content, "/home/user/.claude")).toBe(
+        String.raw`path: /home/user/.claude/scripts/nested/test.ts
+{"path":"/home/user/.claude/scripts/test.ts","line":"\n","regex":"\\d+"}`,
+      );
+    });
+
+    it("preserves escapes in content without paths", async () => {
+      const { transformFileContent } = await import("../src/lib/platform");
+      const content = String.raw`/\+(\d+)/ /\s*\((\d+[KM])\s+context\)/i "\n" '\t' \\\\`;
+
+      expect(transformFileContent(content, "/home/user/.claude")).toBe(content);
+    });
+
     it("should not modify content without claude paths", async () => {
       const { transformFileContent } = await import("../src/lib/platform");
 

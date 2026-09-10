@@ -30,6 +30,10 @@ Items that are unchanged are not selectable. The default custom selection
 includes every available change. If everything is current, the command exits
 without writing anything.
 
+Selected updates replace the installed files; local edits are kept in the backup,
+not merged into the new version. Sync preserves regular expressions and escaped
+characters in scripts and configuration files.
+
 ## Folder options
 
 These options belong to the parent `agents` command, so place them before

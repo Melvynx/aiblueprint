@@ -250,15 +250,18 @@ export async function applyPathPlaceholders(target: string, claudeDir: string): 
 }
 
 export function transformFileContent(content: string, claudeDir: string): string {
-  let transformed = content;
+  const normalizedClaudeDir = claudeDir.replace(/\\/g, "/");
+  const windowsPath = /C:[\\/]+Users[\\/]+[^\\/\r\n"'`]+[\\/]+\.claude[\\/]+([^\s"'`<>|]*)/;
+  const claudePaths = new RegExp(
+    [windowsPath.source, ...KNOWN_CLAUDE_PATHS.map((pattern) => pattern.source)].join("|"),
+    "gi",
+  );
 
-  transformed = replaceClaudePathPlaceholder(transformed, claudeDir);
-
-  for (const pattern of KNOWN_CLAUDE_PATHS) {
-    transformed = transformed.replace(new RegExp(pattern.source, "g"), `${claudeDir}/`);
-  }
-
-  transformed = transformed.replace(/\\/g, "/");
+  // Normalize only recognized paths in one pass, never regexes or string escapes.
+  let transformed = content.replace(claudePaths, (_match, relativePath: string | undefined) =>
+    `${normalizedClaudeDir}/${relativePath?.replace(/\\+/g, "/") ?? ""}`,
+  );
+  transformed = replaceClaudePathPlaceholder(transformed, normalizedClaudeDir);
 
   const audioPatterns = [
     /afplay\s+-v\s+[\d.]+\s+'[^']+'/g,

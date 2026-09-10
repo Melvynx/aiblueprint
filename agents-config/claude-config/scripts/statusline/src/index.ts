@@ -137,6 +137,7 @@ async function main() {
 				const maxTokens =
 					input.context_window?.context_window_size ||
 					config.context.maxContextTokens;
+				config.context.maxContextTokens = maxTokens;
 				contextPercentage = Math.min(
 					100,
 					Math.round((contextTokens / maxTokens) * 100),
