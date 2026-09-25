@@ -1,0 +1,38 @@
+---
+title: Test Audit
+description: "Gate new tests at write time and prune low-value, implementation-coupled, or duplicate ones."
+keywords: ["test-audit", "tests"]
+pro: false
+---
+
+`test-audit` holds every test to one value bar: it must protect behavior, a credible regression, or an independent contract. It gates new tests and audits existing ones.
+
+## Invoke
+
+```bash
+$test-audit
+```
+
+## What it does
+
+- Authoring gate: before a test lands, it must name the behavior it protects, the regression that breaks it, and why existing coverage misses it.
+- Audit mode hunts for junk patterns such as assertion-free probes, source greps, mocks that implement the asserted behavior, and tests that only keep test-only exports alive.
+- Records evidence for every candidate before deleting anything, and keeps tests that guard real API, config, storage, security, or release contracts.
+- Campaign mode prunes one subsystem's whole test surface lane by lane, with a preservation review and mutation checks.
+- Triggers automatically when you write, change, review, or sweep tests.
+
+Adapted from [OpenClaw](https://github.com/openclaw/openclaw) (MIT).
+
+## Install
+
+Included in the free bundle:
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Install only this skill:
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill test-audit
+```

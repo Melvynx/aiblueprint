@@ -13,6 +13,7 @@
     "hooks-manager",
     "rules-manager",
     "skill-manager",
+    "test-audit",
     "use-style",
     "analyze",
     "animate",

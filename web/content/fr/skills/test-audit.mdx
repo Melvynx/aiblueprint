@@ -1,0 +1,38 @@
+---
+title: Test Audit
+description: "Filtrer les nouveaux tests à l'écriture et élaguer ceux sans valeur, couplés à l'implémentation ou dupliqués."
+keywords: ["test-audit", "tests"]
+pro: false
+---
+
+`test-audit` applique une seule barre de valeur à chaque test : il doit protéger un comportement, une régression crédible ou un contrat indépendant. Il filtre les nouveaux tests et audite les existants.
+
+## Invoquer
+
+```bash
+$test-audit
+```
+
+## Ce qu'il fait
+
+- Filtre à l'écriture : avant d'ajouter un test, il faut nommer le comportement protégé, la régression qui le casse et pourquoi la couverture existante ne la détecte pas.
+- Le mode audit traque les tests inutiles : sondes sans assertion, greps de source, mocks qui implémentent le comportement testé, tests qui ne servent qu'à garder des exports de test.
+- Note les preuves pour chaque candidat avant toute suppression, et garde les tests qui protègent de vrais contrats d'API, config, stockage, sécurité ou release.
+- Le mode campagne élague toute la surface de tests d'un sous-système, lane par lane, avec une revue de préservation et des tests de mutation.
+- Se déclenche automatiquement quand tu écris, modifies, relis ou nettoies des tests.
+
+Adapté d'[OpenClaw](https://github.com/openclaw/openclaw) (MIT).
+
+## Installer
+
+Inclus dans le lot gratuit :
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Installer uniquement ce skill :
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill test-audit
+```

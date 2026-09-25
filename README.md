@@ -147,6 +147,7 @@ npx skills add Melvynx/aiblueprint --skill skill-manager
 | `environments-manager` | Set up per-worktree agent environments |
 | `rules-manager` | Create and maintain agent rule files |
 | `skill-manager` | Manage skills and rules across Claude Code, Codex, and Cursor |
+| `test-audit` | Gate new tests and prune low-value, implementation-coupled ones |
 | `use-style` | Apply named UI style guides before implementation |
 
 ## 🤖 Assistant Pro

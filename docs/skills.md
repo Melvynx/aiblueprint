@@ -34,6 +34,7 @@ This catalog is generated from the directories shipped under
 | `hooks-manager` | Create and debug Claude Code hooks |
 | `rules-manager` | Maintain AGENTS.md and agent rules |
 | `skill-manager` | Create, edit, audit, or prune skills |
+| `test-audit` | Gate new tests and prune low-value ones |
 | `use-style` | Apply named visual style guides |
 
 ---
@@ -145,6 +146,29 @@ platforms.
   - Cursor → `.cursor/rules/<name>.md` / `.mdc` (or `AGENTS.md`)
 - All platforms share the same idea: a small markdown file with frontmatter, plus
   optional references and scripts; discovery rules and frontmatter fields differ.
+
+---
+
+## test-audit
+
+```bash
+npx skills@latest add melvynx/aiblueprint --skill test-audit
+```
+
+**What it does:** Gates every new or changed test against a value bar, and audits
+existing tests that re-assert source, duplicate stronger proof, couple to
+implementation, or keep test-only production seams alive.
+
+**Use it for:** writing, changing, reviewing, or sweeping tests.
+
+**Key points:**
+- Authoring gate: a new test must name the behavior it protects, the regression
+  that breaks it, and why existing coverage misses it.
+- Audit mode records evidence per candidate before deleting anything, and keeps
+  tests that guard real contracts.
+- Campaign mode (`CAMPAIGN.md`) prunes one subsystem's whole test surface lane
+  by lane, with a preservation review and mutation checks.
+- Adapted from [OpenClaw](https://github.com/openclaw/openclaw) (MIT).
 
 ---
 
