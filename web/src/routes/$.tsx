@@ -1,5 +1,7 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { parseDocsSplat } from "@public-site/docs/locale";
+import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
+import { usePathname } from "@/compat/navigation";
+import { getNavTree } from "@public-site/docs/doc-manager";
+import { getLocaleFromPathname, parseDocsSplat } from "@public-site/docs/locale";
 import { DocsContent, DocsNotFound } from "./-docs-content";
 import { docsHead, loadDocsPage } from "./-docs-loader";
 
@@ -23,12 +25,21 @@ export const Route = createFileRoute("/$")({
   },
   loader: ({ params }) => {
     const { locale, slugParts } = parseDocsSplat(params._splat);
-    return loadDocsPage(locale, slugParts);
+    const page = loadDocsPage(locale, slugParts);
+    // Throwing makes SSR answer with a real 404 status instead of 200.
+    if (!page.doc) throw notFound();
+    return page;
   },
   head: ({ loaderData }) =>
     docsHead(loaderData?.doc ?? null, loaderData?.locale ?? "en"),
   component: DocsSplatRoute,
+  notFoundComponent: DocsSplatNotFound,
 });
+
+function DocsSplatNotFound() {
+  const locale = getLocaleFromPathname(usePathname());
+  return <DocsNotFound tree={getNavTree(locale)} />;
+}
 
 function DocsSplatRoute() {
   const { tree, doc, allDocs } = Route.useLoaderData();
