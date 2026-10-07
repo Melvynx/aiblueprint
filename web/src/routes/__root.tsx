@@ -21,7 +21,10 @@ export const Route = createRootRoute({
         content: getChrome("en").siteDescription,
       },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/svg+xml", href: "/aiblueprint-mark.svg" },
+    ],
   }),
   component: RootLayout,
 });

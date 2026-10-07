@@ -17,15 +17,17 @@ Run these commands in your coding assistant after installing the skills:
 /apex -a -x add organization invitations
 ```
 
-In Codex, invoke the skill with `$apex` instead of `/apex`.
+<Callout type="tip">In Codex, invoke the skill with `$apex` instead of `/apex`.</Callout>
 
 ## Workflow
 
-1. **Preflight** — Read project instructions, establish scope, and capture the baseline.
-2. **Analyze and plan** — Resolve missing context and define tasks, dependencies, and validation.
-3. **Execute** — Implement locally or delegate bounded, independent work when useful.
-4. **Validate and examine** — Run relevant checks, review according to risk, and fix confirmed findings.
-5. **Prove and hand off** — Exercise the real flow when required and report the evidence and any remaining blockers.
+<Steps>
+<Step title="Preflight">Read project instructions, establish scope, and capture the baseline.</Step>
+<Step title="Analyze and plan">Resolve missing context and define tasks, dependencies, and validation.</Step>
+<Step title="Execute">Implement locally or delegate bounded, independent work when useful.</Step>
+<Step title="Validate and examine">Run relevant checks, review according to risk, and fix confirmed findings.</Step>
+<Step title="Prove and hand off">Exercise the real flow when required and report the evidence and any remaining blockers.</Step>
+</Steps>
 
 Material or high-risk changes require independent review. Apex re-plans when
 checks or new evidence invalidate an assumption, then repeats affected validation.
@@ -50,10 +52,7 @@ still apply.
 | `-m` / `-M` | Set orchestration to `prefer-parallel` / `direct`. Actual fan-out still follows conflict checks. |
 | `-r <id>` | Resume a validated run checkpoint. |
 
-`-a` reduces interaction; it does not authorize publishing, deployment, or other
-external actions. Disabling new tests with `-T` still runs relevant existing
-checks. Runtime proof depends on the request and risk, and can be explicitly
-requested with `-v`.
+<Callout type="warning" title="Flags never widen permissions">`-a` reduces interaction; it does not authorize publishing, deployment, or other external actions. Disabling new tests with `-T` still runs relevant existing checks. Runtime proof depends on the request and risk, and can be explicitly requested with `-v`.</Callout>
 
 ## Resume a run
 

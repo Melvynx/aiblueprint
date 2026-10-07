@@ -3,13 +3,7 @@ import { DocsContent, DocsNotFound } from "./-docs-content";
 import { docsHead, loadDocsPage } from "./-docs-loader";
 
 export const Route = createFileRoute("/fr/")({
-  loader: () => {
-    const data = loadDocsPage("fr", []);
-    return {
-      ...data,
-      doc: data.doc ?? data.tree.rootDocs.at(0) ?? null,
-    };
-  },
+  loader: () => loadDocsPage("fr", []),
   head: ({ loaderData }) =>
     docsHead(loaderData?.doc ?? null, loaderData?.locale ?? "fr"),
   component: FrenchIndexRoute,

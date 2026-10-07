@@ -18,15 +18,17 @@ skills :
 /apex -a -x add organization invitations
 ```
 
-Dans Codex, invoquer le skill avec `$apex` à la place de `/apex`.
+<Callout type="tip">Dans Codex, invoque le skill avec `$apex` à la place de `/apex`.</Callout>
 
 ## Workflow
 
-1. **Preflight** : lire les instructions du projet, établir le périmètre et capturer la baseline.
-2. **Analyze and plan** : résoudre le contexte manquant et définir les tâches, dépendances et validations.
-3. **Execute** : implémenter en local ou déléguer un travail borné et indépendant quand c'est utile.
-4. **Validate and examine** : lancer les checks pertinents, relire selon le risque, et corriger les findings confirmés.
-5. **Prove and hand off** : exercer le vrai flux quand c'est requis et rapporter les preuves ainsi que les blockers restants.
+<Steps>
+<Step title="Preflight">Lire les instructions du projet, établir le périmètre et capturer la baseline.</Step>
+<Step title="Analyze and plan">Résoudre le contexte manquant et définir les tâches, dépendances et validations.</Step>
+<Step title="Execute">Implémenter en local ou déléguer un travail borné et indépendant quand c'est utile.</Step>
+<Step title="Validate and examine">Lancer les checks pertinents, relire selon le risque, et corriger les findings confirmés.</Step>
+<Step title="Prove and hand off">Exercer le vrai flux quand c'est requis et rapporter les preuves ainsi que les blockers restants.</Step>
+</Steps>
 
 Les changements matériels ou à haut risque exigent une revue indépendante.
 Apex replanifie quand des checks ou de nouvelles preuves invalident une
@@ -52,10 +54,7 @@ obligatoires du projet s'appliquent toujours.
 | `-m` / `-M` | Régler l'orchestration sur `prefer-parallel` / `direct`. Le fan-out réel suit toujours les checks de conflit. |
 | `-r <id>` | Reprendre un checkpoint de run validé. |
 
-`-a` réduit l'interaction ; ça n'autorise ni publication, ni déploiement, ni
-d'autres actions externes. Désactiver les nouveaux tests avec `-T` lance
-quand même les checks existants pertinents. La preuve runtime dépend de la
-demande et du risque, et peut être demandée explicitement avec `-v`.
+<Callout type="warning" title="Les flags n'élargissent jamais les permissions">`-a` réduit l'interaction ; ça n'autorise ni publication, ni déploiement, ni d'autres actions externes. Désactiver les nouveaux tests avec `-T` lance quand même les checks existants pertinents. La preuve runtime dépend de la demande et du risque, et peut être demandée explicitement avec `-v`.</Callout>
 
 ## Reprendre une run
 

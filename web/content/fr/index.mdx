@@ -1,61 +1,36 @@
 ---
 title: AIBlueprint CLI
 description: Une commande pour configurer Claude Code, Codex et tout votre workflow de coding IA, avec des defaults éprouvés.
-keywords: ["aiblueprint", "cli", "claude code", "codex", "ai coding"]
+keywords: ["aiblueprint", "cli", "claude code", "codex", "ai coding", "accueil"]
+layout: home
 ---
 
-AIBlueprint est un outil en ligne de commande qui configure votre environnement de
-coding IA en quelques secondes. Il installe des agents, des skills, une
-statusline, des hooks de sécurité et des raccourcis shell dans `~/.claude`,
-`~/.codex` et un dossier partagé `~/.agents`, pour que tous vos outils restent
-synchronisés.
+<HomeHero kicker="Claude Code · Codex · OpenCode" title="Votre setup de coding IA, prêt en une commande." description="AIBlueprint installe des agents, des skills, une statusline complète, des hooks de sécurité et des raccourcis shell dans ~/.claude, ~/.codex et un dossier partagé ~/.agents, pour que tous vos outils restent synchronisés." />
 
-```bash
-npx aiblueprint-cli@latest agents setup
-```
+## Opérationnel en trois étapes
 
-## Ce que vous obtenez
+<Steps>
+<Step title="Lancez le setup">Exécutez `npx aiblueprint-cli@latest agents setup`. Rien à installer globalement : `npx` prend toujours la dernière version.</Step>
+<Step title="Choisissez vos fonctionnalités">Raccourcis, hooks de sécurité, statusline, agents et skills. Votre config existante est sauvegardée avant tout changement.</Step>
+<Step title="Livrez avec un workflow">Ouvrez Claude Code ou Codex et lancez un skill comme `/apex add organization invitations` pour passer de l'idée au changement vérifié.</Step>
+</Steps>
+
+## Pages populaires
 
 <DocCardWrapper>
-<DocSection title="Pour commencer">
 <DocCardGrid>
-  <DocCard href="/getting-started/installation" icon="Play" title="Installation" description="Installez la CLI et lancez votre premier setup." />
   <DocCard href="/getting-started/quick-start" icon="Zap" title="Démarrage rapide" description="Configurez tout avec une seule commande." />
-  <DocCard href="/concepts/security" icon="Shield" title="Sécurité" description="Hooks de sécurité et permissions par défaut, déjà en place." />
-</DocCardGrid>
-</DocSection>
-
-<DocSection title="Commandes principales">
-<DocCardGrid>
+  <DocCard href="/advanced/apex" icon="Workflow" title="Apex" description="Boucle adaptative Analyze, Plan, Execute, eXamine avec checkpoints." />
+  <DocCard href="/core-workflow" icon="Layers" title="Le workflow principal" description="Analyser, planifier, implémenter, reviewer et vérifier, skill par skill." />
   <DocCard href="/commands/agents-setup" icon="Settings" title="agents setup" description="Installe agents, skills, statusline et raccourcis." />
-  <DocCard href="/commands/setup-terminal" icon="Terminal" title="agents setup-terminal" description="Oh My Zsh, plugins et un thème en une étape." />
-  <DocCard href="/commands/symlink" icon="Link2" title="agents symlink" description="Partage la config entre Claude Code, Codex et les autres." />
-  <DocCard href="/commands/unify" icon="Layers" title="agents unify" description="Centralise la config globale ou projet dans .agents." />
-  <DocCard href="/commands/configs" icon="Save" title="configs" description="Sauvegarde, charge et restaure des configs nommées." />
-  <DocCard href="/commands/pro" icon="Key" title="agents pro" description="Active et installe les configs premium." />
-</DocCardGrid>
-</DocSection>
-
-<DocSection title="Skills">
-<DocCardGrid>
-  <DocCard href="/skills" icon="Sparkles" title="Tous les skills" description="Catalogue gratuit plus chaque skill Premium, avec un badge PRO dans la sidebar." />
-  <DocCard href="/skills/use-style" icon="Palette" title="Utiliser un style" description="Styles visuels nommés pour l'implémentation UI." />
+  <DocCard href="/concepts/security" icon="Shield" title="Sécurité" description="Hooks de sécurité et permissions par défaut, déjà en place." />
   <DocCard href="/skills/use-artifacts" icon="FileText" title="Utiliser des artefacts" description="HTML local soigné pour plans, options et prototypes." pro={true} />
-  <DocCard href="/examples" icon="Eye" title="Exemples" description="Prévisualise chaque style inclus avec un sélecteur." />
 </DocCardGrid>
-</DocSection>
-
-<DocSection title="Concepts">
-<DocCardGrid>
-  <DocCard href="/concepts/statusline" icon="Code2" title="Statusline" description="Git, tokens et coût dans votre prompt." />
-  <DocCard href="/concepts/agents" icon="Workflow" title="Agents" description="Agents spécialisés pour l'exploration et la recherche." />
-  <DocCard href="/concepts/effort-level" icon="Gauge" title="Effort level" description="Route Low à Max selon la difficulté. Max n'est pas un défaut." />
-  <DocCard href="/concepts/dont-overflow-memory" icon="HardDrive" title="Ne pas overflow la mémoire" description="Garde AGENTS.md court. Le Markdown mort pollue l'agent plus qu'il ne l'aide." />
-  <DocCard href="/concepts/context-sweet-spot" icon="Target" title="Sweet spot du contexte" description="Reste sous la falaise d'attention. Une fenêtre 1M est plus lente, plus bête et plus chère." />
-  <DocCard href="/landing-page" icon="Eye" title="Références landing page" description="Parcours les screenshots de landing pages d'apps mobile." />
-</DocCardGrid>
-</DocSection>
 </DocCardWrapper>
+
+## Parcourir la documentation
+
+<DocsSectionsGrid />
 
 ## Capacités principales
 

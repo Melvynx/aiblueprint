@@ -3,18 +3,29 @@ import { usePathname } from "@/compat/navigation";
 import { ServerMdx } from "@/features/markdown/server-mdx";
 import { cn } from "@/lib/utils";
 import { DocsHeader } from "@public-site/docs/_components/docs-header";
+import {
+  DocsSearch,
+  SearchTrigger,
+} from "@public-site/docs/_components/docs-search";
 import { DocsSidebar } from "@public-site/docs/_components/docs-sidebar";
 import {
   DocsTableOfContents,
   type TocItem,
 } from "@public-site/docs/_components/docs-toc";
-import type { DocTree, DocType } from "@public-site/docs/doc-manager";
+import { PageActions } from "@public-site/docs/_components/page-actions";
+import {
+  type DocTree,
+  type DocType,
+  getFolderForSlug,
+  type NavDoc,
+} from "@public-site/docs/doc-manager";
 import {
   getChrome,
   getLocaleFromPathname,
   slugifyHeading,
+  withLocale,
 } from "@public-site/docs/locale";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronRight } from "lucide-react";
 import { type ReactNode, useMemo } from "react";
 
 function DocsShell(props: { tree: DocTree; children: ReactNode }) {
@@ -22,24 +33,30 @@ function DocsShell(props: { tree: DocTree; children: ReactNode }) {
   const copy = getChrome(locale);
 
   return (
-    <div className="dark flex min-h-screen flex-col bg-[#08090a] font-sans text-[#f7f8f8] antialiased selection:bg-primary/25">
+    <div className="dark flex min-h-screen flex-col overflow-x-clip bg-[#08090a] font-sans text-[#f7f8f8] antialiased selection:bg-primary/25">
       <DocsHeader />
       <details
-        className="border-b border-white/[0.06] lg:hidden"
+        suppressHydrationWarning
+        className="group/mobile-nav sticky top-16 z-40 border-b border-white/[0.06] bg-[#08090a]/95 backdrop-blur supports-[backdrop-filter]:bg-[#08090a]/85 lg:hidden"
         onClick={(event) => {
           if (event.target instanceof Element && event.target.closest("a"))
             event.currentTarget.open = false;
         }}
       >
-        <summary className="cursor-pointer rounded-xl px-6 py-3 text-sm text-primary focus-visible:outline-2 focus-visible:outline-primary">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-medium text-[#c5c8ce] select-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary sm:px-6 [&::-webkit-details-marker]:hidden">
+          <ChevronRight
+            aria-hidden="true"
+            className="size-4 shrink-0 text-primary transition-transform group-open/mobile-nav:rotate-90"
+          />
           {copy.browse}
         </summary>
         <DocsSidebar tree={props.tree} mobile />
       </details>
       <div className="flex flex-1 border-t border-white/[0.06]">
         <DocsSidebar tree={props.tree} />
-        <main className="min-w-0 flex-1">{props.children}</main>
+        <main id="main" className="min-w-0 flex-1">{props.children}</main>
       </div>
+      <DocsSearch />
     </div>
   );
 }
@@ -53,9 +70,23 @@ export function DocsNotFound(props: { tree: DocTree }) {
 
   return (
     <DocsShell tree={props.tree}>
-      <div className="mx-auto max-w-2xl px-6 py-16">
-        <h1 className="text-3xl font-bold tracking-tight">{copy.notFoundTitle}</h1>
-        <p className="text-muted-foreground mt-3">{copy.notFoundBody}</p>
+      <div className="mx-auto flex max-w-2xl flex-col items-start gap-4 px-6 py-24">
+        <span className="rounded-full border border-white/10 px-2.5 py-0.5 font-mono text-xs text-primary">
+          404
+        </span>
+        <h1 className="text-3xl font-medium tracking-[-0.025em] text-[#f7f8f8]">
+          {copy.notFoundTitle}
+        </h1>
+        <p className="text-[#8a8f98]">{copy.notFoundBody}</p>
+        <div className="flex flex-wrap items-center gap-2 pt-2">
+          <SearchTrigger expanded />
+          <Link
+            href={withLocale("/", getLocaleFromPathname(usePathname()))}
+            className="rounded-full px-3 py-1.5 text-sm font-medium text-primary no-underline hover:bg-primary/10"
+          >
+            {copy.backToDocs}
+          </Link>
+        </div>
       </div>
     </DocsShell>
   );
@@ -64,9 +95,30 @@ export function DocsNotFound(props: { tree: DocTree }) {
 export function DocsContent(props: {
   tree: DocTree;
   doc: DocType;
-  allDocs: DocType[];
+  allDocs: NavDoc[];
 }) {
-  const copy = getChrome(getLocaleFromPathname(usePathname()));
+  if (props.doc.attributes.layout === "home") {
+    return (
+      <DocsShell tree={props.tree}>
+        <div className="mx-auto w-full max-w-5xl px-6 py-10 sm:py-14">
+          <ServerMdx className="docs-typography docs-home" source={props.doc.content} />
+        </div>
+      </DocsShell>
+    );
+  }
+
+  return <DocsArticle {...props} />;
+}
+
+function DocsArticle(props: {
+  tree: DocTree;
+  doc: DocType;
+  allDocs: NavDoc[];
+}) {
+  const locale = getLocaleFromPathname(usePathname());
+  const copy = getChrome(locale);
+  const folder = getFolderForSlug(props.tree, props.doc.slug);
+  const folderLanding = folder?.docs.find((doc) => doc.slug === folder.slug) ?? folder?.docs[0];
   const currentIndex = props.allDocs.findIndex(
     (doc) => doc.slug === props.doc.slug,
   );
@@ -85,6 +137,28 @@ export function DocsContent(props: {
             <div className="mx-auto w-full min-w-0 px-6 py-10 sm:py-14">
               <div className="mx-auto flex w-full min-w-0 max-w-prose flex-col gap-8">
                 <div className="flex flex-col gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+                    <nav aria-label="Breadcrumb">
+                      <ol className="flex items-center gap-1.5 font-mono text-[11px] tracking-[0.08em] text-white/40 uppercase">
+                        <li>
+                          <Link href={withLocale("/", locale)} className="no-underline hover:text-primary">
+                            {copy.docs}
+                          </Link>
+                        </li>
+                        {folder && folderLanding && (
+                          <>
+                            <ChevronRight aria-hidden="true" className="size-3 text-white/25" />
+                            <li>
+                              <Link href={folderLanding.url} className="no-underline hover:text-primary">
+                                {folder.name}
+                              </Link>
+                            </li>
+                          </>
+                        )}
+                      </ol>
+                    </nav>
+                    <PageActions doc={props.doc} />
+                  </div>
                   <h1 className="text-[2rem] leading-[1.1] font-medium tracking-[-0.025em] text-balance text-[#f7f8f8] sm:text-4xl">
                     {props.doc.attributes.title}
                   </h1>
@@ -150,7 +224,7 @@ function extractToc(content: string): TocItem[] {
 
   while ((match = headingRegex.exec(content)) !== null) {
     const depth = match[1].length;
-    const title = match[2].trim();
+    const title = match[2].replace(/[`*_]/g, "").trim();
     toc.push({ title, url: `#${slugifyHeading(title)}`, depth });
   }
 

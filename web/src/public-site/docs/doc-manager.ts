@@ -37,6 +37,7 @@ const AttributeSchema = z.object({
   keywords: z.array(z.string()).optional(),
   order: z.number().optional(),
   pro: z.boolean().optional(),
+  layout: z.enum(["doc", "home"]).optional(),
 });
 
 type DocAttributes = z.infer<typeof AttributeSchema>;
@@ -44,19 +45,24 @@ type DocAttributes = z.infer<typeof AttributeSchema>;
 export type DocType = {
   slug: string;
   url: string;
+  /** Repository-relative path of the source file, used for "Edit on GitHub". */
+  sourcePath: string;
   attributes: DocAttributes;
   content: string;
 };
 
-export type DocFolder = {
+/** A doc without its body, cheap enough to send for navigation on every page. */
+export type NavDoc = Omit<DocType, "content">;
+
+export type DocFolder<T extends NavDoc = DocType> = {
   name: string;
   slug: string;
-  docs: DocType[];
+  docs: T[];
 };
 
-export type DocTree = {
-  rootDocs: DocType[];
-  folders: DocFolder[];
+export type DocTree<T extends NavDoc = NavDoc> = {
+  rootDocs: T[];
+  folders: DocFolder<T>[];
 };
 
 function contentRoot(locale: Locale): string {
@@ -98,6 +104,7 @@ function readMdxFile(
   return {
     slug,
     url: withLocale(slug ? `/${slug}` : "/", locale),
+    sourcePath: filePath.replace("../../../", "web/"),
     content: matter.body,
     attributes: result.data,
   };
@@ -171,7 +178,9 @@ function sortByOrder(order: string[], a: string, b: string): number {
   return aIndex - bIndex;
 }
 
-export function getDocsTree(locale: Locale = DEFAULT_LOCALE): DocTree {
+export function getDocsTree(
+  locale: Locale = DEFAULT_LOCALE,
+): DocTree<DocType> {
   try {
     const root = contentRoot(locale);
     const files = docFilesFor(locale);
@@ -226,4 +235,30 @@ export function getCurrentDoc(
 ): DocType | null {
   const slug = slugParts?.join("/") ?? "";
   return getAllDocs(locale).find((doc) => doc.slug === slug) ?? null;
+}
+
+function toNavDoc({ content: _content, ...doc }: NavDoc & { content?: string }): NavDoc {
+  return doc;
+}
+
+export function getNavTree(locale: Locale = DEFAULT_LOCALE): DocTree {
+  const tree = getDocsTree(locale);
+  return {
+    rootDocs: tree.rootDocs.map(toNavDoc),
+    folders: tree.folders.map((folder) => ({
+      ...folder,
+      docs: folder.docs.map(toNavDoc),
+    })),
+  };
+}
+
+export function getNavDocs(locale: Locale = DEFAULT_LOCALE): NavDoc[] {
+  return getAllDocs(locale).map(toNavDoc);
+}
+
+export function getFolderForSlug(tree: DocTree, slug: string): DocFolder<NavDoc> | null {
+  return (
+    tree.folders.find((folder) => folder.docs.some((doc) => doc.slug === slug)) ??
+    null
+  );
 }

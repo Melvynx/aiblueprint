@@ -7,7 +7,19 @@ import {
   DocCardWrapper,
   DocSection,
 } from "@public-site/docs/_components/doc-card";
+import {
+  DocsSectionsGrid,
+  HomeHero,
+} from "@public-site/docs/_components/docs-home";
 import { LandingReferenceGrid } from "@public-site/docs/_components/landing-reference-grid";
+import {
+  Callout,
+  H2,
+  H3,
+  H4,
+  Step,
+  Steps,
+} from "@public-site/docs/_components/mdx-blocks";
 import { YouTubeEmbed } from "@public-site/docs/_components/youtube-embed";
 import { useCodeWrap } from "@public-site/docs/code-wrap";
 import {
@@ -131,6 +143,14 @@ function DocsMarkdownLink({
 const MdxComponent = {
   a: DocsMarkdownLink,
   pre: CodeBlock,
+  h2: H2,
+  h3: H3,
+  h4: H4,
+  Callout,
+  Steps,
+  Step,
+  HomeHero,
+  DocsSectionsGrid,
   DocCard,
   DocCardGrid,
   DocSection,

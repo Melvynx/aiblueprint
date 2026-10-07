@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import {
   BookOpen,
   Boxes,
+  ChevronRight,
   GitBranch,
   Layers3,
   Rocket,
@@ -69,7 +70,7 @@ export function DocsSidebar({
       className={cn(
         "docs-sidebar-scroll shrink-0 overflow-y-auto bg-[#08090a]",
         mobile
-          ? "max-h-[65vh] w-full"
+          ? "max-h-[calc(100dvh-7.5rem)] w-full overscroll-contain border-t border-white/[0.06]"
           : "sticky top-16 hidden h-[calc(100vh-4rem)] w-64 border-r border-white/[0.06] lg:block",
       )}
     >
@@ -111,11 +112,15 @@ export function DocsSidebar({
         </div>
 
         {tree.folders.map((folder) => (
-          <div key={folder.slug} className="flex flex-col gap-1.5">
-            <h4 className="px-2 pb-1 font-mono text-[10px] tracking-[0.12em] text-white/40 uppercase">
+          <details key={folder.slug} open className="group/folder flex flex-col gap-1.5">
+            <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg px-2 pb-1 font-mono text-[10px] tracking-[0.12em] text-white/40 uppercase transition-colors select-none hover:text-white/70 focus-visible:outline-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
               {folder.name}
-            </h4>
-            <ul className="ml-2 flex flex-col gap-px border-l border-white/[0.06]">
+              <ChevronRight
+                aria-hidden="true"
+                className="size-3 transition-transform group-open/folder:rotate-90"
+              />
+            </summary>
+            <ul className="mt-1.5 ml-2 flex flex-col gap-px border-l border-white/[0.06]">
               {folder.docs
                 .filter(
                   (doc) => folder.docs.length === 1 || doc.slug !== folder.slug,
@@ -142,7 +147,7 @@ export function DocsSidebar({
                   );
                 })}
             </ul>
-          </div>
+          </details>
         ))}
       </nav>
     </aside>

@@ -4,6 +4,9 @@ export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = "en";
 
+export const SITE_URL = "https://docs.aiblueprint.dev";
+export const REPO_URL = "https://github.com/Melvynx/aiblueprint";
+
 export type ChromeCopy = {
   docs: string;
   browse: string;
@@ -21,6 +24,23 @@ export type ChromeCopy = {
   copiedCode: string;
   lineWrap: string;
   language: string;
+  search: string;
+  searchPlaceholder: string;
+  searchNoResults: string;
+  searchSuggested: string;
+  searchNavigate: string;
+  searchSelect: string;
+  searchClose: string;
+  copyPage: string;
+  copiedPage: string;
+  editPage: string;
+  askClaude: string;
+  askClaudePrompt: string;
+  backToTop: string;
+  getStarted: string;
+  browseSkills: string;
+  page: string;
+  pages: string;
   sections: {
     introduction: string;
     gettingStarted: string;
@@ -59,6 +79,23 @@ export const chrome = {
     copiedCode: "Copied",
     lineWrap: "Line wrap",
     language: "Language",
+    search: "Search",
+    searchPlaceholder: "Search the docs…",
+    searchNoResults: "No results for",
+    searchSuggested: "Suggested",
+    searchNavigate: "navigate",
+    searchSelect: "open",
+    searchClose: "close",
+    copyPage: "Copy page",
+    copiedPage: "Copied",
+    editPage: "Edit on GitHub",
+    askClaude: "Ask Claude",
+    askClaudePrompt: "Read this AIBlueprint documentation page and help me with it:",
+    backToTop: "Back to top",
+    getStarted: "Get started",
+    browseSkills: "Browse skills",
+    page: "page",
+    pages: "pages",
     sections: {
       introduction: "Introduction",
       gettingStarted: "Getting Started",
@@ -99,6 +136,23 @@ export const chrome = {
     copiedCode: "Copié",
     lineWrap: "Line wrap",
     language: "Langue",
+    search: "Rechercher",
+    searchPlaceholder: "Rechercher dans la doc…",
+    searchNoResults: "Aucun résultat pour",
+    searchSuggested: "Suggestions",
+    searchNavigate: "naviguer",
+    searchSelect: "ouvrir",
+    searchClose: "fermer",
+    copyPage: "Copier la page",
+    copiedPage: "Copié",
+    editPage: "Modifier sur GitHub",
+    askClaude: "Demander à Claude",
+    askClaudePrompt: "Lis cette page de la documentation AIBlueprint et aide-moi avec :",
+    backToTop: "Retour en haut",
+    getStarted: "Commencer",
+    browseSkills: "Voir les skills",
+    page: "page",
+    pages: "pages",
     sections: {
       introduction: "Introduction",
       gettingStarted: "Démarrage",

@@ -1,19 +1,14 @@
 import Link from "@/compat/link";
 import { usePathname } from "@/compat/navigation";
-import {
-  getChrome,
-  getLocaleFromPathname,
-  withLocale,
-} from "../locale";
+import { getLocaleFromPathname, withLocale } from "../locale";
+import { SearchTrigger } from "./docs-search";
 import { LanguageSwitch } from "./language-switch";
 
 export function DocsHeader() {
   const pathname = usePathname();
   const locale = getLocaleFromPathname(pathname);
-  const copy = getChrome(locale);
 
   const navLinks = [
-    { label: copy.docs, href: withLocale("/", locale) },
     {
       label: "GitHub",
       href: "https://github.com/Melvynx/aiblueprint",
@@ -47,12 +42,13 @@ export function DocsHeader() {
           </Link>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
+          <SearchTrigger />
           <LanguageSwitch />
           {navLinks.map((link) => (
             <Link
               key={link.label}
               href={link.href}
-              className="rounded-full px-2 sm:px-3 py-1.5 text-sm font-medium text-[#8a8f98] no-underline transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
+              className="hidden rounded-full px-2 py-1.5 text-sm font-medium text-[#8a8f98] no-underline transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary sm:inline-flex sm:px-3"
               {...(link.external
                 ? { target: "_blank", rel: "noopener noreferrer" }
                 : {})}

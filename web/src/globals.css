@@ -413,3 +413,74 @@ html[data-code-wrap="1"] .docs-code-scroll {
   border-radius: 0.75rem;
   border: 1px solid rgb(255 255 255 / 10%);
 }
+
+.typography.docs-home {
+  max-width: none;
+}
+
+.typography.docs-home h2:not(.not-typography h2) {
+  margin-top: calc(var(--spacing) * 16);
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl--line-height);
+}
+
+.typography.docs-home > div > p:not(.not-typography p) {
+  max-width: 65ch;
+}
+
+.docs-steps {
+  counter-reset: docs-step;
+  list-style: none;
+  padding: 0;
+}
+
+.docs-step {
+  counter-increment: docs-step;
+  position: relative;
+  padding-left: 2.75rem;
+  padding-bottom: 1.5rem;
+}
+
+.docs-step:last-child {
+  padding-bottom: 0;
+}
+
+.docs-step::before {
+  content: counter(docs-step);
+  position: absolute;
+  top: -0.0625rem;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 999px;
+  background: #0e0f11;
+  color: var(--primary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.docs-step::after {
+  content: "";
+  position: absolute;
+  top: 2.125rem;
+  bottom: 0.375rem;
+  left: 0.875rem;
+  width: 1px;
+  background: rgb(255 255 255 / 8%);
+}
+
+.docs-step:last-child::after {
+  display: none;
+}
+
+html {
+  scroll-padding-top: 5rem;
+}
+
+/* Keep short tokens like `-a` / `-A` from splitting inside table cells. */
+.typography.docs-typography td code:not(.not-typography code) {
+  white-space: nowrap;
+}
