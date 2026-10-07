@@ -1,8 +1,31 @@
 import fs from "fs-extra";
+import os from "os";
 import path from "path";
 
 function toPosixPath(p: string): string {
   return p.replace(/\\/g, "/");
+}
+
+function expandHome(p: string): string {
+  return p.startsWith("~/") ? path.join(os.homedir(), p.slice(2)) : p;
+}
+
+/**
+ * Enables function hooks and appends each installed mod folder to
+ * CLAUDE_CODE_PLUGIN_DIRS, keeping folders the user already listed.
+ */
+function enableMods(env: Record<string, string>, mods: string[], claudeDir: string) {
+  env.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS = "1";
+
+  const dirs = (env.CLAUDE_CODE_PLUGIN_DIRS ?? "").split(path.delimiter).filter(Boolean);
+  const known = new Set(dirs.map((dir) => path.resolve(expandHome(dir))));
+  for (const mod of mods) {
+    const dir = path.join(claudeDir, "mods", mod);
+    if (known.has(path.resolve(dir))) continue;
+    dirs.push(toPosixPath(dir));
+    known.add(path.resolve(dir));
+  }
+  env.CLAUDE_CODE_PLUGIN_DIRS = dirs.join(path.delimiter);
 }
 
 export interface SetupOptions {
@@ -11,6 +34,8 @@ export interface SetupOptions {
   aiblueprintAgents: boolean;
   aiblueprintSkills: boolean;
   installCodex: boolean;
+  claudeMods?: boolean;
+  installedMods?: string[];
   skipInteractive?: boolean;
   replaceStatusline?: boolean;
 }
@@ -61,6 +86,10 @@ export async function updateSettings(options: SetupOptions, claudeDir: string) {
     delete settings.env.ANTHROPIC_DEFAULT_SONNET_MODEL;
   }
   settings.env.CLAUDE_CODE_DISABLE_1M_CONTEXT = "1";
+
+  if (options.installedMods && options.installedMods.length > 0) {
+    enableMods(settings.env, options.installedMods, claudeDir);
+  }
 
   if (!settings.permissions) {
     settings.permissions = {};

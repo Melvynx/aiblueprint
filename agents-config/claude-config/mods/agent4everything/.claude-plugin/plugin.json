@@ -1,0 +1,5 @@
+{
+  "name": "agent4everything",
+  "version": "0.1.0",
+  "description": "Maps .agents/skills (global and per project) into .claude/skills so every skill is active, without duplicating existing ones"
+}

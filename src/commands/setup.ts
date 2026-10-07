@@ -95,6 +95,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
         "aiblueprintAgents",
         "aiblueprintSkills",
         "installCodex",
+        "claudeMods",
       ];
       console.log(chalk.green("✓ Installing all features (--skip mode)"));
     } else {
@@ -129,6 +130,11 @@ export async function setupCommand(params: SetupCommandParams = {}) {
               name: "Codex setup - Starter config + share skills/agents with ~/.codex",
               checked: true,
             },
+            {
+              value: "claudeMods",
+              name: "Claude Code mods - agent4everything (syncs .agents/skills into .claude/skills)",
+              checked: true,
+            },
           ],
         },
       ]);
@@ -147,6 +153,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
       aiblueprintAgents: features.includes("aiblueprintAgents"),
       aiblueprintSkills: features.includes("aiblueprintSkills"),
       installCodex: features.includes("installCodex"),
+      claudeMods: features.includes("claudeMods"),
       skipInteractive,
     };
 
@@ -220,6 +227,24 @@ export async function setupCommand(params: SetupCommandParams = {}) {
         s.stop("Scripts installed");
       } else {
         s.stop("Scripts not available in repository");
+      }
+    }
+
+    if (options.claudeMods) {
+      s.start("Setting up Claude Code mods");
+      const modsSource = await resolveClaudeAssetPath(sourceDir, "mods");
+      if (modsSource) {
+        const entries = await fs.readdir(modsSource, { withFileTypes: true });
+        const mods = entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+        for (const mod of mods) {
+          await fs.copy(path.join(modsSource, mod), path.join(claudeDir, "mods", mod), {
+            overwrite: true,
+          });
+        }
+        options.installedMods = mods;
+        s.stop(`Mods installed (${mods.join(", ")})`);
+      } else {
+        s.stop("Mods not available in repository");
       }
     }
 
