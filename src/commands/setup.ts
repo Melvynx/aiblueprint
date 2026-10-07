@@ -132,7 +132,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
             },
             {
               value: "claudeMods",
-              name: "Claude Code mods - agent4everything (syncs .agents/skills into .claude/skills)",
+              name: "Claude Code mods - aiblueprint usage band + agent4everything skills sync",
               checked: true,
             },
           ],

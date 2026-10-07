@@ -1,0 +1,71 @@
+{
+  "name": "aiblueprint",
+  "version": "0.7.0",
+  "description": "AIBlueprint usage band above the prompt: session cost, 5-hour and weekly limits with pacing and reset time.",
+  "author": {
+    "name": "Melvyn"
+  },
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "showSession": {
+      "type": "boolean",
+      "title": "Session chip",
+      "description": "Show the session cost chip.",
+      "default": true
+    },
+    "showFiveHour": {
+      "type": "boolean",
+      "title": "5h chip",
+      "description": "Show the 5-hour session limit.",
+      "default": true
+    },
+    "showWeek": {
+      "type": "boolean",
+      "title": "Week chip",
+      "description": "Show the weekly limit (all models).",
+      "default": true
+    },
+    "showBars": {
+      "type": "boolean",
+      "title": "Bars",
+      "description": "Draw a progress bar in the 5h and Week chips.",
+      "default": true
+    },
+    "showPace": {
+      "type": "boolean",
+      "title": "Pace",
+      "description": "Show the +/- pace: positive means you use less than the time elapsed.",
+      "default": true
+    },
+    "showReset": {
+      "type": "boolean",
+      "title": "Reset time",
+      "description": "Show when each limit resets.",
+      "default": true
+    },
+    "sessionLabel": {
+      "type": "string",
+      "title": "Session label",
+      "description": "Label of the cost chip.",
+      "default": "S"
+    },
+    "fiveHourLabel": {
+      "type": "string",
+      "title": "5h label",
+      "description": "Label of the 5-hour chip.",
+      "default": "5h"
+    },
+    "weekLabel": {
+      "type": "string",
+      "title": "Week label",
+      "description": "Label of the weekly chip.",
+      "default": "Week"
+    },
+    "refreshSeconds": {
+      "type": "number",
+      "title": "Refresh (seconds)",
+      "description": "How often the band reads usage again.",
+      "default": 30
+    }
+  }
+}

@@ -18,7 +18,7 @@ npx aiblueprint-cli@latest agents setup
 - **🤖 Skills** - 30+ reusable workflow skills
 - **🎭 Agents** - 3 specialized AI agents for codebase exploration
 - **⚡ Scripts** - Built-in statusline utilities
-- **🧩 Mods** - Claude Code function-hook mods (skills sync)
+- **🧩 Mods** - Claude Code function-hook mods (usage band, skills sync)
 
 ## 📦 Installation
 
@@ -114,6 +114,7 @@ installs every directory under `agents-config/skills/`.
 
 Installed into `~/.claude/mods/` and enabled through `CLAUDE_CODE_PLUGIN_DIRS`:
 
+- **aiblueprint** - Usage band above the prompt: session context and cost, 5-hour and weekly limits with pace and reset time
 - **agent4everything** - Links every `.agents/skills` skill (global and per project) into `.claude/skills`
 
 ### Shell Shortcuts
