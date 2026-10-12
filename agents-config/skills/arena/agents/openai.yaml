@@ -1,0 +1,9 @@
+interface:
+  display_name: "Arena"
+  short_description: "Make 100 agents compete until one solution survives"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#F5F5F5"
+  default_prompt: "Use $arena to make sub-agents compete on this task until one solution wins."
+policy:
+  allow_implicit_invocation: false

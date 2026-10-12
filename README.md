@@ -148,6 +148,7 @@ npx skills add Melvynx/aiblueprint --skill skill-manager
 | `apex` | Structured implementation workflow |
 | `app-icon` | Generate and prepare app icons |
 | `appstore-connect` | Manage App Store Connect workflows |
+| `arena` | Make sub-agents compete until one solution survives |
 | `audit-memories` | Manually audit and clean project agent documentation |
 | `audit-skills` | Manually audit skill usage, invocation controls, duplicates, and scope |
 | `grill-me` | Stress-test a plan with focused questions |

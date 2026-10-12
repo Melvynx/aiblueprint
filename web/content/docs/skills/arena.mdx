@@ -1,0 +1,42 @@
+---
+title: Arena
+description: "Make 100 sub-agents compete on the same task until one solution survives."
+keywords: ["arena"]
+pro: false
+---
+
+`arena` is for when Claude keeps giving a weak answer. Instead of asking again and again, it gives the same task to N sub-agents, each with a different strategy, and makes them fight in a bracket until one solution is left.
+
+## Invoke
+
+```bash
+$arena <task>
+$arena --quick <task>
+```
+
+## What it does
+
+- Spins up N sub-agents (100 by default, 16 with `--quick`, any number with `--agents N`), each with its own strategy card: a reasoning mode, a workflow, and a strategy.
+- Runs a single-elimination bracket: solutions attack each other, defend and revise, and a judge scores every match on a written rubric.
+- Keeps every piece of bookkeeping in a stdlib `bracket.py` that only writes to `.arena/`, so a run can be resumed or replayed with `--seed`.
+- Triggers: “arena”, an answer you are not satisfied with, “try again”, “do better”, or asking agents to compete.
+
+<Callout type="warning">
+100 agents is about 600 sub-agent calls. Use `--quick` when you want a cheaper run.
+</Callout>
+
+Based on [Jakeschincariol/arena-skill](https://github.com/Jakeschincariol/arena-skill) (MIT).
+
+## Install
+
+Included in the free bundle:
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Install only this skill:
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill arena
+```

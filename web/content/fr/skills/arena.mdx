@@ -1,0 +1,42 @@
+---
+title: Arena
+description: "Faire combattre 100 sous-agents sur la même tâche jusqu'à ce qu'il reste une seule solution."
+keywords: ["arena"]
+pro: false
+---
+
+`arena` sert quand Claude te sort des réponses nulles. Au lieu de relancer encore et encore, il donne la même tâche à N sous-agents, chacun avec une stratégie différente, et les fait s'affronter dans un tableau à élimination directe jusqu'à ce qu'il reste une seule solution.
+
+## Invoquer
+
+```bash
+$arena <tâche>
+$arena --quick <tâche>
+```
+
+## Ce qu'il fait
+
+- Lance N sous-agents (100 par défaut, 16 avec `--quick`, le nombre de ton choix avec `--agents N`), chacun avec sa carte de stratégie : un mode de raisonnement, une méthode et une stratégie.
+- Fait tourner un tableau à élimination directe : les solutions s'attaquent, se défendent et se corrigent, et un juge note chaque duel sur une grille écrite.
+- Garde tout le suivi dans un `bracket.py` sans dépendance qui écrit seulement dans `.arena/`, donc une partie peut reprendre ou se rejouer avec `--seed`.
+- Triggers : « arena », une réponse qui te plaît pas, « réessaie », « fais mieux », ou faire s'affronter des agents.
+
+<Callout type="warning">
+100 agents, c'est environ 600 appels de sous-agents. Utilise `--quick` pour une partie moins chère.
+</Callout>
+
+Basé sur [Jakeschincariol/arena-skill](https://github.com/Jakeschincariol/arena-skill) (MIT).
+
+## Installer
+
+Inclus dans le lot gratuit :
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Installer uniquement ce skill :
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill arena
+```

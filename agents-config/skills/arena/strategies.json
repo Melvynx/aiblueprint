@@ -1,0 +1,205 @@
+{
+  "version": 1,
+  "about": "The strategy cards for /arena. Every competitor gets the same task and exactly one card: one reasoning mode, one workflow, one strategy. 15 x 12 x 12 = 2,160 distinct cards. bracket.py deals them with no repeats and spreads them evenly, so a 100-agent arena uses every reasoning mode, every workflow and every strategy. Edit freely: add an entry and the dealer picks it up. Ids must stay unique within a list.",
+  "reasoning": [
+    {
+      "id": "first-principles",
+      "name": "First principles",
+      "how": "Strip the task down to the facts and requirements nobody can argue with. Rebuild the answer from those alone, and keep a convention only if it earns its place again."
+    },
+    {
+      "id": "inversion",
+      "name": "Inversion",
+      "how": "Ask what would make this answer fail. List every way it could, then build the answer that makes each of those failures impossible."
+    },
+    {
+      "id": "analogy",
+      "name": "Analogy",
+      "how": "Find a problem in a different field that has already been solved and has the same shape. Port its solution over, then fix every place where the analogy breaks."
+    },
+    {
+      "id": "adversarial",
+      "name": "Adversarial",
+      "how": "Picture the harshest expert reviewer trying to tear the answer apart. Write their attacks down first and build the answer backwards from them."
+    },
+    {
+      "id": "constraint-first",
+      "name": "Constraint first",
+      "how": "List every hard constraint, stated and implied: time, budget, tools, format, audience, platform. Solve strictly inside that box and let the tightest constraint drive the design."
+    },
+    {
+      "id": "worked-example",
+      "name": "Worked example",
+      "how": "Solve one concrete, realistic instance end to end first, with real values. Generalise only from what that example actually taught you."
+    },
+    {
+      "id": "socratic",
+      "name": "Socratic",
+      "how": "Interrogate the task with the questions a sharp expert would ask before starting. Answer each one explicitly and let the answers decide the shape of the solution."
+    },
+    {
+      "id": "contrarian",
+      "name": "Contrarian",
+      "how": "Write down the obvious default answer, then argue seriously against it. Keep only what survives the argument, even if that takes you the unpopular way."
+    },
+    {
+      "id": "systems-thinking",
+      "name": "Systems thinking",
+      "how": "Map the moving parts, how they affect each other, and what happens second and third order. Optimise the whole system, not just the one part the task points at."
+    },
+    {
+      "id": "decomposition",
+      "name": "Decomposition",
+      "how": "Break the task into independent sub-problems. Solve each one completely, then integrate them and test the seams where they meet."
+    },
+    {
+      "id": "working-backwards",
+      "name": "Working backwards",
+      "how": "Describe the finished result precisely, as if it already exists. Then work backwards, step by step, to where the user is right now."
+    },
+    {
+      "id": "probabilistic",
+      "name": "Probabilistic",
+      "how": "Treat every claim and choice as uncertain. Weigh what is likely, prefer what holds up across most scenarios, and state your confidence where it changes the decision."
+    },
+    {
+      "id": "dialectical",
+      "name": "Dialectical",
+      "how": "State the strongest version of one answer, then the strongest opposing answer, then write the synthesis that keeps what is true in both."
+    },
+    {
+      "id": "evidence-first",
+      "name": "Evidence first",
+      "how": "Ground every claim in something checkable: the task text, the files it points to, the numbers given, documentation. Anything you cannot check gets labelled as an assumption."
+    },
+    {
+      "id": "expert-panel",
+      "name": "Expert panel",
+      "how": "Answer the task as three different experts would, picking roles that fit it. Take the strongest idea from each and settle every point where they disagree."
+    }
+  ],
+  "workflows": [
+    {
+      "id": "draft-critique-rewrite",
+      "name": "Draft, critique, rewrite",
+      "how": "Write a complete first draft. Critique it line by line against the task as if someone else wrote it. Then rewrite it from scratch using the critique."
+    },
+    {
+      "id": "outline-first",
+      "name": "Outline first",
+      "how": "Write a skeleton outline, check the outline against every requirement in the task, fix it, and only then fill it in."
+    },
+    {
+      "id": "test-first",
+      "name": "Test first",
+      "how": "Before writing the answer, write the checks it must pass: acceptance tests for code, pass or fail criteria for anything else. Then write the answer and run every check against it."
+    },
+    {
+      "id": "research-then-synthesise",
+      "name": "Research, then synthesise",
+      "how": "Gather every relevant fact first: the task, any files or context it points to, what is known about the domain. Write nothing until the research is done, then synthesise."
+    },
+    {
+      "id": "three-drafts",
+      "name": "Three drafts, pick one",
+      "how": "Write three short, genuinely different approaches. Pick the strongest on the task's own terms and develop only that one fully."
+    },
+    {
+      "id": "requirements-checklist",
+      "name": "Requirements checklist",
+      "how": "Pull every requirement out of the task into a numbered list. Solve, then tick each item off and say exactly where it is met."
+    },
+    {
+      "id": "iterative-deepening",
+      "name": "Iterative deepening",
+      "how": "Write a one-paragraph answer first. Then expand the parts that matter most in two more passes, each one deeper than the last."
+    },
+    {
+      "id": "build-then-break",
+      "name": "Build, then break",
+      "how": "Build the answer. Then throw five hostile inputs or scenarios at it, write down what breaks, and patch every break."
+    },
+    {
+      "id": "smallest-version-first",
+      "name": "Smallest version first",
+      "how": "Produce the smallest complete version that actually works. Then extend it one step at a time, keeping it working after every step."
+    },
+    {
+      "id": "options-matrix",
+      "name": "Options matrix",
+      "how": "List the realistic options, score them in a small matrix against the criteria that matter for this task, choose one, and write up the choice."
+    },
+    {
+      "id": "open-questions-first",
+      "name": "Open questions first",
+      "how": "List every open question the task leaves. Resolve each one with reasoning or a stated assumption, then answer."
+    },
+    {
+      "id": "write-then-restructure",
+      "name": "Write, then restructure",
+      "how": "Write freely and fast. Then outline what you actually wrote, fix the structure, and rewrite it to the new outline."
+    }
+  ],
+  "strategies": [
+    {
+      "id": "simplest",
+      "name": "Simplest thing that works",
+      "how": "Pick the least complicated answer that fully does the job. Every extra part has to justify itself."
+    },
+    {
+      "id": "maximal-rigour",
+      "name": "Maximal rigour",
+      "how": "Be exhaustive and exact. Check every step, verify every claim, and leave no hand-waving anywhere."
+    },
+    {
+      "id": "user-empathy",
+      "name": "User empathy first",
+      "how": "Start from the person who will use this: their situation, their skill level, and what they will actually do next. Shape everything around that."
+    },
+    {
+      "id": "edge-cases-first",
+      "name": "Edge cases first",
+      "how": "Hunt the edge cases, failure modes and weird inputs first, and design the answer around surviving them."
+    },
+    {
+      "id": "speed",
+      "name": "Speed",
+      "how": "Optimise for the fastest route to something usable today. Cut anything that does not move the result."
+    },
+    {
+      "id": "defensive",
+      "name": "Defensive",
+      "how": "Assume the inputs are bad and the conditions are hostile. Make the answer fail safely and loudly rather than quietly."
+    },
+    {
+      "id": "clarity",
+      "name": "Clarity above all",
+      "how": "Make it the easiest answer to read and act on: plain words, obvious structure, nothing the reader has to decode."
+    },
+    {
+      "id": "completeness",
+      "name": "Completeness",
+      "how": "Leave out nothing the task asks for or clearly implies. Cover every requirement explicitly."
+    },
+    {
+      "id": "fewest-moving-parts",
+      "name": "Fewest moving parts",
+      "how": "Remove things until it breaks, then put the last one back. Fewer steps, fewer dependencies, fewer words."
+    },
+    {
+      "id": "explicit-trade-offs",
+      "name": "Explicit trade-offs",
+      "how": "Name the real trade-offs, choose for the user's most likely constraints, and say plainly what that choice gives up."
+    },
+    {
+      "id": "built-to-last",
+      "name": "Built to last",
+      "how": "Optimise for how this holds up in six months: easy to maintain, easy to extend, no traps for the next person."
+    },
+    {
+      "id": "concrete-specifics",
+      "name": "Concrete specifics",
+      "how": "Exact numbers, names, commands, file paths and steps. Zero generic advice."
+    }
+  ]
+}

@@ -30,6 +30,7 @@ This catalog is generated from the directories shipped under
 | `audit-memories` | Audit and clean project agent documentation |
 | `audit-skills` | Audit installed skill usage, discovery, invocation controls, and scope |
 | `environments-manager` | Set up per-worktree environments |
+| `arena` | Make sub-agents compete until one solution survives |
 | `grill-me` | Stress-test a plan with focused questions |
 | `hooks-manager` | Create and debug Claude Code hooks |
 | `rules-manager` | Maintain AGENTS.md and agent rules |
@@ -83,6 +84,27 @@ TestFlight", "app review", "my app sales", or "asc".
 - Requires the `asc` CLI; verify auth with `asc auth status` / `asc auth status
   --validate`.
 - Argument hint: `[testflight [--expo] [setup]] | <natural-language ASC request>`.
+
+---
+
+## arena
+
+```bash
+npx skills@latest add melvynx/aiblueprint --skill arena
+```
+
+**What it does:** Gives the same task to N sub-agents (100 by default, 16 with
+`--quick`), each with a different strategy card (reasoning mode, workflow,
+strategy), then runs a single-elimination bracket where they attack, defend and
+revise until one solution survives. A judge scores every match on a written rubric.
+
+**Use it for:** a task where Claude keeps giving a weak answer, or saying "arena".
+
+**Key points:**
+- Argument hint: `[--agents N | --quick] [--seed S] <task>`.
+- 100 agents is about 600 sub-agent calls; use `--quick` for a cheaper run.
+- Bookkeeping runs through a stdlib `bracket.py` and only writes to `.arena/`.
+- Based on [Jakeschincariol/arena-skill](https://github.com/Jakeschincariol/arena-skill) (MIT).
 
 ---
 
