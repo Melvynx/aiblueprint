@@ -33,6 +33,7 @@ This catalog is generated from the directories shipped under
 | `arena` | Make sub-agents compete until one solution survives |
 | `grill-me` | Stress-test a plan with focused questions |
 | `hooks-manager` | Create and debug Claude Code hooks |
+| `limite` | Route easy Claude Code work to Haiku to save your limit |
 | `rules-manager` | Maintain AGENTS.md and agent rules |
 | `skill-manager` | Create, edit, audit, or prune skills |
 | `test-audit` | Gate new tests and prune low-value ones |
@@ -124,6 +125,26 @@ dependencies one decision at a time.
 **Key points:**
 - Asks questions one at a time, and provides a recommended answer for each.
 - Prefers exploring the codebase over asking when a question can be answered there.
+
+---
+
+## limite
+
+```bash
+npx skills@latest add melvynx/aiblueprint --skill limite
+```
+
+**What it does:** Installs two Haiku sub-agents in Claude Code, `Explore` (code search
+and reading, it replaces the built-in Explore that inherits Opus) and `chores`
+(renames, one-line edits, running a command), plus a `## Models` note in `CLAUDE.md`
+that delegates easy work to them. Opus keeps planning, debugging and multi-file changes.
+
+**Use it for:** hitting your Claude limit too fast, or saying "limite".
+
+**Key points:**
+- Argument hint: `[--project]`. User scope (`~/.claude/`) by default, `--project` writes to `.claude/`.
+- Never overwrites an existing agent without showing the diff first.
+- Check `/agents` afterwards: both agents must show Haiku.
 
 ---
 

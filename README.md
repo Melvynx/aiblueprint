@@ -153,6 +153,7 @@ npx skills add Melvynx/aiblueprint --skill skill-manager
 | `audit-skills` | Manually audit skill usage, invocation controls, duplicates, and scope |
 | `grill-me` | Stress-test a plan with focused questions |
 | `hooks-manager` | Create and debug Claude Code hooks |
+| `limite` | Route easy Claude Code work to Haiku to save your limit |
 | `environments-manager` | Set up per-worktree agent environments |
 | `rules-manager` | Create and maintain agent rule files |
 | `skill-manager` | Manage skills and rules across Claude Code, Codex, and Cursor |

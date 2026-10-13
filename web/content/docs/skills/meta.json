@@ -12,6 +12,7 @@
     "environments-manager",
     "grill-me",
     "hooks-manager",
+    "limite",
     "rules-manager",
     "skill-manager",
     "test-audit",

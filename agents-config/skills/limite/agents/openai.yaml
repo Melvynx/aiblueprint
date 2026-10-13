@@ -1,0 +1,9 @@
+interface:
+  display_name: "Limite"
+  short_description: "Route easy Claude Code work to Haiku to save your limit"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#F5F5F5"
+  default_prompt: "Use $limite to install the Haiku Explore and chores agents."
+policy:
+  allow_implicit_invocation: false

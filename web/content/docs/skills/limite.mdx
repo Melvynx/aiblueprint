@@ -1,0 +1,40 @@
+---
+title: Limite
+description: "Route easy Claude Code work to Haiku so it barely touches your usage limit."
+keywords: ["limite", "limit", "haiku"]
+pro: false
+---
+
+`limite` is for when you hit your Claude limit too fast. Claude Code runs every task on the session model, so on Opus even finding a file or renaming an import eats your limit, and the built-in Explore sub-agent inherits Opus too. This skill moves the easy work to Haiku and keeps Opus for the real thinking.
+
+## Invoke
+
+```bash
+/limite
+/limite --project
+```
+
+## What it does
+
+- Writes two sub-agents on `model: haiku`: `Explore` (read-only code search, it replaces the built-in Explore) and `chores` (renames, one-line edits, running a command and summarizing it).
+- Appends a `## Models` note to `CLAUDE.md` that delegates search and chores to them, and keeps planning, debugging and multi-file changes on Opus.
+- User scope (`~/.claude/`) by default, `--project` writes to `.claude/` and `./CLAUDE.md`.
+- Never overwrites an existing agent without showing the diff first.
+
+<Callout type="info">
+Restart Claude Code afterwards, then check `/agents`: Explore and chores must both show Haiku.
+</Callout>
+
+## Install
+
+Included in the free bundle:
+
+```bash
+npx aiblueprint-cli@latest agents setup
+```
+
+Install only this skill:
+
+```bash
+npx skills@latest add Melvynx/aiblueprint --skill limite
+```
