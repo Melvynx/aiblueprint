@@ -1,16 +1,16 @@
 ---
-title: Test Audit
+title: Audit Test
 description: "Gate new tests at write time and prune low-value, implementation-coupled, or duplicate ones."
-keywords: ["test-audit", "tests"]
+keywords: ["audit-test", "tests"]
 pro: false
 ---
 
-`test-audit` holds every test to one value bar: it must protect behavior, a credible regression, or an independent contract. It gates new tests and audits existing ones.
+`audit-test` holds every test to one value bar: it must protect behavior, a credible regression, or an independent contract. It gates new tests and audits existing ones.
 
 ## Invoke
 
 ```bash
-$test-audit
+$audit-test
 ```
 
 ## What it does
@@ -34,5 +34,5 @@ npx aiblueprint-cli@latest agents setup
 Install only this skill:
 
 ```bash
-npx skills@latest add Melvynx/aiblueprint --skill test-audit
+npx skills@latest add Melvynx/aiblueprint --skill audit-test
 ```

@@ -1,10 +1,10 @@
 interface:
-  display_name: "Test Audit"
+  display_name: "Audit Test"
   short_description: "Gate new tests and prune low-value ones"
   icon_small: "./assets/codex-icon.svg"
   icon_large: "./assets/codex-icon.svg"
   brand_color: "#737373"
-  default_prompt: "Use $test-audit to gate these tests or audit low-value ones."
+  default_prompt: "Use $audit-test to gate these tests or audit low-value ones."
 
 policy:
   allow_implicit_invocation: true

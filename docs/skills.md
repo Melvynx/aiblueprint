@@ -29,13 +29,13 @@ This catalog is generated from the directories shipped under
 | `appstore-connect` | Manage App Store Connect workflows |
 | `audit-memories` | Audit and clean project agent documentation |
 | `audit-skills` | Audit installed skill usage, discovery, invocation controls, and scope |
+| `audit-test` | Gate new tests and prune low-value ones |
 | `environments-manager` | Set up per-worktree environments |
 | `arena` | Make sub-agents compete until one solution survives |
 | `grill-me` | Stress-test a plan with focused questions |
 | `hooks-manager` | Create and debug Claude Code hooks |
 | `rules-manager` | Maintain AGENTS.md and agent rules |
 | `skill-manager` | Create, edit, audit, or prune skills |
-| `test-audit` | Gate new tests and prune low-value ones |
 | `use-style` | Apply named visual style guides |
 
 ---
@@ -171,10 +171,10 @@ platforms.
 
 ---
 
-## test-audit
+## audit-test
 
 ```bash
-npx skills@latest add melvynx/aiblueprint --skill test-audit
+npx skills@latest add melvynx/aiblueprint --skill audit-test
 ```
 
 **What it does:** Gates every new or changed test against a value bar, and audits

@@ -151,12 +151,12 @@ npx skills add Melvynx/aiblueprint --skill skill-manager
 | `arena` | Make sub-agents compete until one solution survives |
 | `audit-memories` | Manually audit and clean project agent documentation |
 | `audit-skills` | Manually audit skill usage, invocation controls, duplicates, and scope |
+| `audit-test` | Gate new tests and prune low-value, implementation-coupled ones |
 | `grill-me` | Stress-test a plan with focused questions |
 | `hooks-manager` | Create and debug Claude Code hooks |
 | `environments-manager` | Set up per-worktree agent environments |
 | `rules-manager` | Create and maintain agent rule files |
 | `skill-manager` | Manage skills and rules across Claude Code, Codex, and Cursor |
-| `test-audit` | Gate new tests and prune low-value, implementation-coupled ones |
 | `use-style` | Apply named UI style guides before implementation |
 
 ## 🤖 Assistant Pro

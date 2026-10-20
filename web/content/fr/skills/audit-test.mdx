@@ -1,16 +1,16 @@
 ---
-title: Test Audit
+title: Audit Test
 description: "Filtrer les nouveaux tests à l'écriture et élaguer ceux sans valeur, couplés à l'implémentation ou dupliqués."
-keywords: ["test-audit", "tests"]
+keywords: ["audit-test", "tests"]
 pro: false
 ---
 
-`test-audit` applique une seule barre de valeur à chaque test : il doit protéger un comportement, une régression crédible ou un contrat indépendant. Il filtre les nouveaux tests et audite les existants.
+`audit-test` applique une seule barre de valeur à chaque test : il doit protéger un comportement, une régression crédible ou un contrat indépendant. Il filtre les nouveaux tests et audite les existants.
 
 ## Invoquer
 
 ```bash
-$test-audit
+$audit-test
 ```
 
 ## Ce qu'il fait
@@ -34,5 +34,5 @@ npx aiblueprint-cli@latest agents setup
 Installer uniquement ce skill :
 
 ```bash
-npx skills@latest add Melvynx/aiblueprint --skill test-audit
+npx skills@latest add Melvynx/aiblueprint --skill audit-test
 ```

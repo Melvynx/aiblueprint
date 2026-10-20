@@ -1,9 +1,9 @@
 ---
-name: test-audit
+name: audit-test
 description: "Invoke whenever writing, changing, reviewing, or sweeping tests. Authoring gate for new tests plus audit workflow for low-value, implementation-coupled, or duplicative tests and the test-only production seams they demand."
 ---
 
-# Test Audit
+# Audit Test
 
 Three modes, one value bar. Authoring mode gates every new or changed test at
 write time. Audit mode runs focused sweeps of tests that re-assert source,
