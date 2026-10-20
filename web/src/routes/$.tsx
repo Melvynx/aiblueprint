@@ -13,7 +13,10 @@ export const Route = createFileRoute("/$")({
       "concepts/apex": "advanced/apex",
       "concepts/slash-commands": "skills",
       "concepts/use-style": "skills/use-style",
-      "concepts/use-artifacts": "skills/use-artifacts",
+      "concepts/use-artifacts": "skills/show-me",
+      "skills/use-artifacts": "skills/show-me",
+      "skills/oneshot": "skills/apex",
+      "advanced/oneshot": "advanced/apex",
     };
     const destination = legacyPaths[slug];
     if (destination) {

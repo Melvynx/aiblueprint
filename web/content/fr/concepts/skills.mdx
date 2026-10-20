@@ -1,7 +1,7 @@
 ---
 title: Skills
 description: Workflows réutilisables installés dans ~/.agents/skills et invoqués depuis Claude Code ou Codex.
-keywords: ["skills", "apex", "oneshot", "verify"]
+keywords: ["skills", "apex", "verify"]
 ---
 
 Les skills sont des workflows réutilisables que Claude Code et Codex peuvent
@@ -16,10 +16,9 @@ Le catalogue complet, avec un badge PRO sur les skills Premium, est dans
 Choisis un workflow selon la tâche :
 
 - **`apex`** est inclus dans le lot gratuit. Il lance une boucle adaptative Analyze → Plan → Execute → eXamine avec checkpoints reprenables, revue fondée sur le risque, et validation. Voir [Apex](/skills/apex).
-- **`oneshot`** est un routeur Premium qui exécute `analyze → plan → implement → code-review → verify` dans l'ordre. Voir [OneShot](/skills/oneshot).
 
 Utilise `apex -a -x` pour une implémentation peu interactive avec revue
-adversariale, ou `oneshot -a` pour la séquence fixe complète.
+adversariale.
 
 Voir [Workflow principal](/core-workflow) pour la responsabilité des étapes,
 puis [Workflows avancés](/advanced) pour les flags et l'automatisation.
@@ -44,6 +43,5 @@ passent par [agents pro setup](/commands/pro-setup). Utilise
 [agents unify](/commands/unify) pour centraliser ceux que tu as déjà.
 
 Voir [Utiliser un style](/skills/use-style),
-[Utiliser des artefacts](/skills/use-artifacts),
 [Ne pas overflow la mémoire](/concepts/dont-overflow-memory), et
 [Exemples](/examples).

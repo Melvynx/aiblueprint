@@ -10,6 +10,7 @@ description: >-
   calls it a bad answer, says try again or do better, says "arena", or asks
   to make them compete.
 argument-hint: "[--agents N | --quick] [--seed S] <task>"
+disable-model-invocation: true
 ---
 
 # arena

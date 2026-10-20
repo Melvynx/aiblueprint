@@ -1,7 +1,7 @@
 ---
 title: Skills
 description: Reusable workflows installed into ~/.agents/skills and invoked from Claude Code or Codex.
-keywords: ["skills", "apex", "oneshot", "verify"]
+keywords: ["skills", "apex", "verify"]
 ---
 
 Skills are reusable workflows that Claude Code and Codex can invoke. AIBlueprint
@@ -16,10 +16,8 @@ The full catalog, with a PRO badge on Premium skills, lives under
 Choose a workflow based on the task:
 
 - **`apex`** is included in the free bundle. It runs an adaptive Analyze → Plan → Execute → eXamine loop with resumable checkpoints, risk-based review, and validation. See [Apex](/skills/apex).
-- **`oneshot`** is a Premium router that runs `analyze → plan → implement → code-review → verify` in order. See [OneShot](/skills/oneshot).
 
-Use `apex -a -x` for low-interaction implementation with adversarial review,
-or `oneshot -a` for the complete fixed sequence.
+Use `apex -a -x` for low-interaction implementation with adversarial review.
 
 See [The Core Workflow](/core-workflow) for stage ownership, then
 [Advanced Workflows](/advanced) for flags and automation.
@@ -42,6 +40,6 @@ Install with [agents setup](/commands/agents-setup). Premium skills need
 [agents pro setup](/commands/pro-setup). Use [agents unify](/commands/unify) to
 centralize skills you already have.
 
-See [Use Style](/skills/use-style), [Use Artifacts](/skills/use-artifacts),
+See [Use Style](/skills/use-style),
 [Don't overflow memory](/concepts/dont-overflow-memory), and
 [Examples](/examples).

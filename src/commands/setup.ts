@@ -122,7 +122,7 @@ export async function setupCommand(params: SetupCommandParams = {}) {
             },
             {
               value: "aiblueprintSkills",
-              name: "AIBlueprint skills - Pre-built skills (apex, commit, oneshot, etc.)",
+              name: "AIBlueprint skills - Pre-built skills (apex, grill-me, audit-test, etc.)",
               checked: true,
             },
             {

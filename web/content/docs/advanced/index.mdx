@@ -1,21 +1,16 @@
 ---
 title: Advanced Workflows
-description: Choose an adaptive implementation loop or a fixed sequence of core skills.
-keywords: ["apex", "oneshot", "automation", "workflow"]
+description: Run the adaptive implementation loop.
+keywords: ["apex", "automation", "workflow"]
 ---
 
 [Apex](/advanced/apex) adapts its plan, delegation, review, and proof to the
 request and risk. It records resumable checkpoints and is included in the free
 skill bundle.
 
-[OneShot](/advanced/oneshot) runs the Premium core skills in a fixed order,
-using the implementation plan as the source of truth. A GitHub issue is optional
-for focused work.
-
 | Workflow | Best for | Review | Verification |
 | --- | --- | --- | --- |
 | `apex` | Adaptive implementation with resumable checkpoints. | Risk-based; `-x` requests adversarial review. | Relevant validation always runs; runtime proof follows intent and risk. |
-| `oneshot` | A complete sequence of core skills. | Always. | Always. |
 
-Both workflows repeat affected checks after fixes. Neither workflow authorizes
+Apex repeats affected checks after fixes. It never authorizes
 external actions beyond the user's request.
