@@ -1,0 +1,69 @@
+---
+title: Video studio
+description: "Launch the studio (review of every short, Recorder, YOLO, faceless takes) and clean your A-roll rushes."
+keywords: ["video-studio", "studio", "recorder", "yolo", "faceless", "rushes", "a-roll", "review"]
+---
+
+`video-studio` launches your studio: one local page that reviews every short of your Shorts folder and also holds the Recorder with its teleprompter. It also sorts your raw takes (the rushes) so broken ones do not pile up.
+
+There is one studio per Shorts folder. The port stays the same each time, and a second studio is never started for the same folder. Launching the studio is not editing: it just opens the right page.
+
+## Invoke
+
+```bash
+/video-studio
+/video-studio recorder
+/video-studio yolo
+/video-studio rushes
+/video-studio clean the takes
+```
+
+## What it does
+
+1. **Starts the studio** (or reuses the one already running) and opens it in your browser. Chrome or Safari is needed for the camera and microphone.
+2. **Opens the page you need**:
+   - `/recorder/` to shoot with a script, in YOLO, or for a faceless take.
+   - `/<slug>/` to review one short.
+   - `/` for the Pipeline: every script and video in its stage (to record, to edit, in review, ready, scheduled, published), with approve and archive buttons.
+   - The app bar also links the B-roll library, your styles and your illustrations.
+3. **Gives you the URL** and the keys to use.
+
+## The Recorder
+
+- **Script mode** lists your scripts, reopens the last one and opens a new file by itself. You can write, edit and archive scripts in the page, and review one (each line with its estimated time, comments on a line or on the whole script).
+- **YOLO** means no script: press `Y`, then `R`, and the camera takes the whole stage. Takes are saved as `yolo-<date-time>.mp4`.
+- **Faceless** is not a Recorder mode but a render style: record in YOLO (hide the preview with `V` if you like), then edit the take with your faceless style so only your voice is used.
+- Pick a default camera and microphone in the settings. A banner warns you if they are unplugged.
+- Audio and video are re-synchronized when a take is saved, using a flash measurement you can run from the settings.
+
+To shoot a specific script, use [record](/editing/record).
+
+## Clean your rushes
+
+```bash
+/video-studio rushes
+```
+
+It lists every take in your A-roll folder, newest first, with duration, size and a verdict:
+
+- `BAD`: unreadable, no audio, under 5 seconds, or a very low bitrate (a broken recording).
+- `warn`: still usable but with variable frame rate or no sidecar file.
+
+You confirm what to archive. Archived takes move to `A-roll/archive/` and can be restored. Nothing is ever deleted, and a take that a short still uses is flagged before it moves. Retakes and dead air inside a take are not cleaned here: the edit cuts them.
+
+## Turn a take into a short
+
+```bash
+/editing latest
+/editing studio latest
+/editing --style faceless latest
+```
+
+`/editing studio latest` gives a rough cut opened in the studio, `/editing latest` the full edit. Several takes at once: one editing agent per take in the background.
+
+## Next
+
+- [record](/editing/record): open the Recorder on a given script.
+- [short-editing](/editing/short-editing): edit and review a short.
+- [setup-faceless](/editing/setup-faceless): create the faceless style.
+- [upgrade-editing-ia-pro](/editing/upgrade-editing-ia-pro): restart the studio after an update.

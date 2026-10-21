@@ -10,10 +10,11 @@ import {
   Rocket,
   Sparkles,
   Terminal,
+  Video,
 } from "lucide-react";
 import { ProBadge } from "./doc-card";
 import type { DocTree } from "../doc-manager";
-import { getChrome, getLocaleFromPathname, withLocale } from "../locale";
+import { getChrome, getLocaleFromPathname, isEditingPath, withLocale } from "../locale";
 
 export function DocsSidebar({
   tree,
@@ -25,7 +26,11 @@ export function DocsSidebar({
   const pathname = usePathname();
   const locale = getLocaleFromPathname(pathname);
   const copy = getChrome(locale);
-  const sections = [
+  const editing = isEditingPath(pathname);
+  const editingSections = [
+    { name: copy.sections.introduction, href: "/editing", icon: Video },
+  ];
+  const cliSections = [
     { name: copy.sections.introduction, href: "/", icon: BookOpen },
     {
       name: copy.sections.gettingStarted,
@@ -64,6 +69,12 @@ export function DocsSidebar({
       icon: Boxes,
     },
   ];
+  const sections: {
+    name: string;
+    href: string;
+    activePrefix?: string;
+    icon: typeof BookOpen;
+  }[] = editing ? editingSections : cliSections;
 
   return (
     <aside
@@ -83,7 +94,7 @@ export function DocsSidebar({
                 ? withLocale(activePrefix, locale)
                 : localizedHref;
               const isActive =
-                href === "/"
+                href === "/" || href === "/editing"
                   ? pathname === localizedHref
                   : pathname.startsWith(localizedPrefix);
               return (

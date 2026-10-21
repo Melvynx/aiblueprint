@@ -1,0 +1,82 @@
+{
+  "title": "Editing IA",
+  "pages": [
+    "index",
+    "installation",
+    "studio-setup",
+    "setup-faceless",
+    "upgrade-editing-ia-pro",
+    "outliers",
+    "remake",
+    "insta-audit",
+    "studio-script",
+    "record",
+    "video-studio",
+    "editing",
+    "short-editing",
+    "broll",
+    "steal",
+    "feedbacks",
+    "short-translate",
+    "codex-images",
+    "publish",
+    "youtube-thumbnail",
+    "youtube-title",
+    "make-it-virale",
+    "case-study-make-it-virale"
+  ],
+  "groups": [
+    {
+      "title": "Démarrer",
+      "pages": [
+        "installation",
+        "studio-setup",
+        "setup-faceless",
+        "upgrade-editing-ia-pro"
+      ]
+    },
+    {
+      "title": "Trouver des idées",
+      "pages": [
+        "outliers",
+        "remake",
+        "insta-audit",
+        "studio-script"
+      ]
+    },
+    {
+      "title": "Tourner",
+      "pages": [
+        "record",
+        "video-studio"
+      ]
+    },
+    {
+      "title": "Monter",
+      "pages": [
+        "editing",
+        "short-editing",
+        "broll",
+        "steal",
+        "feedbacks",
+        "short-translate",
+        "codex-images"
+      ]
+    },
+    {
+      "title": "Publier",
+      "pages": [
+        "publish",
+        "youtube-thumbnail",
+        "youtube-title"
+      ]
+    },
+    {
+      "title": "Devenir viral",
+      "pages": [
+        "make-it-virale",
+        "case-study-make-it-virale"
+      ]
+    }
+  ]
+}

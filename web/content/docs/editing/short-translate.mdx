@@ -1,0 +1,72 @@
+---
+title: Short Translate
+description: "Turn one take into another language with your own voice, with or without lip-sync, after a cost estimate."
+keywords: ["short-translate", "translate", "dubbing", "heygen", "elevenlabs", "voice clone", "lip-sync"]
+---
+
+`short-translate` takes one of your takes and gives it back in another
+language, in your own voice. With HeyGen the lips follow the new language too.
+Then [short-editing](/editing/short-editing) edits the translated take like any
+other, with captions transcribed in the new language.
+
+It translates the **take**, not the finished short, so the editor cuts and
+times everything on the translated voice. It also cleans the take first:
+stutters and retakes sent to HeyGen would be translated, lip-synced and billed.
+
+## Invoke
+
+```bash
+/short-translate my latest take in English
+/short-translate short-my-slug to Spanish
+/short-translate <take> --to en --from fr
+```
+
+It always shows the duration and the cost first, and sends nothing until you
+say yes.
+
+## What it does
+
+1. **Transcribes the take** with word timestamps. A teleprompter take written
+   with `studio-script` already has its script next to it: the translation of
+   each line is filled in for you.
+2. **Builds the cues**: one per spoken sentence, with a natural translation
+   (not word for word, names, numbers and product names kept).
+3. **Cuts the stumbles**: repeated words, false starts, a sentence said twice
+   (the last good one stays). Pauses are tightened, each cut has a short fade.
+   You see the kept length and the dropped ranges. It also writes a subtitle
+   file timed on the cleaned take.
+4. **Estimates, then sends** after your yes. It runs 2 to 20 minutes in the
+   background, and a job can be resumed if it gets interrupted, without being
+   billed twice.
+5. **Hands the result to the editor.** The translated short is named
+   `<original slug>-<lang>` so both versions sit side by side. When the
+   original short has a plan (scenes, B-roll, music), it is reused and retimed
+   on the translated take instead of starting from scratch. On-screen texts and
+   the CTA are rewritten in the new language.
+
+## Providers and modes
+
+| Provider | What you get | Cost |
+|---|---|---|
+| HeyGen `precision` (default) | voice and best lip-sync, side views, hands in front of the face | about 10 credits per minute |
+| HeyGen `speed` | voice and lip-sync, face mostly front-on | about 5 credits per minute |
+| HeyGen `audio` | your voice, original image, no lip-sync | about 4 credits per minute |
+| ElevenLabs | your cloned voice, original image, no lip-sync | ElevenLabs credits |
+
+Lip-sync only matters when your face is on screen for long stretches. A short
+full of B-roll or with a small webcam circle looks fine without it, and costs
+2 to 2.5 times less.
+
+## What you need
+
+- `HEYGEN_API_KEY` in `.short-editing/.env` for HeyGen (HeyGen, Settings, API),
+  or `ELEVEN_KEY` for ElevenLabs (already needed by the kit).
+- Without the HeyGen key, ElevenLabs works in the meantime.
+- HeyGen uploads are capped at 32 MB: a copy is re-encoded to fit. Beyond about
+  15 minutes, cut the take into parts first.
+
+## Next
+
+- [short-editing](/editing/short-editing): edit the translated take.
+- [feedbacks](/editing/feedbacks): fix what is off after the first render.
+- [publish](/editing/publish): put the translated version out on its account.

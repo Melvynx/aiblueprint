@@ -22,6 +22,7 @@ import {
 import {
   getChrome,
   getLocaleFromPathname,
+  isEditingPath,
   slugifyHeading,
   withLocale,
 } from "@public-site/docs/locale";
@@ -115,7 +116,9 @@ function DocsArticle(props: {
   doc: DocType;
   allDocs: NavDoc[];
 }) {
-  const locale = getLocaleFromPathname(usePathname());
+  const pathname = usePathname();
+  const locale = getLocaleFromPathname(pathname);
+  const editing = isEditingPath(pathname);
   const copy = getChrome(locale);
   const folder = getFolderForSlug(props.tree, props.doc.slug);
   const folderLanding = folder?.docs.find((doc) => doc.slug === folder.slug) ?? folder?.docs[0];
@@ -141,8 +144,8 @@ function DocsArticle(props: {
                     <nav aria-label="Breadcrumb">
                       <ol className="flex items-center gap-1.5 font-mono text-[11px] tracking-[0.08em] text-white/40 uppercase">
                         <li>
-                          <Link href={withLocale("/", locale)} className="no-underline hover:text-primary">
-                            {copy.docs}
+                          <Link href={withLocale(editing ? "/editing" : "/", locale)} className="no-underline hover:text-primary">
+                            {editing ? copy.sections.editing : copy.docs}
                           </Link>
                         </li>
                         {folder && folderLanding && (

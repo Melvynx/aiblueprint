@@ -1,0 +1,90 @@
+---
+title: Short editing
+description: "Transformer une prise face caméra en short motion design fini : sous-titres, coupes, musique, bruitages, 9:16, 1:1 ou 16:9, terminé dans un studio de relecture."
+keywords: ["short-editing", "shorts", "reels", "motion design", "sous-titres", "montage", "video-editing-agent"]
+---
+
+`short-editing` est le monteur. Tu lui donnes une vidéo (un fichier, une URL,
+« ma dernière prise ») et il fait le short sans te poser une seule question :
+transcription, coupe des silences, scènes, sous-titres mot à mot, musique,
+bruitages, et un MP4 prêt à publier. Tout suit ton profil de style, pas un
+modèle générique.
+
+Il rend à partir d'un seul `spec.js` par short : chaque changement est une
+petite modification et un rendu rapide, jamais un recommencement.
+
+## Invoquer
+
+```bash
+/short-editing fais un short de ma dernière vidéo
+/short-editing fais un short de ~/Downloads/prise-ia.mp4, garde la partie sur les prix
+/short-editing fais une vidéo motion design (sans caméra) qui compare 3 outils
+/short-editing fais un short de ma dernière vidéo, en mix avec mes B-roll
+/short-editing studio latest
+/short-editing --style punchy 1:1 <slug>
+/short-editing help
+```
+
+Les mots vont dans n'importe quel ordre : un mode (`auto`, `studio`, `help`), un
+visuel (`motion`, `broll`, `mix`), `--style <nom>`, un format (`9:16`, `1:1`,
+`16:9`), une source et un brief libre. Ce que la grammaire couvre n'est jamais
+demandé : un mot manquant prend la valeur de ton profil.
+
+## Ce qu'il fait
+
+1. **Choisit le mode visuel** sans demander : `motion` (papier, cartes,
+   compteurs, textes animés), `broll` (tes plans plein écran quand un clip
+   colle) ou `mix` (B-roll pour les moments et les ressentis, motion pour les
+   idées et les chiffres).
+2. **Résout la source :** un fichier, un dossier, une URL (téléchargée pour toi),
+   `latest` dans ton A-roll, ou un short existant à retravailler.
+3. **Transcrit** avec l'horodatage mot à mot.
+4. **Planifie les temps forts et écrit le spec :** quelque chose change à l'écran
+   toutes les 2 à 4 secondes, le hook est lisible dès la première image, une
+   musique est choisie selon l'émotion du hook dans une bibliothèque de nappes
+   calmes générées en code.
+5. **Construit les composants sur mesure en parallèle** (une vraie appli jouée
+   dans sa propre interface, une illustration qui joue) avec des sous-agents,
+   pendant qu'il écrit le reste.
+6. **Prépare :** coupe chaque micro silence, recolle la voix, extrait les images.
+7. **Contrôle les images, puis corrige** selon une grille de qualité : lisibilité
+   sur mobile, sous-titres qui ne couvrent jamais une carte, tons de peau
+   naturels, bruitages discrets, vrais logos pour chaque outil nommé. Les images
+   fixes coûtent peu, il itère là, pas sur les rendus.
+8. **Rend, mixe, finalise :** voix mise en avant, musique et bruitages
+   automatiques, puis un MP4 1080x1920 (ou carré, ou large) à 30 images par
+   seconde avec un contrôle qualité.
+9. **Ouvre le studio de relecture**, toujours. Tu commentes la vidéo, et le
+   bouton « Envoyer à Claude » du studio renvoie les retours dans la
+   conversation, qui les applique et refait un rendu.
+
+### Les modes
+
+- `auto` (par défaut) : le montage complet, sans question, terminé dans le studio.
+- `studio` : une coupe brute seulement (silences retirés, pas de motion), ouverte
+  dans le studio pour que tu coupes d'abord et que le montage vienne après.
+- `help` : affiche la grammaire, tes styles et tes derniers shorts.
+
+### Plusieurs vidéos d'un coup
+
+L'agent `video-editing-agent` monte une vidéo de la prise au MP4 en arrière-plan.
+Lances-en un par vidéo et ils tournent en parallèle. Il ne demande jamais rien :
+il prend les valeurs de ton profil et te dit ce qu'il a choisi.
+
+## Ce qu'il te faut
+
+- Un profil de style (lance `studio-setup` une fois, environ 10 minutes). Sans
+  lui, le moteur rend avec ses valeurs par défaut.
+- Une clé ElevenLabs pour transcrire tes propres prises.
+- Node, ffmpeg et un Chrome ou Edge pour le rendu (la commande d'installation
+  s'en charge). Un short de 90 secondes se rend en 20 à 60 secondes environ sur
+  Apple Silicon.
+- En option : une bibliothèque B-roll pour `broll` et `mix`, Codex pour les
+  images générées.
+
+## Ensuite
+
+- [broll](/fr/editing/broll) : indexe tes plans pour que `broll` et `mix` trouvent les bons clips.
+- [steal](/fr/editing/steal) : crée un style à partir d'un reel que tu aimes, puis utilise-le avec `--style`.
+- [editing](/fr/editing/editing) : le point d'entrée qui aiguille toute demande ici.
+- [make-it-virale](/fr/editing/make-it-virale) : retravailler un short qui a floppé, avec de nouveaux hooks.

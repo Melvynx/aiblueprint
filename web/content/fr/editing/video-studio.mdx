@@ -1,0 +1,69 @@
+---
+title: Video studio
+description: "Lance le studio (relecture de chaque short, Recorder, YOLO, prises faceless) et trie tes rushs A-roll."
+keywords: ["video-studio", "studio", "recorder", "yolo", "faceless", "rushs", "a-roll", "relecture"]
+---
+
+`video-studio` lance ton studio : une page locale qui relit chaque short de ton dossier Shorts et qui contient aussi le Recorder avec son prompteur. Il trie aussi tes prises brutes (les rushs) pour que les prises cassées ne s'accumulent pas.
+
+Il y a un studio par dossier Shorts. Le port reste le même à chaque fois, et un deuxième studio n'est jamais lancé pour le même dossier. Lancer le studio, ce n'est pas monter : il ouvre juste la bonne page.
+
+## Invoquer
+
+```bash
+/video-studio
+/video-studio recorder
+/video-studio yolo
+/video-studio rushs
+/video-studio nettoie les prises
+```
+
+## Ce qu'il fait
+
+1. **Lance le studio** (ou réutilise celui qui tourne) et l'ouvre dans ton navigateur. Chrome ou Safari est nécessaire pour la caméra et le micro.
+2. **Ouvre la page dont tu as besoin** :
+   - `/recorder/` pour tourner avec un script, en YOLO, ou pour une prise faceless.
+   - `/<slug>/` pour relire un short.
+   - `/` pour le Pipeline : chaque script et chaque vidéo dans son étape (à tourner, à monter, en relecture, prêt, programmé, publié), avec des boutons pour approuver et archiver.
+   - La barre de l'app donne aussi accès à la bibliothèque B-roll, à tes styles et à tes illustrations.
+3. **Te donne l'URL** et les touches à utiliser.
+
+## Le Recorder
+
+- **Mode script** : il liste tes scripts, rouvre le dernier et ouvre tout seul un nouveau fichier. Tu peux écrire, modifier et archiver des scripts dans la page, et en relire un (chaque ligne avec son temps estimé, des commentaires sur une ligne ou sur tout le script).
+- **YOLO** veut dire sans script : appuie sur `Y`, puis `R`, et la caméra prend toute la scène. Les prises s'enregistrent en `yolo-<date-heure>.mp4`.
+- **Faceless** n'est pas un mode du Recorder mais un style de rendu : enregistre en YOLO (masque l'aperçu avec `V` si tu veux), puis monte la prise avec ton style faceless pour que seule ta voix soit utilisée.
+- Choisis une caméra et un micro par défaut dans les réglages. Un bandeau te prévient s'ils sont débranchés.
+- Le son et l'image sont resynchronisés à l'enregistrement, grâce à une mesure par flash que tu peux lancer depuis les réglages.
+
+Pour tourner un script précis, utilise [record](/fr/editing/record).
+
+## Trier tes rushs
+
+```bash
+/video-studio rushs
+```
+
+Il liste chaque prise de ton dossier A-roll, la plus récente d'abord, avec durée, taille et un verdict :
+
+- `BAD` : illisible, sans audio, moins de 5 secondes, ou un débit très bas (un enregistrement cassé).
+- `warn` : encore utilisable, mais avec une fréquence d'images variable ou sans fichier annexe.
+
+Tu confirmes ce qu'on archive. Les prises archivées vont dans `A-roll/archive/` et peuvent être restaurées. Rien n'est jamais supprimé, et une prise encore utilisée par un short est signalée avant d'être déplacée. Les reprises et les blancs à l'intérieur d'une prise ne sont pas nettoyés ici : le montage les coupe.
+
+## Transformer une prise en short
+
+```bash
+/editing latest
+/editing studio latest
+/editing --style faceless latest
+```
+
+`/editing studio latest` donne un montage brut ouvert dans le studio, `/editing latest` le montage complet. Plusieurs prises à la fois : un agent de montage par prise, en arrière-plan.
+
+## Ensuite
+
+- [record](/fr/editing/record) : ouvrir le Recorder sur un script donné.
+- [short-editing](/fr/editing/short-editing) : monter et relire un short.
+- [setup-faceless](/fr/editing/setup-faceless) : créer le style faceless.
+- [upgrade-editing-ia-pro](/fr/editing/upgrade-editing-ia-pro) : relancer le studio après une mise à jour.

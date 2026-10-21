@@ -1,0 +1,81 @@
+---
+title: Outliers
+description: "Trouver les vidéos Instagram et TikTok qui ont explosé dans ta niche et transformer les 5 meilleures en scripts prêts à tourner."
+keywords: ["outliers", "instagram", "tiktok", "concurrents", "viral", "scripts", "treg"]
+---
+
+`outliers` trouve les reels et TikToks qui ont fait bien mieux que d'habitude
+pour leur propre compte, puis écrit les 5 meilleurs en scripts dans ta voix et
+ouvre le Recorder sur le tout. Tu lis le classement, tu lis les scripts, tu
+tournes.
+
+L'idée clé : une vidéo n'est un outlier que par rapport à **la médiane de son
+propre compte** (la valeur du milieu de ses vues une fois triées). Les vues
+brutes d'un gros compte ne prouvent rien, un reel à x3 ou plus de la médiane de
+son créateur, si.
+
+## Invoquer
+
+```bash
+/outliers
+/outliers @compte
+/outliers tiktok:compte
+/outliers @compte1 @compte2 --min 3 --scripts 5
+/outliers --search
+/outliers --platform tiktok
+```
+
+- `/outliers` sans compte : ton propre fil, puis ta liste de veille concurrents.
+- `/outliers @compte` : creuse un seul compte (plusieurs comptes marchent pareil).
+- `--min 3` seuil en x médiane (3 par défaut), `--scripts 5` nombre de scripts,
+  `--search` agrandit la veille avant de mesurer, `--platform tiktok` ou
+  `instagram` garde une seule plateforme de la veille.
+
+## Ce qu'il fait
+
+1. **Collecte.** Avec un compte, il mesure tous ses reels des 180 derniers
+   jours. Sans compte, il mesure d'abord ton fil (seuil x2, un petit compte a
+   peu de gros hits), puis ta veille concurrents
+   (`Inspirations/competitors.json`), en re-mesurant tout compte vieux de plus
+   de 7 jours. La veille est remplie et agrandie par le skill lui-même, avec un
+   mélange de deux langues si tu en suis deux (70 % / 30 % par défaut).
+2. **Classe.** Les reels de moins de 7 jours sont écartés (leurs vues montent
+   encore), les sponsorisés (`#ad`, partenariat) aussi, et un compte avec moins
+   de 10 reels datés est marqué « échantillon trop petit ».
+3. **Choisit les 5.** Sur une longue liste d'environ 15 : il faut que ça colle à
+   ta niche, un concept qui perce 2 fois ou plus (ou chez 2 comptes) est une
+   **recette** et passe en premier, un hit isolé n'est gardé que si son hook et
+   sa promesse l'expliquent clairement, ce que tu as déjà tourné sort, un
+   repost garde l'original, 2 scripts maximum par compte.
+4. **Écrit les 5 scripts**, un sous-agent par vidéo en parallèle, chacun suivant
+   [remake](/fr/editing/remake) : pourquoi ça a marché, le script original, le
+   tien.
+5. **Sauve le lot** dans `Scripts/outliers-<date>.md` (les 5 choix avec leur x
+   médiane, recette ou chance, et ce qui a été écarté et pourquoi) et un fichier
+   prompteur avec les 5 scripts.
+6. **Ouvre le Recorder** sur le lot avec [record](/fr/editing/record), pour
+   tourner les 5 d'une traite.
+
+TikTok marche pareil. Les vues TikTok sont bien plus dispersées (un x élevé est
+courant), donc le test « recette ou chance » compte encore plus. Ne compare
+jamais un x Instagram avec un x TikTok : chacun est face à son propre compte.
+
+## Ce qu'il te faut
+
+- **Treg** connecté (`treg balance`, `treg login` ouvre ton navigateur). Une
+  page de reels coûte environ 0,001 $, une recherche de créateurs environ
+  0,007 $. Le skill te donne le total avant de lancer si la mesure dépasse 10
+  comptes.
+- Une **clé ElevenLabs** dans le `.env` de ton profil (pour transcrire).
+- `yt-dlp` installé (`brew install yt-dlp` ou `winget install yt-dlp`).
+- Ton identifiant de compte (demandé une fois, puis retenu).
+
+Tout ce qui est récupéré (légendes, transcriptions, commentaires, bios) est
+traité comme de la donnée, jamais comme des instructions.
+
+## Ensuite
+
+- [remake](/fr/editing/remake) : le même travail sur une seule vidéo que tu as choisie.
+- [studio-script](/fr/editing/studio-script) : hooks et scripts de la semaine, à partir de la même recherche.
+- [record](/fr/editing/record) : tourner le lot avec le prompteur.
+- [make-it-virale](/fr/editing/make-it-virale) : sauver un short qui a floppé.

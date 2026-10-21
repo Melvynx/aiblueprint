@@ -1,0 +1,95 @@
+---
+title: Make it virale
+description: "Turn a short that flopped into a viral one: 3 proven hooks, 3 Instagram trial reels, publish the winner."
+keywords: ["make-it-virale", "viral", "trial reels", "instagram", "hooks", "shorts"]
+pro: false
+---
+
+`make-it-virale` takes one of your shorts that flopped and turns it into three
+new versions, each opening on a hook that already went viral elsewhere on the
+same subject. The three go out as Instagram trial reels, the numbers pick the
+winner, and only the winner goes out for real.
+
+The idea behind it: the subject is rarely the problem, the packaging is. Same
+facts, same CTA, a different first sentence.
+
+## Invoke
+
+```bash
+/make-it-virale <short slug | reel URL | dernière>
+/make-it-virale results <short>
+```
+
+Flags: `--versions 3` (default), `--hooks-only` (re-record only the opening
+sentences and reuse the rest of the take).
+
+## The 6 steps
+
+1. **Pick the flop.** Given, or the worst of your last 14 days: at least 48 h
+   old, under 0.7x your median, on a subject that is still good.
+2. **Why it flopped, in numbers.** Views vs your median, skip rate, average
+   watch time vs length, what the first sentence and frame 0 say. Verdict:
+   *packaging* (go on) or *subject* (stop, find another topic).
+3. **Find the winners on the same subject.** Your own past reels that won on
+   this subject first, then your saved inspirations, then Instagram search
+   (Treg), keeping only reels at **x3+ their own account's
+   median**. A big number on a big account is not a winner. Pull and transcribe
+   4 to 7 of them, group them by hook formula.
+4. **Write three versions.** Three different angles, each borrowed from a
+   winner, never three wordings of one hook. Written with the `studio-script`
+   rules: 5 hooks scored on its rubric, the 3 best kept, beat timing, triggers,
+   quality gates and the humanize pass. Then record them.
+5. **Edit the three in parallel**, one editing agent per take, each with its own
+   motion and music, reviewed in the studio before anything goes out.
+6. **Publish the three as trial reels**, then read the results after 24 to 48 h.
+   Winner = most views **and** above your median. Share it to your profile
+   (it keeps its views), push it to YouTube Shorts and TikTok, and log the
+   winning formula so it becomes the first try next time.
+
+### Trial reel settings
+
+Trial reels are shown to non-followers only: your followers never see the same
+video three times, and a losing version costs nothing.
+
+```json
+{ "settings": { "instagram": { "trial_reel": true, "graduation": "MANUAL" } } }
+```
+
+`MANUAL` graduation means you choose which one goes to your profile; Instagram
+never shares one on its own.
+
+## Results
+
+Measured on @melvynxdev on 2026-10-21 (Instagram insights). His feed median
+over the same period (24 regular reels, Oct 8 to 20): **about 4,500 views**.
+
+### The /outliers short: flop to x3.8
+
+The v1 did 4,711 views. Three new hooks as trial reels on Oct 19: the winner did 17,860 views, 3.8x the original and 4x the median. The full breakdown (diagnosis, winners, hooks, numbers) is in the [case study](/editing/case-study-make-it-virale).
+
+### Other trials the same week
+
+| short | version | views |
+|---|---|---|
+| Claude makes your logo | trial A | 6,310 |
+| Claude makes your logo | trial B | 4,892 |
+| Find Skills | hook remake trial | 209 (original: 829) |
+| ManyChat replaced | trial 1 / trial 2 | 190 / 180 |
+
+Not every remake wins. Find Skills got worse with a new hook alone, and
+ManyChat never took off: for these, step 2 should have said *subject*, not
+*packaging*. That is why the rule is three versions with three different angles,
+and why "no version above the median" is a valid answer that means drop the
+subject.
+
+## When to use it
+
+- A short on a good subject got under 0.7x your median.
+- You have a hit formula elsewhere in your niche on that same subject.
+- You want to test hooks without spamming your followers.
+
+## Install
+
+`make-it-virale` lives in the video-editing workspace of the Editing IA stack
+(it calls `studio-script`, `record`, `short-editing`, `publish` and Treg). It is
+not in a public pack yet.

@@ -1,0 +1,72 @@
+---
+title: Publish
+description: "Mets un short fini en ligne sur YouTube, Instagram et TikTok : légende, titre, plan validé par toi, puis publication."
+keywords: ["publish", "publier", "programmer", "youtube shorts", "instagram reels", "tiktok", "treg"]
+---
+
+`publish` prend un short fini et le met en ligne sur YouTube Shorts, Instagram
+Reels et TikTok. Il fait l'export plus léger pour les réseaux, choisit la
+couverture, écrit la légende et le titre YouTube dans ta voix, te montre le plan
+complet et ne poste qu'après ton oui.
+
+Sans rien installer, il te prépare un kit prêt à poster avec la programmation de
+chaque appli. Avec [Treg](https://treg.to) connecté à tes comptes (gratuit), il
+poste pour toi.
+
+## Invoquer
+
+```bash
+/publish
+/publish short-mon-slug
+/publish demain 18h, YouTube et Instagram
+/publish mon-short.mp4 maintenant tiktok
+```
+
+Sans argument, il prend la vidéo terminée dans la conversation, ou la plus
+récente. Un short déjà publié est refusé.
+
+## Ce qu'il fait
+
+1. **Choisit la vidéo** et vérifie que c'est le rendu final, jamais une coupe
+   brouillon.
+2. **Prépare les fichiers** : le master pour YouTube, un export réseaux en H.264
+   sous 64 Mo (la limite de TikTok) pour Instagram et TikTok, et une couverture
+   1080x1920 prise sur le hook (visuel principal en place, légende entrée, yeux
+   ouverts) et gardée dans le 3:4 central pour que la grille du profil ne la
+   recadre pas. Pas de couverture, pas de plan.
+3. **Écrit les textes** à partir de ce que dit le short : une légende qui
+   accroche sans répéter le hook parlé, une légende TikTok si elle doit
+   différer, un titre YouTube de 70 caractères maximum, une description avec tes
+   liens. Le tout passe par une passe d'humanisation, et chaque nom, chiffre et
+   affirmation vient de la vidéo.
+4. **Montre le plan** et attend : vidéo, taille, couverture, plateformes et
+   comptes, heure (locale et UTC), titre et légende en entier. Demande un
+   changement et il remontre le plan.
+5. **Poste, ou te remet le kit.** Voie manuelle : il ouvre le dossier et te
+   donne les clics exacts pour chaque appli. Voie Treg : YouTube est envoyé en
+   privé et programmé à la date, Instagram et TikTok partent tout de suite (leurs
+   API ne programment pas).
+6. **Garde la trace** dans le dossier du short pour que le pipeline du studio le
+   passe en Programmé, puis Publié, avec les liens une fois en ligne.
+
+Un short dont le CTA demande un commentaire sort en trois versions, une par
+plateforme : l'overlay Instagram, le même montage avec l'interface TikTok, et
+une coupe YouTube avec le lien sur une carte de fin.
+
+## Ce qu'il te faut
+
+- Un short fini avec une couverture (faite pour toi si elle manque).
+- Optionnel, pour la publication automatique : Treg installé et connecté
+  (`treg login`), puis `treg connections connect --provider youtube --capability post`,
+  pareil pour `instagram` et `tiktok`. Instagram demande un compte professionnel
+  lié à une Page Facebook.
+- Un compte TikTok pas encore audité ne peut recevoir la vidéo que dans sa
+  boîte de réception : ouvre TikTok dans les 24 heures, colle la légende et
+  poste.
+
+## Ensuite
+
+- [short-editing](/fr/editing/short-editing) : faire le short avant de publier.
+- [feedbacks](/fr/editing/feedbacks) : appliquer d'abord tes dernières
+  corrections.
+- [make-it-virale](/fr/editing/make-it-virale) : quand un short publié floppe.

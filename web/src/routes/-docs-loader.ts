@@ -2,6 +2,7 @@ import {
   getCurrentDoc,
   getNavDocs,
   getNavTree,
+  getSpaceForSlug,
 } from "@public-site/docs/doc-manager";
 import {
   getChrome,
@@ -13,11 +14,12 @@ import {
 // Only the current page ships its body; navigation data stays light so the
 // prerendered HTML does not embed every doc twice.
 export function loadDocsPage(locale: Locale, slugParts: string[]) {
+  const space = getSpaceForSlug(slugParts.join("/"));
   return {
     locale,
-    tree: getNavTree(locale),
+    tree: getNavTree(locale, space),
     doc: getCurrentDoc(slugParts, locale),
-    allDocs: getNavDocs(locale),
+    allDocs: getNavDocs(locale, space),
   };
 }
 
@@ -27,12 +29,14 @@ export function docsHead(
 ) {
   const copy = getChrome(locale);
   if (!doc) return {};
+  const editing = doc.slug === "editing" || doc.slug.startsWith("editing/");
+  const siteTitle = editing ? copy.sections.editing : copy.siteTitle;
 
   const bare = doc.slug ? `/${doc.slug}` : "/";
   const title =
-    doc.attributes.title === copy.siteTitle
-      ? `${copy.siteTitle} Documentation`
-      : `${doc.attributes.title} - ${copy.siteTitle}`;
+    doc.attributes.title === siteTitle
+      ? `${siteTitle} Documentation`
+      : `${doc.attributes.title} - ${siteTitle}`;
   const description = doc.attributes.description ?? copy.siteDescription;
   const url = `${SITE_URL}${withLocale(bare, locale)}`;
   return {
@@ -40,7 +44,7 @@ export function docsHead(
       { title },
       { name: "description", content: description },
       { property: "og:type", content: "article" },
-      { property: "og:site_name", content: copy.siteTitle },
+      { property: "og:site_name", content: siteTitle },
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:url", content: url },
@@ -54,6 +58,7 @@ export function docsHead(
       { rel: "alternate", hrefLang: "en", href: `${SITE_URL}${withLocale(bare, "en")}` },
       { rel: "alternate", hrefLang: "fr", href: `${SITE_URL}${withLocale(bare, "fr")}` },
       { rel: "alternate", hrefLang: "x-default", href: `${SITE_URL}${withLocale(bare, "en")}` },
+      ...(editing ? [{ rel: "icon", type: "image/png", href: "/editing-ia-logo.png" }] : []),
     ],
   };
 }

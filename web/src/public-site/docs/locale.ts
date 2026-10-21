@@ -48,6 +48,7 @@ export type ChromeCopy = {
     advanced: string;
     commands: string;
     skills: string;
+    editing: string;
     concepts: string;
   };
   siteTitle: string;
@@ -103,6 +104,7 @@ export const chrome = {
       advanced: "Advanced",
       commands: "Commands",
       skills: "Skills",
+      editing: "Editing IA",
       concepts: "Concepts",
     },
     siteTitle: "AIBlueprint CLI",
@@ -160,6 +162,7 @@ export const chrome = {
       advanced: "Avancé",
       commands: "Commandes",
       skills: "Skills",
+      editing: "Editing IA",
       concepts: "Concepts",
     },
     siteTitle: "AIBlueprint CLI",
@@ -187,6 +190,12 @@ export function getChrome(locale: Locale): ChromeCopy {
 
 export function getLocaleFromPathname(pathname: string): Locale {
   return pathname === "/fr" || pathname.startsWith("/fr/") ? "fr" : "en";
+}
+
+/** The docs space of a page: the AIBlueprint CLI docs, or the Editing IA skills. */
+export function isEditingPath(pathname: string): boolean {
+  const bare = stripLocalePrefix(pathname);
+  return bare === "/editing" || bare.startsWith("/editing/");
 }
 
 export function stripLocalePrefix(pathname: string): string {

@@ -1,0 +1,52 @@
+---
+title: Studio setup
+description: "The onboarding that builds your whole video studio in about 10 minutes: your style, your scripts and your recorder."
+keywords: ["studio-setup", "onboarding", "style", "shorts", "youtube", "captions", "b-roll"]
+---
+
+`studio-setup` is the first skill you run. You send it one video of you (or a voice memo) and one to three shorts whose editing you love. It measures them, edits YOUR take in three looks side by side, and you pick one and tweak it in your own words.
+
+You leave with more than a style: one look for every format (shorts, Reels and TikToks in 9:16, YouTube videos in 16:9, square posts), your scripts set up for `studio-script`, and a studio ready to record and edit. It is meant to feel like a game, not a form.
+
+## Invoke
+
+```bash
+/studio-setup
+/studio-setup look
+/studio-setup colors
+/studio-setup captions
+/studio-setup visual       # motion design, B-roll or mix by default
+/studio-setup music
+/studio-setup scripts      # redo the niche research and your ideas
+```
+
+Run it with no argument the first time. Later, pass a part to redo only that part. A second look next to the first (for example a podcast style) is made with `--style <name>`.
+
+## What it does
+
+1. **Checks your machine** silently (Node, ffmpeg, Chrome, the engine) and only speaks if something blocks.
+2. **Takes one recording of you**: a video of you talking, a take recorded right now in the Recorder, or just a voice memo (the demo then becomes motion design on paper, no camera).
+3. **Reads your taste.** You give 1 to 3 shorts you love (Instagram, TikTok, YouTube Shorts links or files). It measures cuts per minute, colors, caption style and speech rate, then tells you in plain words what it understood.
+4. **Asks who you are** in one message: the name and handle on the end card, the button text, and where you send people (a product, a training, a newsletter, or just followers).
+5. **Renders 3 looks of your own take** side by side in about 20 seconds: one inspired by your examples, one bolder, one classic. You choose, say what you would change ("bigger", "calmer", "in blue"), and it re-renders only that look. Two rounds at most, then the style is saved.
+6. **Decides the rest for you**: folders, motion design or B-roll, pace, music (a library of calm beds, nothing to pay), and the image provider.
+7. **Builds your B-roll database** if you have a folder of your own clips: they are scanned and tagged so a search finds the right shot.
+8. **Sets up your scripts.** It measures the viral Reels and Shorts of your niche, fills your positioning, your voice (real quotes from your take) and your offer, and writes your first 10 ideas.
+9. **Wraps up** with your style in words, how to make a video, and an offer to edit your first real short right away. Your style is saved in a local git commit.
+
+Everything is stored locally in your project folder, in `.short-editing/styles/<name>/`. Changing a style restyles the next shorts, never the finished ones.
+
+## What you need
+
+- One recording of you talking (15 s to 2 min), or a voice memo.
+- An ElevenLabs key to transcribe your own take. You paste it yourself in the `.env` file the skill opens for you, never in the chat. Without it, the bundled sample take is used.
+- Treg, connected with `treg login`, to measure Instagram Reels in your niche (about one cent). Without it, only YouTube Shorts are measured.
+- Codex logged in (free with a ChatGPT plan) if you want generated images later.
+
+## Next
+
+- [studio-script](/editing/studio-script): write your week of scripts in your voice.
+- [record](/editing/record): shoot them with the teleprompter.
+- [short-editing](/editing/short-editing): turn a take into an edited short.
+- [setup-faceless](/editing/setup-faceless): the voice-only version, played by a cartoon avatar.
+- [broll](/editing/broll): manage the B-roll database.

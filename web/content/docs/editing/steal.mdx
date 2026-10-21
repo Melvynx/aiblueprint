@@ -1,0 +1,78 @@
+---
+title: Steal
+description: "Copy another creator's editing style by measuring it, then prove it on a test short built from your own take."
+keywords: ["steal", "style", "copy", "reel", "editing style", "sfx", "captions"]
+---
+
+`steal` takes a reel from a creator you admire and turns its editing into a
+style you can use on any of your shorts. It does not eyeball it: it measures the
+rhythm of the cuts, the layouts, the captions, the beat and the music level, the
+sound effects on each cut, and the zooms frame by frame.
+
+It then edits a test short on one of your takes, compares it tile by tile with
+the original and opens it in the studio. You only see it once the gaps are
+fixed.
+
+## Invoke
+
+```bash
+/steal https://www.instagram.com/reel/<id>/
+/steal ~/Downloads/reel-model.mp4
+/steal copy the style of @handle
+/steal this reel, call the style punchy
+```
+
+Giving two or three reels of the same format is better: one reel can be an
+exception. The style is named after the creator's handle unless you say
+otherwise.
+
+## What it does
+
+1. **Gets the video.** A local file as is, or a download from Instagram, TikTok
+   or YouTube. If the download hits a login wall, it asks you to save the video
+   and drop the file.
+2. **Measures, in three passes** (three sub-agents in parallel when available):
+   - **Frames and cuts:** contact sheets at 2 fps, layouts (full camera, split,
+     cutout on color, B-roll, screenshots), caption font and entrance, stickers,
+     images, hook, CTA and color grade. Key stills are saved as references.
+   - **Sound:** beat tempo, how many cuts carry a click or a boom, where the
+     music starts, and a spectrogram with the cuts marked. An optional voice
+     isolation (it tells you first, it uses ElevenLabs credits) gives the music
+     level under the voice.
+   - **Zooms:** the face height range, zoom jumps per 10 seconds and the slow
+     push per second. These numbers are the ceiling for your render.
+3. **Writes the analysis** in your language: structure, rhythm, measured sound
+   and zooms, what to keep and what to leave out (AI video clips, paid
+   generation) and why.
+4. **Builds the style** in your profile: colors, captions, cut rhythm, grade,
+   music and beat, SFX kit, pace. Sounds come from the library that ships with
+   the kit. Stickers are generated with Codex from your real photos, then cut
+   out. Real logos for every app named on screen.
+5. **Edits a test short** on your take with [short-editing](/editing/short-editing),
+   in the original's grammar. AI action clips in the original become real
+   [broll](/editing/broll) from your library.
+6. **Checks against the original**, not against your house style: type size,
+   sticker size, grade, no fade between shots, zoom numbers not above the
+   original's, hits landing on the cuts.
+7. **Delivers:** the test short opened in the studio, with what was measured, what
+   was copied, what was left out, and a link. Each rejection you give is written
+   in the style's notes so it is never repeated.
+
+If the engine cannot do something the original does, it tells you what is missing
+and picks the closest existing option rather than faking it in one short.
+
+## What you need
+
+- A reel (URL or file) and one clean take of 10 to 20 seconds in your A-roll
+  folder.
+- `yt-dlp` for URLs (the skill tells you how to install it).
+- Codex connected to your ChatGPT account if you want stickers made from your
+  photos.
+- A few close-up photos of you in your profile's `face` folder.
+
+## Next
+
+- [short-editing](/editing/short-editing): use the new style with `--style <name>`.
+- [broll](/editing/broll): the library that replaces the original's AI clips.
+- [editing](/editing/editing): the entry point, it routes "copy the style of this reel" here.
+- [make-it-virale](/editing/make-it-virale): when it is the hook, not the style, that needs work.

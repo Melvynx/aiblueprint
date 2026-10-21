@@ -1,0 +1,78 @@
+---
+title: Studio script
+description: "Your scriptwriter: finds the hooks that work in your niche, writes your week of shorts or a YouTube plan in your voice, then hands off to the teleprompter."
+keywords: ["studio-script", "scripts", "hooks", "youtube", "teleprompter", "brand brain", "humanize"]
+---
+
+`studio-script` is the scriptwriter of your video studio, for shorts, Reels,
+TikToks and YouTube videos. The idea: once a week you sit down for one hour,
+read 5 scripts off a teleprompter and leave with every take of the week
+recorded. No blank page, no motivation needed.
+
+Every script sits on a concept that already over-performed in your niche, is
+written in your voice, and goes through a pass that removes what sounds like AI.
+
+## Invoke
+
+```bash
+/studio-script prepare my 5 shorts of the week
+/studio-script 3 scripts on price objections, with the English version
+/studio-script youtube <topic>
+/studio-script hooks why my shorts plateau at 500 views
+/studio-script rewrite my-script.md
+/studio-script brain
+/studio-script viral
+/studio-script humanize my-description.md
+```
+
+Modes:
+
+- no argument: the week (plan, 5 scripts, teleprompter).
+- `<topic>`: one script.
+- `youtube <topic>`: titles, the first 30 seconds written in full, a plan by
+  chapters (the point, the proof to show, the transition), your CTA.
+- `hooks`: 20 hooks from at least 10 formulas, scored, best 3 on top.
+- `rewrite`: your script tightened, same facts, better hook, with a diff.
+- `brain`: builds your brand brain (positioning, voice, offer, viral concepts).
+- `viral`: finds the hooks that over-performed in your niche and your own feed.
+- `humanize`: removes AI-sounding phrasing from any text (`humanize check` only reports).
+
+## What it does
+
+1. **Reads your profile and brand brain**: niche, language, CTA, then
+   `positioning.md` (viewer, pains, myths), `voice.md` (how you really talk),
+   `offer.md` (CTA ladder, proof), `viral.md` (concepts that worked). No profile
+   yet: it offers [studio-setup](/editing/studio-setup) once, or asks 3 questions.
+2. **Gathers the week's material**: your topics, your `Scripts/ideas.md`, your
+   swipe file, what is hot today (trending repos, launches), and what you
+   already filmed in the last 8 weeks, so no angle repeats.
+3. **Writes each script**: 3 hooks from 3 different formulas out of 22, scored
+   (the best is kept, below 7 out of 10 it rewrites), an on-screen hook of 6
+   words or fewer, 80 to 140 spoken words, one idea, a re-hook near the middle,
+   your CTA said once. Timing is checked beat by beat.
+4. **Never invents facts.** Every number and result comes from you, anything
+   else becomes a `{{placeholder}}` listed under "To fill".
+5. **Humanizes and gates**: at least four triggers in place, then four quality
+   gates (generic, structureless, interchangeable, viral). A failed gate means
+   a rewrite before you see it.
+6. **Saves** `Scripts/semaine-<date>/scripts.md` (the plan table and every
+   script, to read and edit) and `prompter.json` (what the teleprompter reads).
+7. **Hands off to [record](/editing/record)**, which opens the Recorder on the
+   first script not yet shot. At the end it offers to edit all takes in the
+   background, one agent per take.
+
+A second language adds an aligned translation of every line, used later by the
+translation skill.
+
+## What you need
+
+- A creator profile (`.short-editing/`), see [studio-setup](/editing/studio-setup).
+- For `viral`: **Treg** logged in (Instagram and TikTok data) and `yt-dlp`.
+- A browser with camera and microphone for the teleprompter.
+
+## Next
+
+- [record](/editing/record): the teleprompter that saves each take.
+- [outliers](/editing/outliers): turn the best videos of your niche into scripts.
+- [remake](/editing/remake): redo one viral video in your voice.
+- [insta-audit](/editing/insta-audit): audit your account before planning.

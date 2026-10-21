@@ -1,0 +1,68 @@
+---
+title: Remake
+description: "Give it a viral reel or TikTok URL: it explains why it worked, writes the original script and yours, and opens the Recorder."
+keywords: ["remake", "instagram", "tiktok", "viral", "script", "hook", "treg"]
+---
+
+`remake` takes the link of a reel or TikTok that went viral and prepares
+everything to make your own version, with no question on the way. You get the
+numbers, the reason it worked, the original script, your script (same
+sentences, same order, same length, your words and your CTA), and the Recorder
+open on it. You read and record.
+
+## Invoke
+
+```bash
+/remake https://www.instagram.com/reel/<shortcode>/
+/remake https://www.tiktok.com/@<handle>/video/<id>
+```
+
+Short `vm.tiktok.com` links work too. A private account or a refused download:
+save the video yourself, drop it in the reel's folder as `video.mp4`, and rerun.
+
+## What it does
+
+1. **Gets the data** (about 1 minute, via Treg). Views, likes, comments,
+   duration, caption, the account's median, the 5 best reels of the account.
+   It downloads and transcribes the video, builds a contact sheet (one frame
+   every 2 s) and reads the first page of comments.
+2. **Explains why it went viral**, each point with a number or a quote:
+   - **Hit or luck**: x median, and whether the same concept shows up 2+ times
+     above x3 on the account (a recipe) or only once (maybe luck).
+   - **The hook**: the exact first sentence, its formula, who it targets.
+   - **One promise**: what the hook promises and the line where it is paid.
+   - **The structure** with timestamps, the visuals per beat, the CTA.
+   - **What to take**: one or two things, one sentence each.
+
+   Saved in `Inspirations/<handle>/About.md`, with a 5-line summary in chat.
+3. **Writes your script.** Same sentences in the same order, same number of
+   beats, same length (within 15 %), same hook formula. Only the words become
+   yours (from your voice file) and the CTA becomes yours. A beat that only
+   fits another country is swapped for your local equivalent and listed under
+   "To check". Numbers you must provide stay `{{placeholders}}` and never reach
+   the teleprompter.
+4. **Saves it**: `Scripts/<slug>.md` (source and analysis, your script, the
+   original verbatim with a translation, what to verify, CTA to-do) and
+   `Scripts/prompter-<slug>.json` with editing notes per beat.
+5. **Opens the Recorder** on the prompter file with [record](/editing/record).
+
+A comment CTA ("Comment WORD and I send you X") needs the word in your
+comment-to-DM tool. The skill writes it as a to-do with the DM text, it never
+sets it up without your yes.
+
+## What you need
+
+- **Treg** logged in (`treg login`). A remake costs about 0.05 $.
+- An **ElevenLabs key** in your profile `.env` (transcription, a few minutes of
+  credits for 6 reels).
+- `yt-dlp` installed (`brew install yt-dlp` or `winget install yt-dlp`).
+- Ideally your brand brain (positioning, voice, offer), see
+  [studio-script](/editing/studio-script). Without it, the script is written
+  with what exists.
+
+## Next
+
+- [record](/editing/record): record the take.
+- [outliers](/editing/outliers): find the 5 best reels to remake instead of picking by hand.
+- [studio-script](/editing/studio-script): your voice, hooks and brand brain.
+- [make-it-virale](/editing/make-it-virale): test other hooks on the finished short.

@@ -1,0 +1,67 @@
+---
+title: Codex Images
+description: "Génère plusieurs images d'un coup avec Codex, gratuit avec un abonnement ChatGPT et sans clé API."
+keywords: ["codex-images", "codex", "génération d'images", "miniatures", "illustrations", "chatgpt"]
+---
+
+`codex-images` génère tout un lot d'images d'un coup avec Codex et son
+générateur d'images intégré. C'est gratuit avec ton abonnement ChatGPT et ça ne
+demande aucune clé API. Utilise-le pour des illustrations, du B-roll généré, des
+variantes de miniatures, des séries d'icônes, ou des images construites à partir
+de tes propres photos.
+
+Les images à l'intérieur d'un short sont déjà générées par le monteur, dans ton
+style. Ce skill sert pour tout le reste.
+
+## Invoquer
+
+```bash
+/codex-images 6 illustrations : une fusée, un bureau de nuit, un téléphone...
+/codex-images 3 variantes de cette idée de couverture
+/codex-images une série d'icônes, à partir de mes photos dans ~/Pictures/ref
+```
+
+Dessous, il lance un job Codex par image, en parallèle :
+
+```bash
+node <skill>/scripts/image_gen --prompts prompts.json --out "$PWD/images/catalog" --concurrency 3
+node <skill>/scripts/image_gen --name cover --prompt "..." --count 3 --out "$PWD/images/cover"
+```
+
+## Ce qu'il fait
+
+1. **Écrit un prompt nommé par image.** Jamais plusieurs images dans un seul
+   prompt. Chaque prompt donne le format (vertical 9:16, paysage 3:2, carré), le
+   sujet, le style, les couleurs et le fond.
+2. **Fait un essai à blanc** pour lister les jobs, puis génère en parallèle
+   (environ 45 secondes par image). Les gros lots tournent en arrière-plan et on
+   te dit combien de temps ça prend.
+3. **Range les fichiers** dans un dossier de sortie avec des noms propres
+   (`001-bureau-nuit.png`, ...) et un `manifest.json` qui relie chaque image à
+   son prompt, plus un log par job.
+4. **Vérifie le résultat.** Le nombre d'images doit égaler le nombre de prompts,
+   il en ouvre quelques-unes pour les regarder et te donne le dossier. Un job
+   raté est corrigé dans son prompt et relancé seul.
+
+Bon à savoir :
+
+- Pas de texte dans l'image sauf si tu le demandes : le texte généré sort mal.
+  Les titres et les chiffres vont dans la vidéo.
+- Tes propres photos (ton visage, ton produit, un style à copier) sont passées à
+  Codex comme références.
+- Variantes d'un même prompt : demande un nombre et tu obtiens plusieurs prises
+  de la même idée.
+
+## Ce qu'il te faut
+
+- Codex installé et connecté avec ton compte ChatGPT : `npm i -g @openai/codex`,
+  puis `codex login` (vérifie avec `codex login status`).
+- Node 20 ou plus récent.
+
+## Ensuite
+
+- [youtube-thumbnail](/fr/editing/youtube-thumbnail) : 20 miniatures pour une
+  vidéo longue, générées avec ce moteur.
+- [short-editing](/fr/editing/short-editing) : les images à l'intérieur d'un
+  short, dans ton style.
+- [publish](/fr/editing/publish) : la couverture d'un short part avec le post.

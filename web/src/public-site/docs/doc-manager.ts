@@ -29,7 +29,22 @@ const frMetaFiles = import.meta.glob("../../../content/fr/**/meta.json", {
 const MetaSchema = z.object({
   title: z.string(),
   pages: z.array(z.string()),
+  /** Sidebar groups of a docs space (e.g. editing): each lists page names of the folder. */
+  groups: z
+    .array(z.object({ title: z.string(), pages: z.array(z.string()) }))
+    .optional(),
 });
+
+/**
+ * Folders that are their own documentation space: their own sidebar, home
+ * and prev/next, kept out of the AIBlueprint CLI tree.
+ */
+export const SPACES = ["editing"] as const;
+export type Space = "cli" | (typeof SPACES)[number];
+
+export function getSpaceForSlug(slug: string): Space {
+  return SPACES.find((space) => slug === space || slug.startsWith(`${space}/`)) ?? "cli";
+}
 
 const AttributeSchema = z.object({
   title: z.string(),
@@ -178,9 +193,37 @@ function sortByOrder(order: string[], a: string, b: string): number {
   return aIndex - bIndex;
 }
 
+function getSpaceTree(locale: Locale, space: Exclude<Space, "cli">): DocTree<DocType> {
+  const { docs } = processFolder(locale, space);
+  const metaContents = metaFilesFor(locale)[`${contentRoot(locale)}${space}/meta.json`];
+  const meta = metaContents ? MetaSchema.safeParse(JSON.parse(metaContents)) : null;
+  const groups = meta?.success ? (meta.data.groups ?? []) : [];
+  const bySlug = (name: string) =>
+    docs.find((doc) => doc.slug === (name === "index" ? space : `${space}/${name}`));
+
+  return {
+    rootDocs: docs.filter((doc) => doc.slug === space),
+    folders: groups.map((group, index) => ({
+      name: group.title,
+      slug: `${space}#${index}`,
+      docs: group.pages
+        .map(bySlug)
+        .filter((doc): doc is DocType => doc !== undefined),
+    })),
+  };
+}
+
 export function getDocsTree(
   locale: Locale = DEFAULT_LOCALE,
+  space: Space = "cli",
 ): DocTree<DocType> {
+  if (space !== "cli") {
+    try {
+      return getSpaceTree(locale, space);
+    } catch {
+      return { rootDocs: [], folders: [] };
+    }
+  }
   try {
     const root = contentRoot(locale);
     const files = docFilesFor(locale);
@@ -194,7 +237,7 @@ export function getDocsTree(
           .filter((filePath) => filePath.includes("/"))
           .map((filePath) => filePath.split("/")[0]),
       ),
-    );
+    ).filter((folder) => !(SPACES as readonly string[]).includes(folder));
     const rootFiles = Object.keys(files).filter(
       (filePath) => !filePath.replace(root, "").includes("/"),
     );
@@ -224,9 +267,17 @@ export function getDocsTree(
   }
 }
 
-export function getAllDocs(locale: Locale = DEFAULT_LOCALE): DocType[] {
-  const tree = getDocsTree(locale);
+export function getAllDocs(
+  locale: Locale = DEFAULT_LOCALE,
+  space: Space = "cli",
+): DocType[] {
+  const tree = getDocsTree(locale, space);
   return [...tree.rootDocs, ...tree.folders.flatMap((folder) => folder.docs)];
+}
+
+/** Every doc of every space, for lookups and search. */
+export function getEveryDoc(locale: Locale = DEFAULT_LOCALE): DocType[] {
+  return (["cli", ...SPACES] as Space[]).flatMap((space) => getAllDocs(locale, space));
 }
 
 export function getCurrentDoc(
@@ -234,15 +285,18 @@ export function getCurrentDoc(
   locale: Locale = DEFAULT_LOCALE,
 ): DocType | null {
   const slug = slugParts?.join("/") ?? "";
-  return getAllDocs(locale).find((doc) => doc.slug === slug) ?? null;
+  return getEveryDoc(locale).find((doc) => doc.slug === slug) ?? null;
 }
 
 function toNavDoc({ content: _content, ...doc }: NavDoc & { content?: string }): NavDoc {
   return doc;
 }
 
-export function getNavTree(locale: Locale = DEFAULT_LOCALE): DocTree {
-  const tree = getDocsTree(locale);
+export function getNavTree(
+  locale: Locale = DEFAULT_LOCALE,
+  space: Space = "cli",
+): DocTree {
+  const tree = getDocsTree(locale, space);
   return {
     rootDocs: tree.rootDocs.map(toNavDoc),
     folders: tree.folders.map((folder) => ({
@@ -252,8 +306,11 @@ export function getNavTree(locale: Locale = DEFAULT_LOCALE): DocTree {
   };
 }
 
-export function getNavDocs(locale: Locale = DEFAULT_LOCALE): NavDoc[] {
-  return getAllDocs(locale).map(toNavDoc);
+export function getNavDocs(
+  locale: Locale = DEFAULT_LOCALE,
+  space: Space = "cli",
+): NavDoc[] {
+  return getAllDocs(locale, space).map(toNavDoc);
 }
 
 export function getFolderForSlug(tree: DocTree, slug: string): DocFolder<NavDoc> | null {

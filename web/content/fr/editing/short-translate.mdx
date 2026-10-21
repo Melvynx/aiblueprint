@@ -1,0 +1,73 @@
+---
+title: Short Translate
+description: "Passe une prise dans une autre langue avec ta propre voix, avec ou sans lip-sync, après une estimation du coût."
+keywords: ["short-translate", "traduction", "doublage", "heygen", "elevenlabs", "voix clonée", "lip-sync"]
+---
+
+`short-translate` prend une de tes prises et te la rend dans une autre langue,
+avec ta propre voix. Avec HeyGen, les lèvres suivent aussi la nouvelle langue.
+Ensuite [short-editing](/fr/editing/short-editing) monte la prise traduite comme
+n'importe quelle autre, avec des sous-titres transcrits dans la nouvelle langue.
+
+Il traduit la **prise**, pas le short fini : le monteur coupe et cale tout sur
+la voix traduite. Il nettoie aussi la prise avant l'envoi : les bégaiements et
+les reprises envoyés à HeyGen seraient traduits, lip-syncés et facturés.
+
+## Invoquer
+
+```bash
+/short-translate ma dernière prise en anglais
+/short-translate short-mon-slug en espagnol
+/short-translate <prise> --to en --from fr
+```
+
+Il affiche toujours la durée et le coût d'abord, et n'envoie rien sans ton
+accord.
+
+## Ce qu'il fait
+
+1. **Transcrit la prise** avec les mots horodatés. Une prise au prompteur écrite
+   avec `studio-script` a déjà son script à côté : la traduction de chaque
+   ligne est préremplie.
+2. **Construit les repères** : un par phrase dite, avec une traduction
+   naturelle (pas mot à mot, noms, chiffres et noms de produits conservés).
+3. **Coupe les accrocs** : mots répétés, faux départs, phrase dite deux fois (la
+   dernière bonne reste). Les pauses sont resserrées, chaque coupe a un court
+   fondu. Tu vois la durée gardée et les plages retirées. Il écrit aussi un
+   fichier de sous-titres calé sur la prise nettoyée.
+4. **Estime, puis envoie** après ton oui. Compte 2 à 20 minutes en arrière-plan,
+   et un travail interrompu peut être repris sans être facturé deux fois.
+5. **Passe le relais au monteur.** Le short traduit s'appelle
+   `<slug d'origine>-<langue>` pour que les deux versions soient côte à côte.
+   Si le short d'origine a un plan (scènes, B-roll, musique), il est réutilisé
+   et recalé sur la prise traduite au lieu de repartir de zéro. Les textes à
+   l'écran et le CTA sont réécrits dans la nouvelle langue.
+
+## Fournisseurs et modes
+
+| Fournisseur | Ce que tu obtiens | Coût |
+|---|---|---|
+| HeyGen `precision` (par défaut) | voix et meilleur lip-sync, vues de côté, mains devant le visage | environ 10 crédits par minute |
+| HeyGen `speed` | voix et lip-sync, visage surtout de face | environ 5 crédits par minute |
+| HeyGen `audio` | ta voix, image d'origine, pas de lip-sync | environ 4 crédits par minute |
+| ElevenLabs | ta voix clonée, image d'origine, pas de lip-sync | crédits ElevenLabs |
+
+Le lip-sync ne compte que si ton visage reste longtemps à l'écran. Un short
+plein de B-roll ou avec une petite bulle webcam passe très bien sans, et coûte
+2 à 2,5 fois moins.
+
+## Ce qu'il te faut
+
+- `HEYGEN_API_KEY` dans `.short-editing/.env` pour HeyGen (HeyGen, Settings,
+  API), ou `ELEVEN_KEY` pour ElevenLabs (déjà nécessaire pour le kit).
+- Sans clé HeyGen, ElevenLabs fait le travail en attendant.
+- Les envois HeyGen sont limités à 32 Mo : une copie est ré-encodée pour
+  rentrer. Au-delà d'environ 15 minutes, découpe d'abord la prise en parties.
+
+## Ensuite
+
+- [short-editing](/fr/editing/short-editing) : monter la prise traduite.
+- [feedbacks](/fr/editing/feedbacks) : corriger ce qui cloche après le premier
+  rendu.
+- [publish](/fr/editing/publish) : mettre la version traduite en ligne sur son
+  compte.

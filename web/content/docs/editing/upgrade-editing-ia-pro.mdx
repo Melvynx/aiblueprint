@@ -1,0 +1,49 @@
+---
+title: Upgrade Editing IA Pro
+description: "Update the Editing IA Pro kit to its latest version without touching your videos, your style or your keys."
+keywords: ["upgrade-editing-ia-pro", "update", "upgrade", "kit", "version", "skills"]
+---
+
+`upgrade-editing-ia-pro` brings the kit installed in your project to the latest version. It tells you what is new in plain words, keeps a copy of any skill you edited yourself, then installs the new skills, agent and engine.
+
+Your videos, your style and your keys are never touched.
+
+## Invoke
+
+```bash
+/upgrade-editing-ia-pro
+/upgrade-editing-ia-pro check
+```
+
+Use `check` to only see whether a new version exists and what it changes, without installing anything.
+
+## What it does
+
+1. **Looks for a new version.** The first run takes 10 to 30 seconds, the next ones about 2. If you are already up to date, it says so in one line and stops.
+2. **Tells you what is new**: 3 to 6 short bullets of what you will notice (a new skill with its `/command`, a studio improvement, a fixed bug). Internal changes are skipped.
+3. **Warns you about your own edits.** If you changed a kit skill, it tells you which one and where the backup copy is kept (`.kit/backup/<date>/`). The new version replaces your edit, and the copy lets you bring it back.
+4. **Installs it** in 1 to 3 minutes: skills, agent, engine dependencies and a final check. It ends with the old and new version numbers.
+5. **Finishes the job.** If your studio was running, it restarts it so it serves the new version (see [video-studio](/editing/video-studio)). New or changed skills load in a new conversation, so it tells you to open one.
+
+If the final check shows a line to fix, it gives you the exact command and waits. On Windows, an `EPERM` or `EBUSY` error means the studio, Chrome or a video player holds a file: close them and run it again.
+
+## What stays untouched
+
+- Your videos: `A-roll/`, `B-roll/` and `Shorts/`.
+- Your style and your keys in `.short-editing/`.
+- Your `CLAUDE.md`.
+
+## What you need
+
+The kit is downloaded from a private repository, so you need access once:
+
+1. The GitHub CLI (`gh --version`). If it is missing, install it from cli.github.com.
+2. A GitHub login: `gh auth login --hostname github.com --git-protocol https --web`. It prints a one-time code that you type yourself on the GitHub page. Never share a password or a token in the chat.
+3. The invitation to the kit repository, accepted. The course lesson "Récupère ton accès au kit" sends it. A "Repository not found" error while you are logged in usually means the invitation is not accepted yet, or went to another GitHub account.
+
+A kit installed with the lesson's command remembers its download address and can update without GitHub. If that address is refused (your key was regenerated), copy the install command from the lesson again and run it: it updates the kit the same way.
+
+## Next
+
+- [video-studio](/editing/video-studio): restart your studio on the new version.
+- [studio-setup](/editing/studio-setup): redo a part of your style if a new version adds options.

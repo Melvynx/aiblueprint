@@ -1,0 +1,77 @@
+---
+title: Insta audit
+description: "Auditer un compte Instagram via Treg : posts outliers, concurrents pertinents et rapport HTML sourcé avec des recommandations de contenu."
+keywords: ["insta-audit", "instagram", "audit", "concurrents", "outliers", "rapport", "treg"]
+---
+
+`insta-audit` audite un compte Instagram et te livre un rapport HTML sourcé :
+quels posts ont surperformé, qui sont tes vrais concurrents, ce qui marche chez
+eux, et des expériences de contenu précises à tester sur ton compte.
+
+C'est de la preuve avant tout. Chaque affirmation renvoie à des données
+collectées, les explications de viralité sont présentées comme des hypothèses,
+et un échantillon partiel n'est jamais vendu comme l'historique complet.
+
+## Invoquer
+
+```bash
+/insta-audit
+/insta-audit @compte
+/insta-audit https://www.instagram.com/<compte>/
+/insta-audit @compte 30 jours
+/insta-audit @compte concurrents @a @b @c
+```
+
+Par défaut : en français, les 90 derniers jours, jusqu'à 100 posts du compte
+audité et 5 concurrents pertinents (jusqu'à 30 posts récents chacun). Ce sont
+des limites de collecte, pas une promesse de couverture de l'API.
+
+## Ce qu'il fait
+
+1. **Identifie le compte.** Le compte que tu donnes, ou l'unique compte
+   Instagram connecté dans Treg (il le nomme). En cas de doute, il demande. Il
+   ne suppose jamais qu'un compte est le tien à partir d'une recherche
+   publique. Niche, langue et audience sont déduites de la bio et des posts
+   récents, et signalées comme des déductions.
+2. **Annonce le coût, puis collecte via Treg.** Il lit les prix en direct et ton
+   solde, annonce le périmètre, tient un registre appel par appel et s'arrête
+   sous un plafond par défaut de 1 $ (ou ton budget). Tes propres statistiques
+   passent par les endpoints officiels du compte connecté quand c'est possible,
+   les concurrents par les endpoints publics.
+3. **Trouve les concurrents.** Les candidats viennent d'une recherche de
+   créateurs Treg par niche, langue et audience, puis chacun est vérifié sur
+   son vrai profil et ses posts récents. Les pairs directs sont séparés des
+   comptes plus gros qu'on vise.
+4. **Trouve les outliers.** Par rapport à la base propre de chaque compte pour
+   le format, jamais une médiane globale mélangée.
+5. **Inspecte les meilleurs posts** : hook, sujet, format, durée, légende, CTA.
+   Il ne décrit l'audio et le visuel qu'après avoir inspecté le média ou une
+   transcription (une légende n'est pas un hook parlé).
+6. **Écrit le rapport** et le vérifie : calculs recoupés avec `data.json`, liens
+   de sources, mentions de données manquantes, échappement du HTML, rendu
+   desktop et mobile quand un navigateur est disponible.
+
+Résultat, un dossier par exécution, jamais écrasé :
+
+```text
+Instagram/audits/<compte>/<date-heure>/
+  index.html     le rapport
+  data.json      les données collectées
+  sources/       preuves d'API nettoyées
+```
+
+Tu reçois le lien du rapport, les constats les plus forts, les limites de
+couverture et le coût d'API enregistré. Un audit ne publie rien, n'envoie aucun
+DM, n'héberge rien en public et ne modifie pas ton compte.
+
+## Ce qu'il te faut
+
+- **Treg** installé et connecté (`treg login`), avec un peu de solde.
+- Un compte Instagram : le tien (connecté dans Treg pour les statistiques) ou
+  n'importe quel compte public.
+
+## Ensuite
+
+- [outliers](/fr/editing/outliers) : transformer les posts gagnants de ta niche en scripts.
+- [studio-script](/fr/editing/studio-script) : planifier la semaine à partir de l'audit.
+- [remake](/fr/editing/remake) : refaire un reel gagnant précis.

@@ -1,0 +1,75 @@
+---
+title: Editing
+description: "Le point d'entrée du kit : dis ce que tu veux avec tes mots, il choisit le bon skill et reprend le projet en cours."
+keywords: ["editing", "routeur", "point d'entrée", "shorts", "vidéo", "claude code"]
+---
+
+`editing` est la seule commande à retenir. Tu dis ce que tu veux (« monte ma
+dernière prise », « lance le prompteur », « fais-moi des miniatures »), il
+choisit le skill qui s'en occupe et lui passe la main. Tu n'as pas à te
+rappeler quel skill du kit fait quoi.
+
+Il garde aussi le fil : si la conversation travaille déjà sur un short, ta
+demande suivante est l'étape d'après de ce short (appliquer un commentaire,
+relancer une étape), jamais un nouveau départ.
+
+## Invoquer
+
+```bash
+/editing monte ma dernière prise
+/editing ~/Downloads/prise-ia.mp4 garde la partie sur les prix
+/editing enregistre mon script de lundi
+/editing applique les retours sur le short <slug>
+/editing publie-le
+```
+
+Tout passe : une prise, un fichier, une URL, le nom d'un short, un commentaire
+du studio ou simplement une phrase. Si c'est vraiment ambigu, il pose une seule
+question, pas plus.
+
+## Ce qu'il fait
+
+1. **Il reprend avant de démarrer.** Si un short, un dossier de vidéo ou une URL
+   du studio est déjà dans la conversation, ta demande est l'étape suivante de
+   ce projet avec le skill déjà utilisé. Un prompt collé depuis le studio nomme
+   son projet : même dans une conversation neuve, il rouvre le bon.
+2. **Il lit la demande et l'aiguille :**
+   - une prise, un fichier, une URL, un nom de short, « short », « reel »,
+     « motion » : [short-editing](/fr/editing/short-editing)
+   - les commentaires laissés dans le studio de relecture : `feedbacks`
+   - « vole le style de ce reel » : [steal](/fr/editing/steal)
+   - « refais ce reel viral pour moi » : `remake`
+   - « trouve ce qui marche dans ma niche » : `outliers`
+   - ta bibliothèque de B-roll (« ajoute ces clips », « mets mes B-roll sur ce
+     short ») : [broll](/fr/editing/broll)
+   - scripts, hooks, idées de la semaine : `studio-script` ; tourner sur un
+     script : `record`
+   - publier un short fini : `publish`
+   - une version dans une autre langue : `short-translate`
+   - miniatures et titres YouTube : `youtube-thumbnail`, `youtube-title`
+   - style, dossiers, musique, premier réglage : `studio-setup` ; ton avatar
+     cartoon : `setup-faceless`
+3. **Il comble les trous.** Pas encore de profil et tu demandes un montage : il
+   lance d'abord `studio-setup`. Une demande « faceless » utilise ton style
+   faceless, et lance `setup-faceless` si tu n'en as pas.
+4. **Il dit ce qu'il a choisi en une ligne**, puis charge ce skill et le suit
+   exactement comme si tu avais tapé sa commande toi-même.
+5. **Plusieurs vidéos d'un coup.** Un `video-editing-agent` par short, en
+   arrière-plan, avec tous tes choix dans son prompt. Chaque agent travaille
+   seul de la prise jusqu'au MP4 fini et te dit ce qu'il a décidé.
+
+## Ce qu'il te faut
+
+- Le kit installé dans ton projet (la commande d'installation ajoute aussi Node
+  et ffmpeg s'ils manquent).
+- Claude Code ou Codex ouvert sur ce dossier de projet.
+- Un profil de style. Si tu n'en as pas, `editing` te propose le réglage la
+  première fois que tu demandes un montage.
+
+## Ensuite
+
+- [short-editing](/fr/editing/short-editing) : le montage d'une prise.
+- [broll](/fr/editing/broll) : tes propres plans, retrouvés par une recherche.
+- [steal](/fr/editing/steal) : copier le montage d'un créateur que tu aimes.
+- [make-it-virale](/fr/editing/make-it-virale) : retravailler un short qui a
+  floppé.

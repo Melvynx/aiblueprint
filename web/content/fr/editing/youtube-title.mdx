@@ -1,0 +1,68 @@
+---
+title: YouTube Title
+description: "Des titres YouTube classés à partir d'un sujet ou d'une transcription, ou 20 combos titre + miniature avec le trio A/B dans un aperçu façon fil."
+keywords: ["youtube-title", "titre", "youtube", "test a/b", "miniature", "ctr", "combos"]
+---
+
+`youtube-title` écrit les titres de tes vidéos longues. Donne-lui un sujet, une
+transcription ou quelques miniatures et tu obtiens des titres classés. Lance-le
+après [youtube-thumbnail](/fr/editing/youtube-thumbnail) et tu obtiens 20 combos
+titre + miniature, avec les 3 à tester en A/B en haut, dans un aperçu qui
+ressemble à YouTube.
+
+L'idée clé : le titre ne répète jamais la miniature. La miniature pose
+l'accroche, le titre apporte la deuxième moitié, et ensemble ils racontent une
+histoire plus grande.
+
+## Invoquer
+
+```bash
+/youtube-title mon-test-claude-code
+/youtube-title 15 titres pour une vidéo qui compare 3 outils de montage
+/youtube-title ma-video miniatures/a.jpg miniatures/b.jpg
+```
+
+## Ce qu'il fait
+
+1. **Lit la vidéo** : transcription, chapitres, notes, et les miniatures (texte,
+   visage, émotion, couleurs). Sans miniature, il écrit les titres seuls et ne
+   bloque jamais.
+2. **Apprend d'abord de ta chaîne** : tes meilleurs titres avec leurs vues
+   passent avant toute autre source, puis une base de leviers de titres et
+   d'exemples en français et en anglais.
+3. **Applique les règles** à chaque titre : sujet et verdict dans les cinq
+   premiers mots, 60 à 70 caractères (100 maximum), un seul mot en majuscules
+   au plus, uniquement des faits présents dans la vidéo, français
+   conversationnel et anglais direct.
+4. **Travaille en trois tours** : diverger (curiosité, émotion, chiffre,
+   contre-pied, histoire, autorité), affiner (ton spectateur cliquerait-il,
+   est-ce que ça complète la miniature), converger (classé, avec de la variété).
+
+### Deux modes
+
+- **titles** : pas de lot de miniatures. 10 titres ou plus par miniature (15 au
+  total sans miniature), groupés et classés dans le chat, et enregistrés dans
+  `Titres.md`.
+- **combos** : juste après un lot de miniatures. Exactement 20 titres, un par
+  miniature. Il choisit le trio A/B avec 3 angles différents (par exemple un
+  combat drôle, un produit et son résultat, une confession), jamais 3
+  formulations d'une même idée. Un aperçu s'ouvre avec les vues Accueil,
+  Suggestions et Mobile, thème clair et sombre, et des boutons pour copier la
+  miniature et le titre.
+
+## Ce qu'il te faut
+
+- Un lot de miniatures de [youtube-thumbnail](/fr/editing/youtube-thumbnail) pour
+  le mode combos (pas nécessaire pour de simples titres).
+- En option : un `_titles.md` avec tes 10 meilleurs titres et leurs vues.
+- Tu lances le test toi-même : YouTube Studio, détails de la vidéo, « Tester et
+  comparer », jusqu'à 3 variantes de titre et de miniature. Rien n'est modifié
+  sur YouTube à ta place.
+
+## Ensuite
+
+- [youtube-thumbnail](/fr/editing/youtube-thumbnail) : les 20 miniatures
+  auxquelles vont les titres.
+- [codex-images](/fr/editing/codex-images) : générer des variantes de miniatures
+  en plus.
+- [publish](/fr/editing/publish) : mettre tes shorts en ligne.

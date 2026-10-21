@@ -1,0 +1,66 @@
+---
+title: YouTube Thumbnail
+description: "20 miniatures originales pour une vidéo longue, avec ton vrai visage, en 20 styles qui marchent, puis les titres assortis."
+keywords: ["youtube-thumbnail", "miniature", "thumbnail", "youtube", "codex", "ctr", "test a/b"]
+---
+
+`youtube-thumbnail` fait 20 miniatures originales pour une vidéo longue. Chacune
+est une idée de clic différente, dans un style différent, avec ton vrai visage.
+Tu choisis ; rien n'est jamais envoyé sur YouTube à ta place.
+
+Les styles viennent d'une bibliothèque de looks qui marchent sur YouTube, plus
+tes propres inspirations. Les images sont générées avec Codex, gratuit avec ton
+abonnement ChatGPT.
+
+## Invoquer
+
+```bash
+/youtube-thumbnail ma vidéo sur Claude Code, le test de 30 jours
+/youtube-thumbnail mon-test-claude-code fais un deuxième lot plus sobre
+```
+
+## Ce qu'il fait
+
+1. **Première fois seulement : prépare le profil.** 1 à 5 photos nettes de toi
+   dans `face/` (de face, trois quarts, souriant, surpris, sans lunettes de
+   soleil, personne d'autre), et un `youtube.json` avec ta chaîne et ton
+   apparence à l'écran (lunettes, casquette, barbe) pour garder un visage
+   cohérent. Une chaîne sans visage peut tourner en mode faceless.
+2. **Lit ta vidéo** : transcription, chapitres, notes, ou ton brief. Une
+   miniature ne promet jamais ce que la vidéo ne dit pas.
+3. **Écrit une stratégie** : ce qui fait cliquer sur tes miniatures (tes
+   meilleures d'abord), puis 20 hypothèses de clic, chacune avec une promesse
+   au spectateur, une métaphore visuelle et 1 à 3 mots de texte dans la langue
+   de la vidéo.
+4. **Construit 20 concepts dans toute la bibliothèque** : classiques de chaîne,
+   créateurs IA, éditorial épuré, inspirations de créateurs et originaux, 2 par
+   style au maximum. Une vidéo de formation a son propre mélange.
+5. **Génère les 20 images** avec Codex en arrière-plan (5 à 7 minutes), avec le
+   visage, ta ligne d'identité, la référence de style et les vrais logos
+   injectés dans chaque prompt.
+6. **Finalise** : des JPG 1280x720 dans `miniatures/`, des planches de 10 pour
+   parcourir, et un avertissement si deux images sont identiques. Le dossier
+   garde tous les lots, avec un préfixe par lot.
+7. **Vérifie chacune en taille réelle** : ton vrai visage (une seule fois), le
+   texte exact avec ses accents, de vrais logos, pas de filigrane, lisible sur
+   téléphone. Une image ratée est regénérée seule, jamais retouchée.
+8. **Passe le relais** : les 5 meilleures sont présélectionnées, puis
+   [youtube-title](/fr/editing/youtube-title) écrit un titre par miniature et le
+   trio à tester en A/B.
+
+## Ce qu'il te faut
+
+- Codex installé et connecté avec ton compte ChatGPT (voir
+  [codex-images](/fr/editing/codex-images)).
+- Tes photos de visage, une fois. En option, tes meilleures miniatures dans
+  `_inspirations/` et de vrais logos dans `_logos/`.
+- Tu lances le test gagnant toi-même dans YouTube Studio (« Tester et
+  comparer »).
+
+## Ensuite
+
+- [youtube-title](/fr/editing/youtube-title) : le titre de chaque miniature et
+  le trio A/B.
+- [codex-images](/fr/editing/codex-images) : le moteur derrière les images.
+- [publish](/fr/editing/publish) : pour les shorts plutôt que les vidéos
+  longues.

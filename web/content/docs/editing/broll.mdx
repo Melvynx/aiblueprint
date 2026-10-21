@@ -1,0 +1,81 @@
+---
+title: B-roll
+description: "Your own clips, screen recordings and photos indexed once, tagged by cheap Haiku agents, then found and placed in a video with one search."
+keywords: ["broll", "b-roll", "library", "haiku", "footage", "shorts"]
+---
+
+`broll` turns your folder of footage into a library you can search in plain
+words. It reads each file once (date, place, length, six frames), has fast and
+almost free Haiku agents describe every clip, and from then on "me at my desk at
+night" finds the right shot in one query, without anyone opening a file.
+
+Then it places the clips in your short for you, after looking at each one.
+
+## Invoke
+
+```bash
+/broll setup
+/broll add ~/Movies/lisbon-trip
+/broll add --source ~/Pictures/Screens
+/broll use
+/broll search "sunset beach" --portrait
+/broll reject b3f2a1c9d "ugly framing"
+/broll stats
+```
+
+You can also just talk: "add these videos", "put my B-roll on this short",
+"this clip is bad, drop it", "find me a sunset".
+
+## What it does
+
+1. **`setup`, once.** It asks where your clips are, scans them (about one second
+   per clip), reads the date and GPS stored in each file, names the places, and
+   extracts six frames per clip. Nothing is guessed: no GPS, no place.
+2. **Tagging by `broll-tagger` agents.** Each agent reads one page of 5 clips
+   (6 frames each) and writes a title, a description, the mood, the emotions,
+   keywords, and whether you are on screen. Pages run in parallel, about 20
+   seconds per page. A big library gets its first 100 clips now and the rest
+   later.
+3. **Finding you on screen.** Give it one to three close-up photos of your face
+   so the taggers can tell which clips show you.
+4. **A check with you.** It runs three searches on your real topics and shows
+   the contact sheet ("here is what I find for « desk at night »"). A wrong tag
+   is fixed on the spot.
+5. **`add`** copies new files in (or `--move`), scans and tags only the new
+   ones, and tells you what arrived ("12 clips added: 4 in Lisbon, 8 at the
+   office").
+6. **`use`** reads the words of the short in progress, picks the lines that show
+   a moment, a place, a feeling or you doing something, runs one search per
+   line, and **looks at every candidate** before placing it. A search score is
+   never a validation. The plan is saved in `files/broll-plan.json`, then
+   written into the short.
+7. **After the render**, the clips you kept are marked as used so the next video
+   prefers fresh ones.
+
+Numbers, ideas and proof stay motion design. No good clip for a line means the
+library does not have that image: you get motion design or a generated image,
+never a random shot.
+
+Full-screen B-roll lasts 2 to 5 seconds and starts on the word that names it.
+A screen recording the viewer must read goes as a card on the paper instead.
+
+## See the library
+
+The B-roll tab of the studio shows every clip as a card (hover to scrub), a
+search bar ranked like `search`, filters (me on screen, portrait, landscape,
+never used, place, rejected), and a panel per clip to play it, copy its path,
+mark it as "me" or reject it.
+
+## What you need
+
+- A folder of clips, anywhere: it stays where it is (`--source`) or is copied
+  into your project's `B-roll` folder.
+- The `broll-tagger` agent (installed with the kit) for the tagging.
+- Your files are never deleted or moved unless you pass `--move`. A rejected
+  clip is only hidden from searches and can be restored.
+
+## Next
+
+- [short-editing](/editing/short-editing): use `broll` or `mix` as the visual mode so your footage shows in the short.
+- [steal](/editing/steal): a copied style that uses AI clips gets real B-roll from your library instead.
+- [editing](/editing/editing): the entry point, it routes "add these clips" here.

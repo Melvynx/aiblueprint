@@ -1,0 +1,57 @@
+---
+title: Setup faceless
+description: "Crée ton avatar cartoon et un style faceless : tes shorts n'utilisent que ta voix, jamais ton visage."
+keywords: ["setup-faceless", "faceless", "avatar", "mascotte", "poses", "codex", "cartoon"]
+---
+
+`setup-faceless` crée l'avatar qui te joue à l'écran. Tu n'enregistres que ta voix, et l'avatar joue chaque phrase dans un petit cadre en bas, par-dessus un motion design dense. Ton vrai visage n'apparaît jamais.
+
+Compte environ 20 minutes, surtout de la génération d'images. Tu le fais une seule fois : ensuite, n'importe quelle prise peut devenir un short faceless.
+
+## Invoquer
+
+```bash
+/setup-faceless
+/setup-faceless pose il tient une tasse de café
+/setup-faceless poses
+/setup-faceless design
+/setup-faceless cta
+/setup-faceless preview
+```
+
+La première forme lance tout l'onboarding. Les autres sautent à une partie : une nouvelle pose, les poses manquantes, un nouveau design, la photo de profil ou la vidéo de test.
+
+## Ce qu'il fait
+
+1. **Vérifie** ton profil principal (nom, CTA, sous-titres, musique). Sans profil, il te propose de lancer [studio-setup](/fr/editing/studio-setup) d'abord.
+2. **Vérifie la génération d'images** : Codex si tu es connecté (recommandé, il garde le personnage le plus cohérent), sinon une clé Gemini ou OpenAI.
+3. **Pose 5 petites questions** : le nom du style (`faceless` par défaut), la base de l'avatar (1 à 3 photos, un dessin que tu as déjà, ou une description), et la tenue qu'il porte toujours.
+4. **Dessine le même personnage dans 4 styles** (feutre, vectoriel, animation adulte, BD) sur un seul tableau. Tu choisis celui qui te ressemble, ou tu décris ton propre style. Pas convaincu : il redessine avec ta remarque.
+5. **Dessine les poses** pendant que tu attends : le pack de base (14 poses : parler, pointer, choqué, doute, haussement d'épaules, rire, pouce levé, salut, danse) ou le pack complet (27). Chaque pose est vérifiée (même visage, même tenue, corps entier dans le cadre) et les ratées sont redessinées.
+6. **Fait la photo du CTA** à partir de la tête de l'avatar, pour l'écran de fin et comme photo de profil.
+7. **Écrit ton style faceless** dans `.short-editing/styles/<nom>/` : audio seul, l'avatar petit en bas qui se téléporte et joue chaque temps fort, jamais ton vrai visage.
+8. **Monte une vidéo de test** d'une vingtaine de secondes avec ton avatar, en une minute environ. Tu dis parfait, ou tu refais des poses, la photo ou tout le design.
+
+Un lancement interrompu garde ce qui est fait : relance la même commande, il ne dessine que ce qui manque. Tes photos restent privées dans `avatar/photos/` et n'apparaissent jamais dans une vidéo.
+
+## L'utiliser
+
+Enregistre n'importe quelle prise, seule la voix est gardée : une vidéo au téléphone ou à la webcam, une prise YOLO dans le Recorder, ou un fichier audio. Puis :
+
+```bash
+/editing --style faceless latest
+```
+
+Ou dis simplement « fais un short faceless de ma dernière prise ». Une pose manque dans un short ? Lance `/setup-faceless pose <ce qu'il fait>` : la pose est dessinée dans le même style et dispo dans tous les shorts suivants.
+
+## Ce qu'il te faut
+
+- Codex connecté (`npm i -g @openai/codex`, puis `codex login`, gratuit avec un abonnement ChatGPT), ou une clé API Gemini ou OpenAI collée dans le fichier `.env` que le skill t'ouvre (jamais dans le chat).
+- 1 à 3 photos nettes, un dessin, ou une description du personnage.
+- De la patience pour les images : les designs prennent 2 à 3 min, le pack de base environ 8 min, le pack complet environ 15 min.
+
+## Ensuite
+
+- [studio-setup](/fr/editing/studio-setup) : le style principal dont part le faceless.
+- [record](/fr/editing/record) : enregistrer ta voix en mode YOLO.
+- [short-editing](/fr/editing/short-editing) : monter la prise avec ton style faceless.

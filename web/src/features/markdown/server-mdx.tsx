@@ -20,6 +20,7 @@ import {
   Step,
   Steps,
 } from "@public-site/docs/_components/mdx-blocks";
+import { Bar, ProofStep, ProofStrip, Reel, ReelGrid, ViewsBars } from "@public-site/docs/_components/case-study";
 import { YouTubeEmbed } from "@public-site/docs/_components/youtube-embed";
 import { useCodeWrap } from "@public-site/docs/code-wrap";
 import {
@@ -157,6 +158,12 @@ const MdxComponent = {
   DocCardWrapper,
   LandingReferenceGrid,
   YouTubeEmbed,
+  Reel,
+  ReelGrid,
+  ProofStep,
+  ProofStrip,
+  ViewsBars,
+  Bar,
 } satisfies MarkdownToJSX.Overrides;
 
 export const ServerMdx = (props: ServerMdxProps) => {

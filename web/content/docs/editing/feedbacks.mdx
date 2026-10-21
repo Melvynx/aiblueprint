@@ -1,0 +1,64 @@
+---
+title: Feedbacks
+description: "Apply the comments you left in the studio on a short, resolve each one with a reply, and render again."
+keywords: ["feedbacks", "review", "studio", "comments", "short-editing", "revisions"]
+---
+
+`feedbacks` takes the comments you wrote in the review studio and applies them
+for you. You watch the short, drop a comment or a cut at the right second, click
+one button, and the edit comes back fixed with a reply under every comment.
+
+Nothing to paste: the studio already saves every comment on disk, one file per
+render, so the skill only needs to know which short you mean.
+
+## Invoke
+
+In the studio, click **Send to Claude**: the line `/feedbacks <file>` arrives
+straight in the conversation that rendered the video. If that conversation is
+closed, the button reads **Copy the feedback** and you paste the line yourself.
+
+```bash
+/feedbacks files/reviews/v2.json
+/feedbacks short-my-slug
+/feedbacks http://127.0.0.1:4796/short-my-slug/
+/feedbacks
+```
+
+With no argument it picks the project you are already working on, or the
+latest review that still has open comments.
+
+## What it does
+
+1. **Finds the review file.** A path, a project folder, a slug or a studio URL:
+   it takes the newest version of that short and tells you which one it picked.
+2. **Reads the open items.** Each comment has a time (or a range), your text,
+   the words said at that moment, and sometimes the exact element you clicked
+   on the edit tracks (a sound effect, a scene, the music bed). Images you
+   attached are opened too: a frame you drew on shows exactly what to change.
+3. **Sorts the work.** Cuts, wording, captions, timing, zooms, sounds and small
+   values are applied directly in the edit. Anything that needs a new or
+   reworked animated component goes to its own sub-agent, in parallel.
+4. **Applies only what you asked.** The rest of the edit stays identical. When
+   a comment is unclear, it takes the most likely reading and says so in the
+   reply instead of asking.
+5. **Closes each comment.** Every applied item is marked resolved with a
+   one-sentence reply, written in your language. Your text is never changed or
+   deleted. An item it could not do stays open, with the reason.
+6. **Renders again** and gives you back the studio URL, with one line per item
+   (done, or not done and why). It then waits for your next click on **Send to
+   Claude** and runs again on its own.
+
+If you comment an older version after a new render, the open comments are
+carried over to the newest version and found again by the words they point to.
+
+## What you need
+
+- A short edited with [short-editing](/editing/short-editing) and its review
+  studio.
+- Your feedback saved from the studio (it is automatic).
+
+## Next
+
+- [short-editing](/editing/short-editing): the edit that `feedbacks` fixes.
+- [publish](/editing/publish): once the short is approved, put it out.
+- [make-it-virale](/editing/make-it-virale): when the short is fine but flopped.

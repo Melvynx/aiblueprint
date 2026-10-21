@@ -1,0 +1,74 @@
+---
+title: Insta audit
+description: "Audit an Instagram account through Treg: outlier posts, relevant competitors, and a sourced HTML report with content recommendations."
+keywords: ["insta-audit", "instagram", "audit", "competitors", "outliers", "report", "treg"]
+---
+
+`insta-audit` audits an Instagram account and gives you a sourced HTML report:
+which posts over-performed, who your real competitors are, what they do that
+works, and specific content experiments to try on your account.
+
+It is evidence first. Every claim points to collected data, explanations of
+virality are labeled as hypotheses, and a partial sample is never presented as
+the full history.
+
+## Invoke
+
+```bash
+/insta-audit
+/insta-audit @handle
+/insta-audit https://www.instagram.com/<handle>/
+/insta-audit @handle 30 days
+/insta-audit @handle competitors @a @b @c
+```
+
+Defaults: French, the last 90 days, up to 100 posts of the target account and
+5 relevant competitors (up to 30 recent posts each). These are collection
+limits, not promises of API coverage.
+
+## What it does
+
+1. **Resolves the account.** The handle you give, or the single Instagram
+   account connected in Treg (it names it). If it is ambiguous, it asks. It
+   never assumes ownership from a public search result. Niche, language and
+   audience are inferred from the bio and recent posts, and labeled as
+   inferences.
+2. **Announces the cost, then collects through Treg.** It reads live prices and
+   your balance, states the scope, keeps a per-call ledger and stops under a
+   default ceiling of 1 $ (or your budget). Your own insights use the official
+   connected-account endpoints when available, competitors use public ones.
+3. **Finds competitors.** Candidates come from a Treg creator search by niche,
+   language and audience, then each is checked against its real profile and
+   recent posts. Direct peers are kept apart from larger aspirational accounts.
+4. **Finds outliers.** Against each account's own baseline for the format,
+   never one pooled median.
+5. **Inspects the strongest posts**: hook, topic, format, duration, caption, CTA.
+   It only describes audio and visuals after inspecting the media or a
+   transcript (a caption is not a spoken hook).
+6. **Writes the report** and verifies it: calculations against `data.json`,
+   source links, missing-data labels, HTML escaping, desktop and mobile
+   rendering when a browser is available.
+
+Output, one folder per run, never overwritten:
+
+```text
+Instagram/audits/<handle>/<date-time>/
+  index.html     the report
+  data.json      the collected data
+  sources/       sanitized API evidence
+```
+
+You get the link to the report, the strongest findings, the coverage limits and
+the recorded API cost. An audit never posts, sends DMs, hosts anything publicly
+or changes your account.
+
+## What you need
+
+- **Treg** installed and logged in (`treg login`), with a little balance.
+- An Instagram account, yours (connected in Treg for insights) or any public one.
+
+## Next
+
+- [outliers](/editing/outliers): turn the winning posts of your niche into scripts.
+- [studio-script](/editing/studio-script): plan the week from what the audit found.
+- [remake](/editing/remake): redo one specific winning reel.

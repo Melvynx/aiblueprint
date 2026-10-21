@@ -1,0 +1,61 @@
+---
+title: YouTube Thumbnail
+description: "20 original thumbnails for one long video, with your real face, in 20 proven styles, then the matched titles."
+keywords: ["youtube-thumbnail", "thumbnail", "miniature", "youtube", "codex", "ctr", "a/b test"]
+---
+
+`youtube-thumbnail` makes 20 original thumbnails for one long-form video. Each
+one is a different click idea, in a different style, with your real face. You
+pick; nothing is ever uploaded to YouTube for you.
+
+The styles come from a library of looks that work on YouTube, plus your own
+inspirations. Images are generated with Codex, free with your ChatGPT plan.
+
+## Invoke
+
+```bash
+/youtube-thumbnail my video about Claude Code, the 30 day test
+/youtube-thumbnail my-claude-code-test make a second, calmer batch
+```
+
+## What it does
+
+1. **First run only: sets up the profile.** 1 to 5 sharp photos of you in
+   `face/` (front, three-quarter, smiling, surprised, no sunglasses, nobody
+   else), and a `youtube.json` with your channel and how you look on camera
+   (glasses, cap, beard) so the face stays consistent. A channel without a
+   face can run in faceless mode.
+2. **Reads your video**: transcript, chapters, notes, or your brief. A
+   thumbnail never claims what the video does not say.
+3. **Writes a strategy**: what makes your thumbnails click (your own best ones
+   first), then 20 click hypotheses, each with a viewer promise, a visual
+   metaphor and 1 to 3 words of text in the video's language.
+4. **Builds 20 concepts across the style library**: channel classics, AI
+   creators, clean editorial, creator inspirations and originals, at most 2 per
+   style. A course video uses a dedicated mix.
+5. **Generates the 20 images** with Codex in the background (5 to 7 minutes),
+   with the face, your identity line, the style reference and real logos
+   injected into every prompt.
+6. **Finalizes**: 1280x720 JPG files in `miniatures/`, contact sheets of 10 to
+   browse, and a warning if two images are identical. The folder keeps every
+   batch, with a prefix per batch.
+7. **Checks each one at full size**: your real face (once), the exact text with
+   its accents, real logos, no watermark, readable at phone size. A bad image is
+   regenerated alone, never patched.
+8. **Hands off**: the 5 best are shortlisted, then
+   [youtube-title](/editing/youtube-title) writes a title per thumbnail and the
+   A/B trio.
+
+## What you need
+
+- Codex installed and logged in with your ChatGPT account (see
+  [codex-images](/editing/codex-images)).
+- Your face photos, once. Optionally your best thumbnails in `_inspirations/`
+  and real logos in `_logos/`.
+- You set the winner up yourself in YouTube Studio ("Test and compare").
+
+## Next
+
+- [youtube-title](/editing/youtube-title): the title for each thumbnail and the A/B trio.
+- [codex-images](/editing/codex-images): the engine behind the images.
+- [publish](/editing/publish): for shorts rather than long videos.

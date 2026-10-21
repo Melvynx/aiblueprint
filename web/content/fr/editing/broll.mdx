@@ -1,0 +1,84 @@
+---
+title: B-roll
+description: "Tes clips, enregistrements d'écran et photos indexés une fois, décrits par des agents Haiku peu chers, puis retrouvés et posés dans une vidéo en une recherche."
+keywords: ["broll", "b-roll", "bibliothèque", "haiku", "plans de coupe", "shorts"]
+---
+
+`broll` transforme ton dossier de plans en une bibliothèque qu'on interroge avec
+des mots. Il lit chaque fichier une seule fois (date, lieu, durée, six images),
+fait décrire chaque clip par des agents Haiku rapides et presque gratuits, et
+ensuite « moi à mon bureau la nuit » retrouve le bon plan en une requête, sans
+qu'on ouvre un seul fichier.
+
+Puis il pose les clips dans ton short à ta place, après avoir regardé chacun.
+
+## Invoquer
+
+```bash
+/broll setup
+/broll add ~/Movies/voyage-lisbonne
+/broll add --source ~/Pictures/Ecrans
+/broll use
+/broll search "coucher de soleil plage" --portrait
+/broll reject b3f2a1c9d "cadrage moche"
+/broll stats
+```
+
+Tu peux aussi parler normalement : « ajoute ces vidéos », « mets mes B-roll sur
+ce short », « ce plan est nul, vire-le », « trouve-moi un coucher de soleil ».
+
+## Ce qu'il fait
+
+1. **`setup`, une seule fois.** Il demande où sont tes clips, les scanne (environ
+   une seconde par clip), lit la date et le GPS stockés dans chaque fichier,
+   nomme les lieux et extrait six images par clip. Rien n'est deviné : pas de
+   GPS, pas de lieu.
+2. **Le tagging par les agents `broll-tagger`.** Chaque agent lit une page de
+   5 clips (6 images chacun) et écrit un titre, une description, l'ambiance, les
+   émotions, des mots-clés, et si tu es à l'écran. Les pages tournent en
+   parallèle, environ 20 secondes par page. Une grosse bibliothèque a ses 100
+   premiers clips tout de suite, le reste plus tard.
+3. **Te reconnaître à l'écran.** Donne-lui une à trois photos de ton visage de
+   près pour que les agents sachent quels clips te montrent.
+4. **Un contrôle avec toi.** Il lance trois recherches sur tes vrais sujets et
+   te montre la planche (« voilà ce que je trouve pour « bureau la nuit » »).
+   Un tag faux est corrigé sur place.
+5. **`add`** copie les nouveaux fichiers (ou `--move` pour les déplacer), scanne
+   et décrit seulement les nouveaux, et te dit ce qui est arrivé (« 12 clips
+   ajoutés : 4 à Lisbonne, 8 au bureau »).
+6. **`use`** lit les mots du short en cours, repère les phrases qui montrent un
+   moment, un lieu, un ressenti ou toi en train de faire quelque chose, lance
+   une recherche par phrase et **regarde chaque candidat** avant de le poser. Un
+   score de recherche ne vaut jamais validation. Le plan est enregistré dans
+   `files/broll-plan.json`, puis écrit dans le short.
+7. **Après le rendu**, les clips que tu gardes sont marqués comme utilisés, pour
+   que la vidéo suivante préfère des plans neufs.
+
+Les chiffres, les idées et les preuves restent en motion design. Pas de bon
+clip pour une phrase veut dire que la bibliothèque n'a pas cette image : tu
+obtiens du motion design ou une image générée, jamais un plan au hasard.
+
+Un B-roll plein écran dure 2 à 5 secondes et démarre sur le mot qui le nomme.
+Un enregistrement d'écran que le spectateur doit lire passe plutôt en carte sur
+le papier.
+
+## Voir la bibliothèque
+
+L'onglet B-roll du studio montre chaque clip en carte (survole pour le feuilleter),
+une barre de recherche classée comme `search`, des filtres (moi à l'écran,
+portrait, paysage, jamais utilisé, lieu, rejetés) et un panneau par clip pour le
+lire, copier son chemin, le marquer « moi » ou le rejeter.
+
+## Ce qu'il te faut
+
+- Un dossier de clips, où tu veux : il reste en place (`--source`) ou il est
+  copié dans le dossier `B-roll` de ton projet.
+- L'agent `broll-tagger` (installé avec le kit) pour le tagging.
+- Tes fichiers ne sont jamais supprimés ni déplacés sauf avec `--move`. Un clip
+  rejeté est seulement caché des recherches et peut être rétabli.
+
+## Ensuite
+
+- [short-editing](/fr/editing/short-editing) : choisis le mode visuel `broll` ou `mix` pour voir tes plans dans le short.
+- [steal](/fr/editing/steal) : un style copié qui utilise des clips IA reçoit à la place de vrais B-roll de ta bibliothèque.
+- [editing](/fr/editing/editing) : le point d'entrée, il aiguille « ajoute ces clips » ici.

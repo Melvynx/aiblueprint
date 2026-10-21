@@ -1,0 +1,83 @@
+---
+title: Steal
+description: "Copier le montage d'un autre créateur en le mesurant, puis le prouver sur un short de test fait avec ta propre prise."
+keywords: ["steal", "style", "copier", "reel", "style de montage", "sfx", "sous-titres"]
+---
+
+`steal` prend le reel d'un créateur que tu admires et transforme son montage en
+un style utilisable sur tous tes shorts. Il ne le devine pas, il le mesure :
+rythme des coupes, mises en page, sous-titres, beat et niveau de la musique,
+bruitages sur chaque coupe, zooms image par image.
+
+Il monte ensuite un short de test avec une de tes prises, le compare tuile par
+tuile avec l'original et l'ouvre dans le studio. Tu ne le vois qu'une fois les
+écarts corrigés.
+
+## Invoquer
+
+```bash
+/steal https://www.instagram.com/reel/<id>/
+/steal ~/Downloads/reel-modele.mp4
+/steal copie le style de @handle
+/steal ce reel, appelle le style punchy
+```
+
+Donner deux ou trois reels du même format est mieux : un seul reel peut être une
+exception. Le style porte le nom du compte du créateur, sauf si tu en choisis un.
+
+## Ce qu'il fait
+
+1. **Il récupère la vidéo.** Un fichier local tel quel, ou un téléchargement
+   depuis Instagram, TikTok ou YouTube. Si le téléchargement bute sur une
+   connexion obligatoire, il te demande d'enregistrer la vidéo et de déposer le
+   fichier.
+2. **Il mesure, en trois passes** (trois sous-agents en parallèle quand c'est
+   possible) :
+   - **Images et coupes :** planches contact à 2 images par seconde, mises en
+     page (plein caméra, split, détourage sur couleur, B-roll, captures), police
+     et entrée des sous-titres, stickers, images, hook, CTA et étalonnage. Des
+     images clés sont gardées comme références.
+   - **Son :** tempo du beat, nombre de coupes qui portent un clic ou un boum,
+     début de la musique, et un spectrogramme avec les coupes marquées. Une
+     isolation de la voix en option (il te prévient avant, elle utilise des
+     crédits ElevenLabs) donne le niveau de la musique sous la voix.
+   - **Zooms :** la plage de taille du visage, les sauts de zoom par 10 secondes
+     et la poussée lente par seconde. Ces chiffres sont le plafond de ton rendu.
+3. **Il écrit l'analyse** dans ta langue : structure, rythme, son et zooms
+   mesurés, ce qu'on garde et ce qu'on laisse de côté (clips vidéo IA,
+   génération payante) et pourquoi.
+4. **Il construit le style** dans ton profil : couleurs, sous-titres, rythme des
+   coupes, étalonnage, musique et beat, kit de bruitages, cadence. Les sons
+   viennent de la bibliothèque livrée avec le kit. Les stickers sont générés
+   avec Codex à partir de tes vraies photos, puis détourés. Vrais logos pour
+   chaque appli nommée à l'écran.
+5. **Il monte un short de test** sur ta prise avec
+   [short-editing](/fr/editing/short-editing), dans la grammaire de l'original.
+   Les clips d'action IA de l'original deviennent de vrais
+   [B-roll](/fr/editing/broll) de ta bibliothèque.
+6. **Il contrôle face à l'original**, pas face à ton style habituel : taille du
+   texte, taille des stickers, étalonnage, pas de fondu entre les plans, zooms
+   jamais au-dessus de ceux de l'original, bruitages posés sur les coupes.
+7. **Il livre :** le short de test ouvert dans le studio, avec ce qui a été
+   mesuré, copié, laissé de côté, et un lien. Chaque refus que tu donnes est
+   écrit dans les notes du style pour ne plus se reproduire.
+
+Si le moteur ne sait pas faire quelque chose que l'original fait, il te dit ce
+qui manque et choisit l'option existante la plus proche, au lieu de la bricoler
+dans un seul short.
+
+## Ce qu'il te faut
+
+- Un reel (URL ou fichier) et une prise propre de 10 à 20 secondes dans ton
+  dossier A-roll.
+- `yt-dlp` pour les URL (le skill t'explique comment l'installer).
+- Codex connecté à ton compte ChatGPT si tu veux des stickers faits à partir de
+  tes photos.
+- Quelques photos de toi en gros plan dans le dossier `face` de ton profil.
+
+## Ensuite
+
+- [short-editing](/fr/editing/short-editing) : utilise le nouveau style avec `--style <nom>`.
+- [broll](/fr/editing/broll) : la bibliothèque qui remplace les clips IA de l'original.
+- [editing](/fr/editing/editing) : le point d'entrée, il aiguille « copie le style de ce reel » ici.
+- [make-it-virale](/fr/editing/make-it-virale) : quand c'est le hook, pas le style, qui doit changer.

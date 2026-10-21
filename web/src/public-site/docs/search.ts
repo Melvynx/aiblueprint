@@ -1,4 +1,4 @@
-import { getDocsTree } from "./doc-manager";
+import { getDocsTree, SPACES, type Space } from "./doc-manager";
 import { type Locale, slugifyHeading } from "./locale";
 
 export type SearchEntry = {
@@ -54,11 +54,13 @@ export function getSearchIndex(locale: Locale): SearchEntry[] {
   const cached = indexCache.get(locale);
   if (cached) return cached;
 
-  const tree = getDocsTree(locale);
-  const groups = [
-    { name: "", docs: tree.rootDocs },
-    ...tree.folders.map((folder) => ({ name: folder.name, docs: folder.docs })),
-  ];
+  const groups = (["cli", ...SPACES] as Space[]).flatMap((space) => {
+    const tree = getDocsTree(locale, space);
+    return [
+      { name: "", docs: tree.rootDocs },
+      ...tree.folders.map((folder) => ({ name: folder.name, docs: folder.docs })),
+    ];
+  });
   const entries: SearchEntry[] = [];
 
   for (const group of groups) {

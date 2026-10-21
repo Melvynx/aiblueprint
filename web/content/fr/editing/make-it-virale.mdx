@@ -1,0 +1,99 @@
+---
+title: Make it virale
+description: "Transformer un short qui a floppé en vidéo virale : 3 hooks prouvés, 3 trial reels Instagram, le gagnant publié."
+keywords: ["make-it-virale", "viral", "trial reels", "instagram", "hooks", "shorts"]
+pro: false
+---
+
+`make-it-virale` prend un de tes shorts qui a floppé et en fait trois nouvelles
+versions, chacune ouverte sur un hook qui a déjà percé ailleurs sur le même
+sujet. Les trois sortent en trial reels Instagram, les chiffres désignent le
+gagnant, et seul le gagnant sort pour de vrai.
+
+L'idée derrière : le sujet est rarement le problème, l'emballage l'est. Mêmes
+faits, même CTA, une autre première phrase.
+
+## Invoquer
+
+```bash
+/make-it-virale <slug du short | URL du reel | dernière>
+/make-it-virale results <short>
+```
+
+Options : `--versions 3` (par défaut), `--hooks-only` (ne retourner que les
+phrases d'ouverture et réutiliser le reste de la prise).
+
+## Les 6 étapes
+
+1. **Choisir le flop.** Donné, ou le pire de tes 14 derniers jours : au moins
+   48 h, sous 0,7x ta médiane, sur un sujet encore bon.
+2. **Pourquoi il a floppé, en chiffres.** Vues contre ta médiane, taux de skip,
+   watch moyen contre la durée, ce que disent la première phrase et la frame 0.
+   Verdict : *emballage* (on continue) ou *sujet* (on arrête, autre sujet).
+3. **Trouver les winners sur le même sujet.** D'abord tes propres reels qui
+   ont cartonné sur ce sujet, puis tes inspirations enregistrées, puis la
+   recherche Instagram (Treg), en ne gardant que les reels à **x3+ la
+   médiane de leur propre compte**. Un gros chiffre sur un gros compte n'est
+   pas un winner. Récupérer et transcrire 4 à 7 reels, les grouper par formule
+   de hook.
+4. **Écrire trois versions.** Trois angles différents, chacun emprunté à un
+   winner, jamais trois formulations d'un même hook. Écrites avec les règles de
+   `studio-script` : 5 hooks notés avec sa grille, les 3 meilleurs gardés,
+   timing des beats, triggers, quality gates et passe humanize. Puis les
+   tourner.
+5. **Monter les trois en parallèle**, un agent de montage par prise, chacune
+   avec son motion et sa musique, relues dans le studio avant toute publication.
+6. **Publier les trois en trial reels**, puis lire les résultats après 24 à
+   48 h. Gagnant = le plus de vues **et** au-dessus de ta médiane. Le partager
+   sur ton profil (il garde ses vues), le pousser sur YouTube Shorts et TikTok,
+   et noter la formule gagnante pour qu'elle soit le premier essai la prochaine
+   fois.
+
+### Réglages des trial reels
+
+Les trial reels ne sont montrés qu'aux non-abonnés : tes abonnés ne voient
+jamais trois fois la même vidéo, et une version perdante ne coûte rien.
+
+```json
+{ "settings": { "instagram": { "trial_reel": true, "graduation": "MANUAL" } } }
+```
+
+Avec `MANUAL`, c'est toi qui choisis laquelle passe sur ton profil ; Instagram
+n'en partage jamais une tout seul.
+
+## Résultats
+
+Mesurés sur @melvynxdev le 2026-10-21 (insights Instagram). Médiane de ses
+reels du feed sur la même période (24 reels classiques, du 8 au 20 octobre) :
+**environ 4 500 vues**.
+
+### Le short /outliers : du flop à x3,8
+
+La v1 a fait 4 711 vues. Trois nouveaux hooks en trial reels le 19/10 : le gagnant a fait 17 860 vues, x3,8 l'original et x4 la médiane. Tout le détail (diagnostic, winners, hooks, chiffres) dans la [case study](/editing/case-study-make-it-virale).
+
+### Les autres trials de la semaine
+
+| short | version | vues |
+|---|---|---|
+| Claude fait ton logo | trial A | 6 310 |
+| Claude fait ton logo | trial B | 4 892 |
+| Find Skills | trial avec le nouveau hook | 209 (original : 829) |
+| ManyChat remplacé | trial 1 / trial 2 | 190 / 180 |
+
+Tous les remakes ne gagnent pas. Find Skills a fait pire avec juste un nouveau
+hook, et ManyChat n'a jamais décollé : pour ceux-là, l'étape 2 aurait dû dire
+*sujet*, pas *emballage*. C'est pour ça que la règle est trois versions avec
+trois angles différents, et que « aucune version au-dessus de la médiane » est
+une réponse valable, qui veut dire : on abandonne le sujet.
+
+## Quand l'utiliser
+
+- Un short sur un bon sujet a fait moins de 0,7x ta médiane.
+- Une formule a percé ailleurs dans ta niche sur ce même sujet.
+- Tu veux tester des hooks sans spammer tes abonnés.
+
+## Installer
+
+`make-it-virale` vit dans le workspace video-editing de la stack Editing IA (il
+appelle `studio-script`, `record`, `short-editing`, `publish` et Treg). Il n'est
+pas encore dans un pack public.

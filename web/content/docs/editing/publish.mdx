@@ -1,0 +1,68 @@
+---
+title: Publish
+description: "Put a finished short out on YouTube, Instagram and TikTok: caption, title, plan you approve, then post."
+keywords: ["publish", "post", "schedule", "youtube shorts", "instagram reels", "tiktok", "treg"]
+---
+
+`publish` takes a finished short and gets it out on YouTube Shorts, Instagram
+Reels and TikTok. It makes the lighter export for social, picks the cover,
+writes the caption and the YouTube title in your voice, shows you the full
+plan, and posts only after your yes.
+
+Without installing anything it prepares a ready-to-post kit for you to use with
+each app's own scheduler. With [Treg](https://treg.to) connected to your
+accounts (free), it posts for you.
+
+## Invoke
+
+```bash
+/publish
+/publish short-my-slug
+/publish tomorrow 6pm, YouTube and Instagram
+/publish my-short.mp4 now tiktok
+```
+
+With no argument it takes the video finished in the conversation, or the newest
+one. A short that was already published is refused.
+
+## What it does
+
+1. **Picks the video** and checks it is the final render, never a rough cut.
+2. **Makes the files**: the master for YouTube, a social export in H.264 under
+   64 MB (TikTok's cap) for Instagram and TikTok, and a 1080x1920 cover taken
+   from the hook (key visual settled, caption in, eyes open) and kept inside
+   the central 3:4 so the profile grid does not crop it. No cover, no plan.
+3. **Writes the texts** from what the short says: a caption that hooks without
+   repeating the spoken hook, a TikTok caption if it should differ, a YouTube
+   title of 70 characters at most, a description with your links. All of it goes
+   through a humanize pass, and every name, number and claim comes from the
+   video.
+4. **Shows the plan** and waits: video, size, cover, platforms and accounts,
+   time (local and UTC), the title and caption in full. Ask for a change and it
+   shows the plan again.
+5. **Posts, or hands over the kit.** Manual route: it opens the folder and gives
+   you the exact clicks for each app. Treg route: YouTube is uploaded private
+   and scheduled for the date, Instagram and TikTok go out now (their APIs do
+   not schedule).
+6. **Records it** in the short's folder so the studio pipeline moves it to
+   Scheduled, then Published, with the links once live.
+
+A short whose CTA asks for a comment goes out as three versions, one per
+platform: the Instagram overlay, the same edit with the TikTok interface, and a
+YouTube cut with the link on an end card.
+
+## What you need
+
+- A finished short with a cover (made for you if missing).
+- Optional, for automatic posting: Treg installed and logged in (`treg login`),
+  then `treg connections connect --provider youtube --capability post`, same for
+  `instagram` and `tiktok`. Instagram needs a professional account linked to a
+  Facebook Page.
+- TikTok accounts not yet audited can only receive the video in their inbox:
+  open TikTok within 24 hours, paste the caption and post.
+
+## Next
+
+- [short-editing](/editing/short-editing): make the short before publishing.
+- [feedbacks](/editing/feedbacks): apply your last corrections first.
+- [make-it-virale](/editing/make-it-virale): when a published short flops.

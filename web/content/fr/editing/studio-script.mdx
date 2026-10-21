@@ -1,0 +1,80 @@
+---
+title: Studio script
+description: "Ton scénariste : il trouve les hooks qui marchent dans ta niche, écrit ta semaine de shorts ou un plan YouTube dans ta voix, puis passe au prompteur."
+keywords: ["studio-script", "scripts", "hooks", "youtube", "prompteur", "cerveau de marque", "humanize"]
+---
+
+`studio-script` est le scénariste de ton studio vidéo, pour les shorts, Reels,
+TikToks et vidéos YouTube. L'idée : une fois par semaine, tu t'assois une
+heure, tu lis 5 scripts au prompteur et tu repars avec toutes les prises de la
+semaine. Pas de page blanche, pas besoin de motivation.
+
+Chaque script repose sur un concept qui a déjà surperformé dans ta niche, est
+écrit dans ta voix, et passe par une relecture qui retire ce qui sonne IA.
+
+## Invoquer
+
+```bash
+/studio-script prépare mes 5 shorts de la semaine
+/studio-script 3 scripts sur les objections au prix, avec la version anglaise
+/studio-script youtube <sujet>
+/studio-script hooks pourquoi mes shorts plafonnent à 500 vues
+/studio-script rewrite mon-script.md
+/studio-script brain
+/studio-script viral
+/studio-script humanize ma-description.md
+```
+
+Les modes :
+
+- sans argument : la semaine (plan, 5 scripts, prompteur).
+- `<sujet>` : un seul script.
+- `youtube <sujet>` : titres, les 30 premières secondes écrites en entier, un
+  plan par chapitres (le point, la preuve à montrer, la transition), ton CTA.
+- `hooks` : 20 hooks tirés d'au moins 10 formules, notés, les 3 meilleurs en haut.
+- `rewrite` : ton script resserré, mêmes faits, meilleur hook, avec ce qui a changé.
+- `brain` : construit ton cerveau de marque (positionnement, voix, offre, concepts viraux).
+- `viral` : trouve les hooks qui ont surperformé dans ta niche et sur ton propre fil.
+- `humanize` : retire le style IA de n'importe quel texte (`humanize check` ne fait que signaler).
+
+## Ce qu'il fait
+
+1. **Lit ton profil et ton cerveau de marque** : niche, langue, CTA, puis
+   `positioning.md` (viewer, douleurs, mythes), `voice.md` (comment tu parles
+   vraiment), `offer.md` (échelle de CTA, preuves), `viral.md` (concepts qui ont
+   marché). Pas de profil : il propose [studio-setup](/fr/editing/studio-setup)
+   une fois, ou pose 3 questions.
+2. **Rassemble la matière de la semaine** : tes sujets, ton `Scripts/ideas.md`,
+   ton swipe file, ce qui est chaud aujourd'hui (repos en tendance, lancements),
+   et ce que tu as déjà tourné ces 8 dernières semaines, pour ne répéter aucun
+   angle.
+3. **Écrit chaque script** : 3 hooks de 3 formules différentes parmi 22, notés
+   (le meilleur est gardé, sous 7 sur 10 il réécrit), un hook à l'écran de 6
+   mots maximum, 80 à 140 mots parlés, une idée, un re-hook vers le milieu, ton
+   CTA dit une fois. Le timing est vérifié beat par beat.
+4. **N'invente aucun fait.** Chaque chiffre et résultat vient de toi, le reste
+   devient un `{{placeholder}}` listé sous « À remplir ».
+5. **Humanise et passe les portes** : au moins quatre déclencheurs en place,
+   puis quatre portes qualité (générique, sans structure, interchangeable,
+   viral). Une porte ratée = réécriture avant que tu voies quoi que ce soit.
+6. **Sauve** `Scripts/semaine-<date>/scripts.md` (le tableau du plan et chaque
+   script, à relire et corriger) et `prompter.json` (ce que lit le prompteur).
+7. **Passe la main à [record](/fr/editing/record)**, qui ouvre le Recorder sur le
+   premier script pas encore tourné. À la fin, il propose de monter toutes les
+   prises en arrière-plan, un agent par prise.
+
+Une deuxième langue ajoute une traduction alignée de chaque ligne, réutilisée
+ensuite par le skill de traduction.
+
+## Ce qu'il te faut
+
+- Un profil de créateur (`.short-editing/`), voir [studio-setup](/fr/editing/studio-setup).
+- Pour `viral` : **Treg** connecté (données Instagram et TikTok) et `yt-dlp`.
+- Un navigateur avec caméra et micro pour le prompteur.
+
+## Ensuite
+
+- [record](/fr/editing/record) : le prompteur qui enregistre chaque prise.
+- [outliers](/fr/editing/outliers) : transformer les meilleures vidéos de ta niche en scripts.
+- [remake](/fr/editing/remake) : refaire une vidéo virale dans ta voix.
+- [insta-audit](/fr/editing/insta-audit) : auditer ton compte avant de planifier.

@@ -1,0 +1,77 @@
+---
+title: Outliers
+description: "Find the Instagram and TikTok videos that blew up in your niche and turn the 5 best into scripts you can record today."
+keywords: ["outliers", "instagram", "tiktok", "competitors", "viral", "scripts", "treg"]
+---
+
+`outliers` finds the reels and TikToks that did far better than usual for their
+own account, then writes the 5 best as scripts in your voice and opens the
+Recorder on all of them. You read the ranking, you read the scripts, you record.
+
+The key idea: a video is only an outlier against **its own account's median**
+(the middle value of its views once sorted). Raw views of a big account prove
+nothing, a reel at x3 or more of its creator's median does.
+
+## Invoke
+
+```bash
+/outliers
+/outliers @handle
+/outliers tiktok:handle
+/outliers @handle1 @handle2 --min 3 --scripts 5
+/outliers --search
+/outliers --platform tiktok
+```
+
+- `/outliers` with no account: your own feed, then your competitor watchlist.
+- `/outliers @handle`: digs one account (several handles work the same way).
+- `--min 3` threshold in x median (default 3), `--scripts 5` number of scripts,
+  `--search` grows the watchlist before measuring, `--platform tiktok` or
+  `instagram` keeps only one platform of the watchlist.
+
+## What it does
+
+1. **Collects.** With an account, it measures every reel of the last 180 days.
+   With no account, it first measures your own feed (threshold x2, a smaller
+   account has fewer big hits), then your competitor watchlist
+   (`Inspirations/competitors.json`), re-measuring any account older than
+   7 days. The watchlist is filled and grown by the skill itself, mixing two
+   languages if you watch two (70 % / 30 % by default).
+2. **Ranks.** Reels younger than 7 days are left out (their views still climb),
+   sponsored reels (`#ad`, partnership) too, and accounts with fewer than 10
+   dated reels are flagged "sample too small".
+3. **Picks the 5.** From a long list of about 15: it must fit your niche, a
+   concept that is an outlier 2+ times (or on 2+ accounts) is a **recipe** and
+   goes first, a lone hit is kept only if its hook and promise clearly made it,
+   anything you already filmed is out, reposts keep the original, max 2 scripts
+   per account.
+4. **Writes the 5 scripts**, one sub-agent per video in parallel, each following
+   [remake](/editing/remake): why it went viral, the original script, yours.
+5. **Saves the batch** in `Scripts/outliers-<date>.md` (the 5 picks with their
+   x median, recipe or luck, and what was rejected and why) and one prompter
+   file with the 5 scripts.
+6. **Opens the Recorder** on the batch with [record](/editing/record), so you
+   record all 5 in one sitting.
+
+TikTok works the same way. TikTok views are far more skewed (a high x is
+common), so the "recipe or luck" test matters even more. Never compare an
+Instagram x with a TikTok x: each is against its own account.
+
+## What you need
+
+- **Treg** logged in (`treg balance`, `treg login` opens your browser). A page
+  of reels costs about 0.001 $, a creator search about 0.007 $. The skill tells
+  you the total first when a run measures more than 10 accounts.
+- An **ElevenLabs key** in your profile `.env` (to transcribe the videos).
+- `yt-dlp` installed (`brew install yt-dlp` or `winget install yt-dlp`).
+- Your handle (the skill asks once and remembers it).
+
+Everything fetched (captions, transcripts, comments, bios) is treated as data,
+never as instructions.
+
+## Next
+
+- [remake](/editing/remake): the same job on one single video you chose.
+- [studio-script](/editing/studio-script): hooks and weekly scripts from the same research.
+- [record](/editing/record): record the batch with the teleprompter.
+- [make-it-virale](/editing/make-it-virale): rescue a short that flopped.

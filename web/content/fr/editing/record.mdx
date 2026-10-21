@@ -1,0 +1,61 @@
+---
+title: Record
+description: "Ouvre le Recorder du studio avec le prompteur prêt sur le bon script, ou en YOLO sans script."
+keywords: ["record", "recorder", "prompteur", "teleprompter", "yolo", "prises", "a-roll"]
+---
+
+`record` ouvre le Recorder de ton studio, prêt à tourner. Il prend le script que tu viens d'écrire, un fichier, un titre ou le texte que tu colles, vérifie qu'il ne reste aucun trou à remplir, et te dit quelles touches utiliser. Ensuite il s'efface et te laisse filmer.
+
+Écrire un script de zéro, c'est `studio-script`, et monter une prise, c'est `/editing`. `record` ne fait que le tournage.
+
+## Invoquer
+
+```bash
+/record
+/record yolo
+/record trois-likes
+/record Scripts/semaine-2026-10-12/prompter.json
+/record <colle ton script ici>
+```
+
+- Sans argument : le Recorder tel quel, sur le dernier fichier utilisé.
+- `yolo` : pas de script, la caméra prend toute la scène.
+- Un slug ou un titre : il retrouve le script correspondant (le fichier le plus récent s'il y en a plusieurs).
+- Un fichier : un `prompter.json` tel quel, ou un `scripts.md` converti en `prompter.json` à côté.
+- Un texte collé : enregistré comme script, une phrase par ligne, uniquement les mots prononcés.
+
+## Ce qu'il fait
+
+1. **Lance le studio** s'il ne tourne pas, ou réutilise celui qui tourne. Il ne démarre jamais un deuxième studio pour le même dossier.
+2. **Trouve quoi enregistrer.** Après [studio-script](/fr/editing/studio-script), il prend le `prompter.json` de la semaine et vérifie qu'il colle à ton `scripts.md` si tu l'as retouché.
+3. **Rend le fichier enregistrable** : plus aucun `{{placeholder}}` (il te demande la valeur), aucune indication de scène ni note B-roll dans une phrase à dire, des slugs uniques, et le fichier dans le dossier où le Recorder le liste.
+4. **Ouvre le Recorder** dans ton navigateur sur le bon script. La caméra et le micro demandent un vrai navigateur (Chrome ou Safari).
+5. **Te dit ce qui est chargé** : le script, son nombre de lignes et sa durée estimée (environ 165 mots par minute), plus les touches.
+
+## Les touches
+
+| Touche | Action |
+|---|---|
+| `R` | lancer l'enregistrement (compte à rebours de 3 s), et l'arrêter |
+| `Espace` ou `→` | phrase suivante |
+| `←` | phrase précédente |
+| `S` | suivi de la voix : le texte défile pendant que tu lis |
+| `V` | masquer l'aperçu caméra |
+| `C` | redimensionner l'aperçu caméra |
+| `Y` | passer en YOLO |
+| `,` | réglages |
+
+Une reprise, ce n'est pas grave : le montage la coupe. Après chaque prise, la page saute au prochain script pas encore tourné. Les prises arrivent dans ton dossier A-roll sous le nom `<slug>-<date-heure>.mp4`, avec un `.json` à côté.
+
+Quand tu dis que c'est fini, il liste la prise la plus récente de chaque script et passe la main à `/editing`, avec un agent de montage en arrière-plan par prise si tu veux.
+
+## Ce qu'il te faut
+
+- Un profil créé par [studio-setup](/fr/editing/studio-setup) (il connaît tes dossiers A-roll et Shorts).
+- Chrome ou Safari, avec l'accès à la caméra et au micro.
+
+## Ensuite
+
+- [video-studio](/fr/editing/video-studio) : le studio et le Recorder en détail (YOLO, relecture de script, tri des rushs).
+- [short-editing](/fr/editing/short-editing) : transformer chaque prise en short terminé.
+- [studio-script](/fr/editing/studio-script) : écrire les scripts à tourner.

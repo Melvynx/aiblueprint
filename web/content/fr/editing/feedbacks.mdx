@@ -1,0 +1,71 @@
+---
+title: Feedbacks
+description: "Applique les retours que tu as laissés dans le studio sur un short, réponds à chacun et relance le rendu."
+keywords: ["feedbacks", "retours", "review", "studio", "commentaires", "short-editing"]
+---
+
+`feedbacks` prend les commentaires que tu as écrits dans le studio de relecture
+et les applique à ta place. Tu regardes le short, tu poses un commentaire ou une
+coupe à la bonne seconde, tu cliques sur un bouton, et le montage revient
+corrigé avec une réponse sous chaque retour.
+
+Rien à coller : le studio enregistre déjà chaque commentaire sur ton disque, un
+fichier par rendu. Le skill a juste besoin de savoir de quel short tu parles.
+
+## Invoquer
+
+Dans le studio, clique sur **Envoyer à Claude** : la ligne `/feedbacks <fichier>`
+arrive directement dans la conversation qui a monté la vidéo. Si elle est
+fermée, le bouton devient **Copier les retours** et tu colles la ligne toi-même.
+
+```bash
+/feedbacks files/reviews/v2.json
+/feedbacks short-mon-slug
+/feedbacks http://127.0.0.1:4796/short-mon-slug/
+/feedbacks
+```
+
+Sans argument, il prend le projet sur lequel tu travailles déjà, ou la dernière
+relecture qui a encore des commentaires ouverts.
+
+## Ce qu'il fait
+
+1. **Trouve le fichier de retours.** Un chemin, un dossier de projet, un slug ou
+   une URL du studio : il prend la version la plus récente du short et te dit
+   laquelle.
+2. **Lit les retours ouverts.** Chaque commentaire a un temps (ou une plage),
+   ton texte, les mots dits à ce moment et parfois l'élément exact sur lequel
+   tu as cliqué dans les pistes (un bruitage, une scène, la musique). Les
+   images jointes sont ouvertes aussi : une capture sur laquelle tu as dessiné
+   montre précisément quoi changer.
+3. **Trie le travail.** Coupes, formulations, sous-titres, timing, zooms, sons
+   et petites valeurs sont appliqués directement dans le montage. Tout ce qui
+   demande un composant animé nouveau ou refait part chez son propre
+   sous-agent, en parallèle.
+4. **N'applique que ce que tu as demandé.** Le reste du montage reste
+   identique. Si un retour est flou, il prend la lecture la plus probable et le
+   dit dans la réponse au lieu de te poser une question.
+5. **Clôt chaque commentaire.** Chaque retour appliqué est marqué résolu avec
+   une réponse d'une phrase, dans ta langue. Ton texte n'est jamais modifié ni
+   supprimé. Un retour impossible à faire reste ouvert, avec la raison.
+6. **Relance le rendu** et te rend l'URL du studio, avec une ligne par retour
+   (fait, ou pas fait et pourquoi). Il attend ensuite ton prochain clic sur
+   **Envoyer à Claude** et repart tout seul.
+
+Si tu commentes une ancienne version après un nouveau rendu, les commentaires
+ouverts sont reportés sur la version la plus récente et retrouvés grâce aux
+mots qu'ils visent.
+
+## Ce qu'il te faut
+
+- Un short monté avec [short-editing](/fr/editing/short-editing) et son studio
+  de relecture.
+- Tes retours enregistrés depuis le studio (c'est automatique).
+
+## Ensuite
+
+- [short-editing](/fr/editing/short-editing) : le montage que `feedbacks`
+  corrige.
+- [publish](/fr/editing/publish) : une fois le short validé, mets-le en ligne.
+- [make-it-virale](/fr/editing/make-it-virale) : quand le short est bon mais a
+  floppé.

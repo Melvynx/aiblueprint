@@ -1,0 +1,52 @@
+---
+title: Studio setup
+description: "L'onboarding qui monte tout ton studio vidéo en 10 minutes environ : ton style, tes scripts et ton recorder."
+keywords: ["studio-setup", "onboarding", "style", "shorts", "youtube", "sous-titres", "b-roll"]
+---
+
+`studio-setup` est le premier skill à lancer. Tu lui envoies une vidéo de toi (ou juste un vocal) et un à trois shorts dont tu adores le montage. Il les mesure, monte TA prise dans trois looks côte à côte, et tu en choisis un puis tu l'ajustes avec tes mots.
+
+Tu repars avec plus qu'un style : un look pour tous tes formats (shorts, Reels et TikTok en 9:16, vidéos YouTube en 16:9, posts carrés), tes scripts préparés pour `studio-script`, et un studio prêt à tourner et à monter. Ça doit ressembler à un jeu, pas à un formulaire.
+
+## Invoquer
+
+```bash
+/studio-setup
+/studio-setup look
+/studio-setup couleurs
+/studio-setup sous-titres
+/studio-setup visuel       # motion design, B-roll ou mix par défaut
+/studio-setup musique
+/studio-setup scripts      # refaire la veille de ta niche et tes idées
+```
+
+Lance-le sans argument la première fois. Ensuite, passe une partie pour ne refaire que celle-là. Un deuxième look à côté du premier (par exemple un style podcast) se crée avec `--style <nom>`.
+
+## Ce qu'il fait
+
+1. **Vérifie ta machine** en silence (Node, ffmpeg, Chrome, le moteur) et ne parle que si quelque chose bloque.
+2. **Prend un enregistrement de toi** : une vidéo où tu parles, une prise faite tout de suite dans le Recorder, ou juste un vocal (la démo devient alors du motion design sur papier, sans caméra).
+3. **Lit ton goût.** Tu donnes 1 à 3 shorts que tu adores (liens Instagram, TikTok, YouTube Shorts ou fichiers). Il mesure les coupes par minute, les couleurs, les sous-titres et le débit, puis te dit en mots simples ce qu'il a compris.
+4. **Te demande qui tu es** en un message : le nom et le @ de l'écran de fin, le texte du bouton, et où tu envoies les gens (un produit, une formation, une newsletter, ou juste des abonnés).
+5. **Monte 3 looks de ta propre prise** côte à côte en une vingtaine de secondes : un inspiré de tes exemples, un plus osé, un classique. Tu choisis, tu dis ce que tu changerais (« plus gros », « plus calme », « en bleu »), et il ne refait que ce look. Deux tours maximum, puis le style est enregistré.
+6. **Décide le reste pour toi** : dossiers, motion design ou B-roll, rythme, musique (une bibliothèque de nappes calmes, rien à payer) et fournisseur d'images.
+7. **Monte ta base B-roll** si tu as un dossier de tes propres plans : ils sont scannés et étiquetés pour qu'une recherche trouve le bon plan.
+8. **Prépare tes scripts.** Il mesure les Reels et Shorts qui ont explosé dans ta niche, remplit ton positionnement, ta voix (de vraies citations de ta prise) et ton offre, et écrit tes 10 premières idées.
+9. **Conclut** avec ton style en mots, comment faire une vidéo, et la proposition de monter tout de suite ton premier vrai short. Ton style est sauvegardé dans un commit git local.
+
+Tout est stocké en local dans ton dossier projet, dans `.short-editing/styles/<nom>/`. Changer un style restyle les prochains shorts, jamais ceux qui sont finis.
+
+## Ce qu'il te faut
+
+- Un enregistrement de toi qui parles (15 s à 2 min), ou un vocal.
+- Une clé ElevenLabs pour transcrire ta prise. Tu la colles toi-même dans le fichier `.env` que le skill t'ouvre, jamais dans le chat. Sans clé, c'est la prise d'exemple fournie qui sert.
+- Treg, connecté avec `treg login`, pour mesurer les Reels Instagram de ta niche (environ un centime). Sans Treg, seuls les Shorts YouTube sont mesurés.
+- Codex connecté (gratuit avec un abonnement ChatGPT) si tu veux générer des images plus tard.
+
+## Ensuite
+
+- [studio-script](/fr/editing/studio-script) : écrire ta semaine de scripts dans ta voix.
+- [record](/fr/editing/record) : les tourner avec le prompteur.
+- [short-editing](/fr/editing/short-editing) : transformer une prise en short monté.
+- [setup-faceless](/fr/editing/setup-faceless) : la version voix seule, jouée par un avatar cartoon.
+- [broll](/fr/editing/broll) : gérer la base B-roll.

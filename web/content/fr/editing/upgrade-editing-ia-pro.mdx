@@ -1,0 +1,49 @@
+---
+title: Upgrade Editing IA Pro
+description: "Mets le kit Editing IA Pro à jour sans toucher à tes vidéos, ton style ni tes clés."
+keywords: ["upgrade-editing-ia-pro", "mise à jour", "upgrade", "kit", "version", "skills"]
+---
+
+`upgrade-editing-ia-pro` met le kit installé dans ton projet à la dernière version. Il te dit ce qui change en mots simples, garde une copie des skills que tu as modifiés toi-même, puis installe les nouveaux skills, l'agent et le moteur.
+
+Tes vidéos, ton style et tes clés ne sont jamais touchés.
+
+## Invoquer
+
+```bash
+/upgrade-editing-ia-pro
+/upgrade-editing-ia-pro check
+```
+
+Avec `check`, il regarde seulement s'il y a une nouvelle version et ce qu'elle change, sans rien installer.
+
+## Ce qu'il fait
+
+1. **Cherche une nouvelle version.** Le premier passage prend 10 à 30 secondes, les suivants environ 2. Si tu es à jour, il le dit en une ligne et s'arrête.
+2. **Te dit ce qui est nouveau** : 3 à 6 puces courtes de ce que tu vas remarquer (un nouveau skill avec sa `/commande`, une amélioration du studio, un bug corrigé). Les changements internes sont ignorés.
+3. **Te prévient pour tes modifications.** Si tu as modifié un skill du kit, il te dit lequel et où la copie de secours est rangée (`.kit/backup/<date>/`). La nouvelle version remplace ta modification, et la copie te permet de la récupérer.
+4. **Installe** en 1 à 3 minutes : skills, agent, dépendances du moteur et vérification finale. Il termine en affichant l'ancienne et la nouvelle version.
+5. **Termine le travail.** Si ton studio tournait, il le relance pour qu'il serve la nouvelle version (voir [video-studio](/fr/editing/video-studio)). Les skills nouveaux ou modifiés se chargent dans une nouvelle conversation, il te dit donc d'en ouvrir une.
+
+Si la vérification finale affiche une ligne à corriger, il te donne la commande exacte et attend. Sous Windows, une erreur `EPERM` ou `EBUSY` veut dire que le studio, Chrome ou un lecteur vidéo tient un fichier : ferme-les et relance.
+
+## Ce qui n'est pas touché
+
+- Tes vidéos : `A-roll/`, `B-roll/` et `Shorts/`.
+- Ton style et tes clés dans `.short-editing/`.
+- Ton `CLAUDE.md`.
+
+## Ce qu'il te faut
+
+Le kit se télécharge depuis un dépôt privé, il te faut donc un accès, une seule fois :
+
+1. La CLI GitHub (`gh --version`). Si elle manque, installe-la depuis cli.github.com.
+2. Une connexion GitHub : `gh auth login --hostname github.com --git-protocol https --web`. Elle affiche un code à usage unique que tu tapes toi-même sur la page GitHub. Ne donne jamais de mot de passe ni de token dans le chat.
+3. L'invitation au dépôt du kit, acceptée. La leçon « Récupère ton accès au kit » l'envoie. Une erreur « Repository not found » alors que tu es connecté veut en général dire que l'invitation n'est pas encore acceptée, ou qu'elle est partie sur un autre compte GitHub.
+
+Un kit installé avec la commande de la leçon retient son adresse de téléchargement et peut se mettre à jour sans GitHub. Si cette adresse est refusée (ta clé a été régénérée), recopie la commande d'installation de la leçon et lance-la : elle met le kit à jour de la même façon.
+
+## Ensuite
+
+- [video-studio](/fr/editing/video-studio) : relancer ton studio sur la nouvelle version.
+- [studio-setup](/fr/editing/studio-setup) : refaire une partie de ton style si la version ajoute des options.

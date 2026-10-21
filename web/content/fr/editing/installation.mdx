@@ -1,0 +1,87 @@
+---
+title: Installation
+description: "Installer le kit Editing IA Pro en une commande, sur Mac ou Windows."
+keywords: ["installation", "editing ia pro", "setup", "mac", "windows"]
+---
+
+Une commande installe tout dans un seul dossier projet : les skills, l'agent de
+montage, le moteur de rendu et le studio. Rien n'est installé en global.
+
+## Ce qu'il te faut
+
+- Un Mac (Apple Silicon conseillé) ou un PC Windows 10/11. Sur Mac, le suivi du
+  visage et le détourage passent par Apple Vision ; sur Windows, par MediaPipe
+  (dans le navigateur, sans carte graphique).
+- [Claude Code](https://claude.com/claude-code) (terminal, app desktop onglet
+  Code, ou extension VS Code) ou [Codex](https://developers.openai.com/codex).
+- Une clé [ElevenLabs](https://elevenlabs.io/app/settings/api-keys) pour
+  transcrire tes propres prises (la vidéo de test marche sans).
+- Optionnel, pour les images : Codex connecté à ton compte ChatGPT (gratuit avec
+  ton abonnement), sinon une clé OpenAI ou Gemini. Les miniatures YouTube passent
+  uniquement par Codex.
+
+Node, ffmpeg et un Chrome de rendu (si tu n'as ni Chrome ni Edge) sont ajoutés
+par l'installation s'ils manquent, dans `video-editing/.runtime/`.
+
+## Installer
+
+Dans la formation, la leçon d'installation te donne **ta commande personnelle**
+(elle contient ta clé, ne la partage pas). Copie-la, colle-la, Entrée :
+
+- **Mac** : ouvre le Terminal (Cmd + Espace, « Terminal ») et colle la commande
+  `curl -sSL https://.../install | bash`.
+- **Windows** : ouvre PowerShell (touche Windows, « PowerShell ») et colle la
+  commande `irm https://.../install.ps1 | iex`.
+
+Elle installe tout dans **`~/video-editing`** (Windows :
+`C:\Users\<toi>\video-editing`) :
+
+| Dossier | Contenu |
+|---|---|
+| `A-roll/` | tes prises face caméra |
+| `B-roll/` | tes plans de coupe, écrans, photos |
+| `Shorts/` | un dossier par short monté |
+| `.claude/skills/` | les skills (liés dans `.agents/skills/` pour Codex) |
+| `.runtime/` | Node et ffmpeg, s'ils manquaient |
+
+Autre dossier : `VIDEO_EDITING_DIR=~/mon-dossier` devant `bash` (Mac), ou
+`$env:VIDEO_EDITING_DIR="C:\mon-dossier"` avant la commande (Windows).
+
+Sur Windows, quitte complètement l'app Claude après l'installation (icône près de
+l'horloge comprise) et rouvre-la : c'est ce qui lui fait voir Node et ffmpeg.
+
+## Premier lancement
+
+Ouvre ton dossier projet dans Claude (Claude Desktop onglet Code, Claude Code ou
+Codex) et tape :
+
+```bash
+/studio-setup
+```
+
+L'onboarding règle ton style en une dizaine de minutes. Ensuite :
+
+```bash
+/short-editing fais un short de ma dernière vidéo
+/studio-script prépare mes 5 shorts de la semaine
+/record
+/publish
+```
+
+## Mettre à jour
+
+```bash
+/upgrade-editing-ia-pro
+```
+
+Ou relance la même commande d'installation. Tes vidéos, ton profil et tes clés ne
+sont jamais touchés. Clé perdue ou partagée par erreur : « Régénérer la clé »
+dans la leçon, l'ancienne commande cesse de marcher.
+
+## Deux mots à connaître
+
+- **A-roll** : ta prise principale, toi qui parles face caméra. Elle porte la
+  voix et l'histoire, le short est découpé dedans.
+- **B-roll** : tout ce qu'on montre par-dessus ta voix pour l'illustrer : tes
+  propres plans, des captures, des démos, des photos. En plein écran pour un
+  moment ou une émotion, en carte pour une preuve à lire.

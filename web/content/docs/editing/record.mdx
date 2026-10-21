@@ -1,0 +1,61 @@
+---
+title: Record
+description: "Open the studio Recorder with the teleprompter ready on the right script, or in YOLO with no script."
+keywords: ["record", "recorder", "teleprompter", "prompter", "yolo", "takes", "a-roll"]
+---
+
+`record` opens the Recorder of your studio, ready to shoot. It picks the script you just wrote, a file, a title, or the text you paste, checks that nothing is left to fill in, and tells you which keys to press. Then it steps back and lets you film.
+
+Writing a script from nothing is `studio-script`, and editing a take is `/editing`. `record` is only the shoot.
+
+## Invoke
+
+```bash
+/record
+/record yolo
+/record three-likes
+/record Scripts/semaine-2026-10-12/prompter.json
+/record <paste your script here>
+```
+
+- No argument: the Recorder as it is, on the last file you used.
+- `yolo`: no script, the camera takes the whole stage.
+- A slug or a title: it finds the matching script (the newest file if several match).
+- A file: a `prompter.json` as is, or a `scripts.md` converted to a `prompter.json` next to it.
+- Pasted text: saved as a script, one sentence per line, spoken words only.
+
+## What it does
+
+1. **Starts the studio** if it is not running, or reuses the one that is. It never starts a second studio for the same folder.
+2. **Finds what to record.** After [studio-script](/editing/studio-script), it takes that week's `prompter.json` and checks that it matches your `scripts.md` if you edited it.
+3. **Makes the file recordable**: no `{{placeholder}}` left (it asks you for the value), no stage direction or B-roll note inside a spoken line, unique slugs, and the file in the folder where the Recorder lists it.
+4. **Opens the Recorder** in your browser on the right script. The camera and mic need a real browser (Chrome or Safari).
+5. **Tells you what is loaded**: the script, its number of lines and its estimated length (about 165 words a minute), plus the keys.
+
+## The keys
+
+| Key | Does |
+|---|---|
+| `R` | start recording (3 second countdown), and stop |
+| `Space` or `→` | next sentence |
+| `←` | previous sentence |
+| `S` | voice follow: the text scrolls as you read |
+| `V` | hide the camera preview |
+| `C` | resize the camera preview |
+| `Y` | switch to YOLO |
+| `,` | settings |
+
+A retake is fine: the edit cuts it. After each take, the page jumps to the next script not shot yet. Takes are saved in your A-roll folder as `<slug>-<date-time>.mp4` with a `.json` next to it.
+
+When you say you are done, it lists the newest take per script and hands off to `/editing`, one background editing agent per take if you want.
+
+## What you need
+
+- A profile from [studio-setup](/editing/studio-setup) (it knows your A-roll and Shorts folders).
+- Chrome or Safari, with camera and microphone access.
+
+## Next
+
+- [video-studio](/editing/video-studio): the studio and Recorder in detail (YOLO, script review, cleaning rushes).
+- [short-editing](/editing/short-editing): turn each take into a finished short.
+- [studio-script](/editing/studio-script): write the scripts to record.

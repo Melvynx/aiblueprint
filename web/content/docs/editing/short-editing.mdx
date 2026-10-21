@@ -1,0 +1,82 @@
+---
+title: Short editing
+description: "Turn a talking-head take into a finished motion design short: captions, cuts, music, SFX, 9:16, 1:1 or 16:9, ending in a review studio."
+keywords: ["short-editing", "shorts", "reels", "motion design", "captions", "montage", "video-editing-agent"]
+---
+
+`short-editing` is the editor. You give it a video (a file, a URL, "my last
+take") and it makes the short without asking you a question: transcription, silence
+cuts, scenes, captions word by word, music, sound effects, and an MP4 ready to
+post. Everything follows your style profile, not a generic template.
+
+It renders from one `spec.js` per short, so every change is a small edit and a
+quick re-render, never a start over.
+
+## Invoke
+
+```bash
+/short-editing make a short of my last video
+/short-editing make a short of ~/Downloads/take-ai.mp4, keep the pricing part
+/short-editing make a motion video (no camera) comparing 3 tools
+/short-editing make a short of my last video, mixed with my B-roll
+/short-editing studio latest
+/short-editing --style punchy 1:1 <slug>
+/short-editing help
+```
+
+Words go in any order: a mode (`auto`, `studio`, `help`), a visual (`motion`,
+`broll`, `mix`), `--style <name>`, a format (`9:16`, `1:1`, `16:9`), a source
+and a free brief. Anything the grammar covers is never asked: a missing word
+takes your profile default.
+
+## What it does
+
+1. **Picks the visual mode** without asking: `motion` (paper, cards, counters,
+   animated text), `broll` (your footage full screen where a clip matches) or
+   `mix` (B-roll for moments and feelings, motion for ideas and numbers).
+2. **Resolves the source:** a file, a folder, a URL (downloaded for you), `latest`
+   from your A-roll, or an existing short to iterate on.
+3. **Transcribes** with word-level timestamps.
+4. **Plans the beats and writes the spec:** something changes on screen every 2
+   to 4 seconds, the hook is readable in the first frame, a music bed is chosen
+   by the emotion of the hook from a library of calm beds made in code.
+5. **Builds custom components in parallel** (a real app played in its own UI, an
+   illustration that acts) with sub-agents, while it writes the rest.
+6. **Prepares:** cuts every micro silence, splices the voice, extracts frames.
+7. **Checks stills, then fixes** against a quality bar: mobile legibility,
+   captions that never cover a card, natural skin tones, discreet SFX, real logos
+   for every named tool. Stills are cheap, so it iterates there, not on renders.
+8. **Renders, mixes, finalizes:** ducked voice, music and automatic SFX, then a
+   1080x1920 MP4 (or square, or wide) at 30 fps with a quality check.
+9. **Opens the review studio**, always. You comment on the video, and the
+   studio's "Send to Claude" button sends the feedback back into the
+   conversation, which applies it and renders again.
+
+### Modes
+
+- `auto` (default): the whole edit, no questions, ends on the studio.
+- `studio`: a rough cut only (silences removed, no motion), opened in the studio
+  so you cut first and the edit comes after.
+- `help`: prints the grammar, your styles and your newest shorts.
+
+### Several videos at once
+
+The `video-editing-agent` edits one video from take to MP4 in the background.
+Launch one per video and they run in parallel. It never asks anything: it uses
+your profile defaults and reports what it chose.
+
+## What you need
+
+- A style profile (run `studio-setup` once, about 10 minutes). Without it the
+  engine renders with its defaults.
+- An ElevenLabs key for transcribing your own takes.
+- Node, ffmpeg and a Chrome or Edge for rendering (the install command handles
+  them). A 90 second short renders in roughly 20 to 60 seconds on Apple Silicon.
+- Optional: a B-roll library for `broll` and `mix`, Codex for generated images.
+
+## Next
+
+- [broll](/editing/broll): index your footage so `broll` and `mix` find the right clips.
+- [steal](/editing/steal): build a new style from a reel you like, then use it with `--style`.
+- [editing](/editing/editing): the entry point that routes any request here.
+- [make-it-virale](/editing/make-it-virale): rework a short that flopped, with new hooks.

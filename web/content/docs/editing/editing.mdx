@@ -1,0 +1,73 @@
+---
+title: Editing
+description: "The entry point of the kit: tell it what you want in plain words and it picks the right skill, then continues the project already in progress."
+keywords: ["editing", "router", "entry point", "shorts", "video", "claude code"]
+---
+
+`editing` is the one command to remember. You say what you want ("edit my last
+take", "open the teleprompter", "make me thumbnails"), it chooses the skill that
+owns the job and hands over. You never have to remember which of the kit's
+skills does what.
+
+It also keeps you on track: if the conversation already works on a short, your
+next request is the next step of that short (apply a comment, rerun a step),
+never a fresh start.
+
+## Invoke
+
+```bash
+/editing edit my last take
+/editing ~/Downloads/take-ai.mp4 keep the part about pricing
+/editing record my script for Monday
+/editing apply the feedback on the short <slug>
+/editing publish it
+```
+
+Anything works: a take, a file, a URL, a short slug, a studio comment or just a
+sentence. If it is truly ambiguous, it asks one question and nothing more.
+
+## What it does
+
+1. **Continues before it starts.** If a short, a video folder or a studio URL is
+   already in the conversation, the request is the next step of that project
+   with the skill already in use. A prompt pasted from the studio names its
+   project, so even a fresh conversation reopens the right one.
+2. **Reads the request and routes it:**
+   - a take, a file, a URL, a short slug, "short", "reel", "motion":
+     [short-editing](/editing/short-editing)
+   - comments left in the review studio: `feedbacks`
+   - "steal the style of this reel": [steal](/editing/steal)
+   - "remake this viral reel for me": `remake`
+   - "find what works in my niche": `outliers`
+   - your B-roll library ("add these clips", "put my B-roll on this short"):
+     [broll](/editing/broll)
+   - scripts, hooks, the week's ideas: `studio-script`; shooting on a script:
+     `record`
+   - posting a finished short: `publish`
+   - a version in another language: `short-translate`
+   - YouTube thumbnails and titles: `youtube-thumbnail`, `youtube-title`
+   - style, folders, music, first setup: `studio-setup`; your cartoon avatar:
+     `setup-faceless`
+3. **Fills the gaps.** No profile yet and you ask for an edit: it runs
+   `studio-setup` first. A "faceless" request uses your faceless style, and runs
+   `setup-faceless` first if you have none.
+4. **Says what it picked in one line**, then loads that skill and follows it
+   exactly as if you had typed its command yourself.
+5. **Several videos at once.** One `video-editing-agent` per short, in the
+   background, with every choice you gave in its prompt. Each agent works alone
+   from the take to the finished MP4 and reports what it chose.
+
+## What you need
+
+- The kit installed in your project (the install command also adds Node and
+  ffmpeg if they are missing).
+- Claude Code or Codex opened on that project folder.
+- A style profile. If you have none, `editing` offers the setup the first time
+  you ask for an edit.
+
+## Next
+
+- [short-editing](/editing/short-editing): the actual montage of a take.
+- [broll](/editing/broll): your own footage, found by a search.
+- [steal](/editing/steal): copy the editing style of a creator you like.
+- [make-it-virale](/editing/make-it-virale): rework a short that flopped.

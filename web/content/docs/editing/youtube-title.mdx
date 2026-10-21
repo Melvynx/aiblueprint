@@ -1,0 +1,62 @@
+---
+title: YouTube Title
+description: "Ranked YouTube titles from a topic or transcript, or 20 title and thumbnail combos with the A/B trio in a feed preview."
+keywords: ["youtube-title", "title", "youtube", "a/b test", "thumbnail", "ctr", "combos"]
+---
+
+`youtube-title` writes the titles of your long videos. Give it a topic, a
+transcript or a few thumbnails and you get ranked titles. Run it after
+[youtube-thumbnail](/editing/youtube-thumbnail) and you get 20 title and
+thumbnail combos, with the 3 to test in A/B on top, in a preview that looks like
+YouTube.
+
+The key idea: the title never repeats the thumbnail. The thumbnail poses the
+hook, the title adds the second piece, and together they tell a bigger story.
+
+## Invoke
+
+```bash
+/youtube-title my-claude-code-test
+/youtube-title 15 titles for a video comparing 3 editing tools
+/youtube-title my-video thumbnails/a.jpg thumbnails/b.jpg
+```
+
+## What it does
+
+1. **Reads the video**: transcript, chapters, notes, and the thumbnails (text,
+   face, emotion, colors). With no thumbnail it writes titles alone and never
+   blocks.
+2. **Learns from your channel first**: your best titles with their views win
+   over every other source, then a knowledge base of title levers and examples
+   in French and English.
+3. **Applies the rules** to every title: subject and verdict in the first five
+   words, 60 to 70 characters (100 max), at most one word in caps, facts that
+   are in the video only, conversational French and punchy English.
+4. **Works in three rounds**: diverge (curiosity gap, emotion, number,
+   contrarian, story, authority), refine (would your viewer click it, does it
+   complete the thumbnail), converge (ranked, with variety).
+
+### Two modes
+
+- **titles**: no thumbnail batch. 10 or more titles per thumbnail (15 in all
+  without one), grouped and ranked in the chat, and saved in `Titres.md`.
+- **combos**: right after a thumbnail batch. Exactly 20 titles, one per
+  thumbnail. It picks the A/B trio with 3 different angles (for example a funny
+  fight, product and result, a confession), never 3 wordings of one idea. A
+  preview opens with Home, Suggestions and Mobile views, light and dark theme,
+  and buttons to copy the thumbnail and the title.
+
+## What you need
+
+- A thumbnail batch from [youtube-thumbnail](/editing/youtube-thumbnail) for the
+  combos mode (not required for plain titles).
+- Optional: a `_titles.md` with your 10 best titles and their views.
+- You set up the test yourself: YouTube Studio, the video details, "Test and
+  compare", up to 3 title and thumbnail variants. Nothing is changed on YouTube
+  for you.
+
+## Next
+
+- [youtube-thumbnail](/editing/youtube-thumbnail): the 20 thumbnails the titles go with.
+- [codex-images](/editing/codex-images): generate extra thumbnail variants.
+- [publish](/editing/publish): put your shorts out.
